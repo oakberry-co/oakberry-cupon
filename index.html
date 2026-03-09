@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oakberry — Tu Cupón Exclusivo</title>
+<title>Oakberry</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root{--primary:#5F4B8B;--primary-dark:#4a3a6e;--yellow:#F5C842;--white:#ffffff;--off-white:rgba(255,255,255,0.96);--border:#eee;--gray:#999;--red:#c0392b;}
@@ -11,8 +11,6 @@
   body{font-family:'Montserrat',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:linear-gradient(rgba(95,75,139,0.55),rgba(95,75,139,0.55)),url('bg.png') center/cover no-repeat fixed;}
   .card{background:var(--off-white);border-radius:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;animation:cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;}
   @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
-
-  /* HEADER FORMULARIO — con rayitas */
   .card-header{background:var(--primary);padding:28px 30px 24px;text-align:center;position:relative;overflow:hidden;}
   .card-header::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:repeating-linear-gradient(90deg,var(--yellow) 0px,var(--yellow) 18px,var(--primary) 18px,var(--primary) 28px);}
   .brand{font-size:28px;font-weight:900;color:var(--white);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;margin-top:4px;}
@@ -20,7 +18,9 @@
   .discount-badge{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);border-radius:50px;padding:10px 22px;margin-top:18px;}
   .discount-badge .pct{font-size:30px;font-weight:900;color:var(--primary);line-height:1;}
   .discount-badge .desc{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;text-align:left;line-height:1.4;}
-
+  /* Sorteo badge */
+  .sorteo-badge{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);border-radius:50px;padding:12px 22px;margin-top:18px;}
+  .sorteo-badge .premio{font-size:13px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;text-align:left;}
   .card-body{padding:26px 30px 30px;}
   .section-title{color:var(--primary);text-transform:uppercase;font-weight:900;font-size:17px;letter-spacing:0.5px;text-align:center;margin-bottom:6px;}
   .section-sub{font-size:11px;font-weight:700;color:var(--gray);text-align:center;margin-bottom:22px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.6;}
@@ -46,17 +46,13 @@
   .spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.65s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .terms{font-size:10px;font-weight:600;color:#bbb;text-align:center;margin-top:12px;text-transform:uppercase;letter-spacing:0.3px;line-height:1.6;}
-
   .state{display:none;}
   .state.show{display:block;animation:cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both;}
-
-  /* HEADER RESULTADO — SIN rayitas */
   .result-header{background:var(--primary);padding:28px 30px 22px;text-align:center;position:relative;overflow:hidden;}
   .result-icon{font-size:44px;display:block;margin-bottom:8px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.15s both;}
   @keyframes popIn{from{opacity:0;transform:scale(0.3);}to{opacity:1;transform:scale(1);}}
   .result-title{font-size:18px;font-weight:900;color:var(--white);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
   .result-name{font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;}
-
   .result-body{padding:24px 30px 30px;text-align:center;}
   .ticket{background:var(--primary);border-radius:16px;padding:20px 24px;margin-bottom:18px;position:relative;overflow:hidden;}
   .ticket::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:repeating-linear-gradient(90deg,var(--yellow) 0,var(--yellow) 14px,var(--primary) 14px,var(--primary) 22px);}
@@ -69,12 +65,13 @@
   .ticket-product{font-size:11px;font-weight:700;color:var(--yellow);text-align:left;text-transform:uppercase;letter-spacing:0.5px;}
   .ticket-bottom{display:flex;justify-content:space-between;align-items:center;}
   .d-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;text-align:left;}
-  .d-value{font-size:24px;font-weight:900;color:var(--yellow);line-height:1;}
+  .d-value{font-size:18px;font-weight:900;color:var(--yellow);line-height:1;}
   .copy-btn{background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.9);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:9px 16px;border-radius:8px;cursor:pointer;transition:background 0.18s;}
   .copy-btn:hover{background:rgba(255,255,255,0.22);}
   .info-pill{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.2px;line-height:1.5;margin-bottom:10px;text-align:left;}
   .info-pill.purple{background:#f5f0ff;border:1.5px solid #d4c8f5;color:var(--primary);}
   .info-pill.yellow{background:#fffbea;border:1.5px solid #f0dc8c;color:#7a5c00;}
+  .info-pill.green{background:#f0fff4;border:1.5px solid #9ae6b4;color:#276749;}
   .info-pill .icon{font-size:16px;flex-shrink:0;}
   .existing-ticket{background:#f5f0ff;border:2px dashed #d4c8f5;border-radius:16px;padding:20px 24px;margin-bottom:18px;text-align:center;}
   .existing-label{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
@@ -91,15 +88,25 @@
   <div id="stateForm" class="state show">
     <div class="card-header">
       <div class="brand">Oakberry</div>
-      <div class="brand-sub">Cupón exclusivo · Nuevos clientes</div>
-      <div class="discount-badge">
+      <div class="brand-sub" id="headerSub">Cupón exclusivo · Nuevos clientes</div>
+
+      <!-- Modo cupón -->
+      <div id="badgeCupon" class="discount-badge">
         <span class="pct" id="headerPct">30%</span>
-        <span class="desc">OFF en tu<br><span id="headerProducto">primer bowl</span></span>
+        <span class="desc">OFF en tu<br><span id="headerProducto">Bowl 12oz</span></span>
+      </div>
+
+      <!-- Modo sorteo -->
+      <div id="badgeSorteo" class="sorteo-badge" style="display:none;">
+        <span style="font-size:28px;">🏆</span>
+        <span class="premio" id="headerPremio">Un año de açaí gratis</span>
       </div>
     </div>
+
     <div class="card-body">
-      <h2 class="section-title">Obtén tu cupón</h2>
-      <p class="section-sub">Ingresa tus datos y recíbelo al instante</p>
+      <h2 class="section-title" id="formTitle">Obtén tu cupón</h2>
+      <p class="section-sub" id="formSub">Ingresa tus datos y recíbelo al instante</p>
+
       <div class="form-group">
         <input type="text" id="inp-nombre" placeholder="TU NOMBRE" autocomplete="given-name">
         <div class="err-msg" id="err-nombre">⚠ Ingresa tu nombre</div>
@@ -109,69 +116,87 @@
         <input type="tel" id="inp-cel" placeholder="300 000 0000" inputmode="numeric" maxlength="10" autocomplete="tel">
         <div class="err-msg" id="err-cel">⚠ Celular colombiano inválido — 10 dígitos, empieza en 3</div>
       </div>
-      <div class="validity-pill">
+
+      <div class="validity-pill" id="validityPill">
         <span class="validity-dot"></span>
-        Válido <span id="pillVigencia" style="margin:0 3px;font-weight:900;">72 horas</span> · 1 cupón por número
+        <span id="pillText">Válido <span id="pillVigencia" style="font-weight:900;">72 horas</span> · 1 cupón por número</span>
       </div>
+
       <button class="btn" id="mainBtn" onclick="solicitar()">
-        <span class="btn-text">Recibir mi cupón gratis →</span>
+        <span class="btn-text" id="btnText">Recibir mi cupón gratis →</span>
         <span class="btn-loader"><span class="spin"></span></span>
       </button>
-      <p class="terms">1 cupón por número · Sin spam · Solo tiendas Oakberry Colombia</p>
+      <p class="terms" id="formTerms">1 cupón por número · Sin spam · Solo tiendas Oakberry Colombia</p>
     </div>
   </div>
 
-  <!-- ESTADO 2: CUPÓN NUEVO -->
+  <!-- ESTADO 2: ÉXITO (cupón o sorteo) -->
   <div id="stateSuccess" class="state">
     <div class="result-header">
-      <span class="result-icon">🎉</span>
-      <div class="result-title">¡Cupón listo!</div>
+      <span class="result-icon" id="successIcon">🎉</span>
+      <div class="result-title" id="successTitle">¡Cupón listo!</div>
       <div class="result-name" id="outNombre"></div>
     </div>
     <div class="result-body">
       <div class="ticket">
-        <div class="ticket-label">Tu código de descuento</div>
+        <div class="ticket-label" id="ticketLabel">Tu código de descuento</div>
         <div class="ticket-code" id="outCode">—</div>
         <div class="ticket-validity" id="outValidity"></div>
         <div class="ticket-product" id="outProducto"></div>
         <div class="ticket-dashed"></div>
         <div class="ticket-bottom">
           <div>
-            <div class="d-label">Descuento</div>
+            <div class="d-label" id="ticketBottomLabel">Descuento</div>
             <div class="d-value" id="outDescuento">30% OFF</div>
           </div>
           <button class="copy-btn" onclick="copiar('outCode',this)">📋 Copiar</button>
         </div>
       </div>
-      <div class="info-pill purple">
-        <span class="icon">📍</span>
-        <span>Muestra este código al cajero en cualquier tienda Oakberry de <strong id="outCiudad">tu ciudad</strong>.</span>
+
+      <!-- Info cupón -->
+      <div id="infoCupon">
+        <div class="info-pill purple">
+          <span class="icon">📍</span>
+          <span>Muestra este código al cajero en cualquier tienda Oakberry de <strong id="outCiudad">tu ciudad</strong>.</span>
+        </div>
+        <div class="info-pill yellow">
+          <span class="icon">⚠️</span>
+          <span>Uso único. Una vez canjeado en tienda no podrá volver a usarse.</span>
+        </div>
       </div>
-      <div class="info-pill yellow">
-        <span class="icon">⚠️</span>
-        <span>Uso único. Una vez canjeado en tienda no podrá volver a usarse.</span>
+
+      <!-- Info sorteo -->
+      <div id="infoSorteo" style="display:none;">
+        <div class="info-pill green">
+          <span class="icon">🏆</span>
+          <span>Tu número de participación está registrado. El sorteo se realiza en vivo por Instagram.</span>
+        </div>
+        <div class="info-pill yellow">
+          <span class="icon">📲</span>
+          <span>Guarda este número — lo necesitarás si eres el ganador.</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ESTADO 3: YA TIENE CUPÓN -->
+  <!-- ESTADO 3: YA TIENE REGISTRO -->
   <div id="stateUsed" class="state">
     <div class="result-header">
       <span class="result-icon">🔍</span>
-      <div class="result-title">Ya tienes un cupón</div>
+      <div class="result-title" id="usedTitle">Ya tienes un cupón</div>
       <div class="result-name" id="usedNombre"></div>
     </div>
     <div class="result-body">
-      <p style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:18px;">Encontramos tu código registrado con este número</p>
+      <p style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:18px;" id="usedSubtitle">Encontramos tu código registrado con este número</p>
       <div class="existing-ticket">
-        <div class="existing-label">Tu código</div>
+        <div class="existing-label" id="usedLabel">Tu código</div>
         <div class="existing-code" id="outExistingCode">—</div>
         <div class="existing-validity" id="outExistingValidity"></div>
       </div>
       <button class="copy-btn-solid" onclick="copiar('outExistingCode',this)">📋 Copiar código</button>
       <div class="info-pill yellow">
         <span class="icon">💡</span>
-        <span>Si ya canjeaste este cupón en tienda, acércate a cualquier punto Oakberry.</span>
+        <span id="usedTip">Si ya canjeaste este cupón en tienda, acércate a cualquier punto Oakberry.</span>
       </div>
     </div>
   </div>
@@ -184,24 +209,39 @@ const CFG = {
   PREFIX: "OAK",
 };
 
-// Lee todo desde el link del anuncio
-// Ejemplo: oakberry-cupones.com?ciudad=bogota&descuento=30&producto=Bowl+12oz&vigencia=72
 const P = (() => {
   const p = new URLSearchParams(window.location.search);
   return {
+    modo:      p.get("modo")      || "cupon",   // "cupon" o "sorteo"
     ciudad:    p.get("ciudad")    || "No especificada",
     tienda:    p.get("tienda")    || "No especificada",
     fase:      p.get("fase")      || "organico",
     fuente:    p.get("fuente")    || "meta",
     descuento: p.get("descuento") || "30",
     producto:  p.get("producto")  || "Bowl 12oz",
+    premio:    p.get("premio")    || "Un año de açaí gratis",
     vigencia:  parseInt(p.get("vigencia") || "72"),
   };
 })();
 
-document.getElementById("headerPct").textContent      = P.descuento + "%";
-document.getElementById("headerProducto").textContent = P.producto;
-document.getElementById("pillVigencia").textContent   = P.vigencia + " horas";
+const esSorteo = P.modo === "sorteo";
+
+// Adaptar copy según modo
+if (esSorteo) {
+  document.getElementById("headerSub").textContent    = "Sorteo · Nuevos registros";
+  document.getElementById("badgeCupon").style.display = "none";
+  document.getElementById("badgeSorteo").style.display= "inline-flex";
+  document.getElementById("headerPremio").textContent = P.premio;
+  document.getElementById("formTitle").textContent    = "Participa gratis";
+  document.getElementById("formSub").textContent      = "Ingresa tus datos y queda inscrito al sorteo";
+  document.getElementById("pillText").innerHTML       = `⏳ Sorteo en <span style="font-weight:900;">${P.vigencia} horas</span> · 1 registro por número`;
+  document.getElementById("btnText").textContent      = "Quiero participar →";
+  document.getElementById("formTerms").textContent    = "1 registro por número · Sin spam · Oakberry Colombia";
+} else {
+  document.getElementById("headerPct").textContent      = P.descuento + "%";
+  document.getElementById("headerProducto").textContent = P.producto;
+  document.getElementById("pillVigencia").textContent   = P.vigencia + " horas";
+}
 
 function genCodigo() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -261,6 +301,7 @@ async function solicitar() {
   const codigo  = genCodigo();
   const ahora   = new Date();
   const vence   = new Date(ahora.getTime() + P.vigencia * 3_600_000);
+  const producto = esSorteo ? P.premio : P.producto;
 
   try {
     const res = await fetchGET({
@@ -270,8 +311,8 @@ async function solicitar() {
       tienda:     P.tienda,
       fase:       P.fase,
       fuente:     P.fuente,
-      descuento:  P.descuento + "%",
-      producto:   P.producto,
+      descuento:  esSorteo ? "sorteo" : P.descuento + "%",
+      producto,
       fechaGen:   ahora.toISOString(),
       fechaVence: vence.toISOString(),
     });
@@ -293,12 +334,25 @@ async function solicitar() {
 
 function mostrarNuevo({ codigo, nombre, vence }) {
   show("stateSuccess");
-  document.getElementById("outCode").textContent      = codigo;
-  document.getElementById("outNombre").textContent    = "Hola, " + nombre.split(" ")[0] + " 👋";
-  document.getElementById("outValidity").textContent  = "Válido hasta: " + fmt(vence);
-  document.getElementById("outProducto").textContent  = "🫐 " + P.producto;
-  document.getElementById("outDescuento").textContent = P.descuento + "% OFF";
-  document.getElementById("outCiudad").textContent    = P.ciudad !== "No especificada" ? P.ciudad : "tu ciudad";
+
+  document.getElementById("outCode").textContent     = codigo;
+  document.getElementById("outNombre").textContent   = "Hola, " + nombre.split(" ")[0] + " 👋";
+  document.getElementById("outValidity").textContent = "Válido hasta: " + fmt(vence);
+
+  if (esSorteo) {
+    document.getElementById("successIcon").textContent    = "🏆";
+    document.getElementById("successTitle").textContent   = "¡Estás participando!";
+    document.getElementById("ticketLabel").textContent    = "Tu número de participación";
+    document.getElementById("outProducto").textContent    = "🫐 " + P.premio;
+    document.getElementById("ticketBottomLabel").textContent = "Premio";
+    document.getElementById("outDescuento").textContent   = P.premio;
+    document.getElementById("infoCupon").style.display    = "none";
+    document.getElementById("infoSorteo").style.display   = "block";
+  } else {
+    document.getElementById("outProducto").textContent    = "🫐 " + P.producto;
+    document.getElementById("outDescuento").textContent   = P.descuento + "% OFF";
+    document.getElementById("outCiudad").textContent      = P.ciudad !== "No especificada" ? P.ciudad : "tu ciudad";
+  }
 }
 
 function mostrarExistente(data, nombre) {
@@ -306,6 +360,13 @@ function mostrarExistente(data, nombre) {
   document.getElementById("outExistingCode").textContent     = data.codigo;
   document.getElementById("usedNombre").textContent          = "Hola, " + nombre.split(" ")[0] + " 👋";
   document.getElementById("outExistingValidity").textContent = data.fechaVence ? "Válido hasta: " + fmt(new Date(data.fechaVence)) : "";
+
+  if (esSorteo) {
+    document.getElementById("usedTitle").textContent    = "Ya estás participando";
+    document.getElementById("usedSubtitle").textContent = "Encontramos tu número de participación";
+    document.getElementById("usedLabel").textContent    = "Tu número";
+    document.getElementById("usedTip").textContent      = "Guarda este número — lo necesitarás si eres el ganador del sorteo.";
+  }
 }
 
 function show(id) {
