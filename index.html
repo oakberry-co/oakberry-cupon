@@ -6,15 +6,13 @@
 <title>Oakberry — Tu Cupón Exclusivo</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --primary:#5F4B8B; --primary-dark:#4a3a6e; --yellow:#F5C842;
-    --white:#ffffff; --off-white:rgba(255,255,255,0.96);
-    --border:#eee; --gray:#999; --red:#c0392b;
-  }
+  :root{--primary:#5F4B8B;--primary-dark:#4a3a6e;--yellow:#F5C842;--white:#ffffff;--off-white:rgba(255,255,255,0.96);--border:#eee;--gray:#999;--red:#c0392b;}
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Montserrat',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:linear-gradient(rgba(95,75,139,0.55),rgba(95,75,139,0.55)),url('bg.png') center/cover no-repeat fixed;}
   .card{background:var(--off-white);border-radius:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;animation:cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;}
   @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+  /* HEADER FORMULARIO — con rayitas */
   .card-header{background:var(--primary);padding:28px 30px 24px;text-align:center;position:relative;overflow:hidden;}
   .card-header::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:repeating-linear-gradient(90deg,var(--yellow) 0px,var(--yellow) 18px,var(--primary) 18px,var(--primary) 28px);}
   .brand{font-size:28px;font-weight:900;color:var(--white);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;margin-top:4px;}
@@ -22,6 +20,7 @@
   .discount-badge{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);border-radius:50px;padding:10px 22px;margin-top:18px;}
   .discount-badge .pct{font-size:30px;font-weight:900;color:var(--primary);line-height:1;}
   .discount-badge .desc{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;text-align:left;line-height:1.4;}
+
   .card-body{padding:26px 30px 30px;}
   .section-title{color:var(--primary);text-transform:uppercase;font-weight:900;font-size:17px;letter-spacing:0.5px;text-align:center;margin-bottom:6px;}
   .section-sub{font-size:11px;font-weight:700;color:var(--gray);text-align:center;margin-bottom:22px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.6;}
@@ -47,20 +46,23 @@
   .spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.65s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .terms{font-size:10px;font-weight:600;color:#bbb;text-align:center;margin-top:12px;text-transform:uppercase;letter-spacing:0.3px;line-height:1.6;}
+
   .state{display:none;}
   .state.show{display:block;animation:cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both;}
+
+  /* HEADER RESULTADO — SIN rayitas */
   .result-header{background:var(--primary);padding:28px 30px 22px;text-align:center;position:relative;overflow:hidden;}
-  .result-header::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:repeating-linear-gradient(90deg,var(--yellow) 0px,var(--yellow) 18px,var(--primary) 18px,var(--primary) 28px);}
   .result-icon{font-size:44px;display:block;margin-bottom:8px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.15s both;}
   @keyframes popIn{from{opacity:0;transform:scale(0.3);}to{opacity:1;transform:scale(1);}}
   .result-title{font-size:18px;font-weight:900;color:var(--white);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
   .result-name{font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;}
+
   .result-body{padding:24px 30px 30px;text-align:center;}
   .ticket{background:var(--primary);border-radius:16px;padding:20px 24px;margin-bottom:18px;position:relative;overflow:hidden;}
   .ticket::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:repeating-linear-gradient(90deg,var(--yellow) 0,var(--yellow) 14px,var(--primary) 14px,var(--primary) 22px);}
   .ticket-dashed{border-top:1.5px dashed rgba(255,255,255,0.25);margin:14px -24px;position:relative;}
   .ticket-dashed::before,.ticket-dashed::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:16px;height:16px;background:var(--off-white);border-radius:50%;}
-  .ticket-dashed::before{left:-8px;} .ticket-dashed::after{right:-8px;}
+  .ticket-dashed::before{left:-8px;}.ticket-dashed::after{right:-8px;}
   .ticket-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;text-align:left;}
   .ticket-code{font-size:36px;font-weight:900;color:var(--white);letter-spacing:4px;text-align:left;line-height:1;margin-bottom:4px;}
   .ticket-validity{font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);text-align:left;margin-bottom:4px;}
@@ -85,6 +87,7 @@
 <body>
 <div class="card">
 
+  <!-- ESTADO 1: FORMULARIO -->
   <div id="stateForm" class="state show">
     <div class="card-header">
       <div class="brand">Oakberry</div>
@@ -104,7 +107,7 @@
       <div class="form-group">
         <span class="phone-prefix">+57</span>
         <input type="tel" id="inp-cel" placeholder="300 000 0000" inputmode="numeric" maxlength="10" autocomplete="tel">
-        <div class="err-msg" id="err-cel">⚠ Celular inválido — 10 dígitos</div>
+        <div class="err-msg" id="err-cel">⚠ Celular colombiano inválido — 10 dígitos, empieza en 3</div>
       </div>
       <div class="validity-pill">
         <span class="validity-dot"></span>
@@ -118,6 +121,7 @@
     </div>
   </div>
 
+  <!-- ESTADO 2: CUPÓN NUEVO -->
   <div id="stateSuccess" class="state">
     <div class="result-header">
       <span class="result-icon">🎉</span>
@@ -150,6 +154,7 @@
     </div>
   </div>
 
+  <!-- ESTADO 3: YA TIENE CUPÓN -->
   <div id="stateUsed" class="state">
     <div class="result-header">
       <span class="result-icon">🔍</span>
@@ -179,15 +184,17 @@ const CFG = {
   PREFIX: "OAK",
 };
 
+// Lee todo desde el link del anuncio
+// Ejemplo: oakberry-cupones.com?ciudad=bogota&descuento=30&producto=Bowl+12oz&vigencia=72
 const P = (() => {
   const p = new URLSearchParams(window.location.search);
   return {
     ciudad:    p.get("ciudad")    || "No especificada",
     tienda:    p.get("tienda")    || "No especificada",
     fase:      p.get("fase")      || "organico",
-    fuente:    p.get("fuente")    || "directo",
+    fuente:    p.get("fuente")    || "meta",
     descuento: p.get("descuento") || "30",
-    producto:  p.get("producto")  || "bowl",
+    producto:  p.get("producto")  || "Bowl 12oz",
     vigencia:  parseInt(p.get("vigencia") || "72"),
   };
 })();
@@ -215,7 +222,7 @@ function validar() {
     document.getElementById("err-nombre").classList.remove("show");
   }
   const cel = document.getElementById("inp-cel").value.replace(/\D/g,"");
-  if (!/^\d{10}$/.test(cel)) {
+  if (!/^3\d{9}$/.test(cel)) {
     document.getElementById("inp-cel").classList.add("err");
     document.getElementById("err-cel").classList.add("show");
     ok = false;
@@ -226,7 +233,6 @@ function validar() {
   return ok;
 }
 
-// Usamos solo GET con jsonp para evitar CORS
 function fetchGET(params) {
   return new Promise((resolve, reject) => {
     const cbName = "cb_" + Math.random().toString(36).slice(2);
@@ -290,7 +296,7 @@ function mostrarNuevo({ codigo, nombre, vence }) {
   document.getElementById("outCode").textContent      = codigo;
   document.getElementById("outNombre").textContent    = "Hola, " + nombre.split(" ")[0] + " 👋";
   document.getElementById("outValidity").textContent  = "Válido hasta: " + fmt(vence);
-  document.getElementById("outProducto").textContent  = "🫐 " + P.producto.charAt(0).toUpperCase() + P.producto.slice(1);
+  document.getElementById("outProducto").textContent  = "🫐 " + P.producto;
   document.getElementById("outDescuento").textContent = P.descuento + "% OFF";
   document.getElementById("outCiudad").textContent    = P.ciudad !== "No especificada" ? P.ciudad : "tu ciudad";
 }
@@ -298,7 +304,7 @@ function mostrarNuevo({ codigo, nombre, vence }) {
 function mostrarExistente(data, nombre) {
   show("stateUsed");
   document.getElementById("outExistingCode").textContent     = data.codigo;
-  document.getElementById("usedNombre").textContent          = nombre ? "Hola, " + nombre.split(" ")[0] + " 👋" : "";
+  document.getElementById("usedNombre").textContent          = "Hola, " + nombre.split(" ")[0] + " 👋";
   document.getElementById("outExistingValidity").textContent = data.fechaVence ? "Válido hasta: " + fmt(new Date(data.fechaVence)) : "";
 }
 
@@ -310,7 +316,7 @@ function show(id) {
 }
 
 function fmt(d) {
-  return d.toLocaleDateString("es-CO", { day:"numeric", month:"long", hour:"2-digit", minute:"2-digit" });
+  return d.toLocaleDateString("es-CO",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
 }
 
 function copiar(elId, btn) {
