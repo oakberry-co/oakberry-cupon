@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oakberry — Tu Cupón Exclusivo</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:      #5F4B8B;
+    --primary-dark: #4a3a6e;
+    --primary-light:#7a63a8;
+    --yellow:       #F5C842;
+    --white:        #ffffff;
+    --off-white:    rgba(255,255,255,0.96);
+    --border:       #eee;
+    --text:         #5F4B8B;
+    --gray:         #999;
+    --red:          #c0392b;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background:
+      linear-gradient(rgba(95,75,139,0.55), rgba(95,75,139,0.55)),
+      url('https://lh3.googleusercontent.com/d/1EI9qKXQpHm63BeshYudNojU1HQ7TPeSu') center/cover no-repeat fixed;
+  }
+
+  .card {
+    background: var(--off-white);
+    border-radius: 30px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    overflow: hidden;
+    animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  @keyframes cardIn {
+    from { opacity:0; transform:translateY(28px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  /* ── HEADER ── */
+  .card-header {
+    background: var(--primary);
+    padding: 28px 30px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 7px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--yellow) 0px, var(--yellow) 18px,
+      var(--primary) 18px, var(--primary) 28px
+    );
+  }
+
+  .brand {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    margin-top: 4px;
+  }
+
+  .brand-sub {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+  }
+
+  .discount-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--yellow);
+    border-radius: 50px;
+    padding: 10px 22px;
+    margin-top: 18px;
+  }
+
+  .discount-badge .pct {
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1;
+  }
+
+  .discount-badge .desc {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    text-align: left;
+    line-height: 1.4;
+  }
+
+  /* ── BODY ── */
+  .card-body { padding: 26px 30px 30px; }
+
+  .section-title {
+    color: var(--primary);
+    text-transform: uppercase;
+    font-weight: 900;
+    font-size: 17px;
+    letter-spacing: 0.5px;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .section-sub {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray);
+    text-align: center;
+    margin-bottom: 22px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+  }
+
+  /* ── INPUTS ── */
+  .form-group { margin-bottom: 14px; position: relative; }
+
+  input[type=text], input[type=tel] {
+    width: 100%;
+    padding: 15px 16px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    outline: none;
+    background: #fff;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    -webkit-appearance: none;
+  }
+
+  input::placeholder { color: #bbb; font-weight: 600; }
+  input[type=tel]    { padding-left: 52px; }
+
+  input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(95,75,139,0.12);
+  }
+
+  input.err {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+  }
+
+  .phone-prefix {
+    position: absolute;
+    left: 16px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    pointer-events: none;
+  }
+
+  .err-msg {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 5px;
+    display: none;
+    padding-left: 4px;
+  }
+  .err-msg.show { display: block; }
+
+  .validity-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: #f5f0ff;
+    border: 1.5px solid #d4c8f5;
+    border-radius: 50px;
+    padding: 8px 16px;
+    margin-bottom: 18px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .validity-dot {
+    width: 6px; height: 6px;
+    background: #e74c3c;
+    border-radius: 50%;
+    animation: blink 1.6s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  /* ── BUTTON ── */
+  .btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+    box-shadow: 0 6px 20px rgba(95,75,139,0.4);
+  }
+
+  .btn:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(95,75,139,0.5);
+  }
+  .btn:active:not(:disabled) { transform:scale(0.99); }
+  .btn:disabled { opacity:0.55; cursor:not-allowed; box-shadow:none; }
+
+  .btn-text { transition: opacity 0.18s; }
+  .btn-loader {
+    position: absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; transition:opacity 0.18s;
+  }
+  .btn.loading .btn-text   { opacity:0; }
+  .btn.loading .btn-loader { opacity:1; }
+
+  .spin {
+    width:20px; height:20px;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation: spin 0.65s linear infinite;
+  }
+  @keyframes spin { to{transform:rotate(360deg);} }
+
+  .terms {
+    font-size: 10px;
+    font-weight: 600;
+    color: #bbb;
+    text-align: center;
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    line-height: 1.6;
+  }
+
+  /* ── STATES ── */
+  .state { display:none; }
+  .state.show {
+    display:block;
+    animation: cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  /* success / used header */
+  .result-header {
+    background: var(--primary);
+    padding: 28px 30px 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-header::before {
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0;
+    height:7px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--yellow) 0px, var(--yellow) 18px,
+      var(--primary) 18px, var(--primary) 28px
+    );
+  }
+
+  .result-icon {
+    font-size:44px; display:block; margin-bottom:8px;
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.15s both;
+  }
+
+  @keyframes popIn {
+    from{opacity:0;transform:scale(0.3);}
+    to{opacity:1;transform:scale(1);}
+  }
+
+  .result-title {
+    font-size:18px; font-weight:900;
+    color:var(--white); text-transform:uppercase; letter-spacing:1px;
+    margin-bottom:4px;
+  }
+
+  .result-name {
+    font-size:12px; font-weight:700;
+    color:rgba(255,255,255,0.6);
+    text-transform:uppercase; letter-spacing:1px;
+  }
+
+  .result-body { padding:24px 30px 30px; text-align:center; }
+
+  /* ── TICKET ── */
+  .ticket {
+    background: var(--primary);
+    border-radius:16px;
+    padding:20px 24px;
+    margin-bottom:18px;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .ticket::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:5px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--yellow) 0, var(--yellow) 14px,
+      var(--primary) 14px, var(--primary) 22px
+    );
+  }
+
+  .ticket-dashed {
+    border-top:1.5px dashed rgba(255,255,255,0.25);
+    margin:14px -24px;
+    position:relative;
+  }
+  .ticket-dashed::before,
+  .ticket-dashed::after {
+    content:'';
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:16px; height:16px;
+    background:var(--off-white);
+    border-radius:50%;
+  }
+  .ticket-dashed::before { left:-8px; }
+  .ticket-dashed::after  { right:-8px; }
+
+  .ticket-label {
+    font-size:10px; font-weight:700;
+    color:rgba(255,255,255,0.5);
+    text-transform:uppercase; letter-spacing:2px;
+    margin-bottom:8px; text-align:left;
+  }
+
+  .ticket-code {
+    font-size:36px; font-weight:900;
+    color:var(--white); letter-spacing:4px;
+    text-align:left; line-height:1; margin-bottom:4px;
+  }
+
+  .ticket-validity {
+    font-size:11px; font-weight:600;
+    color:rgba(255,255,255,0.45); text-align:left;
+  }
+
+  .ticket-bottom {
+    display:flex; justify-content:space-between; align-items:center;
+  }
+
+  .d-label {
+    font-size:10px; font-weight:700;
+    color:rgba(255,255,255,0.5);
+    text-transform:uppercase; letter-spacing:1px;
+    text-align:left;
+  }
+
+  .d-value {
+    font-size:24px; font-weight:900;
+    color:var(--yellow); line-height:1;
+  }
+
+  .copy-btn {
+    background:rgba(255,255,255,0.12);
+    border:1.5px solid rgba(255,255,255,0.25);
+    color:rgba(255,255,255,0.9);
+    font-family:'Montserrat',sans-serif;
+    font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.5px;
+    padding:9px 16px; border-radius:8px;
+    cursor:pointer; transition:background 0.18s;
+  }
+  .copy-btn:hover { background:rgba(255,255,255,0.22); }
+
+  /* info pills */
+  .info-pill {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:12px 14px; border-radius:12px;
+    font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.2px;
+    line-height:1.5; margin-bottom:10px; text-align:left;
+  }
+
+  .info-pill.purple {
+    background:#f5f0ff; border:1.5px solid #d4c8f5; color:var(--primary);
+  }
+
+  .info-pill.yellow {
+    background:#fffbea; border:1.5px solid #f0dc8c; color:#7a5c00;
+  }
+
+  .info-pill .icon { font-size:16px; flex-shrink:0; }
+
+  /* existing coupon */
+  .existing-ticket {
+    background:#f5f0ff;
+    border:2px dashed #d4c8f5;
+    border-radius:16px;
+    padding:20px 24px;
+    margin-bottom:18px;
+    text-align:center;
+  }
+
+  .existing-label {
+    font-size:10px; font-weight:700; color:var(--gray);
+    text-transform:uppercase; letter-spacing:2px; margin-bottom:8px;
+  }
+
+  .existing-code {
+    font-size:30px; font-weight:900;
+    color:var(--primary); letter-spacing:3px; margin-bottom:4px;
+  }
+
+  .existing-validity {
+    font-size:11px; font-weight:600; color:var(--gray);
+  }
+
+  .copy-btn-solid {
+    width:100%; padding:15px;
+    background:var(--primary); color:var(--white);
+    border:none; border-radius:12px;
+    font-family:'Montserrat',sans-serif;
+    font-size:13px; font-weight:900;
+    text-transform:uppercase; letter-spacing:1px;
+    cursor:pointer; margin-bottom:14px;
+    transition:background 0.18s;
+  }
+  .copy-btn-solid:hover { background:var(--primary-dark); }
+
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- ══ ESTADO 1: FORMULARIO ══ -->
+  <div id="stateForm" class="state show">
+    <div class="card-header">
+      <div class="brand">Oakberry</div>
+      <div class="brand-sub">Cupón exclusivo · Nuevos clientes</div>
+      <div class="discount-badge">
+        <span class="pct">30%</span>
+        <span class="desc">OFF en tu<br>primer bowl</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h2 class="section-title">Obtén tu cupón</h2>
+      <p class="section-sub">Ingresa tus datos y recíbelo al instante</p>
+
+      <div class="form-group">
+        <input type="text" id="inp-nombre" placeholder="TU NOMBRE" autocomplete="given-name">
+        <div class="err-msg" id="err-nombre">⚠ Ingresa tu nombre</div>
+      </div>
+
+      <div class="form-group">
+        <span class="phone-prefix">+57</span>
+        <input type="tel" id="inp-cel" placeholder="300 000 0000"
+               inputmode="numeric" maxlength="10" autocomplete="tel">
+        <div class="err-msg" id="err-cel">⚠ Celular inválido — 10 dígitos</div>
+      </div>
+
+      <div class="validity-pill">
+        <span class="validity-dot"></span>
+        Válido 72 horas · 1 cupón por número de celular
+      </div>
+
+      <button class="btn" id="mainBtn" onclick="solicitar()">
+        <span class="btn-text">Recibir mi cupón gratis →</span>
+        <span class="btn-loader"><span class="spin"></span></span>
+      </button>
+
+      <p class="terms">1 cupón por número · Sin spam · Solo tiendas Oakberry Colombia</p>
+    </div>
+  </div>
+
+  <!-- ══ ESTADO 2: CUPÓN NUEVO ══ -->
+  <div id="stateSuccess" class="state">
+    <div class="result-header">
+      <span class="result-icon">🎉</span>
+      <div class="result-title">¡Cupón listo!</div>
+      <div class="result-name" id="outNombre"></div>
+    </div>
+    <div class="result-body">
+      <div class="ticket">
+        <div class="ticket-label">Tu código de descuento</div>
+        <div class="ticket-code" id="outCode">—</div>
+        <div class="ticket-validity" id="outValidity"></div>
+        <div class="ticket-dashed"></div>
+        <div class="ticket-bottom">
+          <div>
+            <div class="d-label">Descuento</div>
+            <div class="d-value">30% OFF</div>
+          </div>
+          <button class="copy-btn" onclick="copiar('outCode',this)">📋 Copiar</button>
+        </div>
+      </div>
+      <div class="info-pill purple">
+        <span class="icon">📍</span>
+        <span>Muestra este código al cajero en cualquier tienda Oakberry de <strong id="outCiudad">tu ciudad</strong>.</span>
+      </div>
+      <div class="info-pill yellow">
+        <span class="icon">⚠️</span>
+        <span>Uso único. Una vez canjeado en tienda no podrá volver a usarse.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ESTADO 3: YA TIENE CUPÓN ══ -->
+  <div id="stateUsed" class="state">
+    <div class="result-header">
+      <span class="result-icon">🔍</span>
+      <div class="result-title">Ya tienes un cupón</div>
+      <div class="result-name" id="usedNombre"></div>
+    </div>
+    <div class="result-body">
+      <p style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:18px;">
+        Encontramos tu código registrado con este número
+      </p>
+      <div class="existing-ticket">
+        <div class="existing-label">Tu código</div>
+        <div class="existing-code" id="outExistingCode">—</div>
+        <div class="existing-validity" id="outExistingValidity"></div>
+      </div>
+      <button class="copy-btn-solid" onclick="copiar('outExistingCode',this)">
+        📋 Copiar código
+      </button>
+      <div class="info-pill yellow">
+        <span class="icon">💡</span>
+        <span>Si ya canjeaste este cupón en tienda, acércate a cualquier punto Oakberry.</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /card -->
+
+<script>
+// ════════════════════════════════════════════════
+//  ⚙️  CONFIGURACIÓN
+//  Solo edita SCRIPT_URL cuando tengas el link
+//  de tu Apps Script desplegado
+// ════════════════════════════════════════════════
+const CFG = {
+  SCRIPT_URL:     "PEGA_AQUI_LA_URL_DE_TU_APPS_SCRIPT",
+  PREFIX:         "OAK",
+  VIGENCIA_HORAS: 72,
+};
+
+// Lee los UTMs del link del anuncio automáticamente
+// Ejemplo: tudominio.com?ciudad=bogota&tienda=unicentro&fase=mofu
+const UTM = (() => {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    ciudad: p.get("ciudad") || "No especificada",
+    tienda: p.get("tienda") || "No especificada",
+    fase:   p.get("fase")   || "organico",
+    fuente: p.get("fuente") || "directo",
+  };
+})();
+
+// Genera código único (sin I, O, 0, 1 para evitar confusión en caja)
+function genCodigo() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let r = "";
+  for (let i = 0; i < 6; i++) r += chars[Math.floor(Math.random() * chars.length)];
+  return `${CFG.PREFIX}-${r}`;
+}
+
+function validar() {
+  let ok = true;
+  const nombre = document.getElementById("inp-nombre").value.trim();
+  if (nombre.length < 2) {
+    document.getElementById("inp-nombre").classList.add("err");
+    document.getElementById("err-nombre").classList.add("show");
+    ok = false;
+  } else {
+    document.getElementById("inp-nombre").classList.remove("err");
+    document.getElementById("err-nombre").classList.remove("show");
+  }
+  const cel = document.getElementById("inp-cel").value.replace(/\D/g,"");
+  if (!/^\d{10}$/.test(cel)) {
+    document.getElementById("inp-cel").classList.add("err");
+    document.getElementById("err-cel").classList.add("show");
+    ok = false;
+  } else {
+    document.getElementById("inp-cel").classList.remove("err");
+    document.getElementById("err-cel").classList.remove("show");
+  }
+  return ok;
+}
+
+async function solicitar() {
+  if (!validar()) return;
+  const btn = document.getElementById("mainBtn");
+  btn.classList.add("loading");
+  btn.disabled = true;
+
+  const nombre  = document.getElementById("inp-nombre").value.trim();
+  const celular = "+57" + document.getElementById("inp-cel").value.replace(/\D/g,"");
+
+  try {
+    // 1️⃣ ¿Este celular ya tiene cupón?
+    const checkRes  = await fetch(
+      `${CFG.SCRIPT_URL}?accion=verificarCelular&celular=${encodeURIComponent(celular)}`
+    );
+    const checkData = await checkRes.json();
+
+    if (checkData.existe) {
+      mostrarExistente(checkData, nombre);
+      return;
+    }
+
+    // 2️⃣ No existe → crear código y guardar en Sheet
+    const codigo = genCodigo();
+    const ahora  = new Date();
+    const vence  = new Date(ahora.getTime() + CFG.VIGENCIA_HORAS * 3_600_000);
+
+    const saveRes  = await fetch(CFG.SCRIPT_URL, {
+      method:  "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        accion: "registrarCupon",
+        codigo, nombre, celular,
+        ciudad:     UTM.ciudad,
+        tienda:     UTM.tienda,
+        fase:       UTM.fase,
+        fuente:     UTM.fuente,
+        fechaGen:   ahora.toISOString(),
+        fechaVence: vence.toISOString(),
+      }),
+    });
+    const saveData = await saveRes.json();
+
+    if (saveData.ok) {
+      mostrarNuevo({ codigo, nombre, vence });
+    } else {
+      throw new Error(saveData.mensaje || "Error al guardar");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Hubo un problema al conectar. Intenta de nuevo.");
+    btn.classList.remove("loading");
+    btn.disabled = false;
+  }
+}
+
+function mostrarNuevo({ codigo, nombre, vence }) {
+  show("stateSuccess");
+  document.getElementById("outCode").textContent    = codigo;
+  document.getElementById("outNombre").textContent  = "Hola, " + nombre.split(" ")[0] + " 👋";
+  document.getElementById("outValidity").textContent = "Válido hasta: " + fmt(vence);
+  document.getElementById("outCiudad").textContent  =
+    UTM.ciudad !== "No especificada" ? UTM.ciudad : "tu ciudad";
+}
+
+function mostrarExistente(data, nombre) {
+  show("stateUsed");
+  document.getElementById("outExistingCode").textContent     = data.codigo;
+  document.getElementById("usedNombre").textContent          =
+    nombre ? "Hola, " + nombre.split(" ")[0] + " 👋" : "";
+  document.getElementById("outExistingValidity").textContent =
+    data.fechaVence ? "Válido hasta: " + fmt(new Date(data.fechaVence)) : "";
+}
+
+function show(id) {
+  ["stateForm","stateSuccess","stateUsed"].forEach(s => {
+    document.getElementById(s).classList.remove("show");
+  });
+  document.getElementById(id).classList.add("show");
+}
+
+function fmt(d) {
+  return d.toLocaleDateString("es-CO", {
+    day:"numeric", month:"long", hour:"2-digit", minute:"2-digit"
+  });
+}
+
+function copiar(elId, btn) {
+  const code = document.getElementById(elId).textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const prev = btn.textContent;
+    btn.textContent = "✅ ¡Copiado!";
+    setTimeout(() => btn.textContent = prev, 2200);
+  });
+}
+
+document.getElementById("inp-cel").addEventListener("input", function() {
+  this.value = this.value.replace(/\D/g,"");
+});
+</script>
+</body>
+</html>
