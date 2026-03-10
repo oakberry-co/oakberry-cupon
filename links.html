@@ -230,8 +230,13 @@
   <!-- PREVIEW -->
   <div class="preview-panel">
     <div class="link-card">
-      <div class="link-card-title">Link generado</div>
-      <div class="link-display empty" id="linkDisplay">El link aparecerá aquí...</div>
+      <div class="link-card-title">Link corto</div>
+      <div class="link-display empty" id="shortLinkDisplay">Se generará al crear el link...</div>
+      <div class="link-actions" style="margin-bottom:14px;">
+        <button class="action-btn primary" onclick="copiarShortLink()">📋 Copiar link corto</button>
+      </div>
+      <div class="link-card-title" style="margin-top:4px;">Link completo</div>
+      <div class="link-display empty" id="linkDisplay" style="font-size:10px;">El link aparecerá aquí...</div>
       <div class="link-actions">
         <button class="action-btn" onclick="copiarLink()">📋 Copiar</button>
         <button class="action-btn primary" onclick="abrirLink()">↗ Probar</button>
@@ -365,6 +370,14 @@ function generar() {
   display.textContent = linkActual;
   display.classList.remove("empty");
 
+  // Link corto
+  const alias = nombre.toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"");
+  const shortLink = `${BASE}/r#${alias}`;
+  const shortDisplay = document.getElementById("shortLinkDisplay");
+  shortDisplay.textContent = shortLink;
+  shortDisplay.classList.remove("empty");
+  shortDisplay.dataset.alias = alias;
+
   mostrarResumen(params, nombre);
 
   const item = { nombre, link: linkActual, params, ts: new Date() };
@@ -422,6 +435,12 @@ function renderHistorial() {
 
 function copiarItemLink(i) {
   navigator.clipboard.writeText(historial[i].link).then(() => showToast("✅ Link copiado"));
+}
+
+function copiarShortLink() {
+  const el = document.getElementById("shortLinkDisplay");
+  if (!el || el.classList.contains("empty")) return;
+  navigator.clipboard.writeText(el.textContent).then(() => showToast("✅ Link corto copiado"));
 }
 
 function copiarLink() {
