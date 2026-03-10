@@ -134,12 +134,36 @@ function fetchGET(params) {
   });
 }
 
+
+// ── CACHE DE CIUDADES Y TIENDAS ──────────────────────────────
+const _cache = {};
+function fetchGETCached(params) {
+  const key = JSON.stringify(params);
+  if (_cache[key]) return Promise.resolve(_cache[key]);
+  return fetchGET(params).then(d => { _cache[key] = d; return d; });
+}
+
+// ── CARGA COMBINADA (ciudades + todas las tiendas en 1 sola llamada) ──
+async function cargarTodo() {
+  try {
+    const data = await fetchGET({ accion: "obtenerTodo" });
+    if (!data || !data.ciudades) return false;
+    // Poblar cache con los datos recibidos
+    _cache[JSON.stringify({accion:"obtenerCiudades"})] = { ciudades: data.ciudades };
+    Object.entries(data.tiendas || {}).forEach(([ciudad, tiendas]) => {
+      _cache[JSON.stringify({accion:"obtenerTiendas", ciudad})] = { tiendas };
+    });
+    return data;
+  } catch(e) { return false; }
+}
 async function cargarCiudades() {
   try {
-    const data = await fetchGET({ accion: "obtenerCiudades" });
+    const data = await fetchGETCached({ accion: "obtenerCiudades" });
     const ciudades = Array.isArray(data) ? data : (data.ciudades || []);
     const sel = document.getElementById("ciudad");
     ciudades.forEach(c => sel.add(new Option(c, c)));
+    // Precalentar cache de tiendas en paralelo
+    ciudades.forEach(c => fetchGETCached({ accion: "obtenerTiendas", ciudad: c }));
   } catch(e) {}
 }
 
@@ -149,7 +173,7 @@ async function cargarTiendas() {
   sel.innerHTML = '<option value="">Selecciona tienda</option>';
   if (!ciudad) return;
   try {
-    const data = await fetchGET({ accion: "obtenerTiendas", ciudad });
+    const data = await fetchGETCached({ accion: "obtenerTiendas", ciudad });
     const tiendas = Array.isArray(data) ? data : (data.tiendas || []);
     tiendas.forEach(t => sel.add(new Option(t, t)));
   } catch(e) {}
@@ -203,7 +227,15 @@ function mostrarResultado(ok, titulo, filas) {
     .join("");
 }
 
-window.addEventListener("DOMContentLoaded", cargarCiudades);
+window.addEventListener("DOMContentLoaded", async () => {
+  const todo = await cargarTodo();
+  if (todo) {
+    const sel = document.getElementById("ciudad");
+    todo.ciudades.forEach(c => sel.add(new Option(c, c)));
+  } else {
+    await cargarCiudades();
+  }
+});
 
 document.getElementById("codigo").addEventListener("input", function() {
   this.value = this.value.toUpperCase();
