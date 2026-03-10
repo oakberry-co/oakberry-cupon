@@ -229,6 +229,14 @@ const P = (() => {
 
 const esSorteo = P.modo === "sorteo";
 
+// ── PRECALENTAR servidor apenas carga la página ──────────────
+(function warmup() {
+  const s = document.createElement("script");
+  s.src = CFG.SCRIPT_URL + "?accion=ping&callback=_warmup";
+  window._warmup = () => {};
+  document.head.appendChild(s);
+})();
+
 // Adaptar copy según modo
 if (esSorteo) {
   document.getElementById("headerSub").textContent    = "Sorteo · Nuevos registros";
