@@ -359,6 +359,14 @@ function fetchGETCached(params) {
   if (_cache[key]) return Promise.resolve(_cache[key]);
   return fetchGET(params).then(d => { _cache[key] = d; return d; });
 }
+
+// ── PRECALENTAR servidor ──────────────────────────────────────
+(function warmup() {
+  const s = document.createElement("script");
+  s.src = "https://script.google.com/macros/s/AKfycbxXgiwi0TVSa26VJK5M0n2YOnSBm0XvOkNn_6QXFeJQGwm6Nz8Dj8GfvA4GbKKyWX-AdQ/exec?accion=ping&callback=_warmup";
+  window._warmup = () => {};
+  document.head.appendChild(s);
+})();
 window.addEventListener("DOMContentLoaded", async () => {
   const todo = await cargarTodo();
   if (todo) {
