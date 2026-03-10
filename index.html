@@ -330,6 +330,7 @@ async function solicitar() {
       fuente:     P.fuente,
       descuento:  esSorteo ? "sorteo" : P.descuento + "%",
       producto,
+      momentos:   P.momentos || "",
       fechaGen:   ahora.toISOString(),
       fechaVence: vence.toISOString(),
     });
