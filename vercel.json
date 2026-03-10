@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/validar", "destination": "/validar.html" },
+    { "source": "/links",   "destination": "/links.html"   }
+  ]
+}
