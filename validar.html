@@ -137,9 +137,9 @@ function fetchGET(params) {
 async function cargarCiudades() {
   try {
     const data = await fetchGET({ accion: "obtenerCiudades" });
-    if (!Array.isArray(data)) return;
+    const ciudades = Array.isArray(data) ? data : (data.ciudades || []);
     const sel = document.getElementById("ciudad");
-    data.forEach(c => sel.add(new Option(c, c)));
+    ciudades.forEach(c => sel.add(new Option(c, c)));
   } catch(e) {}
 }
 
@@ -150,8 +150,8 @@ async function cargarTiendas() {
   if (!ciudad) return;
   try {
     const data = await fetchGET({ accion: "obtenerTiendas", ciudad });
-    if (!Array.isArray(data)) return;
-    data.forEach(t => sel.add(new Option(t, t)));
+    const tiendas = Array.isArray(data) ? data : (data.tiendas || []);
+    tiendas.forEach(t => sel.add(new Option(t, t)));
   } catch(e) {}
 }
 
