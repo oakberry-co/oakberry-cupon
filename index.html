@@ -48,14 +48,16 @@
   .terms{font-size:10px;font-weight:600;color:#bbb;text-align:center;margin-top:12px;text-transform:uppercase;letter-spacing:0.3px;line-height:1.6;}
   .state{display:none;}
   .state.show{display:block;animation:cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both;}
-  .result-header{background:var(--primary);padding:28px 30px 22px;text-align:center;position:relative;overflow:hidden;}
+  .result-header{background:var(--primary);padding:28px 30px 22px;text-align:center;}
   .result-icon{font-size:44px;display:block;margin-bottom:8px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.15s both;}
   @keyframes popIn{from{opacity:0;transform:scale(0.3);}to{opacity:1;transform:scale(1);}}
   .result-title{font-size:18px;font-weight:900;color:var(--white);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
   .result-name{font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;}
   .result-body{padding:24px 30px 30px;text-align:center;}
   .ticket{background:var(--primary);border-radius:16px;padding:20px 24px;margin-bottom:18px;position:relative;overflow:hidden;}
-  .ticket::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:repeating-linear-gradient(90deg,var(--yellow) 0,var(--yellow) 14px,var(--primary) 14px,var(--primary) 22px);}
+  .momento-pill{display:flex;align-items:center;gap:8px;background:rgba(245,200,66,0.15);border:1.5px solid rgba(245,200,66,0.4);border-radius:8px;padding:9px 14px;margin-bottom:10px;margin-top:2px;}
+  .momento-pill .mp-icon{font-size:15px;flex-shrink:0;}
+  .momento-pill .mp-text{font-size:10px;font-weight:700;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:0.5px;line-height:1.5;}
   .ticket-dashed{border-top:1.5px dashed rgba(255,255,255,0.25);margin:14px -24px;position:relative;}
   .ticket-dashed::before,.ticket-dashed::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:16px;height:16px;background:var(--off-white);border-radius:50%;}
   .ticket-dashed::before{left:-8px;}.ticket-dashed::after{right:-8px;}
@@ -143,6 +145,7 @@
         <div class="ticket-code" id="outCode">—</div>
         <div class="ticket-validity" id="outValidity"></div>
         <div class="ticket-product" id="outProducto"></div>
+        <div class="momento-pill" id="momentoPill" style="display:none;"><span class="mp-icon">🕐</span><span class="mp-text" id="momentoText"></span></div>
         <div class="ticket-dashed"></div>
         <div class="ticket-bottom">
           <div>
@@ -332,6 +335,31 @@ async function solicitar() {
   }
 }
 
+const MOMENTOS_LABELS = {
+  desayuno: { emoji: "☀️", texto: "Solo válido en desayuno · 6:00am – 12:00pm" },
+  almuerzo: { emoji: "🍽️", texto: "Solo válido en almuerzo · 12:00pm – 3:00pm" },
+  onces:    { emoji: "🧃", texto: "Solo válido en onces · 3:00pm – 7:00pm"    },
+  cena:     { emoji: "🌙", texto: "Solo válido en cena · 8:00pm – 10:00pm"     },
+};
+
+function mostrarMomentos(momentosStr) {
+  if (!momentosStr) return;
+  const lista = momentosStr.split(",").map(m => m.trim()).filter(Boolean);
+  if (!lista.length) return;
+  const pill = document.getElementById("momentoPill");
+  const icon = document.querySelector(".momento-pill .mp-icon");
+  const text = document.getElementById("momentoText");
+  if (lista.length === 1) {
+    const m = MOMENTOS_LABELS[lista[0]];
+    if (m) { icon.textContent = m.emoji; text.textContent = m.texto; }
+  } else {
+    const nombres = lista.map(m => (MOMENTOS_LABELS[m]?.emoji||"") + " " + m.charAt(0).toUpperCase() + m.slice(1)).join(" · ");
+    icon.textContent = "🕐";
+    text.textContent = "Solo válido en: " + nombres;
+  }
+  pill.style.display = "flex";
+}
+
 function mostrarNuevo({ codigo, nombre, vence }) {
   show("stateSuccess");
 
@@ -352,6 +380,7 @@ function mostrarNuevo({ codigo, nombre, vence }) {
     document.getElementById("outProducto").textContent    = "🫐 " + P.producto;
     document.getElementById("outDescuento").textContent   = P.descuento + "% OFF";
     document.getElementById("outCiudad").textContent      = P.ciudad !== "No especificada" ? P.ciudad : "tu ciudad";
+    mostrarMomentos(P.momentos);
   }
 }
 
