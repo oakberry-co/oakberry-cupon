@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oakberry · Generador de Links</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --p: #5F4B8B;
+    --pd: #3d2f66;
+    --y: #F5C842;
+    --bg: #0e0b16;
+    --card: #1a1427;
+    --card2: #221935;
+    --border: rgba(255,255,255,0.07);
+    --text: #e8e0ff;
+    --muted: rgba(232,224,255,0.4);
+    --green: #39d98a;
+    --red: #ff5c5c;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  /* ── GRID ── */
+  .layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+  }
+
+  @media(max-width:780px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  /* ── HEADER ── */
+  .header {
+    grid-column: 1/-1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: var(--p);
+    border-radius: 12px;
+    display: flex; align-items:center; justify-content:center;
+    font-size: 22px;
+  }
+
+  .logo-text { font-size: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+  .logo-sub  { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; font-family: 'Space Mono', monospace; }
+
+  .header-badge {
+    background: rgba(245,200,66,0.12);
+    border: 1px solid rgba(245,200,66,0.3);
+    color: var(--y);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title::before {
+    content: '';
+    display: block;
+    width: 3px; height: 14px;
+    background: var(--y);
+    border-radius: 2px;
+  }
+
+  /* ── MODO TABS ── */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    background: var(--card2);
+    border-radius: 12px;
+    padding: 5px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px;
+    border-radius: 9px;
+    border: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .tab.active {
+    background: var(--p);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(95,75,139,0.4);
+  }
+
+  /* ── FIELDS ── */
+  .field { margin-bottom: 16px; }
+
+  label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 7px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus {
+    border-color: rgba(95,75,139,0.6);
+    box-shadow: 0 0 0 3px rgba(95,75,139,0.15);
+  }
+
+  select option { background: #1a1427; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── SECTION DIVIDER ── */
+  .divider {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin: 20px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* ── GENERATE BTN ── */
+  .gen-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--y);
+    color: var(--pd);
+    border: none;
+    border-radius: 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 6px 24px rgba(245,200,66,0.25);
+  }
+
+  .gen-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 32px rgba(245,200,66,0.35); }
+  .gen-btn:active { transform: scale(0.99); }
+
+  /* ── PREVIEW PANEL ── */
+  .preview-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Link card */
+  .link-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .link-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--p), var(--y));
+  }
+
+  .link-card-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 14px;
+  }
+
+  .link-display {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--y);
+    word-break: break-all;
+    line-height: 1.6;
+    min-height: 60px;
+    margin-bottom: 14px;
+  }
+
+  .link-display.empty { color: var(--muted); font-style: italic; }
+
+  .link-actions { display: flex; gap: 8px; }
+
+  .action-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card2);
+    color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+
+  .action-btn:hover { border-color: var(--p); color: var(--y); }
+  .action-btn.primary { background: var(--p); border-color: var(--p); color: #fff; }
+  .action-btn.primary:hover { background: var(--pd); }
+
+  /* Summary card */
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .summary-row:last-child { border-bottom: none; }
+
+  .summary-key {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .summary-val {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: right;
+    max-width: 55%;
+  }
+
+  .summary-val.highlight { color: var(--y); }
+
+  /* History */
+  .history-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    flex: 1;
+  }
+
+  .history-empty {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 30px 0;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+
+  .history-item:last-child { border-bottom: none; }
+
+  .history-meta { flex: 1; min-width: 0; }
+  .history-name { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-detail { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 2px; }
+
+  .history-copy {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    white-space: nowrap;
+    transition: all 0.18s;
+    flex-shrink: 0;
+  }
+
+  .history-copy:hover { border-color: var(--y); color: var(--y); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--green);
+    color: #0e0b16;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px 24px;
+    border-radius: 50px;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 999;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Modo oculto */
+  .modo-sorteo { display: none; }
+  .modo-cupon  { display: block; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🫐</div>
+      <div>
+        <div class="logo-text">Oakberry</div>
+        <div class="logo-sub">Generador de Links · Pauta</div>
+      </div>
+    </div>
+    <div class="header-badge">Uso interno</div>
+  </div>
+
+  <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+  <div>
+    <div class="panel">
+      <div class="panel-title">Configurar campaña</div>
+
+      <!-- TABS MODO -->
+      <div class="tabs">
+        <button class="tab active" onclick="setModo('cupon')">🎟 Cupón</button>
+        <button class="tab" onclick="setModo('sorteo')">🏆 Sorteo</button>
+      </div>
+
+      <!-- SECCIÓN CAMPAÑA -->
+      <div class="divider">Campaña</div>
+
+      <div class="row">
+        <div class="field">
+          <label>Ciudad</label>
+          <select id="ciudad">
+            <option value="bogota">Bogotá</option>
+            <option value="cali">Cali</option>
+            <option value="pereira">Pereira</option>
+            <option value="cucuta">Cúcuta</option>
+            <option value="monteria">Montería</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Fase</label>
+          <select id="fase">
+            <option value="tofu">TOFU · Awareness</option>
+            <option value="mofu">MOFU · Consideración</option>
+            <option value="bofu">BOFU · Conversión</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Tienda</label>
+          <input type="text" id="tienda" placeholder="Ej: Unicentro">
+        </div>
+        <div class="field">
+          <label>Fuente</label>
+          <select id="fuente">
+            <option value="meta">Meta</option>
+            <option value="instagram">Instagram</option>
+            <option value="tiktok">TikTok</option>
+            <option value="organico">Orgánico</option>
+            <option value="influencer">Influencer</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SECCIÓN CUPÓN -->
+      <div class="modo-cupon">
+        <div class="divider">Oferta</div>
+        <div class="row">
+          <div class="field">
+            <label>Producto</label>
+            <select id="producto">
+              <option value="Bowl+9oz">Bowl 9oz</option>
+              <option value="Bowl+12oz" selected>Bowl 12oz</option>
+              <option value="Bowl+16oz">Bowl 16oz</option>
+              <option value="Smoothie">Smoothie</option>
+              <option value="Açaí+puro">Açaí puro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Descuento %</label>
+            <input type="number" id="descuento" value="30" min="0" max="100">
+          </div>
+        </div>
+        <div class="field">
+          <label>Vigencia (horas)</label>
+          <select id="vigencia">
+            <option value="24">24 horas</option>
+            <option value="48">48 horas</option>
+            <option value="72" selected>72 horas</option>
+            <option value="168">7 días</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SECCIÓN SORTEO -->
+      <div class="modo-sorteo">
+        <div class="divider">Premio</div>
+        <div class="field">
+          <label>Premio del sorteo</label>
+          <input type="text" id="premio" value="Un año de açaí gratis" placeholder="Describe el premio">
+        </div>
+        <div class="field">
+          <label>Duración del sorteo</label>
+          <select id="vigenciaSorteo">
+            <option value="24">24 horas</option>
+            <option value="72">72 horas</option>
+            <option value="168" selected>7 días</option>
+            <option value="360">15 días</option>
+            <option value="720">30 días</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- NOMBRE CAMPAÑA -->
+      <div class="divider">Identificación</div>
+      <div class="field">
+        <label>Nombre de la campaña (interno)</label>
+        <input type="text" id="campañaNombre" placeholder="Ej: Bogotá MOFU Marzo Bowl">
+      </div>
+
+      <button class="gen-btn" onclick="generar()">⚡ Generar link</button>
+    </div>
+  </div>
+
+  <!-- COLUMNA DERECHA: PREVIEW + HISTORIAL -->
+  <div class="preview-panel">
+
+    <!-- LINK GENERADO -->
+    <div class="link-card">
+      <div class="link-card-title">Link generado</div>
+      <div class="link-display empty" id="linkDisplay">El link aparecerá aquí...</div>
+      <div class="link-actions">
+        <button class="action-btn" onclick="copiarLink()">📋 Copiar</button>
+        <button class="action-btn primary" onclick="abrirLink()">↗ Probar</button>
+      </div>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="summary-card" id="summaryCard" style="display:none;">
+      <div class="panel-title">Resumen</div>
+      <div id="summaryRows"></div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="history-card">
+      <div class="panel-title">Historial de links</div>
+      <div id="historyList">
+        <div class="history-empty">Sin links generados aún</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast">✅ ¡Copiado!</div>
+
+<script>
+const BASE = "https://oakberry-cupones.com";
+let modoActual = "cupon";
+let historial = [];
+let linkActual = "";
+
+function setModo(modo) {
+  modoActual = modo;
+  document.querySelectorAll(".tab").forEach((t,i) => {
+    t.classList.toggle("active", (modo === "cupon" && i === 0) || (modo === "sorteo" && i === 1));
+  });
+  document.querySelectorAll(".modo-cupon").forEach(el => el.style.display = modo === "cupon" ? "block" : "none");
+  document.querySelectorAll(".modo-sorteo").forEach(el => el.style.display = modo === "sorteo" ? "block" : "none");
+}
+
+function generar() {
+  const ciudad   = document.getElementById("ciudad").value;
+  const fase     = document.getElementById("fase").value;
+  const tienda   = document.getElementById("tienda").value.trim() || "general";
+  const fuente   = document.getElementById("fuente").value;
+  const nombre   = document.getElementById("campañaNombre").value.trim() || `${ciudad}-${fase}-${Date.now()}`;
+
+  let params = { modo: modoActual, ciudad, tienda, fase, fuente };
+
+  if (modoActual === "cupon") {
+    params.descuento = document.getElementById("descuento").value;
+    params.producto  = document.getElementById("producto").value;
+    params.vigencia  = document.getElementById("vigencia").value;
+  } else {
+    params.premio   = encodeURIComponent(document.getElementById("premio").value.trim()).replace(/%20/g, "+");
+    params.vigencia = document.getElementById("vigenciaSorteo").value;
+  }
+
+  // Construir URL
+  const qs = Object.entries(params)
+    .map(([k,v]) => `${k}=${v}`)
+    .join("&");
+
+  linkActual = `${BASE}?${qs}`;
+
+  // Mostrar link
+  const display = document.getElementById("linkDisplay");
+  display.textContent = linkActual;
+  display.classList.remove("empty");
+
+  // Resumen
+  mostrarResumen(params, nombre);
+
+  // Agregar al historial
+  const item = { nombre, link: linkActual, params, ts: new Date() };
+  historial.unshift(item);
+  renderHistorial();
+
+  // Guardar en Sheet
+  guardarEnSheet(item);
+}
+
+function mostrarResumen(params, nombre) {
+  const card = document.getElementById("summaryCard");
+  card.style.display = "block";
+
+  const labels = {
+    modo: "Modo", ciudad: "Ciudad", tienda: "Tienda",
+    fase: "Fase", fuente: "Fuente", descuento: "Descuento",
+    producto: "Producto", premio: "Premio", vigencia: "Vigencia (h)"
+  };
+
+  const filas = Object.entries(params).map(([k, v]) => {
+    const val = decodeURIComponent(v.replace(/\+/g, " "));
+    const highlight = ["descuento","premio","producto","modo"].includes(k);
+    return `<div class="summary-row">
+      <span class="summary-key">${labels[k] || k}</span>
+      <span class="summary-val ${highlight ? 'highlight' : ''}">${k === "descuento" ? val + "%" : val}</span>
+    </div>`;
+  }).join("");
+
+  document.getElementById("summaryRows").innerHTML = filas;
+}
+
+function renderHistorial() {
+  const list = document.getElementById("historyList");
+  if (historial.length === 0) {
+    list.innerHTML = '<div class="history-empty">Sin links generados aún</div>';
+    return;
+  }
+
+  list.innerHTML = historial.slice(0, 10).map((item, i) => {
+    const hora = item.ts.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+    const detalle = item.params.modo === "sorteo"
+      ? `Sorteo · ${item.params.ciudad}`
+      : `${item.params.descuento}% · ${decodeURIComponent((item.params.producto||"").replace(/\+/g," "))} · ${item.params.ciudad}`;
+    return `<div class="history-item">
+      <div class="history-meta">
+        <div class="history-name">${item.nombre}</div>
+        <div class="history-detail">${detalle} · ${hora}</div>
+      </div>
+      <button class="history-copy" onclick="copiarItemLink(${i})">copiar</button>
+    </div>`;
+  }).join("");
+}
+
+function copiarItemLink(i) {
+  navigator.clipboard.writeText(historial[i].link).then(() => showToast("✅ Link copiado"));
+}
+
+function copiarLink() {
+  if (!linkActual) return;
+  navigator.clipboard.writeText(linkActual).then(() => showToast("✅ ¡Copiado!"));
+}
+
+function abrirLink() {
+  if (!linkActual) return;
+  window.open(linkActual, "_blank");
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+// ══════════════════════════════════════════
+//  GUARDAR EN GOOGLE SHEET (Apps Script)
+//  Reemplaza SCRIPT_URL con la URL de un
+//  Apps Script separado para el generador,
+//  o usa el mismo si quieres una hoja nueva
+// ══════════════════════════════════════════
+const SHEET_URL = "PEGA_AQUI_URL_APPS_SCRIPT_LINKS";
+
+function guardarEnSheet(item) {
+  if (SHEET_URL === "PEGA_AQUI_URL_APPS_SCRIPT_LINKS") return; // no configurado aún
+  const cbName = "cb_" + Math.random().toString(36).slice(2);
+  const p = item.params;
+  const params = {
+    accion:    "guardarLink",
+    callback:  cbName,
+    nombre:    item.nombre,
+    modo:      p.modo,
+    ciudad:    p.ciudad,
+    tienda:    p.tienda,
+    fase:      p.fase,
+    fuente:    p.fuente,
+    descuento: p.descuento || "",
+    producto:  decodeURIComponent((p.producto||"").replace(/\+/g," ")),
+    premio:    decodeURIComponent((p.premio||"").replace(/\+/g," ")),
+    vigencia:  p.vigencia,
+    link:      item.link,
+    fecha:     item.ts.toISOString(),
+  };
+  const url = SHEET_URL + "?" + new URLSearchParams(params);
+  const script = document.createElement("script");
+  window[cbName] = () => { delete window[cbName]; document.body.removeChild(script); };
+  script.src = url;
+  document.body.appendChild(script);
+}
+</script>
+</body>
+</html>
