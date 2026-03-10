@@ -1,1 +1,214 @@
-x
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oakberry · Validar Cupón</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary:#5F4B8B; --pd:#4a3a6e; --yellow:#F5C842; --red:#e74c3c; --green:#27ae60; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Montserrat',sans-serif;
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+      padding:24px 16px;
+      background:linear-gradient(rgba(95,75,139,0.5),rgba(95,75,139,0.5)),
+                 url('bg.png') center/cover no-repeat fixed;
+    }
+    .card {
+      background:rgba(255,255,255,0.97); border-radius:28px;
+      width:100%; max-width:400px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.35); overflow:hidden;
+    }
+    .card-header {
+      background:var(--primary); padding:28px 30px 22px; text-align:center;
+    }
+    .brand { font-size:26px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:2px; }
+    .brand-sub { font-size:11px; font-weight:700; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:2px; margin-top:4px; }
+    .card-body { padding:28px 28px 32px; }
+    .field { margin-bottom:14px; }
+    label { display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#999; margin-bottom:6px; }
+    input, select {
+      width:100%; padding:14px 16px; border-radius:12px;
+      border:2px solid #eee; font-family:'Montserrat',sans-serif;
+      font-size:13px; font-weight:700; color:var(--primary);
+      outline:none; background:#fff; transition:border-color 0.18s;
+      -webkit-appearance:none;
+    }
+    input { text-transform:uppercase; letter-spacing:2px; font-size:15px; }
+    input:focus, select:focus { border-color:var(--primary); }
+    .btn {
+      width:100%; padding:17px; background:var(--primary); color:#fff;
+      border:none; border-radius:12px; font-family:'Montserrat',sans-serif;
+      font-size:14px; font-weight:900; text-transform:uppercase; letter-spacing:1px;
+      cursor:pointer; margin-top:6px; transition:background 0.18s, transform 0.12s;
+      box-shadow:0 6px 20px rgba(95,75,139,0.35);
+      position:relative; overflow:hidden;
+    }
+    .btn:hover:not(:disabled) { background:var(--pd); transform:translateY(-1px); }
+    .btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .btn-text { transition:opacity 0.18s; }
+    .btn-loader { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.18s; }
+    .btn.loading .btn-text { opacity:0; }
+    .btn.loading .btn-loader { opacity:1; }
+    .spin { width:20px; height:20px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.65s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* RESULTADO */
+    .result { display:none; margin-top:18px; border-radius:16px; padding:18px 20px; text-align:left; }
+    .result.show { display:block; animation:fadeIn 0.3s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+    .result.ok  { background:#eafaf1; border:2px solid #a9dfbf; }
+    .result.err { background:#fdedec; border:2px solid #f5b7b1; }
+    .result-icon { font-size:32px; display:block; margin-bottom:8px; }
+    .result-title { font-size:15px; font-weight:900; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
+    .result.ok  .result-title { color:var(--green); }
+    .result.err .result-title { color:var(--red); }
+    .result-row { font-size:12px; font-weight:700; color:#444; margin-bottom:5px; line-height:1.5; }
+    .result-row span { color:var(--primary); }
+    .divider-line { border:none; border-top:1.5px dashed #ddd; margin:10px 0; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="card-header">
+    <div class="brand">Oakberry</div>
+    <div class="brand-sub">Validador de cupones · Cajero</div>
+  </div>
+  <div class="card-body">
+
+    <div class="field">
+      <label>Código del cupón</label>
+      <input type="text" id="codigo" placeholder="OAK-XXXXXX" maxlength="12">
+    </div>
+    <div class="field">
+      <label>Ciudad</label>
+      <select id="ciudad" onchange="cargarTiendas()">
+        <option value="">Selecciona ciudad</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Tienda</label>
+      <select id="tienda">
+        <option value="">Selecciona tienda</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>¿Es usuario Loopy?</label>
+      <select id="loopy">
+        <option value="">Selecciona</option>
+        <option value="SÍ">SÍ</option>
+        <option value="NO">NO</option>
+      </select>
+    </div>
+
+    <button class="btn" id="mainBtn" onclick="validar()">
+      <span class="btn-text">Validar cupón</span>
+      <span class="btn-loader"><span class="spin"></span></span>
+    </button>
+
+    <!-- RESULTADO -->
+    <div class="result" id="resultado">
+      <span class="result-icon" id="resIcon"></span>
+      <div class="result-title" id="resTitle"></div>
+      <hr class="divider-line">
+      <div id="resRows"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLiiJ7lFjmPX-oGyvZxNMbXtx_JL8zLY5nPPITrycN1kb5z83NFSHG7R08AY8ZF3gxGw/exec";
+
+function fetchGET(params) {
+  return new Promise((resolve, reject) => {
+    const cb  = "cb_" + Math.random().toString(36).slice(2);
+    const url = SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
+    const s   = document.createElement("script");
+    window[cb] = d => { delete window[cb]; document.body.removeChild(s); resolve(d); };
+    s.onerror  = () => reject(new Error("Error de red"));
+    s.src = url;
+    document.body.appendChild(s);
+    setTimeout(() => reject(new Error("Timeout")), 10000);
+  });
+}
+
+async function cargarCiudades() {
+  try {
+    const data = await fetchGET({ accion: "obtenerCiudades" });
+    if (!Array.isArray(data)) return;
+    const sel = document.getElementById("ciudad");
+    data.forEach(c => sel.add(new Option(c, c)));
+  } catch(e) {}
+}
+
+async function cargarTiendas() {
+  const ciudad = document.getElementById("ciudad").value;
+  const sel    = document.getElementById("tienda");
+  sel.innerHTML = '<option value="">Selecciona tienda</option>';
+  if (!ciudad) return;
+  try {
+    const data = await fetchGET({ accion: "obtenerTiendas", ciudad });
+    if (!Array.isArray(data)) return;
+    data.forEach(t => sel.add(new Option(t, t)));
+  } catch(e) {}
+}
+
+async function validar() {
+  const codigo = document.getElementById("codigo").value.trim().toUpperCase();
+  const ciudad = document.getElementById("ciudad").value;
+  const tienda = document.getElementById("tienda").value;
+  const loopy  = document.getElementById("loopy").value;
+
+  if (!codigo || !ciudad || !tienda || !loopy) {
+    return mostrarResultado(false, "Completa todos los campos", []);
+  }
+
+  const btn = document.getElementById("mainBtn");
+  btn.classList.add("loading");
+  btn.disabled = true;
+
+  try {
+    const res = await fetchGET({
+      accion: "canjearCodigo",
+      codigo, tienda, ciudad, loopy
+    });
+
+    if (res.ok) {
+      const lineas = res.mensaje.split("\n");
+      const titulo = lineas[0];
+      const filas  = lineas.slice(1);
+      mostrarResultado(true, titulo, filas);
+      document.getElementById("codigo").value = "";
+    } else {
+      const lineas = res.mensaje.split("\n");
+      mostrarResultado(false, lineas[0], lineas.slice(1));
+    }
+  } catch(e) {
+    mostrarResultado(false, "❌ Error de conexión", ["Intenta de nuevo"]);
+  }
+
+  btn.classList.remove("loading");
+  btn.disabled = false;
+}
+
+function mostrarResultado(ok, titulo, filas) {
+  const el = document.getElementById("resultado");
+  el.className = "result show " + (ok ? "ok" : "err");
+  document.getElementById("resIcon").textContent  = ok ? "✅" : "❌";
+  document.getElementById("resTitle").textContent = titulo;
+  document.getElementById("resRows").innerHTML    = filas
+    .map(f => f ? `<div class="result-row">${f}</div>` : "")
+    .join("");
+}
+
+window.addEventListener("DOMContentLoaded", cargarCiudades);
+
+document.getElementById("codigo").addEventListener("input", function() {
+  this.value = this.value.toUpperCase();
+  document.getElementById("resultado").className = "result";
+});
+</script>
+</body>
+</html>
