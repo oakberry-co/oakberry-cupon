@@ -301,6 +301,20 @@ async function solicitar() {
 
   const nombre  = document.getElementById("inp-nombre").value.trim();
   const celular = "+57" + document.getElementById("inp-cel").value.replace(/\D/g,"");
+
+  // Verificar primero si el celular ya existe ANTES de generar código
+  try {
+    const check = await fetchGET({ accion: "verificarCelular", celular });
+    if (check.existe) {
+      mostrarExistente(check, nombre);
+      btn.classList.remove("loading");
+      btn.disabled = false;
+      return;
+    }
+  } catch(e) {
+    // Si falla la verificación, continuamos normal
+  }
+
   const codigo  = genCodigo();
   const ahora   = new Date();
   const vence   = new Date(ahora.getTime() + P.vigencia * 3_600_000);
