@@ -300,7 +300,7 @@ async function solicitar() {
   btn.disabled = true;
 
   const nombre  = document.getElementById("inp-nombre").value.trim();
-  const celular = "+57" + document.getElementById("inp-cel").value.replace(/\D/g,"");
+  const celular = "57" + document.getElementById("inp-cel").value.replace(/\D/g,"");
 
   // Verificar primero si el celular ya existe ANTES de generar código
   try {
