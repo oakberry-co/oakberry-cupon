@@ -11,8 +11,7 @@
   body{font-family:'Montserrat',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:linear-gradient(rgba(95,75,139,0.55),rgba(95,75,139,0.55)),url('bg.png') center/cover no-repeat fixed;}
   .card{background:var(--off-white);border-radius:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;animation:cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;}
   @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
-  .card-header{background:var(--primary);padding:28px 30px 24px;text-align:center;position:relative;overflow:hidden;}
-  .card-header::before{content:'';position:absolute;top:0;left:0;right:0;height:7px;background:repeating-linear-gradient(90deg,var(--yellow) 0px,var(--yellow) 18px,var(--primary) 18px,var(--primary) 28px);}
+  .card-header{background:var(--primary);padding:28px 30px 24px;text-align:center;}
   .brand{font-size:28px;font-weight:900;color:var(--white);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;margin-top:4px;}
   .brand-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:2.5px;}
   .discount-badge{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);border-radius:50px;padding:10px 22px;margin-top:18px;}
@@ -224,6 +223,7 @@ const P = (() => {
     producto:  p.get("producto")  || "Bowl 12oz",
     premio:    p.get("premio")    || "Un año de açaí gratis",
     vigencia:  parseInt(p.get("vigencia") || "72"),
+    momentos:  p.get("momentos")  || "",
   };
 })();
 
