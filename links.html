@@ -315,23 +315,24 @@ function fetchGET(params) {
 async function cargarCiudades() {
   try {
     const data = await fetchGET({ accion: "obtenerCiudades" });
-    if (!Array.isArray(data)) return;
+    const ciudades = Array.isArray(data) ? data : (data.ciudades || []);
+    if (!ciudades.length) return;
     const sel = document.getElementById("ciudad");
     sel.innerHTML = "";
-    data.forEach(c => sel.add(new Option(c, c)));
+    ciudades.forEach(c => sel.add(new Option(c, c)));
     await cargarTiendas();
-  } catch(e) {}
+  } catch(e) { console.error("cargarCiudades:", e); }
 }
 
 async function cargarTiendas() {
   const ciudad = document.getElementById("ciudad").value;
   try {
     const data = await fetchGET({ accion: "obtenerTiendas", ciudad });
-    if (!Array.isArray(data)) return;
+    const tiendas = Array.isArray(data) ? data : (data.tiendas || []);
     const sel = document.getElementById("tienda");
     sel.innerHTML = '<option value="general">Todas las tiendas</option>';
-    data.forEach(t => sel.add(new Option(t, t)));
-  } catch(e) {}
+    tiendas.forEach(t => sel.add(new Option(t, t)));
+  } catch(e) { console.error("cargarTiendas:", e); }
 }
 
 window.addEventListener("DOMContentLoaded", cargarCiudades);
