@@ -238,6 +238,26 @@ fbq('track', 'PageView');
         <span class="icon">💡</span>
         <span id="usedTip">Si ya canjeaste este cupón en tienda, acércate a cualquier punto Oakberry.</span>
       </div>
+  <!-- ESTADO 4: BLOQUEADO POR LOOPY -->
+  <div id="stateLoopy" class="state">
+    <div class="result-header" style="background:#c0392b;">
+      <span class="result-icon">🎖️</span>
+      <div class="result-title">¡Ya eres cliente Oakberry!</div>
+      <div class="result-name" id="loopyNombre"></div>
+    </div>
+    <div class="result-body">
+      <div class="info-pill purple">
+        <span class="icon">⭐</span>
+        <span>Tienes una tarjeta activa en nuestro programa de fidelización <strong>Loopy Loyalty</strong>. Este cupón es exclusivo para clientes nuevos.</span>
+      </div>
+      <div class="info-pill yellow">
+        <span class="icon">🎁</span>
+        <span>Como cliente frecuente puedes acumular sellos y canjear recompensas exclusivas en cualquier tienda Oakberry.</span>
+      </div>
+      <div class="info-pill green">
+        <span class="icon">📲</span>
+        <span>Presenta tu tarjeta Loopy en caja para seguir acumulando beneficios.</span>
+      </div>
     </div>
   </div>
 
@@ -390,7 +410,9 @@ async function solicitar() {
       fechaVence: vence.toISOString(),
     });
 
-    if (res.existe) {
+    if (res.esLoopy) {
+      mostrarBloqueadoLoopy(nombre);
+    } else if (res.existe) {
       mostrarExistente(res, nombre);
     } else if (res.ok) {
       mostrarNuevo({ codigo: res.codigo || codigo, nombre, vence });
@@ -457,6 +479,11 @@ function mostrarNuevo({ codigo, nombre, vence }) {
     document.getElementById("outCiudad").textContent      = P.ciudad !== "No especificada" ? P.ciudad : "tu ciudad";
     mostrarMomentos(P.momentos);
   }
+}
+
+function mostrarBloqueadoLoopy(nombre) {
+  show("stateLoopy");
+  document.getElementById("loopyNombre").textContent = "Hola, " + nombre.split(" ")[0] + " 👋";
 }
 
 function mostrarExistente(data, nombre) {
