@@ -128,7 +128,7 @@
       <div class="row">
         <div class="field">
           <label>Tienda</label>
-          <select id="tienda"><option value="general">Todas las tiendas</option></select>
+          <select id="tienda"><option value="general">⚡ Todas las tiendas</option></select>
         </div>
         <div class="field">
           <label>Fuente</label>
@@ -174,22 +174,29 @@
         <!-- MOMENTOS DE CONSUMO -->
         <div class="divider">Momento de consumo</div>
         <div class="momentos-grid">
-          <div class="momento-btn" onclick="toggleMomento('desayuno', this)">
+          <div class="momento-btn momento-todos" id="btnTodosMomentos" onclick="toggleTodosMomentos(this)" style="grid-column:1/-1;flex-direction:row;gap:10px;padding:12px 16px;border-color:rgba(245,200,66,0.25);">
+            <span class="momento-emoji" style="font-size:18px;">⚡</span>
+            <div style="text-align:left;">
+              <span class="momento-nombre" style="color:var(--y);">Todo el día</span>
+              <span class="momento-hora" style="display:block;">Aplica en cualquier horario</span>
+            </div>
+          </div>
+          <div class="momento-btn" id="mBtn-desayuno" onclick="toggleMomento('desayuno', this)">
             <span class="momento-emoji">☀️</span>
             <span class="momento-nombre">Desayuno</span>
             <span class="momento-hora">6:00 am – 12:00 pm</span>
           </div>
-          <div class="momento-btn" onclick="toggleMomento('almuerzo', this)">
+          <div class="momento-btn" id="mBtn-almuerzo" onclick="toggleMomento('almuerzo', this)">
             <span class="momento-emoji">🍽️</span>
             <span class="momento-nombre">Almuerzo</span>
             <span class="momento-hora">12:00 pm – 3:00 pm</span>
           </div>
-          <div class="momento-btn" onclick="toggleMomento('onces', this)">
+          <div class="momento-btn" id="mBtn-onces" onclick="toggleMomento('onces', this)">
             <span class="momento-emoji">🧃</span>
             <span class="momento-nombre">Onces</span>
             <span class="momento-hora">3:00 pm – 7:00 pm</span>
           </div>
-          <div class="momento-btn" onclick="toggleMomento('cena', this)">
+          <div class="momento-btn" id="mBtn-cena" onclick="toggleMomento('cena', this)">
             <span class="momento-emoji">🌙</span>
             <span class="momento-nombre">Cena</span>
             <span class="momento-hora">8:00 pm – 10:00 pm</span>
@@ -287,13 +294,48 @@ function setModo(modo) {
 }
 
 // ── MOMENTOS ──
+const TODOS_MOMENTOS = ["desayuno", "almuerzo", "onces", "cena"];
+
 function toggleMomento(key, el) {
+  // Si estaba en "todo el día", desactivarlo primero
+  const btnTodos = document.getElementById("btnTodosMomentos");
+  if (btnTodos.classList.contains("selected")) {
+    btnTodos.classList.remove("selected");
+    momentosSelected.clear();
+    TODOS_MOMENTOS.forEach(m => {
+      const b = document.getElementById("mBtn-" + m);
+      if (b) b.classList.remove("selected");
+    });
+  }
+
   if (momentosSelected.has(key)) {
     momentosSelected.delete(key);
     el.classList.remove("selected");
   } else {
     momentosSelected.add(key);
     el.classList.add("selected");
+  }
+  document.getElementById("errMomento").classList.remove("show");
+}
+
+function toggleTodosMomentos(el) {
+  const yaActivo = el.classList.contains("selected");
+
+  // Desactivar todos los individuales
+  TODOS_MOMENTOS.forEach(m => {
+    momentosSelected.delete(m);
+    const b = document.getElementById("mBtn-" + m);
+    if (b) b.classList.remove("selected");
+  });
+
+  if (yaActivo) {
+    // Era "todo el día" → deseleccionar
+    el.classList.remove("selected");
+    momentosSelected.clear();
+  } else {
+    // Activar "todo el día" → seleccionar todos
+    el.classList.add("selected");
+    TODOS_MOMENTOS.forEach(m => momentosSelected.add(m));
   }
   document.getElementById("errMomento").classList.remove("show");
 }
@@ -346,7 +388,7 @@ async function cargarTiendas() {
     const data = await fetchGETCached({ accion: "obtenerTiendas", ciudad });
     const tiendas = Array.isArray(data) ? data : (data.tiendas || []);
     const sel = document.getElementById("tienda");
-    sel.innerHTML = '<option value="general">Todas las tiendas</option>';
+    sel.innerHTML = '<option value="general">⚡ Todas las tiendas</option>';
     tiendas.forEach(t => sel.add(new Option(t, t)));
   } catch(e) { console.error("cargarTiendas:", e); }
 }
