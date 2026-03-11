@@ -3,5 +3,6 @@
     { "source": "/validar", "destination": "/validar.html" },
     { "source": "/links",   "destination": "/links.html"   },
     { "source": "/r",       "destination": "/r.html"       }
+    { "source": "/tyc", "destination": "/tyc.html" }
   ]
 }
