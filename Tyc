@@ -70,8 +70,9 @@
         <li>Residir o encontrarse en Colombia al momento del canje.</li>
         <li>Proporcionar un número de celular colombiano válido y de su propiedad.</li>
         <li>Ser un <strong>cliente nuevo</strong> que no haya canjeado cupón anteriormente con el mismo número.</li>
+        <li>No estar registrado en el programa de fidelización <strong>Loopy Loyalty</strong> de Oakberry Colombia.</li>
       </ul>
-      <div class="highlight">Cada número celular tiene derecho a un (1) único cupón. No se permite el registro múltiple para obtener más de un cupón.</div>
+      <div class="highlight">Cada número celular tiene derecho a un (1) único cupón. No se permite el registro múltiple para obtener más de un cupón. Esta campaña es exclusiva para clientes nuevos sin registro previo en Oakberry.</div>
     </div>
   </div>
 
@@ -80,7 +81,7 @@
     <div class="body">
       <ul>
         <li>El participante ingresa su nombre y número celular en <strong>oakberry-cupones.com</strong>.</li>
-        <li>El sistema genera un código único con formato <strong>OAK-XXXXXX</strong>.</li>
+        <li>El sistema verifica que el número no esté registrado previamente y genera un código único de <strong>5 caracteres</strong>.</li>
         <li>El cupón tiene una <strong>vigencia de 72 horas</strong> desde la generación.</li>
         <li>Se presenta el código en caja en la tienda Oakberry correspondiente.</li>
         <li>El cajero valida el código antes de aplicar el descuento.</li>
@@ -116,12 +117,13 @@
       <p>Los datos serán usados exclusivamente para:</p>
       <ul>
         <li>Verificar la elegibilidad como nuevo cliente.</li>
+        <li>Consultar el registro en el programa de fidelización Loopy Loyalty para validar elegibilidad.</li>
         <li>Generar y gestionar el cupón de descuento.</li>
         <li>Prevenir fraudes y uso indebido de la campaña.</li>
         <li>Análisis estadístico interno.</li>
       </ul>
       <div class="highlight">Oakberry Colombia no venderá ni compartirá los datos con terceros con fines comerciales.</div>
-      <p>El titular puede ejercer sus derechos de acceso, corrección y supresión escribiendo a <strong>privacidad@manelfoods.com</strong>.</p>
+      <p>El titular puede ejercer sus derechos de acceso, corrección y supresión escribiendo a <strong>contacto@oakberry.com.co</strong>.</p>
     </div>
   </div>
 
@@ -149,7 +151,7 @@
   <div class="footer-info">
     <p>Oakberry Colombia · Manel Foods S.A.S.</p>
     <p>Cl. 109 #15-48, Bogotá D.C., Colombia</p>
-    <p><a href="mailto:privacidad@manelfoods.com">privacidad@manelfoods.com</a></p>
+    <p>contacto@oakberry.com.co</p>
     <p style="margin-top:6px;">&copy; 2025 Oakberry Colombia. Todos los derechos reservados.</p>
   </div>
 
@@ -161,18 +163,45 @@
 </div>
 
 <script>
+  // Volver a la página anterior (landing del cupón)
   function goBack() {
-    if (document.referrer) { history.back(); } else { window.location.href = "/"; }
+    if (window.history.length > 1 && document.referrer) {
+      window.history.back();
+    } else {
+      window.location.href = "/";
+    }
   }
+
+  // Aceptar TyC: marca el checkbox en la ventana padre si se abrió como popup,
+  // y vuelve a la landing
   function aceptarYVolver() {
+    // Si se abrió en nueva pestaña (target="_blank"), intenta marcar el checkbox en la opener
     try {
       if (window.opener && !window.opener.closed) {
         const chk = window.opener.document.getElementById("chk-tyc");
-        if (chk) { chk.checked = true; chk.dispatchEvent(new Event("change")); }
+        if (chk) {
+          chk.checked = true;
+          // Disparar evento change para que el formulario lo detecte
+          chk.dispatchEvent(new Event("change", { bubbles: true }));
+        }
         window.close();
-      } else { history.back(); }
-    } catch(e) { history.back(); }
+        return;
+      }
+    } catch(e) {}
+    // Si está en la misma pestaña, volver con flag para marcar el checkbox
+    sessionStorage.setItem("tyc_aceptado", "1");
+    goBack();
   }
+
+  // Si llegó de vuelta desde TyC (misma pestaña), marcar el checkbox automáticamente
+  window.addEventListener("DOMContentLoaded", function() {
+    // Scroll al anchor si viene con #privacidad
+    const hash = window.location.hash;
+    if (hash) {
+      const el = document.querySelector(hash);
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 200);
+    }
+  });
 </script>
 </body>
 </html>
