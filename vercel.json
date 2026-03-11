@@ -4,5 +4,6 @@
     { "source": "/links",   "destination": "/links.html"   },
     { "source": "/r",       "destination": "/r.html"       },
     { "source": "/tyc",     "destination": "/tyc.html"     }
+    { "source": "/portal", "destination": "/portal.html" }
   ]
 }
