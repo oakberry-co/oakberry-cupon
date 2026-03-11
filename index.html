@@ -357,14 +357,24 @@ function fetchGET(params) {
     const url = CFG.SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cbName});
     const script = document.createElement("script");
     window[cbName] = (data) => {
+      clearTimeout(timer);
       delete window[cbName];
-      document.body.removeChild(script);
+      if (script.parentNode) document.body.removeChild(script);
       resolve(data);
     };
-    script.onerror = () => reject(new Error("Error de red"));
+    script.onerror = () => {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) document.body.removeChild(script);
+      reject(new Error("Error de red"));
+    };
     script.src = url;
     document.body.appendChild(script);
-    setTimeout(() => reject(new Error("Timeout")), 10000);
+    const timer = setTimeout(() => {
+      delete window[cbName];
+      if (script.parentNode) document.body.removeChild(script);
+      reject(new Error("Timeout"));
+    }, 35000);
   });
 }
 
@@ -501,10 +511,12 @@ function mostrarExistente(data, nombre) {
 }
 
 function show(id) {
-  ["stateForm","stateSuccess","stateUsed"].forEach(s =>
-    document.getElementById(s).classList.remove("show")
-  );
-  document.getElementById(id).classList.add("show");
+  ["stateForm","stateSuccess","stateUsed","stateLoopy"].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.classList.remove("show");
+  });
+  const target = document.getElementById(id);
+  if (target) target.classList.add("show");
 }
 
 function fmt(d) {
