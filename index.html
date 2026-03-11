@@ -5,6 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Oakberry</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+<!-- ═══════════════════════════════════════════════════
+     META PIXEL
+     Cuando tengas el ID, reemplaza REEMPLAZAR_CON_ID_DEL_PIXEL
+     por tu número (ej: 1234567890123456)
+     ═══════════════════════════════════════════════════ -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', 'REEMPLAZAR_CON_ID_DEL_PIXEL');
+fbq('track', 'PageView');
+</script>
+<noscript>
+  <img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=REEMPLAZAR_CON_ID_DEL_PIXEL&ev=PageView&noscript=1"/>
+</noscript>
+<!-- ═══════════════════════════════════════════════════ -->
 <style>
   :root{--primary:#5F4B8B;--primary-dark:#4a3a6e;--yellow:#F5C842;--white:#ffffff;--off-white:rgba(255,255,255,0.96);--border:#eee;--gray:#999;--red:#c0392b;}
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -409,6 +432,11 @@ function mostrarMomentos(momentosStr) {
 
 function mostrarNuevo({ codigo, nombre, vence }) {
   show("stateSuccess");
+
+  // ── Meta Pixel: Lead ──────────────────────────────────────
+  // Se dispara solo cuando es un cupón NUEVO, no cuando ya existía
+  try { fbq('track', 'Lead'); } catch(e) {}
+  // ─────────────────────────────────────────────────────────
 
   document.getElementById("outCode").textContent     = codigo;
   document.getElementById("outNombre").textContent   = "Hola, " + nombre.split(" ")[0] + " 👋";
