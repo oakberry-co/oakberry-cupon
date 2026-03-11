@@ -44,7 +44,16 @@
   .btn.loading .btn-loader{opacity:1;}
   .spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.65s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
-  .terms{font-size:10px;font-weight:600;color:#bbb;text-align:center;margin-top:12px;text-transform:uppercase;letter-spacing:0.3px;line-height:1.6;}
+  .terms{font-size:10px;font-weight:600;color:#bbb;text-align:center;margin-top:10px;text-transform:uppercase;letter-spacing:0.3px;line-height:1.6;}
+  .tyc-wrap{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;cursor:pointer;}
+  .tyc-wrap input[type=checkbox]{appearance:none;-webkit-appearance:none;min-width:18px;height:18px;border:2px solid var(--border);border-radius:5px;background:#fff;cursor:pointer;transition:border-color 0.18s,background 0.18s;margin-top:1px;position:relative;}
+  .tyc-wrap input[type=checkbox]:checked{background:var(--primary);border-color:var(--primary);}
+  .tyc-wrap input[type=checkbox]:checked::after{content:'';position:absolute;left:4px;top:1px;width:6px;height:10px;border:2.5px solid #fff;border-top:none;border-left:none;transform:rotate(45deg);}
+  .tyc-wrap input[type=checkbox].err{border-color:var(--red);}
+  .tyc-label{font-size:11px;font-weight:600;color:#666;line-height:1.6;}
+  .tyc-label a{color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:2px;}
+  .tyc-err{font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.3px;margin-top:-10px;margin-bottom:10px;display:none;padding-left:4px;}
+  .tyc-err.show{display:block;}
   .state{display:none;}
   .state.show{display:block;animation:cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both;}
   .result-header{background:var(--primary);padding:28px 30px 22px;text-align:center;}
@@ -123,11 +132,17 @@
         <span id="pillText">Válido <span id="pillVigencia" style="font-weight:900;">72 horas</span> · 1 cupón por número</span>
       </div>
 
+      <label class="tyc-wrap">
+        <input type="checkbox" id="chk-tyc">
+        <span class="tyc-label">He leído y acepto los <a href="/tyc" target="_blank">Términos y Condiciones</a> y la <a href="/tyc#privacidad" target="_blank">Política de Privacidad</a> de Oakberry Colombia. Autorizo el uso de mis datos para el canje del cupón.</span>
+      </label>
+      <div class="tyc-err" id="err-tyc">⚠ Debes aceptar los términos y condiciones</div>
+
       <button class="btn" id="mainBtn" onclick="solicitar()">
         <span class="btn-text" id="btnText">Recibir mi cupón gratis →</span>
         <span class="btn-loader"><span class="spin"></span></span>
       </button>
-      <p class="terms" id="formTerms">1 cupón por número · Sin spam · Solo tiendas Oakberry Colombia</p>
+      <p class="terms" id="formTerms">1 cupón por número · Válido solo en tiendas Oakberry Colombia</p>
     </div>
   </div>
 
@@ -280,6 +295,15 @@ function validar() {
   } else {
     document.getElementById("inp-cel").classList.remove("err");
     document.getElementById("err-cel").classList.remove("show");
+  }
+  const tyc = document.getElementById("chk-tyc");
+  if (!tyc.checked) {
+    tyc.classList.add("err");
+    document.getElementById("err-tyc").classList.add("show");
+    ok = false;
+  } else {
+    tyc.classList.remove("err");
+    document.getElementById("err-tyc").classList.remove("show");
   }
   return ok;
 }
