@@ -223,7 +223,6 @@
 <script>
 const CFG = {
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxXgiwi0TVSa26VJK5M0n2YOnSBm0XvOkNn_6QXFeJQGwm6Nz8Dj8GfvA4GbKKyWX-AdQ/exec",
-  PREFIX: "OAK",
 };
 
 const P = (() => {
@@ -270,10 +269,11 @@ if (esSorteo) {
 }
 
 function genCodigo() {
+  // Sin O,0,I,1 para evitar confusión visual en caja
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let r = "";
-  for (let i = 0; i < 6; i++) r += chars[Math.floor(Math.random() * chars.length)];
-  return `${CFG.PREFIX}-${r}`;
+  for (let i = 0; i < 5; i++) r += chars[Math.floor(Math.random() * chars.length)];
+  return r;
 }
 
 function validar() {
