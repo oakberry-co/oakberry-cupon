@@ -1,1 +1,748 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oakberry · Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --p: #5F4B8B;
+  --pd: #3d2f66;
+  --pl: #8b72c8;
+  --y: #F5C842;
+  --yd: #d4a800;
+  --bg: #0a0812;
+  --surface: #110e1c;
+  --surface2: #1a1530;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #ede8ff;
+  --muted: rgba(237,232,255,0.4);
+  --green: #2ecc71;
+  --red: #e74c3c;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND ── */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(95,75,139,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(95,75,139,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+.bg-glow {
+  position: fixed; top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(95,75,139,0.2) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; position: relative; z-index: 1; }
+.screen.active { display: flex; }
+
+/* ══════════════════════════════════════
+   LOGIN SCREEN
+══════════════════════════════════════ */
+#screenLogin {
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  animation: slideUp 0.5s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(24px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.login-header {
+  background: linear-gradient(135deg, var(--pd) 0%, var(--p) 100%);
+  padding: 32px 28px 28px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.login-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.login-logo {
+  font-size: 32px; font-weight: 900;
+  color: #fff; text-transform: uppercase;
+  letter-spacing: 3px; position: relative;
+}
+.login-logo span { color: var(--y); }
+.login-subtitle {
+  font-size: 11px; font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase; letter-spacing: 2px;
+  margin-top: 6px; position: relative;
+  font-family: 'DM Mono', monospace;
+}
+
+.login-body { padding: 28px; }
+
+.login-field { margin-bottom: 16px; }
+.login-field label {
+  display: block; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--muted); font-family: 'DM Mono', monospace;
+  margin-bottom: 8px;
+}
+.login-field input {
+  width: 100%; padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 500;
+  color: var(--text); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+.login-field input:focus {
+  border-color: rgba(95,75,139,0.6);
+  box-shadow: 0 0 0 3px rgba(95,75,139,0.15);
+}
+.login-field input.err { border-color: var(--red); }
+
+.login-btn {
+  width: 100%; padding: 16px;
+  background: var(--p); color: #fff;
+  border: none; border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  cursor: pointer; margin-top: 4px;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 6px 24px rgba(95,75,139,0.35);
+  position: relative; overflow: hidden;
+}
+.login-btn:hover { background: var(--pd); transform: translateY(-1px); }
+.login-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.login-btn .btn-text { transition: opacity 0.2s; }
+.login-btn .btn-loader {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.2s;
+}
+.login-btn.loading .btn-text { opacity: 0; }
+.login-btn.loading .btn-loader { opacity: 1; }
+.spin {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.login-err {
+  font-size: 11px; font-weight: 700;
+  color: var(--red); text-transform: uppercase;
+  letter-spacing: 0.5px; text-align: center;
+  margin-top: 12px; display: none;
+  font-family: 'DM Mono', monospace;
+}
+.login-err.show { display: block; animation: shake 0.3s ease; }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* ══════════════════════════════════════
+   PORTAL SCREEN
+══════════════════════════════════════ */
+#screenPortal {
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.portal-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 28px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.topbar-logo {
+  font-size: 16px; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 2px;
+}
+.topbar-logo span { color: var(--y); }
+.topbar-divider {
+  width: 1px; height: 20px;
+  background: var(--border2);
+}
+.topbar-user {
+  display: flex; align-items: center; gap: 8px;
+}
+.user-avatar {
+  width: 30px; height: 30px;
+  background: var(--p); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900; color: #fff;
+}
+.user-info { line-height: 1.3; }
+.user-name {
+  font-size: 12px; font-weight: 700; color: var(--text);
+}
+.user-role {
+  font-size: 10px; color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.role-badge {
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  padding: 4px 10px; border-radius: 50px;
+  font-family: 'DM Mono', monospace;
+}
+.role-badge.cajero {
+  background: rgba(245,200,66,0.12);
+  border: 1px solid rgba(245,200,66,0.3);
+  color: var(--y);
+}
+.role-badge.pauta {
+  background: rgba(95,75,139,0.2);
+  border: 1px solid rgba(95,75,139,0.4);
+  color: var(--pl);
+}
+.role-badge.admin {
+  background: rgba(46,204,113,0.12);
+  border: 1px solid rgba(46,204,113,0.3);
+  color: var(--green);
+}
+.logout-btn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 7px 14px; border-radius: 8px;
+  cursor: pointer; transition: all 0.2s;
+}
+.logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* ── PORTAL CONTENT ── */
+.portal-content {
+  flex: 1;
+  padding: 32px 28px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Welcome */
+.portal-welcome {
+  margin-bottom: 32px;
+  animation: fadeIn 0.4s ease both;
+}
+@keyframes fadeIn {
+  from { opacity:0; transform: translateY(8px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.welcome-greeting {
+  font-size: 22px; font-weight: 900;
+  letter-spacing: -0.3px; margin-bottom: 4px;
+}
+.welcome-greeting span { color: var(--y); }
+.welcome-sub {
+  font-size: 13px; color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+/* Tienda pill para cajeros */
+.tienda-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(95,75,139,0.15);
+  border: 1px solid rgba(95,75,139,0.3);
+  border-radius: 50px; padding: 8px 16px;
+  margin-top: 12px;
+  font-size: 11px; font-weight: 700;
+  color: var(--pl); text-transform: uppercase;
+  letter-spacing: 1px; font-family: 'DM Mono', monospace;
+}
+.tienda-dot {
+  width: 6px; height: 6px;
+  background: var(--green); border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform: scale(1); }
+  50% { opacity:0.5; transform: scale(0.8); }
+}
+
+/* ── APP CARDS ── */
+.apps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.app-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  animation: fadeIn 0.4s ease both;
+  text-decoration: none;
+  display: block;
+  position: relative;
+}
+.app-card:nth-child(2) { animation-delay: 0.08s; }
+.app-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+}
+.app-card.card-pauta:hover { border-color: rgba(95,75,139,0.5); }
+.app-card.card-cajero:hover { border-color: rgba(245,200,66,0.4); }
+
+.card-stripe {
+  height: 4px;
+}
+.card-pauta .card-stripe {
+  background: linear-gradient(90deg, var(--p), var(--pl));
+}
+.card-cajero .card-stripe {
+  background: linear-gradient(90deg, var(--yd), var(--y));
+}
+
+.card-inner { padding: 24px; }
+
+.card-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin-bottom: 18px;
+}
+.card-pauta .card-icon {
+  background: rgba(95,75,139,0.2);
+  border: 1px solid rgba(95,75,139,0.3);
+}
+.card-cajero .card-icon {
+  background: rgba(245,200,66,0.1);
+  border: 1px solid rgba(245,200,66,0.2);
+}
+
+.card-title {
+  font-size: 17px; font-weight: 900;
+  letter-spacing: -0.2px; margin-bottom: 6px;
+}
+.card-desc {
+  font-size: 12px; color: var(--muted);
+  line-height: 1.6; margin-bottom: 20px;
+}
+
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.card-tag {
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  padding: 4px 10px; border-radius: 50px;
+  font-family: 'DM Mono', monospace;
+}
+.card-pauta .card-tag {
+  background: rgba(95,75,139,0.2);
+  color: var(--pl);
+}
+.card-cajero .card-tag {
+  background: rgba(245,200,66,0.1);
+  color: var(--y);
+}
+.card-arrow {
+  font-size: 18px; color: var(--muted);
+  transition: transform 0.2s, color 0.2s;
+}
+.app-card:hover .card-arrow {
+  transform: translateX(4px);
+  color: var(--text);
+}
+
+/* ── APP FRAME (iframe view) ── */
+#screenApp {
+  flex-direction: column;
+  min-height: 100vh;
+}
+.app-topbar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.back-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 7px 12px; border-radius: 8px;
+  cursor: pointer; transition: all 0.2s;
+}
+.back-btn:hover { border-color: var(--border2); color: var(--text); }
+.app-title {
+  font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.app-frame-wrap {
+  flex: 1; position: relative;
+}
+.app-frame {
+  width: 100%; height: calc(100vh - 53px);
+  border: none;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .portal-topbar { padding: 12px 16px; }
+  .portal-content { padding: 20px 16px; }
+  .topbar-user .user-info { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1: LOGIN
+══════════════════════════════════════ -->
+<div id="screenLogin" class="screen active">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">OAK<span>BERRY</span></div>
+      <div class="login-subtitle">Portal interno · Acceso restringido</div>
+    </div>
+    <div class="login-body">
+      <div class="login-field">
+        <label>Usuario</label>
+        <input type="text" id="inputUser" placeholder="tu usuario" autocomplete="username"
+               autocapitalize="none" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="login-field">
+        <label>Contraseña</label>
+        <input type="password" id="inputPass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">
+        <span class="btn-text">Ingresar →</span>
+        <span class="btn-loader"><span class="spin"></span></span>
+      </button>
+      <div class="login-err" id="loginErr">Usuario o contraseña incorrectos</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 2: PORTAL (selector de apps)
+══════════════════════════════════════ -->
+<div id="screenPortal" class="screen">
+  <div class="portal-topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">OAK<span>BERRY</span></div>
+      <div class="topbar-divider"></div>
+      <div class="topbar-user">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">—</div>
+          <div class="user-role" id="userRoleLabel">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="role-badge" id="roleBadge">—</div>
+      <button class="logout-btn" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="portal-content">
+    <div class="portal-welcome">
+      <div class="welcome-greeting">Bienvenido, <span id="welcomeName">—</span></div>
+      <div class="welcome-sub" id="welcomeSub">Selecciona una herramienta para continuar</div>
+      <div class="tienda-pill" id="tiendaPill" style="display:none;">
+        <span class="tienda-dot"></span>
+        <span id="tiendaLabel">—</span>
+      </div>
+    </div>
+
+    <div class="apps-grid" id="appsGrid">
+      <!-- Cards se renderizan dinámicamente según rol -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 3: APP EMBEDDED
+══════════════════════════════════════ -->
+<div id="screenApp" class="screen">
+  <div class="app-topbar">
+    <button class="back-btn" onclick="goBack()">← Portal</button>
+    <div class="app-title" id="appTitle">—</div>
+  </div>
+  <div class="app-frame-wrap">
+    <iframe class="app-frame" id="appFrame" src="about:blank"></iframe>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIG — Apps Script URL
+// ══════════════════════════════════════════════════════════
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXgiwi0TVSa26VJK5M0n2YOnSBm0XvOkNn_6QXFeJQGwm6Nz8Dj8GfvA4GbKKyWX-AdQ/exec";
+
+// ══════════════════════════════════════════════════════════
+// SESSION
+// ══════════════════════════════════════════════════════════
+let session = null;
+
+function getSession() {
+  try {
+    const s = sessionStorage.getItem("oak_session");
+    return s ? JSON.parse(s) : null;
+  } catch(e) { return null; }
+}
+function setSession(data) {
+  sessionStorage.setItem("oak_session", JSON.stringify(data));
+  session = data;
+}
+function clearSession() {
+  sessionStorage.removeItem("oak_session");
+  session = null;
+}
+
+// ══════════════════════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// ══════════════════════════════════════════════════════════
+// FETCH GET (JSONP — igual que el resto del sistema)
+// ══════════════════════════════════════════════════════════
+function fetchGET(params) {
+  return new Promise((resolve, reject) => {
+    const cb  = "cb_" + Math.random().toString(36).slice(2);
+    const url = SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
+    const s   = document.createElement("script");
+    window[cb] = d => { delete window[cb]; document.body.removeChild(s); resolve(d); };
+    s.onerror  = () => reject(new Error("Error de red"));
+    s.src = url;
+    document.body.appendChild(s);
+    setTimeout(() => reject(new Error("Timeout")), 10000);
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════════════════
+document.getElementById("inputPass").addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
+});
+document.getElementById("inputUser").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("inputPass").focus();
+});
+
+async function doLogin() {
+  const usuario = document.getElementById("inputUser").value.trim().toLowerCase();
+  const pass    = document.getElementById("inputPass").value.trim();
+  const err     = document.getElementById("loginErr");
+  const btn     = document.getElementById("loginBtn");
+
+  err.classList.remove("show");
+
+  if (!usuario || !pass) {
+    err.textContent = "Completa usuario y contraseña";
+    err.classList.add("show");
+    return;
+  }
+
+  btn.classList.add("loading");
+  btn.disabled = true;
+
+  try {
+    const res = await fetchGET({ accion: "login", usuario, pass });
+
+    if (res.ok) {
+      setSession(res);
+      renderPortal(res);
+      showScreen("screenPortal");
+    } else {
+      err.textContent = res.mensaje || "Usuario o contraseña incorrectos";
+      err.classList.add("show");
+      document.getElementById("inputPass").value = "";
+    }
+  } catch(e) {
+    err.textContent = "Error de conexión. Intenta de nuevo.";
+    err.classList.add("show");
+  }
+
+  btn.classList.remove("loading");
+  btn.disabled = false;
+}
+
+// ══════════════════════════════════════════════════════════
+// PORTAL
+// ══════════════════════════════════════════════════════════
+const APPS = {
+  pauta: {
+    id: "pauta",
+    title: "Generador de Links",
+    desc: "Crea links para cada campaña con parámetros de ciudad, tienda, fase y descuento. Genera el link corto para Meta Ads.",
+    icon: "🔗",
+    url: "/links",
+    tag: "Equipo de pauta",
+    type: "card-pauta",
+  },
+  validar: {
+    id: "validar",
+    title: "Validador de Cupones",
+    desc: "Verifica el código del cliente, aplica el descuento y registra el canje. La tienda queda preseleccionada según tu usuario.",
+    icon: "✅",
+    url: "/validar",
+    tag: "Cajero en tienda",
+    type: "card-cajero",
+  },
+};
+
+function renderPortal(s) {
+  // Topbar
+  document.getElementById("userAvatar").textContent  = (s.nombre || s.usuario || "?")[0].toUpperCase();
+  document.getElementById("userName").textContent    = s.nombre || s.usuario;
+  document.getElementById("userRoleLabel").textContent = roleLabel(s.rol);
+  document.getElementById("welcomeName").textContent = (s.nombre || s.usuario).split(" ")[0];
+
+  // Role badge
+  const badge = document.getElementById("roleBadge");
+  badge.textContent = roleLabel(s.rol);
+  badge.className   = "role-badge " + s.rol;
+
+  // Tienda pill para cajeros
+  if (s.rol === "cajero" && s.tienda) {
+    document.getElementById("tiendaLabel").textContent = "📍 " + s.tienda + (s.ciudad ? " · " + s.ciudad : "");
+    document.getElementById("tiendaPill").style.display = "inline-flex";
+    document.getElementById("welcomeSub").textContent = "Tu tienda está preconfigurada · Solo puedes validar en tu punto";
+  }
+
+  // Apps grid según rol
+  const grid = document.getElementById("appsGrid");
+  grid.innerHTML = "";
+
+  let apps = [];
+  if (s.rol === "admin") apps = ["pauta", "validar"];
+  else if (s.rol === "pauta") apps = ["pauta"];
+  else if (s.rol === "cajero") apps = ["validar"];
+
+  apps.forEach((key, i) => {
+    const a = APPS[key];
+    const card = document.createElement("div");
+    card.className = `app-card ${a.type}`;
+    card.style.animationDelay = (i * 0.08) + "s";
+    card.innerHTML = `
+      <div class="card-stripe"></div>
+      <div class="card-inner">
+        <div class="card-icon">${a.icon}</div>
+        <div class="card-title">${a.title}</div>
+        <div class="card-desc">${a.desc}</div>
+        <div class="card-footer">
+          <span class="card-tag">${a.tag}</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </div>
+    `;
+    card.addEventListener("click", () => openApp(a, s));
+    grid.appendChild(card);
+  });
+}
+
+function roleLabel(rol) {
+  return { admin: "Administrador", pauta: "Equipo Pauta", cajero: "Cajero" }[rol] || rol;
+}
+
+// ══════════════════════════════════════════════════════════
+// ABRIR APP EN IFRAME
+// ══════════════════════════════════════════════════════════
+function openApp(app, s) {
+  let url = app.url;
+
+  // Para cajeros: precarga tienda y ciudad como parámetros
+  if (s.rol === "cajero" && app.id === "validar" && s.tienda) {
+    const params = new URLSearchParams({
+      tienda: s.tienda,
+      ciudad: s.ciudad || "",
+    });
+    url = app.url + "?" + params.toString();
+  }
+
+  document.getElementById("appTitle").textContent = app.title;
+  document.getElementById("appFrame").src = url;
+  showScreen("screenApp");
+}
+
+function goBack() {
+  document.getElementById("appFrame").src = "about:blank";
+  showScreen("screenPortal");
+}
+
+// ══════════════════════════════════════════════════════════
+// LOGOUT
+// ══════════════════════════════════════════════════════════
+function doLogout() {
+  clearSession();
+  document.getElementById("inputUser").value = "";
+  document.getElementById("inputPass").value = "";
+  document.getElementById("loginErr").classList.remove("show");
+  showScreen("screenLogin");
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT — restaurar sesión si existe
+// ══════════════════════════════════════════════════════════
+window.addEventListener("DOMContentLoaded", () => {
+  const s = getSession();
+  if (s) {
+    session = s;
+    renderPortal(s);
+    showScreen("screenPortal");
+  }
+});
+</script>
+</body>
+</html>
