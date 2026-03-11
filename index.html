@@ -491,8 +491,29 @@ function mostrarNuevo({ codigo, nombre, vence }) {
 }
 
 function mostrarBloqueadoLoopy(nombre) {
-  show("stateLoopy");
-  document.getElementById("loopyNombre").textContent = "Hola, " + nombre.split(" ")[0] + " 👋";
+  const primer = nombre.split(" ")[0];
+  const card = document.querySelector(".card");
+  card.innerHTML = `
+    <div class="result-header" style="background:#c0392b;">
+      <span class="result-icon">🏆</span>
+      <div class="result-title">¡Ya eres cliente Oakberry!</div>
+      <div class="result-name">Hola, ${primer} 👋</div>
+    </div>
+    <div class="result-body">
+      <div class="info-pill purple">
+        <span class="icon">⭐</span>
+        <span>Ya eres cliente de Oakberry Colombia. Este cupón es exclusivo para clientes nuevos.</span>
+      </div>
+      <div class="info-pill yellow">
+        <span class="icon">🎁</span>
+        <span>Como cliente frecuente puedes acumular sellos y canjear recompensas exclusivas en cualquier tienda Oakberry.</span>
+      </div>
+      <div class="info-pill green">
+        <span class="icon">💳</span>
+        <span>Presenta tu tarjeta en caja para seguir acumulando beneficios.</span>
+      </div>
+    </div>
+  `;
 }
 
 function mostrarExistente(data, nombre) {
