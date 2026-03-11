@@ -362,18 +362,17 @@ function fetchGET(params) {
       if (script.parentNode) document.body.removeChild(script);
       resolve(data);
     };
-    script.onerror = () => {
-      clearTimeout(timer);
-      delete window[cbName];
-      if (script.parentNode) document.body.removeChild(script);
-      reject(new Error("Error de red"));
-    };
+    // No rechazar en onerror — Google redirige 302 y Chrome lo marca como error
+    // pero el callback igual llega desde googleusercontent.com
+    script.onerror = () => { /* ignorar — el callback llega igual tras el redirect */ };
     script.src = url;
     document.body.appendChild(script);
     const timer = setTimeout(() => {
-      delete window[cbName];
-      if (script.parentNode) document.body.removeChild(script);
-      reject(new Error("Timeout"));
+      if (window[cbName]) {
+        delete window[cbName];
+        if (script.parentNode) document.body.removeChild(script);
+        reject(new Error("Timeout"));
+      }
     }, 35000);
   });
 }
