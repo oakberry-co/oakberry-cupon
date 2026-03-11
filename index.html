@@ -382,9 +382,12 @@ async function solicitar() {
   const btn = document.getElementById("mainBtn");
   btn.classList.add("loading");
   btn.disabled = true;
+  btn.textContent = "Estamos preparando tu cupón...";
 
   const nombre  = document.getElementById("inp-nombre").value.trim();
-  const celular = "57" + document.getElementById("inp-cel").value.replace(/\D/g,"");
+  const celularRaw = document.getElementById("inp-cel").value.replace(/\D/g,"");
+  const esColombia = celularRaw.length === 10;
+  const celular = esColombia ? "57" + celularRaw : celularRaw;
 
   // Verificar primero si el celular ya existe ANTES de generar código
   try {
@@ -433,6 +436,7 @@ async function solicitar() {
     alert("Hubo un problema al conectar. Intenta de nuevo.");
     btn.classList.remove("loading");
     btn.disabled = false;
+    btn.textContent = "RECIBIR MI CUPÓN GRATIS →";
   }
 }
 
