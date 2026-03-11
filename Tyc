@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Términos y Condiciones · Oakberry Colombia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--primary:#5F4B8B;--primary-dark:#4a3870;--yellow:#F5C842;--white:#fff;--off-white:#F7F5FF;--text:#1A1427;--gray:#888;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Montserrat',sans-serif;background:var(--off-white);color:var(--text);min-height:100vh;padding-bottom:90px;}
+    .header{background:var(--primary);padding:18px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,0.18);}
+    .back-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:8px 14px;border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;text-decoration:none;transition:background 0.18s;white-space:nowrap;}
+    .back-btn:hover{background:rgba(255,255,255,0.25);}
+    .header-title{color:#fff;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:0.8px;}
+    .header-sub{color:rgba(255,255,255,0.55);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+    .container{max-width:640px;margin:0 auto;padding:24px 16px 40px;}
+    .brand-badge{background:var(--primary);color:var(--yellow);font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:2px;text-align:center;padding:22px 20px;border-radius:16px;margin-bottom:6px;}
+    .brand-badge small{display:block;font-size:10px;font-weight:700;color:rgba(255,255,255,0.55);letter-spacing:2px;margin-top:4px;}
+    .last-updated{text-align:center;font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:24px;}
+    .section{background:#fff;border-radius:14px;padding:20px 18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(95,75,139,0.06);}
+    .section-title{font-size:13px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+    .num{display:inline-flex;align-items:center;justify-content:center;background:var(--primary);color:#fff;font-size:10px;font-weight:900;min-width:22px;height:22px;border-radius:50%;flex-shrink:0;}
+    .body{font-size:12px;font-weight:600;color:#444;line-height:1.8;}
+    .body p{margin-bottom:10px;}
+    .body p:last-child{margin-bottom:0;}
+    .body ul{padding-left:18px;margin-bottom:10px;}
+    .body ul li{margin-bottom:5px;}
+    .body strong{color:var(--text);font-weight:800;}
+    .highlight{background:var(--off-white);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:11px 14px;margin:10px 0;font-size:12px;font-weight:700;color:var(--primary);line-height:1.6;}
+    #privacidad{scroll-margin-top:80px;}
+    .footer-info{text-align:center;font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.4px;margin-top:28px;line-height:2;}
+    .footer-info a{color:var(--primary);text-decoration:none;}
+    .accept-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 16px;box-shadow:0 -3px 16px rgba(0,0,0,0.1);display:flex;gap:10px;justify-content:center;}
+    .accept-bar>*{max-width:300px;flex:1;}
+    .btn-back-bar{background:var(--off-white);color:var(--primary);border:2px solid var(--primary);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;padding:14px 16px;border-radius:12px;cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center;}
+    .btn-accept{background:var(--primary);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;padding:14px;border-radius:12px;cursor:pointer;transition:background 0.18s;}
+    .btn-accept:hover{background:var(--primary-dark);}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <button class="back-btn" onclick="goBack()">&#8592; Volver</button>
+  <div>
+    <div class="header-title">Términos y Condiciones</div>
+    <div class="header-sub">Oakberry Colombia · Campaña Cupones</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="brand-badge">OAKBERRY<small>Términos y Condiciones · Campaña de Cupones 2025</small></div>
+  <div class="last-updated">Última actualización: Marzo 2025</div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">1</span> Objeto y Alcance</div>
+    <div class="body">
+      <p>Los presentes términos regulan la participación en la campaña de cupones digitales de <strong>Oakberry Colombia</strong>, operada por <strong>Manel Foods S.A.S.</strong>, con el propósito de ofrecer descuentos en productos seleccionados a nuevos clientes en tiendas físicas participantes.</p>
+      <p>Al solicitar un cupón a través de <strong>oakberry-cupones.com</strong>, el participante acepta en su totalidad estos términos.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">2</span> Requisitos de Participación</div>
+    <div class="body">
+      <p>Para participar el usuario debe:</p>
+      <ul>
+        <li>Ser mayor de edad (18 años o más).</li>
+        <li>Residir o encontrarse en Colombia al momento del canje.</li>
+        <li>Proporcionar un número de celular colombiano válido y de su propiedad.</li>
+        <li>Ser un <strong>cliente nuevo</strong> que no haya canjeado cupón anteriormente con el mismo número.</li>
+      </ul>
+      <div class="highlight">Cada número celular tiene derecho a un (1) único cupón. No se permite el registro múltiple para obtener más de un cupón.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">3</span> Funcionamiento del Cupón</div>
+    <div class="body">
+      <ul>
+        <li>El participante ingresa su nombre y número celular en <strong>oakberry-cupones.com</strong>.</li>
+        <li>El sistema genera un código único con formato <strong>OAK-XXXXXX</strong>.</li>
+        <li>El cupón tiene una <strong>vigencia de 72 horas</strong> desde la generación.</li>
+        <li>Se presenta el código en caja en la tienda Oakberry correspondiente.</li>
+        <li>El cajero valida el código antes de aplicar el descuento.</li>
+        <li>Una vez canjeado, el cupón queda invalidado definitivamente.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">4</span> Condiciones del Descuento</div>
+    <div class="body">
+      <ul>
+        <li>Aplica <strong>únicamente al producto indicado</strong> en el cupón generado.</li>
+        <li>No es acumulable con otras promociones o programas de fidelización.</li>
+        <li>Solo válido en tiendas participantes durante la vigencia de la campaña.</li>
+        <li>Oakberry Colombia puede modificar las condiciones del descuento previo aviso.</li>
+      </ul>
+      <div class="highlight">El descuento no tiene valor en efectivo, no es transferible y no aplica para domicilios ni pedidos por plataformas de delivery.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">5</span> Tiendas Participantes</div>
+    <div class="body">
+      <p>La campaña aplica en tiendas físicas Oakberry Colombia en: <strong>Bogotá, Medellín, Cali, Cúcuta y Pereira</strong>. La tienda válida para cada cupón es la indicada en el anuncio de origen. El sistema rechazará automáticamente cupones presentados en tiendas no asignadas.</p>
+    </div>
+  </div>
+
+  <div class="section" id="privacidad">
+    <div class="section-title"><span class="num">6</span> Política de Privacidad y Tratamiento de Datos</div>
+    <div class="body">
+      <p>Al participar, el usuario autoriza a <strong>Manel Foods S.A.S.</strong> para el tratamiento de sus datos personales (nombre y celular), conforme a la <strong>Ley 1581 de 2012</strong>.</p>
+      <p>Los datos serán usados exclusivamente para:</p>
+      <ul>
+        <li>Verificar la elegibilidad como nuevo cliente.</li>
+        <li>Generar y gestionar el cupón de descuento.</li>
+        <li>Prevenir fraudes y uso indebido de la campaña.</li>
+        <li>Análisis estadístico interno.</li>
+      </ul>
+      <div class="highlight">Oakberry Colombia no venderá ni compartirá los datos con terceros con fines comerciales.</div>
+      <p>El titular puede ejercer sus derechos de acceso, corrección y supresión escribiendo a <strong>privacidad@manelfoods.com</strong>.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">7</span> Limitaciones de Responsabilidad</div>
+    <div class="body">
+      <p>Oakberry Colombia no será responsable por fallas técnicas ajenas a su control, datos incorrectos ingresados por el participante, uso no autorizado del código por terceros, ni por pérdida del código dentro del período de vigencia.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">8</span> Modificaciones y Terminación</div>
+    <div class="body">
+      <p>Oakberry Colombia puede modificar, suspender o terminar la campaña en cualquier momento publicando los cambios en <strong>oakberry-cupones.com</strong>. Los cambios no afectarán cupones válidamente generados antes de la modificación.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">9</span> Ley Aplicable</div>
+    <div class="body">
+      <p>Estos términos se rigen por las leyes de Colombia. Cualquier controversia se resolverá ante los tribunales de Bogotá D.C. Domicilio: <strong>Cl. 109 #15-48, Bogotá D.C.</strong></p>
+    </div>
+  </div>
+
+  <div class="footer-info">
+    <p>Oakberry Colombia · Manel Foods S.A.S.</p>
+    <p>Cl. 109 #15-48, Bogotá D.C., Colombia</p>
+    <p><a href="mailto:privacidad@manelfoods.com">privacidad@manelfoods.com</a></p>
+    <p style="margin-top:6px;">&copy; 2025 Oakberry Colombia. Todos los derechos reservados.</p>
+  </div>
+
+</div>
+
+<div class="accept-bar">
+  <button class="btn-back-bar" onclick="goBack()">&#8592; Volver</button>
+  <button class="btn-accept" onclick="aceptarYVolver()">Acepto los términos &#8594;</button>
+</div>
+
+<script>
+  function goBack() {
+    if (document.referrer) { history.back(); } else { window.location.href = "/"; }
+  }
+  function aceptarYVolver() {
+    try {
+      if (window.opener && !window.opener.closed) {
+        const chk = window.opener.document.getElementById("chk-tyc");
+        if (chk) { chk.checked = true; chk.dispatchEvent(new Event("change")); }
+        window.close();
+      } else { history.back(); }
+    } catch(e) { history.back(); }
+  }
+</script>
+</body>
+</html>
