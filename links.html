@@ -173,6 +173,13 @@
 
         <!-- MOMENTOS DE CONSUMO -->
         <div class="divider">Momento de consumo</div>
+        <div style="margin-bottom:8px">
+          <div class="momento-btn" onclick="toggleTodosMomentos(this)" id="btnTodosMomentos" style="width:100%;text-align:center;">
+            <span class="momento-emoji">🕐</span>
+            <span class="momento-nombre">Todos los momentos</span>
+            <span class="momento-hora">Sin restricción de horario</span>
+          </div>
+        </div>
         <div class="momentos-grid">
           <div class="momento-btn" onclick="toggleMomento('desayuno', this)">
             <span class="momento-emoji">☀️</span>
@@ -287,6 +294,24 @@ function setModo(modo) {
 }
 
 // ── MOMENTOS ──
+const TODOS_MOMENTOS = ["desayuno","almuerzo","onces","cena"];
+
+function toggleTodosMomentos(el) {
+  const allSelected = TODOS_MOMENTOS.every(m => momentosSelected.has(m));
+  if (allSelected) {
+    // Deseleccionar todos
+    TODOS_MOMENTOS.forEach(m => momentosSelected.delete(m));
+    document.querySelectorAll(".momento-btn[onclick*="toggleMomento"]").forEach(b => b.classList.remove("selected"));
+    el.classList.remove("selected");
+  } else {
+    // Seleccionar todos
+    TODOS_MOMENTOS.forEach(m => momentosSelected.add(m));
+    document.querySelectorAll(".momento-btn[onclick*="toggleMomento"]").forEach(b => b.classList.add("selected"));
+    el.classList.add("selected");
+  }
+  document.getElementById("errMomento").classList.remove("show");
+}
+
 function toggleMomento(key, el) {
   if (momentosSelected.has(key)) {
     momentosSelected.delete(key);
@@ -295,6 +320,10 @@ function toggleMomento(key, el) {
     momentosSelected.add(key);
     el.classList.add("selected");
   }
+  // Sync "Todos" button
+  const allSelected = TODOS_MOMENTOS.every(m => momentosSelected.has(m));
+  const btnTodos = document.getElementById("btnTodosMomentos");
+  if (btnTodos) btnTodos.classList.toggle("selected", allSelected);
   document.getElementById("errMomento").classList.remove("show");
 }
 
@@ -374,6 +403,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (todo) {
     const sel = document.getElementById("ciudad");
     sel.innerHTML = "";
+    sel.add(new Option("Todas las ciudades", "todas"));
     todo.ciudades.forEach(c => sel.add(new Option(c, c)));
     await cargarTiendas();
   } else {
