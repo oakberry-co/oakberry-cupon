@@ -84,6 +84,11 @@
   .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#0e0b16;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;padding:12px 24px;border-radius:50px;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;}
   .toast.show{transform:translateX(-50%) translateY(0);}
   .modo-sorteo{display:none;}
+
+  /* Status indicator */
+  .status-bar{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);padding:8px 0;}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:#ff5c5c;flex-shrink:0;}
+  .status-dot.ok{background:var(--green);}
 </style>
 </head>
 <body>
@@ -100,6 +105,12 @@
     <div class="header-badge">Uso interno</div>
   </div>
 
+  <!-- STATUS BAR -->
+  <div class="status-bar" id="statusBar">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">Conectando con backend...</span>
+  </div>
+
   <!-- FORMULARIO -->
   <div>
     <div class="panel">
@@ -114,7 +125,9 @@
       <div class="row">
         <div class="field">
           <label>Ciudad</label>
-          <select id="ciudad" onchange="cargarTiendas()"></select>
+          <select id="ciudad" onchange="cargarTiendas()">
+            <option value="">Cargando...</option>
+          </select>
         </div>
         <div class="field">
           <label>Fase</label>
@@ -181,22 +194,22 @@
           </div>
         </div>
         <div class="momentos-grid">
-          <div class="momento-btn" onclick="toggleMomento('desayuno', this)">
+          <div class="momento-btn" data-momento="desayuno" onclick="toggleMomento('desayuno', this)">
             <span class="momento-emoji">☀️</span>
             <span class="momento-nombre">Desayuno</span>
             <span class="momento-hora">6:00 am – 12:00 pm</span>
           </div>
-          <div class="momento-btn" onclick="toggleMomento('almuerzo', this)">
+          <div class="momento-btn" data-momento="almuerzo" onclick="toggleMomento('almuerzo', this)">
             <span class="momento-emoji">🍽️</span>
             <span class="momento-nombre">Almuerzo</span>
             <span class="momento-hora">12:00 pm – 3:00 pm</span>
           </div>
-          <div class="momento-btn" onclick="toggleMomento('onces', this)">
+          <div class="momento-btn" data-momento="onces" onclick="toggleMomento('onces', this)">
             <span class="momento-emoji">🧃</span>
             <span class="momento-nombre">Onces</span>
             <span class="momento-hora">3:00 pm – 7:00 pm</span>
           </div>
-          <div class="momento-btn" onclick="toggleMomento('cena', this)">
+          <div class="momento-btn" data-momento="cena" onclick="toggleMomento('cena', this)">
             <span class="momento-emoji">🌙</span>
             <span class="momento-nombre">Cena</span>
             <span class="momento-hora">8:00 pm – 10:00 pm</span>
@@ -268,8 +281,9 @@
 <div class="toast" id="toast">✅ ¡Copiado!</div>
 
 <script>
+// ── CONSTANTES ────────────────────────────────────────────────
 const BASE       = "https://oakberry-cupones.com";
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXgiwi0TVSa26VJK5M0n2YOnSBm0XvOkNn_6QXFeJQGwm6Nz8Dj8GfvA4GbKKyWX-AdQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
 
 const MOMENTOS = {
   desayuno: { nombre: "Desayuno",  inicio: 6,  fin: 12 },
@@ -278,35 +292,160 @@ const MOMENTOS = {
   cena:     { nombre: "Cena",      inicio: 20, fin: 22 },
 };
 
-let modoActual        = "cupon";
-let momentosSelected  = new Set();
-let historial         = [];
-let linkActual        = "";
-
-// ── MODO ──
-function setModo(modo) {
-  modoActual = modo;
-  document.querySelectorAll(".tab").forEach((t,i) =>
-    t.classList.toggle("active", (modo==="cupon"&&i===0)||(modo==="sorteo"&&i===1))
-  );
-  document.getElementById("modoCupon").style.display  = modo==="cupon"  ? "block" : "none";
-  document.getElementById("modeSorteo").style.display = modo==="sorteo" ? "block" : "none";
-}
-
-// ── MOMENTOS ──
 const TODOS_MOMENTOS = ["desayuno","almuerzo","onces","cena"];
 
+// ── ESTADO ────────────────────────────────────────────────────
+let modoActual       = "cupon";
+let momentosSelected = new Set();
+let historial        = [];
+let linkActual       = "";
+
+// ── CACHE — declarado PRIMERO para que todas las funciones lo usen ──
+const _cache = {};
+
+function fetchGETCached(params) {
+  const key = JSON.stringify(params);
+  if (_cache[key]) return Promise.resolve(_cache[key]);
+  return fetchGET(params).then(d => { _cache[key] = d; return d; });
+}
+
+// ── FETCH JSONP ───────────────────────────────────────────────
+function fetchGET(params) {
+  return new Promise((resolve, reject) => {
+    const cb  = "cb_" + Math.random().toString(36).slice(2);
+    const url = SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
+    const s   = document.createElement("script");
+    window[cb] = d => {
+      delete window[cb];
+      if (s.parentNode) document.body.removeChild(s);
+      resolve(d);
+    };
+    s.onerror = () => {
+      // Google Apps Script redirige 302 → el callback llega igual
+      // No rechazar aquí, esperar el timeout solo si el callback no llega
+    };
+    s.src = url;
+    document.body.appendChild(s);
+    setTimeout(() => {
+      if (window[cb]) {
+        delete window[cb];
+        if (s.parentNode) document.body.removeChild(s);
+        reject(new Error("Timeout"));
+      }
+    }, 12000);
+  });
+}
+
+// ── CARGA COMBINADA ───────────────────────────────────────────
+async function cargarTodo() {
+  try {
+    const data = await fetchGET({ accion: "obtenerTodo" });
+    if (!data || !data.ciudades || !data.ciudades.length) return false;
+
+    // Poblar cache con los datos recibidos
+    _cache[JSON.stringify({accion:"obtenerCiudades"})] = { ciudades: data.ciudades };
+    Object.entries(data.tiendas || {}).forEach(([ciudad, tiendas]) => {
+      _cache[JSON.stringify({accion:"obtenerTiendas", ciudad})] = { tiendas };
+    });
+
+    return data;
+  } catch(e) {
+    console.error("cargarTodo error:", e);
+    return false;
+  }
+}
+
+async function cargarCiudades() {
+  try {
+    const data = await fetchGETCached({ accion: "obtenerCiudades" });
+    const ciudades = Array.isArray(data) ? data : (data.ciudades || []);
+    if (!ciudades.length) return;
+
+    const sel = document.getElementById("ciudad");
+    sel.innerHTML = "";
+    sel.add(new Option("Todas las ciudades", "todas"));
+    ciudades.forEach(c => sel.add(new Option(c, c)));
+    await cargarTiendas();
+
+    // Precalentar cache de todas las ciudades en paralelo
+    ciudades.forEach(c => fetchGETCached({ accion: "obtenerTiendas", ciudad: c }));
+  } catch(e) {
+    console.error("cargarCiudades error:", e);
+  }
+}
+
+async function cargarTiendas() {
+  const ciudad = document.getElementById("ciudad").value;
+  const sel    = document.getElementById("tienda");
+  sel.innerHTML = '<option value="general">Todas las tiendas</option>';
+  if (!ciudad || ciudad === "todas") return;
+  try {
+    const data    = await fetchGETCached({ accion: "obtenerTiendas", ciudad });
+    const tiendas = Array.isArray(data) ? data : (data.tiendas || []);
+    tiendas.forEach(t => sel.add(new Option(t, t)));
+  } catch(e) {
+    console.error("cargarTiendas error:", e);
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+(function warmup() {
+  const s = document.createElement("script");
+  s.src = SCRIPT_URL + "?accion=ping&callback=_warmup";
+  window._warmup = () => {};
+  document.head.appendChild(s);
+})();
+
+window.addEventListener("DOMContentLoaded", async () => {
+  setStatus("Cargando ciudades y tiendas...", false);
+
+  const todo = await cargarTodo();
+
+  if (todo && todo.ciudades && todo.ciudades.length) {
+    const sel = document.getElementById("ciudad");
+    sel.innerHTML = "";
+    sel.add(new Option("Todas las ciudades", "todas"));
+    todo.ciudades.forEach(c => sel.add(new Option(c, c)));
+    await cargarTiendas();
+    setStatus("Backend conectado · " + todo.ciudades.length + " ciudades cargadas", true);
+  } else {
+    // Fallback a carga individual
+    await cargarCiudades();
+    const sel = document.getElementById("ciudad");
+    if (sel.options.length > 1) {
+      setStatus("Backend conectado (modo fallback)", true);
+    } else {
+      setStatus("⚠ No se pudieron cargar ciudades — revisa el backend", false);
+    }
+  }
+});
+
+function setStatus(msg, ok) {
+  document.getElementById("statusText").textContent = msg;
+  document.getElementById("statusDot").className = "status-dot" + (ok ? " ok" : "");
+}
+
+// ── MODO ──────────────────────────────────────────────────────
+function setModo(modo) {
+  modoActual = modo;
+  document.querySelectorAll(".tab").forEach((t, i) =>
+    t.classList.toggle("active", (modo === "cupon" && i === 0) || (modo === "sorteo" && i === 1))
+  );
+  document.getElementById("modoCupon").style.display  = modo === "cupon"  ? "block" : "none";
+  document.getElementById("modeSorteo").style.display = modo === "sorteo" ? "block" : "none";
+}
+
+// ── MOMENTOS ──────────────────────────────────────────────────
 function toggleTodosMomentos(el) {
   const allSelected = TODOS_MOMENTOS.every(m => momentosSelected.has(m));
   if (allSelected) {
-    // Deseleccionar todos
     TODOS_MOMENTOS.forEach(m => momentosSelected.delete(m));
-    document.querySelectorAll(".momento-btn[onclick*="toggleMomento"]").forEach(b => b.classList.remove("selected"));
+    // FIX: usar data-momento en lugar de querySelector con comillas tipográficas
+    document.querySelectorAll(".momento-btn[data-momento]").forEach(b => b.classList.remove("selected"));
     el.classList.remove("selected");
   } else {
-    // Seleccionar todos
     TODOS_MOMENTOS.forEach(m => momentosSelected.add(m));
-    document.querySelectorAll(".momento-btn[onclick*="toggleMomento"]").forEach(b => b.classList.add("selected"));
+    document.querySelectorAll(".momento-btn[data-momento]").forEach(b => b.classList.add("selected"));
     el.classList.add("selected");
   }
   document.getElementById("errMomento").classList.remove("show");
@@ -320,100 +459,14 @@ function toggleMomento(key, el) {
     momentosSelected.add(key);
     el.classList.add("selected");
   }
-  // Sync "Todos" button
   const allSelected = TODOS_MOMENTOS.every(m => momentosSelected.has(m));
   const btnTodos = document.getElementById("btnTodosMomentos");
   if (btnTodos) btnTodos.classList.toggle("selected", allSelected);
   document.getElementById("errMomento").classList.remove("show");
 }
 
-// ── TIENDAS DINÁMICAS ──
-function fetchGET(params) {
-  return new Promise((resolve, reject) => {
-    const cb = "cb_" + Math.random().toString(36).slice(2);
-    const url = SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
-    const s = document.createElement("script");
-    window[cb] = d => { delete window[cb]; document.body.removeChild(s); resolve(d); };
-    s.onerror = () => reject();
-    s.src = url;
-    document.body.appendChild(s);
-    setTimeout(() => reject(), 8000);
-  });
-}
-
-
-// ── CARGA COMBINADA (ciudades + todas las tiendas en 1 sola llamada) ──
-async function cargarTodo() {
-  try {
-    const data = await fetchGET({ accion: "obtenerTodo" });
-    if (!data || !data.ciudades) return false;
-    // Poblar cache con los datos recibidos
-    _cache[JSON.stringify({accion:"obtenerCiudades"})] = { ciudades: data.ciudades };
-    Object.entries(data.tiendas || {}).forEach(([ciudad, tiendas]) => {
-      _cache[JSON.stringify({accion:"obtenerTiendas", ciudad})] = { tiendas };
-    });
-    return data;
-  } catch(e) { return false; }
-}
-async function cargarCiudades() {
-  try {
-    const data = await fetchGETCached({ accion: "obtenerCiudades" });
-    const ciudades = Array.isArray(data) ? data : (data.ciudades || []);
-    if (!ciudades.length) return;
-    const sel = document.getElementById("ciudad");
-    sel.innerHTML = "";
-    sel.add(new Option("Todas las ciudades", "todas"));
-    ciudades.forEach(c => sel.add(new Option(c, c)));
-    await cargarTiendas();
-    // Precalentar cache de todas las ciudades en paralelo
-    ciudades.forEach(c => fetchGETCached({ accion: "obtenerTiendas", ciudad: c }));
-  } catch(e) { console.error("cargarCiudades:", e); }
-}
-
-async function cargarTiendas() {
-  const ciudad = document.getElementById("ciudad").value;
-  const sel = document.getElementById("tienda");
-  sel.innerHTML = '<option value="general">Todas las tiendas</option>';
-  if (ciudad === "todas") return;
-  try {
-    const data = await fetchGETCached({ accion: "obtenerTiendas", ciudad });
-    const tiendas = Array.isArray(data) ? data : (data.tiendas || []);
-    tiendas.forEach(t => sel.add(new Option(t, t)));
-  } catch(e) { console.error("cargarTiendas:", e); }
-}
-
-
-// ── CACHE DE CIUDADES Y TIENDAS ──────────────────────────────
-const _cache = {};
-function fetchGETCached(params) {
-  const key = JSON.stringify(params);
-  if (_cache[key]) return Promise.resolve(_cache[key]);
-  return fetchGET(params).then(d => { _cache[key] = d; return d; });
-}
-
-// ── PRECALENTAR servidor ──────────────────────────────────────
-(function warmup() {
-  const s = document.createElement("script");
-  s.src = "https://script.google.com/macros/s/AKfycbxXgiwi0TVSa26VJK5M0n2YOnSBm0XvOkNn_6QXFeJQGwm6Nz8Dj8GfvA4GbKKyWX-AdQ/exec?accion=ping&callback=_warmup";
-  window._warmup = () => {};
-  document.head.appendChild(s);
-})();
-window.addEventListener("DOMContentLoaded", async () => {
-  const todo = await cargarTodo();
-  if (todo) {
-    const sel = document.getElementById("ciudad");
-    sel.innerHTML = "";
-    sel.add(new Option("Todas las ciudades", "todas"));
-    todo.ciudades.forEach(c => sel.add(new Option(c, c)));
-    await cargarTiendas();
-  } else {
-    await cargarCiudades();
-  }
-});
-
-// ── GENERAR ──
+// ── GENERAR ───────────────────────────────────────────────────
 function generar() {
-  // Validar momentos en modo cupón
   if (modoActual === "cupon" && momentosSelected.size === 0) {
     document.getElementById("errMomento").classList.add("show");
     return;
@@ -431,7 +484,6 @@ function generar() {
     params.descuento = document.getElementById("descuento").value;
     params.producto  = document.getElementById("producto").value;
     params.vigencia  = document.getElementById("vigencia").value;
-    // Momentos: "desayuno,almuerzo" etc.
     params.momentos  = Array.from(momentosSelected).join(",");
   } else {
     params.premio   = document.getElementById("premio").value.trim().replace(/\s+/g, "+");
@@ -445,7 +497,6 @@ function generar() {
   display.textContent = linkActual;
   display.classList.remove("empty");
 
-  // Link corto
   const alias = nombre.toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"");
   const shortLink = `${BASE}/r#${alias}`;
   const shortDisplay = document.getElementById("shortLinkDisplay");
@@ -461,7 +512,7 @@ function generar() {
   guardarEnSheet({ ...item, nombre });
 }
 
-// ── RESUMEN ──
+// ── RESUMEN ───────────────────────────────────────────────────
 function mostrarResumen(params, nombre) {
   document.getElementById("summaryCard").style.display = "block";
   const labels = {
@@ -486,16 +537,19 @@ function mostrarResumen(params, nombre) {
   document.getElementById("summaryRows").innerHTML = rows;
 }
 
-// ── HISTORIAL ──
+// ── HISTORIAL ─────────────────────────────────────────────────
 function renderHistorial() {
   const list = document.getElementById("historyList");
-  if (!historial.length) { list.innerHTML = '<div class="history-empty">Sin links generados aún</div>'; return; }
+  if (!historial.length) {
+    list.innerHTML = '<div class="history-empty">Sin links generados aún</div>';
+    return;
+  }
   list.innerHTML = historial.slice(0,10).map((item,i) => {
     const hora = item.ts.toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"});
     const momentosStr = item.params.momentos
-      ? item.params.momentos.split(",").map(m=>MOMENTOS[m]?.nombre||m).join("+")
+      ? item.params.momentos.split(",").map(m => MOMENTOS[m]?.nombre||m).join("+")
       : "";
-    const det = item.params.modo==="sorteo"
+    const det = item.params.modo === "sorteo"
       ? `Sorteo · ${item.params.ciudad}`
       : `${item.params.descuento}% · ${decodeURIComponent((item.params.producto||"").replace(/\+/g," "))} · ${momentosStr}`;
     return `<div class="history-item">
@@ -535,7 +589,7 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove("show"), 2200);
 }
 
-// ── GUARDAR EN SHEET ──
+// ── GUARDAR EN SHEET ──────────────────────────────────────────
 function guardarEnSheet(item) {
   const p = item.params;
   const momentosStr = p.momentos
@@ -550,7 +604,7 @@ function guardarEnSheet(item) {
     vigencia:p.vigencia, momentos:momentosStr,
     link:item.link, fecha:item.ts.toISOString(),
   };
-  fetchGET(params).catch(()=>{});
+  fetchGET(params).catch(() => {});
 }
 </script>
 </body>
