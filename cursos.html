@@ -1696,7 +1696,7 @@ Evalúa su trabajo en máximo 150 palabras:
 Tono: como un buen profesor — directo, constructivo, alentador. Sin puntuar, solo feedback cualitativo.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/chat', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -1751,7 +1751,7 @@ Tu rol:
 Estilo: directo, cálido, como un mentor que quiere que el estudiante tenga éxito. Respuestas de máximo 200 palabras salvo que se pida más detalle.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/chat', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
