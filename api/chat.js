@@ -6,10 +6,16 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { messages, system, model, max_tokens } = req.body;
+  const { messages, system } = req.body;
 
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'messages requerido' });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  
+  if (!apiKey) {
+    return res.status(500).json({ error: 'API key no configurada' });
   }
 
   try {
@@ -17,12 +23,12 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: model || 'claude-sonnet-4-5',
-        max_tokens: max_tokens || 1000,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
         system: system || 'Eres un profesor experto en IA aplicada a negocios.',
         messages,
       }),
@@ -31,12 +37,16 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: data.error?.message || 'Error de API' });
+      return res.status(response.status).json({ 
+        error: data.error?.message || 'Error de API',
+        status: response.status,
+        type: data.error?.type
+      });
     }
 
     return res.status(200).json(data);
 
   } catch (error) {
-    return res.status(500).json({ error: 'Error interno del servidor' });
+    return res.status(500).json({ error: error.message });
   }
 }
