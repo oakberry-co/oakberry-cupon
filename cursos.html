@@ -1700,7 +1700,7 @@ Tono: como un buen profesor — directo, constructivo, alentador. Sin puntuar, s
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-5',
         max_tokens:1000,
         messages:[{role:'user',content:prompt}]
       })
@@ -1755,7 +1755,7 @@ Estilo: directo, cálido, como un mentor que quiere que el estudiante tenga éxi
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-5',
         max_tokens:1000,
         system: systemPrompt,
         messages:[{role:'user',content:q}]
