@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domina la IA · Curso Completo</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #FAF7F2;
+  --cream2: #F3EDE3;
+  --brown: #3D2B1F;
+  --brown2: #6B4A35;
+  --accent: #C4622D;
+  --accent2: #E8956D;
+  --green: #2D6A4F;
+  --green2: #74C69D;
+  --gold: #D4A017;
+  --text: #2A1F16;
+  --text2: #6B5A4E;
+  --text3: #9E8878;
+  --border: #E8DDD4;
+  --white: #FFFFFF;
+  --shadow: 0 2px 20px rgba(61,43,31,0.08);
+  --shadow-lg: 0 8px 40px rgba(61,43,31,0.14);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+#app { display: flex; min-height: 100vh; }
+
+#sidebar {
+  width: 280px;
+  min-height: 100vh;
+  background: var(--brown);
+  padding: 0;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  overflow-y: auto;
+  z-index: 100;
+  transition: transform .3s;
+}
+
+#main {
+  margin-left: 280px;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── SIDEBAR ── */
+.sb-header {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sb-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  color: var(--cream);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.sb-sub { font-size: 11px; color: var(--accent2); letter-spacing: .06em; text-transform: uppercase; }
+
+.sb-progress-wrap { padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sb-prog-label { font-size: 11px; color: rgba(255,255,255,0.45); margin-bottom: 8px; }
+.sb-prog-bar { height: 4px; background: rgba(255,255,255,0.12); border-radius: 2px; }
+.sb-prog-fill { height: 4px; border-radius: 2px; background: var(--accent2); transition: width .5s; }
+.sb-prog-pct { font-size: 11px; color: var(--accent2); margin-top: 5px; }
+
+.sb-section { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sb-section-title { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 4px 24px 8px; }
+
+.sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 24px;
+  cursor: pointer;
+  transition: background .15s;
+  position: relative;
+}
+.sb-item:hover { background: rgba(255,255,255,0.06); }
+.sb-item.active { background: rgba(196,98,45,0.25); }
+.sb-item.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent2); border-radius:0 2px 2px 0; }
+
+.sb-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; flex-shrink: 0;
+}
+.sb-num.done { background: var(--green2); color: var(--brown); }
+.sb-num.current { background: var(--accent2); color: var(--white); }
+.sb-num.locked { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3); }
+.sb-num.unlocked { background: rgba(255,255,255,0.15); color: var(--cream); }
+
+.sb-item-text { flex: 1; }
+.sb-item-name { font-size: 12.5px; color: var(--cream); line-height: 1.3; }
+.sb-item-name.locked-text { color: rgba(255,255,255,0.35); }
+.sb-item-phase { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+
+/* ── TOPBAR ── */
+#topbar {
+  height: 60px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 32px;
+  gap: 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-title { font-family: 'Fraunces', serif; font-size: 17px; color: var(--brown); flex: 1; }
+.topbar-badge {
+  font-size: 11px; font-weight: 600; padding: 4px 12px;
+  border-radius: 20px; letter-spacing: .04em;
+}
+.badge-fase { background: #FDF0E8; color: var(--accent); }
+.badge-semana { background: #EAF5EE; color: var(--green); }
+
+/* ── CONTENT ── */
+#content { padding: 36px 40px; flex: 1; max-width: 860px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.card-accent-line { border-left: 4px solid var(--accent); }
+.card-green { border-left: 4px solid var(--green); }
+.card-gold { border-left: 4px solid var(--gold); }
+
+.label {
+  font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--text3); margin-bottom: 8px;
+}
+.label-accent { color: var(--accent); }
+.label-green { color: var(--green); }
+
+h1 { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 500; color: var(--brown); line-height: 1.25; margin-bottom: 10px; }
+h2 { font-family: 'Fraunces', serif; font-size: 21px; font-weight: 500; color: var(--brown); line-height: 1.3; margin-bottom: 8px; }
+h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+p { font-size: 14px; color: var(--text2); line-height: 1.75; }
+p + p { margin-top: 10px; }
+
+/* ── CONCEPT BLOCKS ── */
+.concept-block {
+  background: var(--cream2);
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin: 14px 0;
+}
+.concept-block h3 { color: var(--brown); margin-bottom: 8px; }
+
+/* ── PROMPT BOX ── */
+.prompt-wrap { margin: 14px 0; }
+.prompt-header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--brown); padding: 10px 16px;
+  border-radius: 10px 10px 0 0;
+}
+.prompt-header span { font-size: 11px; color: var(--accent2); font-weight: 600; letter-spacing: .06em; }
+.copy-btn {
+  font-size: 11px; padding: 4px 12px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent; color: rgba(255,255,255,0.7);
+  cursor: pointer; transition: all .15s; font-family: 'DM Sans', sans-serif;
+}
+.copy-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.prompt-body {
+  background: #2A1F16; padding: 18px 20px;
+  border-radius: 0 0 10px 10px;
+  font-family: 'Courier New', monospace; font-size: 12.5px;
+  color: #E8DDD4; line-height: 1.8; white-space: pre-wrap;
+}
+
+/* ── EXAMPLE BOX ── */
+.example-box {
+  background: #FDF0E8;
+  border: 1px solid #F0D4BE;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin: 14px 0;
+}
+.example-box .ex-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-bottom: 8px; }
+
+/* ── STEPS ── */
+.step-list { margin: 12px 0; }
+.step-item { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
+.step-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 1px;
+}
+.step-content h3 { margin-bottom: 3px; }
+
+/* ── TABS ── */
+.tab-bar { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab-btn {
+  padding: 8px 18px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--white); color: var(--text2);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all .15s; font-family: 'DM Sans', sans-serif;
+}
+.tab-btn:hover { border-color: var(--accent2); color: var(--accent); }
+.tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── EXERCISE ── */
+.exercise-card {
+  background: linear-gradient(135deg, #FDF0E8 0%, #FAF7F2 100%);
+  border: 2px dashed var(--accent2);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin: 16px 0;
+}
+.exercise-card h3 { color: var(--accent); margin-bottom: 6px; }
+
+/* ── AI CHAT ── */
+#ai-panel {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  padding: 0;
+}
+.ai-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+.ai-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green2); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
+.ai-label { font-size: 13px; font-weight: 600; color: var(--brown); }
+.ai-sub { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+.ai-body { padding: 16px 20px; display: none; }
+.ai-body.open { display: flex; flex-direction: column; gap: 10px; }
+
+#chat-log {
+  max-height: 320px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px;
+  padding-right: 4px;
+}
+.msg { padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.6; max-width: 88%; }
+.msg-user { background: var(--accent); color: #fff; align-self: flex-end; border-radius: 12px 12px 2px 12px; }
+.msg-ai { background: var(--cream2); color: var(--text); align-self: flex-start; border-radius: 12px 12px 12px 2px; }
+.msg-typing { background: var(--cream2); color: var(--text3); align-self: flex-start; font-style: italic; }
+
+.ai-input-row { display: flex; gap: 8px; margin-top: 4px; }
+#ai-input {
+  flex: 1; padding: 10px 14px;
+  border: 1px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: var(--text); background: var(--cream);
+  outline: none; transition: border-color .15s;
+  resize: none;
+}
+#ai-input:focus { border-color: var(--accent2); }
+.send-btn {
+  padding: 10px 18px; border-radius: 10px;
+  background: var(--accent); color: #fff; border: none;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background .15s; font-family: 'DM Sans', sans-serif;
+  white-space: nowrap;
+}
+.send-btn:hover { background: var(--brown2); }
+.send-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.quick-prompts { display: flex; gap: 6px; flex-wrap: wrap; }
+.qp-btn {
+  font-size: 11px; padding: 5px 11px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--white);
+  color: var(--text2); cursor: pointer; transition: all .15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.qp-btn:hover { border-color: var(--accent2); color: var(--accent); background: #FDF0E8; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 11px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: all .15s; font-family: 'DM Sans', sans-serif;
+  text-decoration: none; border: none;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--brown2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(196,98,45,0.3); }
+.btn-outline { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+.btn-outline:hover { background: #FDF0E8; }
+.btn-next { background: var(--brown); color: var(--cream); margin-top: 8px; }
+.btn-next:hover { background: var(--accent); }
+.btn-disabled { background: var(--border); color: var(--text3); cursor: not-allowed; }
+
+/* ── TEST ── */
+.test-q { margin-bottom: 20px; }
+.test-q-text { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; line-height: 1.5; }
+.test-opt {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px; border-radius: 10px;
+  border: 1.5px solid var(--border);
+  margin-bottom: 6px; cursor: pointer;
+  transition: all .15s; font-size: 13px; color: var(--text2);
+  background: var(--white);
+}
+.test-opt:hover { border-color: var(--accent2); background: #FDF8F5; }
+.test-opt.selected { border-color: var(--accent); background: #FDF0E8; color: var(--accent); font-weight: 500; }
+.test-opt.correct { border-color: var(--green); background: #EAF5EE; color: var(--green); }
+.test-opt.wrong { border-color: #E05252; background: #FDEEEE; color: #c0392b; }
+.test-open { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); min-height: 80px; resize: vertical; outline: none; transition: border-color .15s; background: var(--cream); }
+.test-open:focus { border-color: var(--accent2); }
+.feedback-box { background: var(--cream2); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 12px 16px; margin-top: 10px; font-size: 13px; color: var(--text2); line-height: 1.6; display: none; }
+.feedback-box.show { display: block; }
+.ai-feedback { background: #EAF5EE; border-left: 3px solid var(--green); border-radius: 0 10px 10px 0; padding: 12px 16px; margin-top: 10px; font-size: 13px; color: var(--text); line-height: 1.6; display: none; }
+.ai-feedback.show { display: block; }
+
+/* ── PROGRESS CHIPS ── */
+.phase-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  margin: 3px;
+}
+.chip-1 { background: #FDF0E8; color: var(--accent); }
+.chip-2 { background: #EAF5EE; color: var(--green); }
+.chip-3 { background: #FEF9E7; color: var(--gold); }
+.chip-4 { background: #EEF2FF; color: #4F46E5; }
+
+/* ── CERTIFICATE ── */
+#cert-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(42,31,22,0.7); z-index: 1000;
+  align-items: center; justify-content: center; padding: 20px;
+}
+#cert-modal.show { display: flex; }
+.cert-wrap {
+  background: var(--white); border-radius: 20px;
+  max-width: 680px; width: 100%; padding: 40px;
+  text-align: center; position: relative;
+  border: 3px solid var(--gold);
+  box-shadow: var(--shadow-lg);
+}
+.cert-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text3); }
+.cert-title { font-family: 'Fraunces', serif; font-size: 13px; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.cert-main { font-family: 'Fraunces', serif; font-size: 32px; color: var(--brown); margin: 12px 0; font-weight: 700; }
+.cert-name { font-family: 'Fraunces', serif; font-size: 26px; color: var(--accent); font-style: italic; margin: 8px 0; border-bottom: 2px solid var(--gold); padding-bottom: 8px; display: inline-block; min-width: 200px; }
+.cert-desc { font-size: 14px; color: var(--text2); margin: 16px 0; line-height: 1.6; }
+.cert-score { font-size: 36px; font-weight: 700; color: var(--green); }
+.cert-date { font-size: 12px; color: var(--text3); margin-top: 16px; }
+
+/* ── HOME / DASHBOARD ── */
+.welcome-hero {
+  background: linear-gradient(135deg, var(--brown) 0%, #5C3825 100%);
+  border-radius: 20px; padding: 36px 40px; margin-bottom: 24px;
+  position: relative; overflow: hidden;
+}
+.welcome-hero::after {
+  content: '🌿'; position: absolute; right: 40px; top: 50%;
+  transform: translateY(-50%); font-size: 80px; opacity: .12;
+}
+.welcome-hero h1 { color: var(--cream); font-size: 26px; margin-bottom: 8px; }
+.welcome-hero p { color: rgba(250,247,242,0.7); font-size: 14px; }
+.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin: 20px 0; }
+.stat-card { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; text-align: center; }
+.stat-num { font-family: 'Fraunces', serif; font-size: 28px; color: var(--accent2); font-weight: 500; }
+.stat-lbl { font-size: 11px; color: rgba(250,247,242,0.55); margin-top: 4px; }
+
+.module-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
+.mod-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 18px 20px; cursor: pointer;
+  transition: all .2s;
+}
+.mod-card:hover { border-color: var(--accent2); transform: translateY(-2px); box-shadow: var(--shadow); }
+.mod-card.done { border-color: var(--green2); }
+.mod-card.locked { opacity: .55; cursor: not-allowed; }
+.mod-card-num { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+.mod-card-title { font-family: 'Fraunces', serif; font-size: 15px; color: var(--brown); margin-bottom: 4px; }
+.mod-card-sub { font-size: 12px; color: var(--text3); }
+.mod-card-status { font-size: 11px; font-weight: 600; margin-top: 10px; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── MOBILE ── */
+#menu-btn { display: none; }
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  #content { padding: 20px 18px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .module-grid { grid-template-columns: 1fr; }
+  #menu-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: none; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 18px; }
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.fade-in { animation: fadeIn .35s ease both; }
+
+.tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin: 2px; }
+.tag-tool { background: #FDF0E8; color: var(--accent); }
+.tag-time { background: #EAF5EE; color: var(--green); }
+.tag-level { background: #FEF9E7; color: var(--gold); }
+
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+.name-input {
+  width: 100%; padding: 12px 16px; border-radius: 10px;
+  border: 1.5px solid var(--border); font-size: 15px;
+  font-family: 'DM Sans', sans-serif; color: var(--text);
+  background: var(--cream2); outline: none; margin: 8px 0;
+  transition: border-color .15s;
+}
+.name-input:focus { border-color: var(--accent2); }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">Domina la IA</div>
+    <div class="sb-sub">Curso completo · 12 semanas</div>
+  </div>
+
+  <div class="sb-progress-wrap">
+    <div class="sb-prog-label">Tu progreso general</div>
+    <div class="sb-prog-bar"><div class="sb-prog-fill" id="sb-fill" style="width:0%"></div></div>
+    <div class="sb-prog-pct" id="sb-pct">0% completado</div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">Inicio</div>
+    <div class="sb-item" onclick="goTo('home')">
+      <div class="sb-num unlocked">⌂</div>
+      <div class="sb-item-text">
+        <div class="sb-item-name">Dashboard</div>
+        <div class="sb-item-phase">Tu progreso y mapa</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">Fase 1 · Fundamentos · Sem 1-2</div>
+    <div class="sb-item" onclick="goTo('m1')" id="sb-m1">
+      <div class="sb-num unlocked" id="sbn-m1">1</div>
+      <div class="sb-item-text">
+        <div class="sb-item-name" id="sbt-m1">¿Qué es la IA y cómo funciona?</div>
+        <div class="sb-item-phase">Conceptos base · 45 min</div>
+      </div>
+    </div>
+    <div class="sb-item" onclick="goTo('m2')" id="sb-m2">
+      <div class="sb-num locked" id="sbn-m2">2</div>
+      <div class="sb-item-text">
+        <div class="sb-item-name locked-text" id="sbt-m2">Fundamentos de prompting</div>
+        <div class="sb-item-phase">La base de todo · 60 min</div>
+      </div>
+    </div>
+    <div class="sb-item" onclick="goTo('m3')" id="sb-m3">
+      <div class="sb-num locked" id="sbn-m3">3</div>
+      <div class="sb-item-text">
+        <div class="sb-item-name locked-text" id="sbt-m3">Tipos de IA y cuándo usarlas</div>
+        <div class="sb-item-phase">Ecosistema · 45 min</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">Fase 2 · Contenido · Sem 3-5</div>
+    <div class="sb-item" onclick="goTo('m4')" id="sb-m4">
+      <div class="sb-num locked" id="sbn-m4">4</div>
+      <div class="sb-item-text">
+        <div class="sb-item-name locked-text" id="sbt-m4">IA para marketing y contenido</div>
+        <div class="sb-item-phase">Copy · Redes · Estrategia</div>
+      </div>
+    </div>
+    <div class="sb-item" onclick="goTo('m5')" id="sb-m5">
+      <div class="sb-num locked" id="sbn-m5">5</div>
+      <div class="sb-item-text">
+        <div class="sb-item-name locked-text" id="sbt-m5">Imágenes y video con IA</div>
+        <div class="sb-item-phase">Midjourney · Runway · Canva</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">Fase 3 · Negocios · Sem 6-9</div>
+    <div class="sb-item" onclick="goTo('m6')" id="sb-m6">
+      <div class="sb-num locked" id="sbn-m6">6</div>
+      <div class="sb-item-text">
+        <div class="sb-item-name locked-text" id="sbt-m6">Ventas B2B con IA</div>
+        <div class="sb-item-phase">Prospección · Cierre · CRM</div>
+      </div>
+    </div>
+    <div class="sb-item" onclick="goTo('m7')" id="sb-m7">
+      <div class="sb-num locked" id="sbn-m7">7</div>
+      <div class="sb-item-text">
+        <div class="sb-item-name locked-text" id="sbt-m7">Investigación de mercado</div>
+        <div class="sb-item-phase">Perplexity · Análisis · Datos</div>
+      </div>
+    </div>
+    <div class="sb-item" onclick="goTo('m8')" id="sb-m8">
+      <div class="sb-num locked" id="sbn-m8">8</div>
+      <div class="sb-item-text">
+        <div class="sb-item-name locked-text" id="sbt-m8">Automatización de procesos</div>
+        <div class="sb-item-phase">Make · Zapier · Flujos</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-title">Certificación · Sem 12</div>
+    <div class="sb-item" onclick="goTo('exam')" id="sb-exam">
+      <div class="sb-num locked" id="sbn-exam">★</div>
+      <div class="sb-item-text">
+        <div class="sb-item-name locked-text" id="sbt-exam">Examen final</div>
+        <div class="sb-item-phase">Requiere 80/100 · Certificado</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <button id="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <span class="topbar-badge badge-fase" id="topbar-fase">Fase 1</span>
+    <span class="topbar-badge badge-semana" id="topbar-semana">Semana 1</span>
+  </div>
+
+  <div id="content">
+    <!-- pages rendered here -->
+  </div>
+
+  <!-- AI PANEL -->
+  <div id="ai-panel">
+    <div class="ai-header" onclick="toggleChat()">
+      <div class="ai-dot"></div>
+      <span class="ai-label">Profesor IA · Pregúntame cualquier cosa del módulo</span>
+      <span class="ai-sub" id="chat-toggle-label">Abrir ↑</span>
+    </div>
+    <div class="ai-body" id="ai-body">
+      <div class="quick-prompts" id="quick-prompts">
+        <button class="qp-btn" onclick="quickAsk('No entendí el concepto de este módulo, explícamelo de otra forma')">Explícame de otra forma</button>
+        <button class="qp-btn" onclick="quickAsk('Dame un ejemplo más concreto aplicado a un negocio real')">Ejemplo concreto</button>
+        <button class="qp-btn" onclick="quickAsk('¿Cuál es el error más común en este tema?')">Errores comunes</button>
+        <button class="qp-btn" onclick="quickAsk('Evalúa mi nivel en este módulo con una pregunta rápida')">Test rápido</button>
+      </div>
+      <div id="chat-log"></div>
+      <div class="ai-input-row">
+        <textarea id="ai-input" placeholder="Pregunta al profesor IA sobre este módulo..." rows="1" onkeydown="handleKey(event)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendToAI()">Enviar →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- CERTIFICATE MODAL -->
+<div id="cert-modal">
+  <div class="cert-wrap">
+    <button class="cert-close" onclick="closeCert()">✕</button>
+    <div class="cert-title">🎓 Certificado de Finalización</div>
+    <div class="cert-main">Domina la Inteligencia Artificial<br>Aplicada a Negocios</div>
+    <p style="font-size:13px;color:var(--text3);margin:8px 0 4px">Otorgado a</p>
+    <div class="cert-name" id="cert-name-display">—</div>
+    <div class="cert-desc">Ha completado exitosamente el programa completo de 12 módulos en Inteligencia Artificial aplicada a Marketing, Ventas B2B, Creación de Contenido, Investigación de Mercado y Automatización de Negocios.</div>
+    <div class="cert-score" id="cert-score-display">—/100</div>
+    <p style="font-size:13px;color:var(--text3);margin-top:4px">Puntaje final del examen</p>
+    <div class="cert-date" id="cert-date">—</div>
+    <button class="btn btn-primary" style="margin-top:20px" onclick="printCert()">Imprimir / Guardar PDF</button>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────
+const S = {
+  userName: localStorage.getItem('userName') || '',
+  progress: JSON.parse(localStorage.getItem('progress') || '{}'),
+  scores: JSON.parse(localStorage.getItem('scores') || '{}'),
+  currentPage: 'home',
+  chatOpen: false,
+  currentModule: 'home',
+};
+
+const MODULE_ORDER = ['m1','m2','m3','m4','m5','m6','m7','m8','exam'];
+
+function save() {
+  localStorage.setItem('progress', JSON.stringify(S.progress));
+  localStorage.setItem('scores', JSON.stringify(S.scores));
+  localStorage.setItem('userName', S.userName);
+}
+
+function isUnlocked(m) {
+  if (m === 'home' || m === 'm1') return true;
+  const idx = MODULE_ORDER.indexOf(m);
+  if (idx <= 0) return true;
+  return S.progress[MODULE_ORDER[idx-1]] === 'done';
+}
+
+function updateSidebar() {
+  const total = MODULE_ORDER.length;
+  const done = MODULE_ORDER.filter(m => S.progress[m] === 'done').length;
+  const pct = Math.round((done/total)*100);
+  document.getElementById('sb-fill').style.width = pct+'%';
+  document.getElementById('sb-pct').textContent = pct+'% completado';
+
+  MODULE_ORDER.forEach(m => {
+    const unlocked = isUnlocked(m);
+    const done = S.progress[m] === 'done';
+    const sbItem = document.getElementById('sb-'+m);
+    const sbNum = document.getElementById('sbn-'+m);
+    const sbTxt = document.getElementById('sbt-'+m);
+    if (!sbItem) return;
+    sbItem.classList.toggle('active', S.currentPage === m);
+    if (done) {
+      sbNum.className = 'sb-num done'; sbNum.textContent = '✓';
+      sbTxt.className = 'sb-item-name';
+    } else if (unlocked) {
+      sbNum.className = 'sb-num unlocked'; sbNum.textContent = MODULE_ORDER.indexOf(m)+1;
+      sbTxt.className = 'sb-item-name';
+    } else {
+      sbNum.className = 'sb-num locked'; sbNum.textContent = MODULE_ORDER.indexOf(m)+1;
+      sbTxt.className = 'sb-item-name locked-text';
+    }
+  });
+  const examNum = document.getElementById('sbn-exam');
+  if (S.progress['exam'] === 'done') { examNum.className='sb-num done'; examNum.textContent='✓'; }
+  else if (isUnlocked('exam')) { examNum.className='sb-num unlocked'; examNum.textContent='★'; }
+  else { examNum.className='sb-num locked'; examNum.textContent='★'; }
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────
+function goTo(page) {
+  if (!isUnlocked(page) && page !== 'home') {
+    showToast('Completa el módulo anterior primero');
+    return;
+  }
+  S.currentPage = page;
+  S.currentModule = page;
+  updateSidebar();
+  renderPage(page);
+  window.scrollTo(0,0);
+  if (window.innerWidth < 769) document.getElementById('sidebar').classList.remove('open');
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2A1F16;color:#FAF7F2;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999;animation:fadeIn .3s ease';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ─── PAGES ───────────────────────────────────────────────────────
+function renderPage(page) {
+  const c = document.getElementById('content');
+  const topTitle = document.getElementById('topbar-title');
+  const topFase = document.getElementById('topbar-fase');
+  const topSem = document.getElementById('topbar-semana');
+
+  const pages = {
+    home: renderHome,
+    m1: ()=>renderModule('m1'),
+    m2: ()=>renderModule('m2'),
+    m3: ()=>renderModule('m3'),
+    m4: ()=>renderModule('m4'),
+    m5: ()=>renderModule('m5'),
+    m6: ()=>renderModule('m6'),
+    m7: ()=>renderModule('m7'),
+    m8: ()=>renderModule('m8'),
+    exam: renderExam,
+  };
+
+  const fasemap = {home:'Inicio',m1:'Fase 1',m2:'Fase 1',m3:'Fase 1',m4:'Fase 2',m5:'Fase 2',m6:'Fase 3',m7:'Fase 3',m8:'Fase 4',exam:'Certificación'};
+  const semmap = {home:'—',m1:'Semana 1',m2:'Semana 1',m3:'Semana 2',m4:'Semana 3-4',m5:'Semana 5',m6:'Semana 6-7',m7:'Semana 8',m8:'Semana 10-11',exam:'Semana 12'};
+
+  topFase.textContent = fasemap[page]||'—';
+  topSem.textContent = semmap[page]||'—';
+
+  c.innerHTML = '';
+  c.className = 'fade-in';
+  void c.offsetWidth;
+  c.className = 'fade-in';
+
+  if (pages[page]) {
+    const html = pages[page]();
+    c.innerHTML = html;
+    initPageEvents(page);
+  }
+}
+
+// ─── HOME ─────────────────────────────────────────────────────────
+function renderHome() {
+  document.getElementById('topbar-title').textContent = 'Dashboard';
+  const done = MODULE_ORDER.filter(m => S.progress[m]==='done').length;
+  const nameHTML = S.userName ? `Bienvenido de nuevo, <em>${S.userName}</em>` : 'Bienvenido al curso';
+
+  return `
+  <div class="welcome-hero">
+    <h1>${nameHTML}</h1>
+    <p>Tu plataforma personalizada de Inteligencia Artificial para negocios. Avanza a tu ritmo, regresa cuando quieras.</p>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num">${done}</div><div class="stat-lbl">módulos completados</div></div>
+      <div class="stat-card"><div class="stat-num">${MODULE_ORDER.length - (MODULE_ORDER.includes('exam')?1:0)}</div><div class="stat-lbl">módulos totales</div></div>
+      <div class="stat-card"><div class="stat-num">${S.scores['exam'] || '—'}</div><div class="stat-lbl">puntaje examen</div></div>
+    </div>
+  </div>
+
+  ${!S.userName ? `
+  <div class="card card-accent-line">
+    <div class="label label-accent">Personaliza tu experiencia</div>
+    <h3>¿Cómo te llamas?</h3>
+    <p>Tu nombre aparecerá en tu certificado al finalizar el curso.</p>
+    <input class="name-input" id="name-inp" type="text" placeholder="Escribe tu nombre completo..." value="${S.userName}">
+    <button class="btn btn-primary" style="margin-top:8px" onclick="saveName()">Guardar nombre</button>
+  </div>` : ''}
+
+  <div class="card">
+    <div class="label">Módulos del curso</div>
+    <h2>Tu mapa de aprendizaje</h2>
+    <p>Cada módulo desbloquea el siguiente. Puedes regresar a cualquier módulo completado en cualquier momento.</p>
+    <div style="margin-top:8px">
+      <span class="phase-chip chip-1">Fase 1: Fundamentos</span>
+      <span class="phase-chip chip-2">Fase 2: Contenido</span>
+      <span class="phase-chip chip-3">Fase 3: Negocios</span>
+      <span class="phase-chip chip-4">Fase 4: Automatización</span>
+    </div>
+    <div class="module-grid" style="margin-top:16px">
+      ${moduleCards()}
+    </div>
+  </div>
+
+  <div class="card card-green">
+    <div class="label label-green">Cómo usar el curso</div>
+    <div class="step-list">
+      <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Lee el concepto</h3><p>Cada módulo explica el fundamento de forma clara y práctica, sin tecnicismos innecesarios.</p></div></div>
+      <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>Practica el ejercicio</h3><p>Cada módulo tiene un ejercicio real que puedes completar de inmediato.</p></div></div>
+      <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>Haz el test con IA</h3><p>Al final de cada módulo, el Profesor IA evalúa tus respuestas y te da feedback personalizado.</p></div></div>
+      <div class="step-item"><div class="step-dot">4</div><div class="step-content"><h3>Avanza al siguiente</h3><p>Completa el test para desbloquear el próximo módulo. Puedes volver atrás cuando quieras.</p></div></div>
+    </div>
+  </div>
+  `;
+}
+
+function moduleCards() {
+  const mods = [
+    {id:'m1',title:'¿Qué es la IA?',sub:'Conceptos base · 45 min',fase:'chip-1'},
+    {id:'m2',title:'Fundamentos de prompting',sub:'La base de todo · 60 min',fase:'chip-1'},
+    {id:'m3',title:'Tipos de IA',sub:'Ecosistema · 45 min',fase:'chip-1'},
+    {id:'m4',title:'IA para marketing',sub:'Copy · Redes · Estrategia',fase:'chip-2'},
+    {id:'m5',title:'Imágenes y video',sub:'Midjourney · Runway',fase:'chip-2'},
+    {id:'m6',title:'Ventas B2B con IA',sub:'Prospección · Cierre',fase:'chip-3'},
+    {id:'m7',title:'Investigación de mercado',sub:'Perplexity · Análisis',fase:'chip-3'},
+    {id:'m8',title:'Automatización',sub:'Make · Zapier · Flujos',fase:'chip-4'},
+  ];
+  return mods.map(m => {
+    const done = S.progress[m.id]==='done';
+    const unlocked = isUnlocked(m.id);
+    const cls = done ? 'done' : (!unlocked ? 'locked' : '');
+    const statusTxt = done ? '✓ Completado' : (unlocked ? '→ Disponible' : '🔒 Bloqueado');
+    const statusColor = done ? 'color:var(--green)' : (unlocked ? 'color:var(--accent)' : 'color:var(--text3)');
+    return `<div class="mod-card ${cls}" onclick="${unlocked||done?`goTo('${m.id}')`:'showToast(\"Completa el módulo anterior\")'}" >
+      <div class="mod-card-num"><span class="phase-chip ${m.fase}" style="padding:2px 8px;font-size:10px">${m.fase.replace('chip-','Fase ')}</span></div>
+      <div class="mod-card-title">${m.title}</div>
+      <div class="mod-card-sub">${m.sub}</div>
+      <div class="mod-card-status" style="${statusColor}">${statusTxt}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── MODULE CONTENT DATA ──────────────────────────────────────────
+const MODULES = {
+  m1: {
+    title: '¿Qué es la IA y cómo funciona?',
+    fase: 'Fase 1 · Fundamentos',
+    tiempo: '45 minutos',
+    herramientas: ['Claude','ChatGPT'],
+    nivel: 'Base',
+    tabs: ['Concepto','Ejemplo','Prompt','Ejercicio','Test'],
+    content: {
+      concepto: `
+        <h2>¿Qué es exactamente la Inteligencia Artificial?</h2>
+        <p>La IA no es magia ni ciencia ficción. Es un sistema entrenado con enormes cantidades de texto humano que aprendió a predecir qué palabra viene después de otra, una y otra vez, hasta que ese proceso de predicción se volvió tan sofisticado que puede razonar, crear y analizar.</p>
+        <div class="concept-block">
+          <h3>La analogía más útil</h3>
+          <p>Imagina que lees cada libro, artículo, conversación y página web que existe en internet. Después de todo eso, cuando alguien te hace una pregunta, puedes responder basándote en patrones de todo lo que leíste. Eso es esencialmente lo que hace una IA de lenguaje como Claude o ChatGPT.</p>
+        </div>
+        <h2 style="margin-top:20px">Los 3 conceptos que cambian todo</h2>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Modelo de lenguaje (LLM)</h3><p>Es el tipo de IA que usas al hablar con Claude o ChatGPT. Procesa y genera texto. No "piensa" como un humano — predice con una precisión extraordinaria basándose en patrones.</p></div></div>
+          <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>Contexto</h3><p>La IA solo sabe lo que está en la conversación actual. No tiene memoria entre sesiones a menos que se lo des tú. Por eso el contexto que le proporcionas en tu prompt es crítico.</p></div></div>
+          <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>Temperatura y creatividad</h3><p>Las IAs pueden ser más o menos creativas según cómo se les pida. Un prompt preciso da respuestas precisas. Un prompt abierto da respuestas más creativas y variables.</p></div></div>
+        </div>
+        <div class="concept-block">
+          <h3>¿Por qué esto importa para tu negocio?</h3>
+          <p>Entender cómo funciona la IA cambia cómo la usas. La mayoría de personas le hace preguntas vagas y obtiene respuestas genéricas. Los que entienden el modelo saben que mientras más contexto y especificidad das, mejor es el resultado. Esa diferencia vale miles de dólares en productividad.</p>
+        </div>`,
+      ejemplo: `
+        <div class="example-box">
+          <div class="ex-label">Caso real</div>
+          <h3>La diferencia entre usuario básico y usuario avanzado</h3>
+          <p>Dos personas le piden a la IA que escriba un email de ventas para su negocio.</p>
+        </div>
+        <div class="card" style="border-left:3px solid #E05252">
+          <h3 style="color:#c0392b;margin-bottom:8px">Usuario básico — prompt vago</h3>
+          <div class="prompt-body" style="border-radius:8px;padding:12px">"Escribe un email de ventas para mi negocio"</div>
+          <p style="margin-top:10px">Resultado: un email genérico con frases como "estimado cliente", "le ofrezco nuestros servicios", sin ninguna relevancia para su industria, cliente o producto real.</p>
+        </div>
+        <div class="card" style="border-left:3px solid var(--green);margin-top:12px">
+          <h3 style="color:var(--green);margin-bottom:8px">Usuario avanzado — prompt con contexto</h3>
+          <div class="prompt-body" style="border-radius:8px;padding:12px">"Actúa como SDR senior B2B. Escribe un email de primer contacto de 100 palabras para el Director de RRHH de una empresa manufacturera de 200 empleados. Vendemos software de gestión de turnos que reduce el ausentismo un 35%. Tono: directo, sin jerga. CTA: agendar 15 minutos."</div>
+          <p style="margin-top:10px">Resultado: un email específico, con el dolor correcto del cliente, el beneficio concreto, y una llamada a acción sin fricción. Listo para enviar.</p>
+        </div>
+        <p style="margin-top:14px">La diferencia no es la herramienta — es el conocimiento de cómo usarla. Eso es lo que aprenderás en este curso.</p>`,
+      prompt: `
+        <p>Este es el primer prompt reutilizable del curso. Su objetivo es enseñarte a darle contexto correcto a cualquier IA antes de pedir una tarea.</p>
+        <div class="prompt-wrap">
+          <div class="prompt-header">
+            <span>PROMPT MAESTRO DE CONTEXTO</span>
+            <button class="copy-btn" onclick="copyText('prompt-m1')">Copiar</button>
+          </div>
+          <div class="prompt-body" id="prompt-m1">Antes de comenzar cualquier tarea, necesito darte contexto sobre mí y mi negocio.
+
+Mi nombre: [TU NOMBRE]
+Mi negocio: [QUÉ HACES EN UNA LÍNEA]
+Mi cliente ideal: [QUIÉN TE COMPRA: cargo, industria, edad, problema principal]
+Mi propuesta de valor: [POR QUÉ TE ELIGEN A TI Y NO A LA COMPETENCIA]
+Mi tono de comunicación: [FORMAL/INFORMAL, CON EJEMPLOS]
+Lo que NUNCA debo decir: [FRASES O ENFOQUES QUE NO VAN CON TU MARCA]
+
+Con este contexto, ayúdame a [TAREA ESPECÍFICA].</div>
+        </div>
+        <div class="concept-block">
+          <h3>Por qué funciona</h3>
+          <p>Este prompt convierte a Claude en un colaborador que conoce tu negocio. Cada vez que lo usas al inicio de una sesión, todas las respuestas posteriores estarán calibradas a tu realidad, no a una respuesta genérica.</p>
+        </div>`,
+      ejercicio: `
+        <div class="exercise-card">
+          <h3>Ejercicio Módulo 1 · Tiempo: 20 minutos</h3>
+          <p style="margin-top:6px">Completa este ejercicio antes de hacer el test. El Profesor IA evaluará tu respuesta y te dará feedback personalizado.</p>
+        </div>
+        <div class="card">
+          <h3>Parte 1 · Define tu contexto de negocio</h3>
+          <p>Completa el Prompt Maestro de Contexto con tu información real. Escríbelo como si lo fueras a usar mañana con una IA para crear contenido o una propuesta.</p>
+          <textarea class="test-open" id="ej1-p1" placeholder="Mi nombre: ...&#10;Mi negocio: ...&#10;Mi cliente ideal: ...&#10;Mi propuesta de valor: ...&#10;Mi tono: ...&#10;Lo que nunca digo: ..." style="min-height:140px"></textarea>
+        </div>
+        <div class="card">
+          <h3>Parte 2 · Explica con tus palabras</h3>
+          <p>Sin buscar en Google: ¿qué es un modelo de lenguaje y por qué el contexto que le das determina la calidad de su respuesta? Escríbelo en 3-4 líneas como si se lo explicaras a un amigo.</p>
+          <textarea class="test-open" id="ej1-p2" placeholder="Un modelo de lenguaje es..." style="min-height:100px"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitEjercicio('m1')">Enviar al Profesor IA para evaluación →</button>
+        <div class="ai-feedback" id="feedback-ej-m1"></div>`,
+      test: `
+        <div class="card card-gold">
+          <div class="label" style="color:var(--gold)">Test de módulo · 5 preguntas</div>
+          <h2>Evalúa tu comprensión</h2>
+          <p>Debes obtener al menos 4/5 para completar el módulo y desbloquear el siguiente. Puedes intentarlo las veces que necesites.</p>
+        </div>
+        ${buildTest('m1', [
+          {q:'¿Cuál es la descripción más precisa de cómo funciona un modelo de lenguaje como Claude?',opts:['Busca información en internet en tiempo real para responder','Predice texto basándose en patrones aprendidos de enormes cantidades de datos','Tiene una base de datos de respuestas predefinidas','Conecta con expertos humanos para generar respuestas'],c:1},
+          {q:'¿Por qué el contexto que le das a una IA es tan importante?',opts:['Porque sin contexto la IA se apaga','Porque la IA no tiene memoria entre sesiones y solo sabe lo que está en la conversación actual','Porque el contexto determina el precio de uso','Porque solo funciona con ciertos idiomas'],c:1},
+          {q:'Un colega te dice: "Le pedí a ChatGPT que escribiera mi propuesta de negocio y fue terrible." ¿Cuál es probablemente el error?',opts:['ChatGPT no puede escribir propuestas de negocio','La IA estaba desactualizada','No le dio suficiente contexto sobre su negocio, cliente y objetivos','Debió usar Claude en cambio'],c:2},
+          {q:'¿Qué diferencia principalmente a un usuario básico de uno avanzado al usar IA?',opts:['El usuario avanzado paga más por la herramienta','El usuario avanzado sabe programar','El usuario avanzado proporciona más contexto, rol y especificidad en sus prompts','El usuario avanzado usa más herramientas diferentes'],c:2},
+          {q:'¿Cuál de estos prompts producirá un mejor resultado?',opts:['"Escríbeme un post para Instagram"','"Dame ideas de marketing"','"Actúa como estratega de contenido B2C. Escribe un post de Instagram de 120 palabras para una marca de açaí premium dirigida a mujeres 25-35 años que se cuidan. Enfoque: permiso para disfrutar. Tono cómplice, sin ser vendedor."','"Haz algo creativo para mis redes"'],c:2},
+        ])}`
+    }
+  },
+  m2: {
+    title: 'Fundamentos de prompting',
+    fase: 'Fase 1 · Fundamentos',
+    tiempo: '60 minutos',
+    herramientas: ['Claude','ChatGPT','Gemini'],
+    nivel: 'Base',
+    tabs: ['Concepto','Ejemplo','Prompt','Ejercicio','Test'],
+    content: {
+      concepto: `
+        <h2>El prompting es el nuevo lenguaje de los negocios</h2>
+        <p>Saber escribir prompts efectivos no es una habilidad técnica — es una habilidad de comunicación. La diferencia entre un prompt que funciona y uno que no está en cuánto le ayudas a la IA a entender exactamente qué necesitas.</p>
+        <div class="concept-block">
+          <h3>La fórmula RCTF</h3>
+          <p>Todo prompt profesional tiene 4 elementos:</p>
+        </div>
+        <div class="step-list" style="margin-top:14px">
+          <div class="step-item"><div class="step-dot">R</div><div class="step-content"><h3>Rol</h3><p>"Actúa como..." — le das a la IA una perspectiva específica. No es lo mismo pedirle algo como "asistente genérico" que como "Director de Marketing con 15 años en SaaS B2B".</p></div></div>
+          <div class="step-item"><div class="step-dot">C</div><div class="step-content"><h3>Contexto</h3><p>El fondo de la situación: quién eres tú, qué vendes, quién es tu cliente, cuál es el objetivo. Sin contexto, la IA inventa suposiciones que suelen ser incorrectas.</p></div></div>
+          <div class="step-item"><div class="step-dot">T</div><div class="step-content"><h3>Tarea</h3><p>La instrucción específica: qué quieres que produzca, con qué restricciones, en qué formato, de qué longitud. Mientras más precisa la tarea, más preciso el resultado.</p></div></div>
+          <div class="step-item"><div class="step-dot">F</div><div class="step-content"><h3>Formato</h3><p>Cómo quieres el output: lista numerada, párrafo, email, tabla, bullet points, JSON, con o sin emojis. Si no lo especificas, la IA elige — y a menudo elige mal.</p></div></div>
+        </div>
+        <div class="concept-block">
+          <h3>Técnica avanzada: Chain-of-thought</h3>
+          <p>Para problemas complejos, añade al final del prompt: <strong>"Razona paso a paso antes de dar tu respuesta final."</strong> Esto activa un modo de análisis más profundo en la IA. Funciona especialmente bien para análisis de negocio, estrategia y toma de decisiones.</p>
+        </div>`,
+      ejemplo: `
+        <div class="example-box">
+          <div class="ex-label">Transformación real · Mismo objetivo, 2 prompts</div>
+          <h3>Objetivo: crear el bio de LinkedIn para un consultor de marketing</h3>
+        </div>
+        <div class="card" style="border-left:3px solid #E05252">
+          <h3 style="color:#c0392b;margin-bottom:8px">Sin fórmula RCTF</h3>
+          <div class="prompt-body" style="border-radius:8px;padding:12px">"Escribe mi bio de LinkedIn. Soy consultor de marketing."</div>
+          <p style="margin-top:10px">Resultado: bio genérico, podría ser de cualquier persona, no convierte visitas en oportunidades de negocio.</p>
+        </div>
+        <div class="card" style="border-left:3px solid var(--green);margin-top:12px">
+          <h3 style="color:var(--green);margin-bottom:8px">Con fórmula RCTF completa</h3>
+          <div class="prompt-body" style="border-radius:8px;padding:12px">ROL: Actúa como copywriter especializado en personal branding B2B.
+
+CONTEXTO: Soy consultor de marketing digital con 8 años de experiencia. Me especializo en empresas SaaS de 50-200 empleados que quieren escalar su adquisición de clientes. He ayudado a 40+ empresas a triplicar su pipeline en 6 meses.
+
+TAREA: Escribe mi bio de LinkedIn de 3 párrafos que comunique mi especialización, genere credibilidad y termine con un CTA para agendar una consulta.
+
+FORMATO: Párrafos cortos, primera persona, sin bullet points, tono profesional pero cercano. Máximo 150 palabras.</div>
+          <p style="margin-top:10px">Resultado: bio específico que habla al cliente ideal (empresa SaaS), incluye prueba social (40+ empresas, 3x pipeline), y tiene un propósito claro de conversión.</p>
+        </div>`,
+      prompt: `
+        <p>El prompt de evaluación de prompts — úsalo para mejorar cualquier prompt antes de ejecutarlo.</p>
+        <div class="prompt-wrap">
+          <div class="prompt-header">
+            <span>PROMPT PARA MEJORAR TUS PROMPTS</span>
+            <button class="copy-btn" onclick="copyText('prompt-m2')">Copiar</button>
+          </div>
+          <div class="prompt-body" id="prompt-m2">Eres un experto en ingeniería de prompts.
+
+Analiza este prompt que quiero usar:
+[PEGA TU PROMPT AQUÍ]
+
+Evalúalo en estas 4 dimensiones (1-10 cada una):
+1. ROL: ¿Tiene un rol claro y específico?
+2. CONTEXTO: ¿Proporciona suficiente contexto de negocio?
+3. TAREA: ¿Es la instrucción específica y sin ambigüedad?
+4. FORMATO: ¿Especifica el formato del output esperado?
+
+Para cada dimensión con puntuación menor a 8:
+- Explica qué falta
+- Reescribe esa parte del prompt mejorada
+
+Al final, dame el prompt completo mejorado, listo para usar.</div>
+        </div>`,
+      ejercicio: `
+        <div class="exercise-card">
+          <h3>Ejercicio Módulo 2 · Tiempo: 25 minutos</h3>
+          <p style="margin-top:6px">Practica la fórmula RCTF con un caso real de tu negocio.</p>
+        </div>
+        <div class="card">
+          <h3>Tarea: reescribe este prompt usando RCTF</h3>
+          <p>Prompt original (malo): <strong>"Dame ideas para conseguir más clientes"</strong></p>
+          <p style="margin-top:8px">Reescríbelo completo usando los 4 elementos: Rol, Contexto (tu negocio real), Tarea específica y Formato de output esperado.</p>
+          <textarea class="test-open" id="ej2-p1" placeholder="ROL: Actúa como...&#10;CONTEXTO: Mi negocio es...&#10;TAREA: ...&#10;FORMATO: ..." style="min-height:140px"></textarea>
+        </div>
+        <div class="card">
+          <h3>Reflexión</h3>
+          <p>¿Cuál es la diferencia más importante que notas entre el prompt original y el que acabas de escribir? ¿Qué cambió?</p>
+          <textarea class="test-open" id="ej2-p2" placeholder="La diferencia principal es..." style="min-height:80px"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitEjercicio('m2')">Enviar al Profesor IA →</button>
+        <div class="ai-feedback" id="feedback-ej-m2"></div>`,
+      test: `
+        <div class="card card-gold">
+          <div class="label" style="color:var(--gold)">Test de módulo · 5 preguntas</div>
+          <h2>Demuestra tu dominio del prompting</h2>
+          <p>Necesitas 4/5 para completar el módulo.</p>
+        </div>
+        ${buildTest('m2', [
+          {q:'¿Qué significa RCTF en la fórmula de prompting?',opts:['Resultado, Claridad, Técnica, Frecuencia','Rol, Contexto, Tarea, Formato','Rapidez, Creatividad, Temperatura, Función','Respuesta, Calidad, Tiempo, Flujo'],c:1},
+          {q:'Alguien escribe: "Actúa como experto en ventas. Escribe un email." ¿Qué elemento de RCTF falta principalmente?',opts:['El rol','El formato de salida','El contexto del negocio y la tarea específica','Nada, el prompt está completo'],c:2},
+          {q:'¿Para qué sirve la técnica "chain-of-thought" (razona paso a paso)?',opts:['Para hacer que la IA responda más rápido','Para que la IA active un análisis más profundo antes de dar la respuesta final','Para que la respuesta sea más corta','Para cambiar el idioma de la respuesta'],c:1},
+          {q:'¿Cuál de estos es el prompt más completo y efectivo?',opts:['"Escribe sobre marketing"','"Dame consejos de ventas para mi empresa"','"Actúa como consultor de ventas B2B. Mi empresa vende CRM a pymes de 10-50 empleados. Crea 5 objeciones comunes de compra con su respuesta ideal. Formato: tabla de 2 columnas. Tono directo."','"Ayúdame con mis ventas, gracias"'],c:2},
+          {q:'¿Cuándo es especialmente útil especificar el formato de salida en un prompt?',opts:['Solo cuando necesitas una tabla','Siempre — el formato afecta directamente si el output es usable sin edición adicional','Solo para documentos largos','El formato no importa, la IA siempre elige bien'],c:1},
+        ])}`
+    }
+  },
+  m3: {
+    title: 'Tipos de IA y cuándo usar cada una',
+    fase: 'Fase 1 · Fundamentos',
+    tiempo: '45 minutos',
+    herramientas: ['Claude','ChatGPT','Perplexity','Gemini'],
+    nivel: 'Base',
+    tabs: ['Concepto','Ejemplo','Prompt','Ejercicio','Test'],
+    content: {
+      concepto: `
+        <h2>No todas las IAs son iguales</h2>
+        <p>El error más común es usar siempre la misma IA para todo. Cada herramienta tiene fortalezas distintas. Elegir la correcta para cada tarea puede duplicar la calidad de tus resultados.</p>
+        <div class="concept-block">
+          <h3>Las 4 categorías principales</h3>
+        </div>
+        <div class="step-list" style="margin-top:14px">
+          <div class="step-item"><div class="step-dot" style="background:var(--brown)">C</div><div class="step-content"><h3>IAs de conversación y escritura</h3><p>Claude, ChatGPT, Gemini. Úsalas para: escribir, analizar, razonar, crear estrategias, generar ideas, hacer cálculos, responder preguntas complejas. Claude destaca en análisis profundo y copy matizado. ChatGPT en volumen y plugins.</p></div></div>
+          <div class="step-item"><div class="step-dot" style="background:var(--accent)">B</div><div class="step-content"><h3>IAs de búsqueda e investigación</h3><p>Perplexity AI. Úsala para: investigar mercados, buscar información actual con fuentes verificadas, analizar competidores, encontrar tendencias. Tiene acceso a internet en tiempo real, algo que Claude y ChatGPT base no tienen.</p></div></div>
+          <div class="step-item"><div class="step-dot" style="background:var(--gold)">I</div><div class="step-content"><h3>IAs de imagen</h3><p>Midjourney, DALL·E 3, Adobe Firefly. Úsalas para: crear imágenes de marketing, prototipar diseños, generar visual de contenido. Midjourney = calidad artística premium. Firefly = uso comercial seguro.</p></div></div>
+          <div class="step-item"><div class="step-dot" style="background:var(--green)">V</div><div class="step-content"><h3>IAs de video y automatización</h3><p>Runway, HeyGen, Make.com. Para crear video generativo, avatares, y conectar todas las herramientas anteriores en flujos automáticos que corren sin tu intervención.</p></div></div>
+        </div>`,
+      ejemplo: `
+        <div class="example-box">
+          <div class="ex-label">Caso real · Lanzamiento de producto</div>
+          <h3>Cómo usar 4 IAs coordinadas para lanzar un producto nuevo</h3>
+        </div>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Perplexity — investigación de mercado</h3><p>Prompt: "Analiza el mercado de [tu categoría] en [tu país]. Tendencias 2024-2025, competidores principales, precio promedio, qué no está haciendo nadie todavía." Resultado: inteligencia de mercado en 3 minutos con fuentes reales.</p></div></div>
+          <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>Claude — estrategia y copy</h3><p>Le das el research de Perplexity + contexto de tu negocio y le pides: posicionamiento, copy de lanzamiento, emails, posts para redes. Claude sintetiza y crea con criterio estratégico.</p></div></div>
+          <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>Midjourney / Firefly — visual</h3><p>El copy de Claude te da exactamente qué imagen necesitas. Se lo describes a Midjourney y genera el visual de marca en minutos, sin contratar diseñador.</p></div></div>
+          <div class="step-item"><div class="step-dot">4</div><div class="step-content"><h3>Make.com — automatización</h3><p>Conecta todo: cuando alguien llena el formulario de lanzamiento → Claude genera email personalizado → se envía automáticamente → se registra en tu CRM. Sin intervención humana.</p></div></div>
+        </div>`,
+      prompt: `
+        <p>El prompt de selección de herramienta — úsalo cuando no sepas qué IA usar para una tarea.</p>
+        <div class="prompt-wrap">
+          <div class="prompt-header">
+            <span>PROMPT: ¿QUÉ IA DEBO USAR?</span>
+            <button class="copy-btn" onclick="copyText('prompt-m3')">Copiar</button>
+          </div>
+          <div class="prompt-body" id="prompt-m3">Tengo esta tarea de negocio: [DESCRIBE TU TAREA]
+
+Evalúa cuál de estas herramientas es mejor para esta tarea específica:
+- Claude: análisis profundo, copy, estrategia, documentos largos
+- ChatGPT: ideas rápidas, volumen, integración con plugins  
+- Perplexity: investigación con fuentes actuales, datos en tiempo real
+- Midjourney/Firefly: creación de imágenes
+- Make.com/Zapier: automatización de flujos
+- Runway/HeyGen: creación de video
+
+Para la tarea que describí:
+1. ¿Qué herramienta usarías primero y por qué?
+2. ¿Habría una segunda herramienta que complementaría?
+3. Dame el prompt exacto que usarías en esa herramienta para esta tarea.</div>
+        </div>`,
+      ejercicio: `
+        <div class="exercise-card">
+          <h3>Ejercicio Módulo 3 · Tiempo: 20 minutos</h3>
+          <p style="margin-top:6px">Diseña el flujo de IAs para un caso real de tu negocio.</p>
+        </div>
+        <div class="card">
+          <h3>Describe un proyecto real que tengas en mente</h3>
+          <p>Puede ser: lanzar un producto, crear contenido para el mes, conseguir nuevos clientes, hacer una propuesta, o cualquier proyecto de negocio real.</p>
+          <textarea class="test-open" id="ej3-p1" placeholder="Mi proyecto es..." style="min-height:80px"></textarea>
+        </div>
+        <div class="card">
+          <h3>Diseña el flujo de IAs</h3>
+          <p>¿Qué IA usarías en cada paso? ¿Por qué esa y no otra? Describe el flujo completo de principio a fin.</p>
+          <textarea class="test-open" id="ej3-p2" placeholder="Paso 1: usaría [IA] para... porque...&#10;Paso 2: usaría [IA] para... porque...&#10;..." style="min-height:120px"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitEjercicio('m3')">Enviar al Profesor IA →</button>
+        <div class="ai-feedback" id="feedback-ej-m3"></div>`,
+      test: `
+        <div class="card card-gold">
+          <div class="label" style="color:var(--gold)">Test de módulo · 5 preguntas</div>
+          <h2>Evalúa tu conocimiento del ecosistema</h2>
+        </div>
+        ${buildTest('m3', [
+          {q:'Necesitas investigar tendencias actuales del mercado con fuentes verificadas. ¿Qué herramienta usas?',opts:['Claude — tiene mucho conocimiento','ChatGPT — sabe de todo','Perplexity AI — búsqueda web en tiempo real con fuentes citadas','Google Sheets — para organizar los datos'],c:2},
+          {q:'¿Cuál es la principal ventaja de Adobe Firefly sobre Midjourney para uso empresarial?',opts:['Es más barato','Genera imágenes más bonitas','Es entrenado con contenido licenciado — seguro para uso comercial sin riesgo legal','Es más fácil de usar'],c:2},
+          {q:'Una empresa quiere automatizar: lead entra → IA genera email personalizado → se envía → se registra en CRM. ¿Qué herramienta orquesta este flujo?',opts:['Claude — puede hacer todo eso','Make.com o Zapier — plataformas de automatización que conectan apps','LinkedIn — para los leads','Un desarrollador de software'],c:1},
+          {q:'¿Para qué tipo de tarea es Claude superior a ChatGPT?',opts:['Generar muchas variaciones rápidas de un texto corto','Análisis profundo, documentos largos y copy que requiere matiz estratégico','Crear imágenes de alta calidad','Automatizar flujos de trabajo entre apps'],c:1},
+          {q:'Un fundador quiere lanzar un producto nuevo. El flujo óptimo de IAs sería:',opts:['Solo ChatGPT para todo','Perplexity (investigación) → Claude (estrategia y copy) → Midjourney (visual) → Make.com (automatización)','Empezar directamente con Midjourney para crear la imagen del producto','Usar solo Google para investigar todo'],c:1},
+        ])}`
+    }
+  },
+  m4: {
+    title: 'IA para marketing y contenido',
+    fase: 'Fase 2 · Contenido',
+    tiempo: '75 minutos',
+    herramientas: ['Claude','ChatGPT','Buffer','Canva AI'],
+    nivel: 'Intermedio',
+    tabs: ['Concepto','Ejemplo','Prompt','Ejercicio','Test'],
+    content: {
+      concepto: `
+        <h2>De publicar contenido a tener un sistema de contenido</h2>
+        <p>La mayoría de negocios publica lo que se le ocurre ese día. Los negocios que crecen tienen un sistema: pilares temáticos definidos, formatos por plataforma, y un proceso de producción que funciona con o sin inspiración.</p>
+        <div class="concept-block">
+          <h3>Los 5 pilares de contenido universales</h3>
+          <p>Toda marca necesita equilibrar estos 5 tipos de contenido para construir audiencia, autoridad y ventas al mismo tiempo:</p>
+        </div>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">E</div><div class="step-content"><h3>Educativo (30%)</h3><p>Enseña algo útil sin vender. Posiciona tu marca como autoridad. Ejemplo: "5 cosas que nadie te dice sobre [tu industria]". Este contenido genera guardados y compartidos — las métricas que más pesa el algoritmo.</p></div></div>
+          <div class="step-item"><div class="step-dot">A</div><div class="step-content"><h3>Aspiracional (25%)</h3><p>Muestra el resultado que tu cliente quiere lograr. No tu producto — el estilo de vida o resultado que tu producto habilita. Genera identificación y deseo.</p></div></div>
+          <div class="step-item"><div class="step-dot">C</div><div class="step-content"><h3>Conversacional (20%)</h3><p>Pregunta, debate, invita a participar. "¿Cuál es tu mayor reto con X?" Genera comentarios — otra métrica clave del algoritmo y fuente de inteligencia sobre tu cliente.</p></div></div>
+          <div class="step-item"><div class="step-dot">P</div><div class="step-content"><h3>Producto (15%)</h3><p>Muestra tu producto o servicio en contexto real. No publicidad — demostración de valor. Casos de uso, antes/después, proceso detrás del producto.</p></div></div>
+          <div class="step-item"><div class="step-dot">S</div><div class="step-content"><h3>Social/Comunidad (10%)</h3><p>Clientes reales, testimoniales, reposts, behind the scenes. La prueba social que convierte audiencia en clientes. El contenido que más genera confianza.</p></div></div>
+        </div>`,
+      ejemplo: `
+        <div class="example-box">
+          <div class="ex-label">Sistema real · Agencia de marketing</div>
+          <h3>Cómo una agencia pasó de 2 posts/semana a 20 con el mismo tiempo</h3>
+        </div>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Lunes: sesión de estrategia con Claude (20 min)</h3><p>Un prompt genera 20 ideas de contenido distribuidas por pilar. No todas se usan — pero siempre hay más ideas que tiempo para ejecutarlas.</p></div></div>
+          <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>Martes: producción de copy con Claude (45 min)</h3><p>De las 20 ideas, se desarrollan 5 posts completos con copy listo para publicar. Claude los escribe según el pilar, la plataforma y el tono de marca.</p></div></div>
+          <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>Miércoles: visual con Canva AI (30 min)</h3><p>Los posts tienen el texto — Canva AI genera el diseño visual. Misma paleta de colores, misma tipografía, en 3 minutos por pieza.</p></div></div>
+          <div class="step-item"><div class="step-dot">4</div><div class="step-content"><h3>Jueves: programación con Buffer (10 min)</h3><p>Los 5 posts se programan para la semana en todas las plataformas. Desde aquí en adelante, el contenido sale solo.</p></div></div>
+        </div>
+        <p>Resultado: 105 minutos totales para producir una semana completa de contenido para múltiples clientes.</p>`,
+      prompt: `
+        <p>El prompt de sistema semanal de contenido — el más valioso del curso para cualquier negocio con redes sociales.</p>
+        <div class="prompt-wrap">
+          <div class="prompt-header">
+            <span>PROMPT: SISTEMA SEMANAL DE CONTENIDO</span>
+            <button class="copy-btn" onclick="copyText('prompt-m4')">Copiar</button>
+          </div>
+          <div class="prompt-body" id="prompt-m4">Actúa como Director de Contenido con 10 años de experiencia en [TU INDUSTRIA].
+
+Mi marca: [NOMBRE Y QUÉ HACES]
+Mi cliente ideal: [DESCRIPCIÓN DETALLADA]
+Plataformas: [INSTAGRAM / LINKEDIN / TIKTOK / etc.]
+Tono de marca: [CÓMO HABLAS: formal, cómplice, inspiracional, etc.]
+
+Genera el plan de contenido para esta semana con 5 posts:
+- 1 educativo: enseña algo útil sin vender
+- 1 aspiracional: muestra el resultado que mi cliente desea
+- 1 conversacional: pregunta que invite a comentar  
+- 1 de producto: muestra mi producto en contexto real
+- 1 de comunidad: prueba social o behind the scenes
+
+Para cada post:
+1. Pilar y plataforma
+2. Hook (primera línea — máx 8 palabras, que detenga el scroll)
+3. Copy completo listo para publicar
+4. 5 hashtags (mezcla nicho + masivo)
+5. Formato recomendado (reel/carrusel/imagen/video) y duración
+
+Regla: ningún post debe sonar a anuncio. Todos deben aportar valor primero.</div>
+        </div>`,
+      ejercicio: `
+        <div class="exercise-card">
+          <h3>Ejercicio Módulo 4 · Tiempo: 30 minutos</h3>
+        </div>
+        <div class="card">
+          <h3>Define tus pilares de contenido</h3>
+          <p>Para tu negocio específico, ¿cómo se vería cada uno de los 5 pilares? Da un ejemplo de tema o idea para cada uno.</p>
+          <textarea class="test-open" id="ej4-p1" placeholder="Educativo: ...&#10;Aspiracional: ...&#10;Conversacional: ...&#10;Producto: ...&#10;Comunidad: ..." style="min-height:140px"></textarea>
+        </div>
+        <div class="card">
+          <h3>Escribe un hook para cada pilar</h3>
+          <p>El hook es la primera línea de tu post. Máximo 8 palabras. Debe detener el scroll. Escribe uno para cada uno de tus 5 pilares.</p>
+          <textarea class="test-open" id="ej4-p2" placeholder="Educativo: '...'&#10;Aspiracional: '...'&#10;Conversacional: '...'&#10;Producto: '...'&#10;Comunidad: '...'" style="min-height:140px"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitEjercicio('m4')">Enviar al Profesor IA →</button>
+        <div class="ai-feedback" id="feedback-ej-m4"></div>`,
+      test: `
+        <div class="card card-gold">
+          <div class="label" style="color:var(--gold)">Test de módulo</div>
+          <h2>Marketing de contenido con IA</h2>
+        </div>
+        ${buildTest('m4', [
+          {q:'¿Cuál es la métrica que más valoran los algoritmos de Instagram y LinkedIn?',opts:['Número de likes','Guardados y compartidos — señalan que el contenido tiene valor duradero','Número de seguidores de la cuenta','Frecuencia de publicación'],c:1},
+          {q:'Un negocio publica solo contenido de producto (fotos del producto, precios, promociones). ¿Cuál es el problema principal?',opts:['No hay problema, eso es lo que venden','Satura a la audiencia con publicidad constante y no construye autoridad ni comunidad','El algoritmo no favorece imágenes de producto','Deberían publicar en más plataformas'],c:1},
+          {q:'¿Cuál debe ser el porcentaje aproximado de contenido de producto en una estrategia de contenido equilibrada?',opts:['50% — es lo que vende','30% — suficiente para generar ventas','15% — la mayoría del contenido debe aportar valor sin vender directamente','5% — casi nunca se debe mostrar el producto'],c:2},
+          {q:'¿Qué tipo de contenido genera más confianza y convierte más audiencia en clientes?',opts:['Contenido educativo con muchos datos','Contenido aspiracional con imágenes de calidad','Contenido de comunidad: testimoniales, clientes reales, prueba social','Contenido conversacional con preguntas'],c:2},
+          {q:'Para producir contenido de una semana en 2 horas usando IA, ¿cuál es el orden correcto?',opts:['Crear visual → escribir copy → definir pilares → programar','Definir pilares → generar ideas con IA → desarrollar copy con IA → visual con Canva AI → programar con Buffer','Programar primero → luego crear el contenido','Escribir todo manualmente y luego pedir a la IA que corrija'],c:1},
+        ])}`
+    }
+  },
+  m5: {
+    title: 'Imágenes y video con IA',
+    fase: 'Fase 2 · Contenido Visual',
+    tiempo: '60 minutos',
+    herramientas: ['Midjourney','Adobe Firefly','DALL·E 3','Runway','HeyGen'],
+    nivel: 'Intermedio',
+    tabs: ['Concepto','Ejemplo','Prompt','Ejercicio','Test'],
+    content: {
+      concepto: `
+        <h2>El contenido visual es la moneda de las redes sociales</h2>
+        <p>El 90% de la información que el cerebro humano procesa es visual. En plataformas como Instagram y TikTok, una imagen o video de baja calidad destruye el trabajo de un excelente copy. La IA visual resolvió este problema para siempre.</p>
+        <div class="concept-block"><h3>La jerarquía de herramientas visuales</h3></div>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Midjourney v6 — calidad artística premium</h3><p>El mejor para crear imágenes de alta calidad estética. Ideal para branding, contenido aspiracional y cualquier imagen donde la calidad visual es el diferenciador. Requiere aprender su lenguaje de prompts específico.</p></div></div>
+          <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>Adobe Firefly — uso comercial seguro</h3><p>Entrenado exclusivamente con contenido licenciado por Adobe. Cero riesgo legal para uso comercial. Se integra con Photoshop y Creative Cloud. Perfecto para empresas que necesitan garantías legales.</p></div></div>
+          <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>DALL·E 3 (en ChatGPT) — accesibilidad e integración</h3><p>El más fácil de usar — está dentro de ChatGPT. El prompt de imagen puede ser conversacional, en lenguaje natural. Ideal para prototipar ideas visuales rápidamente.</p></div></div>
+          <div class="step-item"><div class="step-dot">4</div><div class="step-content"><h3>Runway Gen-3 — video de alta calidad</h3><p>Genera video a partir de texto o imagen. La mejor calidad para video corto de marca. Ideal para crear contenido de producto sin producción física.</p></div></div>
+          <div class="step-item"><div class="step-dot">5</div><div class="step-content"><h3>HeyGen — videos con presentador IA</h3><p>Crea un avatar de IA que habla con tu script. Revolucionario para ventas B2B, onboarding, y contenido educativo escalable. Un video, mil personalizaciones.</p></div></div>
+        </div>`,
+      ejemplo: `
+        <div class="example-box"><div class="ex-label">Caso real · E-commerce</div><h3>Cómo una tienda creó 30 imágenes de producto en 2 horas sin fotógrafo</h3></div>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Brief visual con Claude</h3><p>Prompt: "Soy una marca de [producto] con estilo [descripción]. Describe 5 escenas visuales para fotografía de producto que comuniquen [valores de marca]. Para cada escena: ambiente, iluminación, props, ángulo de cámara." Claude genera el brief — Midjourney lo ejecuta.</p></div></div>
+          <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>Generación en Midjourney</h3><p>Cada brief se convierte en un prompt de Midjourney con parámetros de estilo: "--ar 4:5 --style raw --v 6". Se generan 4 variantes por escena. Las mejores se seleccionan y upscalean.</p></div></div>
+          <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>Refinamiento con Firefly</h3><p>Las imágenes seleccionadas pasan por Adobe Firefly Generative Fill para ajustes: cambiar fondo, agregar o quitar elementos, ajustar iluminación. Sin Photoshop avanzado.</p></div></div>
+        </div>`,
+      prompt: `
+        <div class="prompt-wrap">
+          <div class="prompt-header"><span>PROMPT: BRIEF VISUAL PARA MIDJOURNEY</span><button class="copy-btn" onclick="copyText('prompt-m5')">Copiar</button></div>
+          <div class="prompt-body" id="prompt-m5">Actúa como director de arte para una marca [POSICIONAMIENTO: premium/masivo/artesanal/etc].
+
+Mi producto: [QUÉ ES]
+Paleta de colores de marca: [COLORES]
+Estilo visual: [MINIMALISTA/CÁLIDO/OSCURO/VIBRANTE/etc]
+Plataforma destino: [INSTAGRAM/TIKTOK/LINKEDIN]
+
+Genera 5 descripciones de imagen para [TIPO: post de producto/campaña de lanzamiento/contenido lifestyle].
+
+Para cada imagen dame:
+1. Descripción de escena (qué aparece, dónde, cómo)
+2. Prompt optimizado para Midjourney (en inglés, con parámetros)
+3. Prompt alternativo para DALL·E 3 (en español, conversacional)
+
+Formato Midjourney: [descripción detallada], [estilo fotográfico], [iluminación], [composición], --ar [ratio] --v 6 --style raw</div>
+        </div>`,
+      ejercicio: `
+        <div class="exercise-card"><h3>Ejercicio Módulo 5 · Tiempo: 25 minutos</h3></div>
+        <div class="card">
+          <h3>Crea tu brief visual de marca</h3>
+          <p>Define el estilo visual de tu marca respondiendo estas preguntas. Esto es lo que le darás a cualquier IA de imagen para que genere contenido consistente.</p>
+          <textarea class="test-open" id="ej5-p1" placeholder="Paleta de colores: ...&#10;Estilo visual (3 adjetivos): ...&#10;Qué nunca aparece en mis imágenes: ...&#10;Referencia visual (marca que admiras): ...&#10;Emoción que debe transmitir: ..." style="min-height:140px"></textarea>
+        </div>
+        <div class="card">
+          <h3>Escribe tu primer prompt de imagen</h3>
+          <p>Usando el formato del prompt de arriba, escribe un prompt para crear una imagen de tu producto o servicio para Instagram.</p>
+          <textarea class="test-open" id="ej5-p2" placeholder="[Descripción de escena], [estilo fotográfico], [iluminación], [composición], --ar 4:5 --v 6..." style="min-height:100px"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitEjercicio('m5')">Enviar al Profesor IA →</button>
+        <div class="ai-feedback" id="feedback-ej-m5"></div>`,
+      test: `
+        <div class="card card-gold"><div class="label" style="color:var(--gold)">Test de módulo</div><h2>Contenido visual con IA</h2></div>
+        ${buildTest('m5', [
+          {q:'¿Cuál es la principal ventaja de Adobe Firefly para uso empresarial?',opts:['Es gratuito','Genera imágenes en más resolución','Está entrenado con contenido licenciado — seguro para uso comercial sin riesgo de copyright','Es el más fácil de usar'],c:2},
+          {q:'¿Para qué caso de uso es HeyGen especialmente poderoso en ventas B2B?',opts:['Crear imágenes de producto de alta calidad','Generar videos personalizados con presentador IA para cada prospecto a escala','Editar videos de redes sociales rápidamente','Crear logos de marca'],c:1},
+          {q:'¿Qué parámetro en Midjourney controla el ratio de aspecto de la imagen?',opts:['--quality','--ar (aspect ratio)','--style','--version'],c:1},
+          {q:'Para crear contenido visual de redes de forma consistente sin diseñador, ¿cuál es la herramienta más accesible?',opts:['Midjourney — porque tiene la mejor calidad','Adobe Firefly — porque es seguro','Canva AI — porque permite aplicar guías de marca con plantillas y tiene la menor curva de aprendizaje','Runway — porque genera video y foto'],c:2},
+          {q:'¿Por qué es recomendable usar Claude ANTES de Midjourney al crear imágenes de marca?',opts:['Porque Claude puede enviar el prompt directamente a Midjourney','Porque Claude genera el brief creativo estratégico que garantiza consistencia de marca antes de ejecutar visualmente','Porque Midjourney requiere prompts en inglés y Claude traduce','Porque Claude es más barato'],c:1},
+        ])}`
+    }
+  },
+  m6: {
+    title: 'Ventas B2B con IA',
+    fase: 'Fase 3 · Negocios',
+    tiempo: '75 minutos',
+    herramientas: ['Claude','Clay','Apollo.io','HubSpot AI'],
+    nivel: 'Avanzado',
+    tabs: ['Concepto','Ejemplo','Prompt','Ejercicio','Test'],
+    content: {
+      concepto: `
+        <h2>La prospección inteligente es el mayor multiplicador de ventas B2B</h2>
+        <p>La diferencia entre un email de ventas que se ignora y uno que genera una reunión no es el producto — es la relevancia. La IA permite personalizar a escala: tratar a cada prospecto como si fuera el único, automáticamente.</p>
+        <div class="concept-block"><h3>El flujo B2B con IA: de lista fría a reunión agendada</h3></div>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Enriquecimiento de datos (Clay)</h3><p>Clay toma una lista de empresas objetivo y extrae automáticamente: tecnología que usan, contrataciones recientes, noticias, LinkedIn del decisor, señales de compra. Esto que antes tomaba horas, toma segundos por prospecto.</p></div></div>
+          <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>Brief de prospecto (Claude)</h3><p>Con los datos de Clay, Claude genera en 30 segundos: el reto principal del prospecto, el ángulo de entrada más relevante, el gancho específico basado en algo real de su empresa.</p></div></div>
+          <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>Email hiperpersonalizado (Claude)</h3><p>Con el brief listo, Claude escribe el primer contacto: referencia a algo real de la empresa, dolor específico, caso de éxito relevante, CTA de bajo compromiso. No suena a plantilla porque no lo es.</p></div></div>
+          <div class="step-item"><div class="step-dot">4</div><div class="step-content"><h3>Secuencia automática (Make.com)</h3><p>Si no responden en 4 días: Claude genera follow-up con ángulo nuevo. Si responden: notificación inmediata + tarea de llamada en CRM. Todo sin intervención manual.</p></div></div>
+        </div>`,
+      ejemplo: `
+        <div class="example-box"><div class="ex-label">Caso real · SaaS B2B</div><h3>De 2% a 8% de tasa de respuesta en outreach en frío</h3></div>
+        <p>Una empresa de software de RRHH tenía una tasa de respuesta del 2% con emails genéricos. Implementaron el flujo de IA en 3 semanas. Resultado a los 60 días:</p>
+        <div class="step-list" style="margin-top:14px">
+          <div class="step-item"><div class="step-dot">↑</div><div class="step-content"><h3>Tasa de respuesta: 2% → 8.3%</h3><p>Porque cada email referenciaba algo real: "vi que contrataron 3 managers de operaciones este mes" abre una conversación sobre escala y procesos. El prospecto siente que lo conocen.</p></div></div>
+          <div class="step-item"><div class="step-dot">↑</div><div class="step-content"><h3>Volumen: 20 → 85 emails/día/SDR</h3><p>El mismo vendedor, cuatro veces más alcance. La IA hace el research y escribe — el humano revisa y decide a quién enviar.</p></div></div>
+          <div class="step-item"><div class="step-dot">↑</div><div class="step-content"><h3>Costo por reunión: -62%</h3><p>Más reuniones, menos tiempo, mismo equipo. El ROI del sistema se pagó en 3 semanas.</p></div></div>
+        </div>`,
+      prompt: `
+        <div class="prompt-wrap">
+          <div class="prompt-header"><span>PROMPT: SECUENCIA COMPLETA DE OUTREACH B2B</span><button class="copy-btn" onclick="copyText('prompt-m6')">Copiar</button></div>
+          <div class="prompt-body" id="prompt-m6">Actúa como SDR senior B2B con 10 años de experiencia en [TU INDUSTRIA].
+
+Mi empresa vende: [DESCRIPCIÓN EN UNA LÍNEA]
+Propuesta de valor concreta: [RESULTADO MEDIBLE QUE PRODUCES]
+Caso de éxito relevante: [CLIENTE SIMILAR + RESULTADO]
+
+Prospecto:
+- Empresa: [NOMBRE]
+- Sector: [INDUSTRIA]
+- Cargo del decisor: [TÍTULO]
+- Señal detectada: [NOTICIA/CONTRATACIÓN/EXPANSIÓN RECIENTE]
+
+Genera la secuencia completa:
+
+EMAIL 1 (día 1): 
+- Asunto: máx 7 palabras, específico, sin signos de exclamación
+- Cuerpo: 80-100 palabras, referencia a la señal detectada, propuesta de valor + caso de éxito, CTA de bajo compromiso (15 min, sin deck)
+
+EMAIL 2 (día 5 si no hay respuesta):
+- Ángulo completamente distinto al email 1
+- 60 palabras máximo
+- Termina con pregunta de sí/no
+
+LINKEDIN (día 8):
+- Mensaje de conexión: 40 palabras máximo, menciona algo específico de su perfil o empresa
+
+Regla de oro: ninguno de los 3 debe sonar a plantilla.</div>
+        </div>`,
+      ejercicio: `
+        <div class="exercise-card"><h3>Ejercicio Módulo 6 · Tiempo: 35 minutos</h3></div>
+        <div class="card">
+          <h3>Elige un prospecto real</h3>
+          <p>Busca en LinkedIn una empresa a la que quieras vender. Encuentra: nombre, sector, cargo del decisor y una señal reciente (contratación, noticia, expansión). Describe todo aquí.</p>
+          <textarea class="test-open" id="ej6-p1" placeholder="Empresa: ...&#10;Sector: ...&#10;Decisor (cargo): ...&#10;Señal detectada: ..." style="min-height:100px"></textarea>
+        </div>
+        <div class="card">
+          <h3>Escribe el email de primer contacto</h3>
+          <p>Usando el prompt de arriba como guía, escribe el email de primer contacto para ese prospecto. Máximo 100 palabras.</p>
+          <textarea class="test-open" id="ej6-p2" placeholder="Asunto: ...&#10;&#10;Hola [nombre],&#10;..." style="min-height:140px"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitEjercicio('m6')">Enviar al Profesor IA →</button>
+        <div class="ai-feedback" id="feedback-ej-m6"></div>`,
+      test: `
+        <div class="card card-gold"><div class="label" style="color:var(--gold)">Test de módulo</div><h2>Ventas B2B con IA</h2></div>
+        ${buildTest('m6', [
+          {q:'¿Cuál es la señal de compra más valiosa para personalizar outreach B2B?',opts:['Que la empresa tenga muchos seguidores en LinkedIn','Contrataciones recientes, rondas de inversión o expansión a nuevos mercados — indican crecimiento y necesidades activas','Que el CEO esté activo en redes sociales','Que sea una empresa grande'],c:1},
+          {q:'¿Cuál es la diferencia más importante entre un email de ventas genérico y uno hiperpersonalizado?',opts:['La longitud — el personalizado es más largo','El personalizado referencia algo real y específico de la empresa del prospecto, haciéndolo sentir que lo conocen','El personalizado tiene mejor diseño HTML','El personalizado menciona el precio'],c:1},
+          {q:'Para el follow-up (segundo email sin respuesta), la mejor práctica es:',opts:['Reenviar el mismo email con asunto "RE:"','Escribir un email más largo explicando mejor el producto','Cambiar completamente el ángulo: nuevo insight, nueva pregunta, distinto valor propuesto','No hacer follow-up para no molestar'],c:2},
+          {q:'¿Qué herramienta es hoy la más potente para enriquecer datos de prospectos B2B automáticamente?',opts:['Google — búsqueda manual','LinkedIn Sales Navigator','Clay — conecta múltiples fuentes de datos y enriquece automáticamente con IA','Excel con fórmulas VLOOKUP'],c:2},
+          {q:'¿Cuál es la regla de oro del CTA en un email de ventas B2B en frío?',opts:['"Compra ahora" con enlace directo al checkout','Invitación a una demo de 1 hora con presentación completa','Solicitar 15 minutos sin compromisos, sin deck, sin demo forzada — bajo compromiso','Pedir que compartan el email con su equipo'],c:2},
+        ])}`
+    }
+  },
+  m7: {
+    title: 'Investigación de mercado con IA',
+    fase: 'Fase 3 · Negocios',
+    tiempo: '60 minutos',
+    herramientas: ['Perplexity','Claude','Gemini'],
+    nivel: 'Intermedio',
+    tabs: ['Concepto','Ejemplo','Prompt','Ejercicio','Test'],
+    content: {
+      concepto: `
+        <h2>La inteligencia de mercado ya no cuesta semanas ni dinero</h2>
+        <p>Antes, un estudio de mercado profesional costaba semanas de trabajo y miles de dólares. Hoy, con el flujo correcto de IAs, puedes generar inteligencia competitiva accionable en horas. La diferencia entre una decisión de negocio basada en datos y una basada en intuición puede valer meses de esfuerzo.</p>
+        <div class="concept-block"><h3>Los 5 tipos de investigación que debes hacer antes de cualquier decisión importante</h3></div>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Análisis de competencia</h3><p>Quiénes son, qué ofrecen, cómo se posicionan, qué dicen sus clientes, qué hueco no están llenando. Herramienta: Perplexity para datos actuales + Claude para síntesis estratégica.</p></div></div>
+          <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>Tendencias del sector</h3><p>Qué está creciendo, qué está muriendo, qué tecnologías emergen, qué cambios regulatorios se vienen. Herramienta: Perplexity con fuentes recientes.</p></div></div>
+          <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>Perfil profundo del cliente</h3><p>Más allá de datos demográficos: qué le duele, qué busca en Google a las 2am, qué objeciones tiene, qué le haría cambiar de proveedor. Herramienta: Claude con técnica de empatía.</p></div></div>
+          <div class="step-item"><div class="step-dot">4</div><div class="step-content"><h3>Análisis de precios y posicionamiento</h3><p>Qué cobra la competencia, cómo justifican su precio, qué incluyen, dónde hay oportunidad de diferenciación. Herramienta: Perplexity + Claude.</p></div></div>
+          <div class="step-item"><div class="step-dot">5</div><div class="step-content"><h3>Oportunidades no aprovechadas</h3><p>Qué no está haciendo nadie, qué pide el cliente que nadie da, qué formato de oferta no existe. Herramienta: Claude con análisis de gaps.</p></div></div>
+        </div>`,
+      ejemplo: `
+        <div class="example-box"><div class="ex-label">Caso real · Startup de tecnología</div><h3>Análisis de competencia completo en 3 horas vs 3 semanas</h3></div>
+        <p>Un fundador necesitaba entender el mercado de CRM para pymes antes de lanzar su producto. Con el flujo de IA generó un análisis que normalmente costaría $5,000 a una consultora.</p>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Hora 1: Perplexity investiga</h3><p>5 prompts sobre competidores, tendencias, precios y quejas de usuarios. Resultado: 8 páginas de datos con fuentes verificadas.</p></div></div>
+          <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>Hora 2: Claude sintetiza</h3><p>Le da el research a Claude y pide: matriz de competidores, oportunidades no aprovechadas, posicionamiento recomendado, mensajes clave. Resultado: estrategia accionable.</p></div></div>
+          <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>Hora 3: validación y plan</h3><p>Claude genera las 10 preguntas más importantes para validar con clientes reales. El fundador hace 5 llamadas ese mismo día.</p></div></div>
+        </div>`,
+      prompt: `
+        <div class="prompt-wrap">
+          <div class="prompt-header"><span>PROMPT: ANÁLISIS COMPETITIVO COMPLETO</span><button class="copy-btn" onclick="copyText('prompt-m7')">Copiar</button></div>
+          <div class="prompt-body" id="prompt-m7">Actúa como analista de mercado senior especializado en [TU INDUSTRIA].
+
+Voy a lanzar / mejorar: [DESCRIPCIÓN DE TU PRODUCTO O SERVICIO]
+Mi cliente objetivo: [DESCRIPCIÓN]
+Mi mercado geográfico: [PAÍS/REGIÓN]
+
+Necesito un análisis de mercado completo. Estructura tu respuesta así:
+
+1. PANORAMA DEL MERCADO
+   - Tamaño estimado y tendencia (crecimiento/madurez/declive)
+   - 3 tendencias más importantes de los últimos 12 meses
+
+2. ANÁLISIS DE COMPETIDORES (mínimo 3)
+   - Nombre, posicionamiento, precio aproximado, fortaleza principal, debilidad principal
+
+3. GAPS Y OPORTUNIDADES
+   - ¿Qué no está haciendo nadie?
+   - ¿Qué pide el cliente que ningún competidor da bien?
+
+4. POSICIONAMIENTO RECOMENDADO
+   - Cómo diferenciarse de la competencia
+   - El mensaje central que nadie está usando
+
+5. PREGUNTAS DE VALIDACIÓN
+   - 5 preguntas para hacer a clientes potenciales esta semana
+
+Razona paso a paso. Basa tus respuestas en datos y lógica, no en suposiciones.</div>
+        </div>`,
+      ejercicio: `
+        <div class="exercise-card"><h3>Ejercicio Módulo 7 · Tiempo: 30 minutos</h3></div>
+        <div class="card">
+          <h3>Investiga a tu competidor principal</h3>
+          <p>Elige el competidor más importante en tu mercado. Responde: ¿qué hace bien? ¿qué hace mal? ¿qué dicen sus clientes insatisfechos? ¿qué hueco está dejando que tú podrías llenar?</p>
+          <textarea class="test-open" id="ej7-p1" placeholder="Competidor: ...&#10;Lo que hace bien: ...&#10;Lo que hace mal: ...&#10;Quejas frecuentes de sus clientes: ...&#10;Hueco que deja: ..." style="min-height:140px"></textarea>
+        </div>
+        <div class="card">
+          <h3>Define tu ventaja competitiva</h3>
+          <p>Basándote en el análisis anterior, ¿cuál es el posicionamiento que deberías ocupar tú? Escríbelo en una sola oración.</p>
+          <textarea class="test-open" id="ej7-p2" placeholder="Mi ventaja competitiva es... porque a diferencia de [competidor], yo..." style="min-height:80px"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitEjercicio('m7')">Enviar al Profesor IA →</button>
+        <div class="ai-feedback" id="feedback-ej-m7"></div>`,
+      test: `
+        <div class="card card-gold"><div class="label" style="color:var(--gold)">Test de módulo</div><h2>Investigación de mercado con IA</h2></div>
+        ${buildTest('m7', [
+          {q:'¿Por qué Perplexity AI es superior a Claude o ChatGPT para investigación de mercado?',opts:['Porque tiene más inteligencia artificial','Porque tiene acceso a internet en tiempo real y cita sus fuentes — crítico para datos actuales de mercado','Porque es más barato','Porque genera mejores resúmenes'],c:1},
+          {q:'¿Cuál es el tipo de investigación más valioso antes de lanzar un producto nuevo?',opts:['Cuánto cobran los competidores','Qué no está haciendo nadie — identificar gaps en el mercado','Cuántas empresas hay en el sector','Cuál es el tamaño del mercado total'],c:1},
+          {q:'Para entender profundamente al cliente ideal (más allá de datos demográficos), ¿qué técnica es más efectiva con IA?',opts:['Pedirle estadísticas del sector','Pedir a Claude que "actúe como" tu cliente ideal y responda preguntas desde su perspectiva — técnica de empatía','Buscar en Google el perfil del cliente','Revisar reviews de Amazon'],c:1},
+          {q:'Un análisis de gaps de mercado busca identificar:',opts:['Cuánto dinero hay en el mercado','Qué están haciendo mal los competidores','Lo que los clientes quieren pero ningún competidor está dando bien todavía','Cuántos competidores existen'],c:2},
+          {q:'¿Cuál es el flujo correcto para generar inteligencia de mercado accionable?',opts:['Claude primero (análisis) → Perplexity después (datos)','Perplexity (datos con fuentes actuales) → Claude (síntesis estratégica y recomendaciones)','Solo usar Google para todo','Contratar una consultora'],c:1},
+        ])}`
+    }
+  },
+  m8: {
+    title: 'Automatización de procesos con IA',
+    fase: 'Fase 4 · Automatización',
+    tiempo: '90 minutos',
+    herramientas: ['Make.com','Zapier','Claude API','HubSpot'],
+    nivel: 'Avanzado',
+    tabs: ['Concepto','Ejemplo','Prompt','Ejercicio','Test'],
+    content: {
+      concepto: `
+        <h2>La automatización convierte tu conocimiento en un sistema que trabaja sin ti</h2>
+        <p>Todo lo que has aprendido en los módulos anteriores — prompting, contenido, ventas, investigación — puede automatizarse para que ocurra sin tu intervención. Ese es el salto de usuario de IA a arquitecto de sistemas de IA.</p>
+        <div class="concept-block">
+          <h3>La regla de oro de la automatización</h3>
+          <p><strong>Nunca automatices un proceso roto.</strong> La IA amplifica lo que ya existe — si el proceso es ineficiente, la automatización produce ineficiencia a escala. Optimiza primero, automatiza después.</p>
+        </div>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Make.com — el orquestador</h3><p>Conecta cualquier aplicación con cualquier aplicación. Puedes insertar un paso de IA (Claude, OpenAI) en medio de cualquier flujo. Cuando algo ocurre en app A → IA procesa → resultado va a app B. Sin código.</p></div></div>
+          <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>Los 3 flujos que todo negocio debe automatizar primero</h3><p>Lead nuevo → email personalizado con IA → tarea en CRM. Nuevo seguidor → mensaje de bienvenida personalizado. Mención de marca → análisis de sentimiento + respuesta sugerida.</p></div></div>
+          <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>El principio de la automatización progresiva</h3><p>Semana 1: automatiza 1 tarea que repites más de 3 veces por semana. Semana 2: conecta 2 flujos. Mes 2: tienes un sistema que corre solo. No intentes automatizar todo de golpe.</p></div></div>
+        </div>`,
+      ejemplo: `
+        <div class="example-box"><div class="ex-label">Flujo real · Agencia digital</div><h3>Sistema de onboarding de clientes completamente automatizado</h3></div>
+        <div class="step-list">
+          <div class="step-item"><div class="step-dot">1</div><div class="step-content"><h3>Trigger: cliente firma contrato en DocuSign</h3><p>Make.com detecta la firma. Extrae: nombre, empresa, tipo de servicio contratado, fecha de inicio.</p></div></div>
+          <div class="step-item"><div class="step-dot">2</div><div class="step-content"><h3>IA genera email de bienvenida personalizado</h3><p>Claude recibe los datos + template de onboarding + información de la empresa del cliente. Genera un email que menciona su empresa específica, el servicio contratado y los próximos pasos.</p></div></div>
+          <div class="step-item"><div class="step-dot">3</div><div class="step-content"><h3>Creación automática de proyecto en Notion + tarea en CRM</h3><p>Make.com crea el workspace del cliente, asigna el equipo, configura los hitos del proyecto y actualiza el CRM con estado "onboarding activo".</p></div></div>
+          <div class="step-item"><div class="step-dot">4</div><div class="step-content"><h3>Notificación en Slack al equipo</h3><p>"Cliente nuevo: [nombre]. Servicio: [tipo]. Email de bienvenida enviado. Proyecto creado en Notion. Primer check-in: [fecha automática]."</p></div></div>
+        </div>
+        <p>Tiempo de este proceso manualmente: 45 minutos por cliente. Con automatización: 0 minutos. El sistema corre solo, 24/7.</p>`,
+      prompt: `
+        <div class="prompt-wrap">
+          <div class="prompt-header"><span>PROMPT: DISEÑAR UN FLUJO DE AUTOMATIZACIÓN</span><button class="copy-btn" onclick="copyText('prompt-m8')">Copiar</button></div>
+          <div class="prompt-body" id="prompt-m8">Actúa como arquitecto de sistemas de automatización de negocios.
+
+Mi negocio: [DESCRIPCIÓN]
+Herramientas que uso: [LISTA DE APPS: CRM, email, redes, etc.]
+
+Proceso que quiero automatizar: [DESCRIBE EL PROCESO ACTUAL MANUAL]
+Frecuencia actual: [CUÁNTAS VECES POR SEMANA LO HACES]
+Tiempo que toma manualmente: [MINUTOS/HORAS]
+
+Diseña el flujo de automatización completo:
+
+1. TRIGGER: ¿Qué evento dispara el flujo?
+2. PASOS DEL FLUJO: Lista cada acción en orden
+3. DÓNDE ENTRA LA IA: ¿En qué pasos Claude/ChatGPT procesa información?
+4. HERRAMIENTA RECOMENDADA: Make.com vs Zapier vs nativa — ¿cuál para este caso?
+5. DIFICULTAD DE IMPLEMENTACIÓN: Fácil/Media/Avanzada
+6. ROI ESTIMADO: Tiempo ahorrado por semana
+
+Al final, dame el paso a paso para implementarlo esta semana, empezando por la versión más simple.</div>
+        </div>`,
+      ejercicio: `
+        <div class="exercise-card"><h3>Ejercicio Módulo 8 · Tiempo: 40 minutos</h3></div>
+        <div class="card">
+          <h3>Identifica tu tarea más repetitiva</h3>
+          <p>¿Qué tarea haces más de 3 veces por semana que sea siempre igual o casi igual? Descríbela en detalle: qué desencadena la tarea, qué pasos tiene, cuánto tiempo toma, dónde termina.</p>
+          <textarea class="test-open" id="ej8-p1" placeholder="La tarea es: ...&#10;La hago cuando: ...&#10;Los pasos son: 1. ... 2. ... 3. ...&#10;Tiempo total: ...&#10;Resultado final: ..." style="min-height:140px"></textarea>
+        </div>
+        <div class="card">
+          <h3>Diseña la automatización</h3>
+          <p>Sin importar si sabes usar Make.com o no — diseña cómo debería funcionar el flujo automatizado: qué lo dispara, qué haría la IA, dónde termina el proceso.</p>
+          <textarea class="test-open" id="ej8-p2" placeholder="Trigger: cuando...&#10;Paso 1: ...&#10;Paso 2 (IA): Claude haría...&#10;Paso 3: resultado va a...&#10;Tiempo ahorrado por semana: ..." style="min-height:120px"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitEjercicio('m8')">Enviar al Profesor IA →</button>
+        <div class="ai-feedback" id="feedback-ej-m8"></div>`,
+      test: `
+        <div class="card card-gold"><div class="label" style="color:var(--gold)">Test de módulo</div><h2>Automatización con IA</h2></div>
+        ${buildTest('m8', [
+          {q:'¿Cuál es la regla de oro antes de automatizar cualquier proceso?',opts:['Siempre automatizar lo más complejo primero','Nunca automatizar procesos que involucren clientes','Optimizar el proceso primero — la automatización amplifica lo que existe, bueno o malo','Contratar un desarrollador para implementarla'],c:2},
+          {q:'¿Cuál es la diferencia principal entre Make.com y Zapier?',opts:['Make.com es gratuito y Zapier es de pago','Make.com permite flujos más complejos y con lógica condicional avanzada; Zapier es más simple y fácil para automatizaciones básicas','Zapier funciona con más apps que Make.com','No hay diferencia real'],c:1},
+          {q:'En un flujo de automatización, ¿en qué paso es más valioso insertar un paso de IA (Claude)?',opts:['Al inicio, para disparar el flujo','Cuando se necesita procesar, personalizar o generar texto basado en datos del flujo — tareas que requieren comprensión del lenguaje','Al final, para enviar notificaciones','En todos los pasos siempre'],c:1},
+          {q:'¿Cuáles son los 3 flujos que todo negocio debería automatizar primero?',opts:['Publicación en redes, diseño de logos, creación de presentaciones','Lead nuevo → email con IA → CRM; nuevo seguidor → bienvenida; mención de marca → análisis y respuesta','Facturación, nómina, contabilidad','Reuniones, agenda, recordatorios'],c:1},
+          {q:'Un negocio quiere automatizar su proceso de ventas pero el proceso actual es desorganizado y mal definido. ¿Qué debe hacer?',opts:['Automatizarlo de todas formas — la automatización lo ordenará','Contratar más vendedores primero','Definir y optimizar el proceso manualmente primero, probarlo con al menos 10 casos reales, y solo entonces automatizarlo','Comprar el CRM más caro del mercado'],c:2},
+        ])}`
+    }
+  },
+};
+
+// ─── BUILD TEST HTML ──────────────────────────────────────────────
+function buildTest(moduleId, questions) {
+  let html = `<div id="test-${moduleId}">`;
+  questions.forEach((q, qi) => {
+    html += `<div class="test-q" id="tq-${moduleId}-${qi}">
+      <div class="test-q-text">${qi+1}. ${q.q}</div>`;
+    q.opts.forEach((opt, oi) => {
+      html += `<div class="test-opt" id="to-${moduleId}-${qi}-${oi}" onclick="selectTestOpt('${moduleId}',${qi},${oi},${q.c})">${opt}</div>`;
+    });
+    html += `<div class="feedback-box" id="fb-${moduleId}-${qi}"></div></div>`;
+  });
+  html += `<div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button class="btn btn-primary" id="submit-test-${moduleId}" onclick="submitTest('${moduleId}',${questions.length})">Evaluar respuestas →</button>
+    <span id="test-score-${moduleId}" style="font-size:14px;font-weight:600;color:var(--green)"></span>
+  </div></div>`;
+  return html;
+}
+
+const testAnswers = {};
+const testCorrects = {
+  m1:[1,1,2,2,2], m2:[1,2,1,2,1], m3:[2,2,1,1,1],
+  m4:[1,1,2,2,1], m5:[2,1,1,2,1], m6:[1,1,2,2,2],
+  m7:[1,1,1,2,1], m8:[2,1,1,1,2],
+  exam:[1,2,1,2,1,2,1,2,1,2]
+};
+
+function selectTestOpt(mod, qi, oi, correct) {
+  if (!testAnswers[mod]) testAnswers[mod] = {};
+  if (testAnswers[mod][qi] !== undefined) return;
+  testAnswers[mod][qi] = oi;
+  document.getElementById(`to-${mod}-${qi}-${oi}`).classList.add('selected');
+}
+
+function submitTest(mod, total) {
+  if (!testAnswers[mod]) { showToast('Responde todas las preguntas primero'); return; }
+  const answered = Object.keys(testAnswers[mod]).length;
+  if (answered < total) { showToast(`Responde las ${total} preguntas`); return; }
+
+  let correct = 0;
+  const corrects = testCorrects[mod];
+  for (let qi = 0; qi < total; qi++) {
+    const given = testAnswers[mod][qi];
+    const right = corrects[qi];
+    const givenEl = document.getElementById(`to-${mod}-${qi}-${given}`);
+    const rightEl = document.getElementById(`to-${mod}-${qi}-${right}`);
+    const fb = document.getElementById(`fb-${mod}-${qi}`);
+    if (given === right) {
+      correct++;
+      if(givenEl) givenEl.classList.replace('selected','correct');
+      if(fb){ fb.textContent='✓ Correcto'; fb.className='feedback-box show'; fb.style.borderColor='var(--green)'; fb.style.background='#EAF5EE'; }
+    } else {
+      if(givenEl) givenEl.classList.replace('selected','wrong');
+      if(rightEl) rightEl.classList.add('correct');
+      if(fb){ fb.textContent=`La respuesta correcta está resaltada en verde.`; fb.className='feedback-box show'; }
+    }
+  }
+
+  const pct = Math.round((correct/total)*100);
+  const scoreEl = document.getElementById(`test-score-${mod}`);
+  if(scoreEl) scoreEl.textContent = `${correct}/${total} correctas (${pct}%)`;
+
+  S.scores[mod] = pct;
+  const passScore = mod === 'exam' ? 80 : 80;
+  if (pct >= passScore) {
+    S.progress[mod] = 'done';
+    save();
+    updateSidebar();
+    setTimeout(() => {
+      if (mod === 'exam') {
+        showToast('🎓 ¡Felicitaciones! Obtuviste tu certificado');
+        setTimeout(showCertificate, 1000);
+      } else {
+        const nextIdx = MODULE_ORDER.indexOf(mod) + 1;
+        if (nextIdx < MODULE_ORDER.length) {
+          showToast(`✓ Módulo completado. ${MODULE_ORDER[nextIdx].toUpperCase()} desbloqueado`);
+        }
+      }
+    }, 500);
+  } else {
+    showToast(`${pct}% — necesitas 80% para completar. Revisa las respuestas y vuelve a intentarlo.`);
+    setTimeout(() => { if(testAnswers[mod]) delete testAnswers[mod]; }, 2000);
+  }
+}
+
+// ─── RENDER MODULE ────────────────────────────────────────────────
+function renderModule(id) {
+  const m = MODULES[id];
+  if (!m) return '<p>Módulo en construcción</p>';
+  document.getElementById('topbar-title').textContent = m.title;
+
+  const tabsHtml = m.tabs.map((t,i) =>
+    `<button class="tab-btn ${i===0?'active':''}" onclick="switchTab('${id}','${t.toLowerCase()}')">${t}</button>`
+  ).join('');
+
+  const toolTags = m.herramientas.map(h => `<span class="tag tag-tool">${h}</span>`).join('');
+  const done = S.progress[id] === 'done';
+
+  return `
+  <div class="card card-accent-line">
+    <div class="label label-accent">${m.fase}</div>
+    <h1>${m.title}</h1>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      ${toolTags}
+      <span class="tag tag-time">⏱ ${m.tiempo}</span>
+      <span class="tag tag-level">★ ${m.nivel}</span>
+      ${done ? '<span class="tag" style="background:#EAF5EE;color:var(--green)">✓ Completado</span>' : ''}
+    </div>
+  </div>
+  <div class="tab-bar">${tabsHtml}</div>
+  ${m.tabs.map((t,i) => `<div class="tab-panel ${i===0?'active':''}" id="tp-${id}-${t.toLowerCase()}">${m.content[t.toLowerCase()]||''}</div>`).join('')}
+  <div style="margin-top:20px;display:flex;gap:10px">
+    ${MODULE_ORDER.indexOf(id) > 0 ? `<button class="btn btn-outline" onclick="goTo('${MODULE_ORDER[MODULE_ORDER.indexOf(id)-1]}')">← Anterior</button>` : ''}
+    ${MODULE_ORDER.indexOf(id) < MODULE_ORDER.length-1 ? `<button class="btn btn-next" onclick="goTo('${MODULE_ORDER[MODULE_ORDER.indexOf(id)+1]}')" ${isUnlocked(MODULE_ORDER[MODULE_ORDER.indexOf(id)+1])?'':'style="opacity:.5;cursor:not-allowed"'}>Siguiente módulo →</button>` : ''}
+  </div>`;
+}
+
+function switchTab(moduleId, tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  const panel = document.getElementById(`tp-${moduleId}-${tab}`);
+  if (panel) panel.classList.add('active');
+}
+
+// ─── EXAM ─────────────────────────────────────────────────────────
+function renderExam() {
+  document.getElementById('topbar-title').textContent = 'Examen Final';
+  const examQs = [
+    {q:'¿Cuál es el elemento más importante en la fórmula RCTF para obtener resultados de calidad de una IA?',opts:['El rol — sin rol la IA no funciona','Todos son igualmente importantes — la calidad del resultado depende de los 4 elementos combinados','El formato — determina si el output es usable','La tarea — es lo único que importa'],c:1},
+    {q:'Un negocio quiere crear 20 posts de LinkedIn al mes usando IA de forma eficiente. ¿Cuál es el flujo correcto?',opts:['Pedirle a ChatGPT los 20 posts de una sola vez','Definir 5 pilares de contenido → generar batería de ideas con Claude → desarrollar cada post con prompt específico por tipo → programar con Buffer','Copiar posts de competidores y parafrasearlos','Publicar lo que la IA genere sin revisar'],c:1},
+    {q:'Para investigar tendencias actuales del mercado con fuentes verificadas, ¿qué herramienta es insustituible?',opts:['Claude — tiene mucho conocimiento acumulado','ChatGPT con plugins','Perplexity AI — acceso a internet en tiempo real con fuentes citadas','Google Sheets'],c:2},
+    {q:'¿Cuál es el mayor error al implementar IA en procesos de negocio?',opts:['Usar demasiadas herramientas','Automatizar procesos rotos — la IA amplifica tanto lo bueno como lo ineficiente','No usar suficientes prompts','Usar IA solo para contenido'],c:1},
+    {q:'En ventas B2B, ¿qué hace que un email de prospección en frío sea efectivo con IA?',opts:['Que sea largo y detallado para demostrar expertise','Que mencione el precio competitivo desde el inicio','Que referencie una señal específica y real de la empresa del prospecto — contratación, noticia, expansión','Que tenga un asunto con signos de exclamación para llamar la atención'],c:2},
+    {q:'¿Cuál es la ventaja principal de Adobe Firefly sobre Midjourney para uso empresarial?',opts:['Genera imágenes de mayor resolución','Cuesta menos por imagen','Está entrenado con contenido licenciado — sin riesgo legal para uso comercial','Es más fácil de aprender'],c:2},
+    {q:'Para construir un flujo donde: lead llena formulario → IA genera email personalizado → se envía → se registra en CRM, ¿qué herramienta orquesta todo?',opts:['Claude — puede hacer todo eso directamente','Make.com o Zapier — conectan las apps y permiten insertar pasos de IA en el flujo','HubSpot solo','Un desarrollador de software'],c:1},
+    {q:'¿Qué diferencia a un usuario avanzado de IA de uno básico en el contexto de negocios?',opts:['El usuario avanzado usa más herramientas diferentes','El usuario avanzado sabe programar','El usuario avanzado proporciona contexto rico, roles específicos y formatos claros — obtiene resultados usables sin edición','El usuario avanzado paga más por las herramientas premium'],c:2},
+    {q:'Al diseñar un sistema de contenido con IA para redes sociales, ¿cuál debe ser el porcentaje máximo de contenido directamente promocional?',opts:['50% — la mitad debe vender','30% — un tercio es razonable','15-20% — la mayoría debe aportar valor antes de vender','5% — casi nunca se debe mencionar el producto'],c:2},
+    {q:'¿Cuál es el flujo correcto de IAs para lanzar un nuevo producto o servicio al mercado?',opts:['Midjourney (imagen) → ChatGPT (copy) → publicar directamente','Solo Claude para todo','Perplexity (investigación de mercado) → Claude (estrategia y copy) → Midjourney/Firefly (visual) → Make.com (automatización de lanzamiento)','Contratar agencia de marketing tradicional'],c:2},
+  ];
+
+  const qs = examQs.map((q,qi) => {
+    let html = `<div class="test-q" id="tq-exam-${qi}"><div class="test-q-text">${qi+1}. ${q.q}</div>`;
+    q.opts.forEach((opt,oi) => { html += `<div class="test-opt" id="to-exam-${qi}-${oi}" onclick="selectTestOpt('exam',${qi},${oi},${q.c})">${opt}</div>`; });
+    html += `<div class="feedback-box" id="fb-exam-${qi}"></div></div>`;
+    return html;
+  }).join('');
+
+  return `
+  <div class="card" style="background:linear-gradient(135deg,var(--brown) 0%,#5C3825 100%);border:none">
+    <div class="label" style="color:var(--accent2)">Examen Final · Semana 12</div>
+    <h1 style="color:var(--cream)">Certificación en IA Aplicada a Negocios</h1>
+    <p style="color:rgba(250,247,242,0.7)">10 preguntas · necesitas 80/100 para obtener tu certificado · puedes intentarlo las veces que necesites</p>
+  </div>
+  ${!S.userName ? `<div class="card card-accent-line"><h3>Antes de comenzar</h3><p>Escribe tu nombre completo — aparecerá en tu certificado.</p><input class="name-input" id="exam-name" type="text" placeholder="Tu nombre completo..." value="${S.userName}"><button class="btn btn-outline" style="margin-top:8px" onclick="saveExamName()">Guardar</button></div>` : `<div class="card card-green"><p>✓ El certificado se emitirá a nombre de <strong>${S.userName}</strong></p></div>`}
+  <div class="card">
+    <div class="label label-accent">Preguntas del examen</div>
+    <div id="test-exam">${qs}</div>
+    <div style="margin-top:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="submitTest('exam',10)">Enviar examen y obtener resultado →</button>
+      <span id="test-score-exam" style="font-size:14px;font-weight:600;color:var(--green)"></span>
+    </div>
+  </div>`;
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────
+function saveName() {
+  const v = document.getElementById('name-inp')?.value?.trim();
+  if(v) { S.userName = v; save(); renderPage('home'); showToast('Nombre guardado ✓'); }
+}
+function saveExamName() {
+  const v = document.getElementById('exam-name')?.value?.trim();
+  if(v) { S.userName = v; save(); renderPage('exam'); }
+}
+function copyText(id) {
+  const el = document.getElementById(id);
+  if(el) navigator.clipboard.writeText(el.innerText).then(() => showToast('Prompt copiado ✓'));
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+function toggleChat() {
+  S.chatOpen = !S.chatOpen;
+  document.getElementById('ai-body').classList.toggle('open', S.chatOpen);
+  document.getElementById('chat-toggle-label').textContent = S.chatOpen ? 'Cerrar ↓' : 'Abrir ↑';
+}
+
+// ─── EXERCISE SUBMIT ─────────────────────────────────────────────
+async function submitEjercicio(mod) {
+  const inputs = {};
+  for(let i=1; i<=3; i++){
+    const el = document.getElementById(`ej${mod.slice(1)}-p${i}`);
+    if(el) inputs[`p${i}`] = el.value;
+  }
+  const filled = Object.values(inputs).some(v => v && v.trim().length > 20);
+  if(!filled){ showToast('Completa el ejercicio antes de enviar'); return; }
+
+  const fbEl = document.getElementById(`feedback-ej-${mod}`);
+  if(!fbEl) return;
+  fbEl.className = 'ai-feedback show';
+  fbEl.innerHTML = '🤔 El Profesor IA está analizando tu ejercicio...';
+
+  const moduleTitle = MODULES[mod]?.title || mod;
+  const prompt = `Eres un profesor experto en IA aplicada a negocios. Un estudiante completó el ejercicio del módulo "${moduleTitle}".
+
+Sus respuestas:
+${Object.entries(inputs).map(([k,v]) => `${k}: ${v}`).join('\n')}
+
+Evalúa su trabajo en máximo 150 palabras:
+1. ¿Qué está haciendo bien?
+2. ¿Qué mejorarías específicamente?
+3. Un tip concreto y accionable para que lo aplique hoy.
+
+Tono: como un buen profesor — directo, constructivo, alentador. Sin puntuar, solo feedback cualitativo.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const txt = data.content?.[0]?.text || 'No se pudo obtener feedback en este momento.';
+    fbEl.innerHTML = `<strong>Feedback del Profesor IA:</strong><br><br>${txt.replace(/\n/g,'<br>')}`;
+  } catch(e) {
+    fbEl.innerHTML = 'El Profesor IA no está disponible en este momento. Revisa tu conexión e intenta de nuevo.';
+  }
+}
+
+// ─── AI CHAT ──────────────────────────────────────────────────────
+function addMsg(text, role) {
+  const log = document.getElementById('chat-log');
+  const div = document.createElement('div');
+  div.className = `msg msg-${role}`;
+  div.innerHTML = text.replace(/\n/g,'<br>');
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+  return div;
+}
+
+async function sendToAI() {
+  const input = document.getElementById('ai-input');
+  const btn = document.getElementById('send-btn');
+  const q = input.value.trim();
+  if(!q) return;
+
+  input.value = '';
+  btn.disabled = true;
+  addMsg(q, 'user');
+
+  const currentMod = MODULES[S.currentModule];
+  const modContext = currentMod ? `El estudiante está en el módulo "${currentMod.title}" (${currentMod.fase}).` : 'El estudiante está en el dashboard del curso.';
+
+  const typing = addMsg('Escribiendo...', 'typing');
+
+  const systemPrompt = `Eres un profesor experto en IA aplicada a negocios. ${modContext}
+
+Tu rol:
+- Explicar conceptos del módulo de forma clara y práctica
+- Dar ejemplos aplicados a negocios reales
+- Evaluar el nivel del estudiante si te lo piden
+- Corregir errores de comprensión amablemente
+- Nunca dar respuestas genéricas — siempre contextualizadas al módulo actual
+
+Estilo: directo, cálido, como un mentor que quiere que el estudiante tenga éxito. Respuestas de máximo 200 palabras salvo que se pida más detalle.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system: systemPrompt,
+        messages:[{role:'user',content:q}]
+      })
+    });
+    const data = await res.json();
+    const txt = data.content?.[0]?.text || 'No pude procesar tu pregunta. Intenta de nuevo.';
+    typing.remove();
+    addMsg(txt, 'ai');
+  } catch(e) {
+    typing.remove();
+    addMsg('Error de conexión. Verifica tu internet e intenta de nuevo.', 'ai');
+  }
+  btn.disabled = false;
+  input.focus();
+}
+
+function quickAsk(q) {
+  document.getElementById('ai-input').value = q;
+  if(!S.chatOpen) toggleChat();
+  sendToAI();
+}
+
+function handleKey(e) {
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendToAI(); }
+}
+
+// ─── CERTIFICATE ─────────────────────────────────────────────────
+function showCertificate() {
+  document.getElementById('cert-name-display').textContent = S.userName || 'Estudiante';
+  document.getElementById('cert-score-display').textContent = (S.scores['exam']||'—') + '/100';
+  document.getElementById('cert-date').textContent = 'Emitido el ' + new Date().toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('cert-modal').classList.add('show');
+}
+function closeCert() { document.getElementById('cert-modal').classList.remove('show'); }
+function printCert() { window.print(); }
+
+// ─── PAGE EVENTS ─────────────────────────────────────────────────
+function initPageEvents(page) {
+  // Re-attach dynamic events after innerHTML replace
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+goTo('home');
+</script>
+</body>
+</html>
