@@ -40,7 +40,6 @@ fbq('track', 'PageView');
   .discount-badge{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);border-radius:50px;padding:10px 22px;margin-top:18px;}
   .discount-badge .pct{font-size:30px;font-weight:900;color:var(--primary);line-height:1;}
   .discount-badge .desc{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;text-align:left;line-height:1.4;}
-  /* Sorteo badge */
   .sorteo-badge{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);border-radius:50px;padding:12px 22px;margin-top:18px;}
   .sorteo-badge .premio{font-size:13px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;text-align:left;}
   .card-body{padding:26px 30px 30px;}
@@ -122,14 +121,10 @@ fbq('track', 'PageView');
     <div class="card-header">
       <div class="brand">Oakberry</div>
       <div class="brand-sub" id="headerSub">Cupón exclusivo · Nuevos clientes</div>
-
-      <!-- Modo cupón -->
       <div id="badgeCupon" class="discount-badge">
         <span class="pct" id="headerPct">30%</span>
         <span class="desc">OFF en tu<br><span id="headerProducto">Bowl 12oz</span></span>
       </div>
-
-      <!-- Modo sorteo -->
       <div id="badgeSorteo" class="sorteo-badge" style="display:none;">
         <span style="font-size:28px;">🏆</span>
         <span class="premio" id="headerPremio">Un año de açaí gratis</span>
@@ -169,7 +164,7 @@ fbq('track', 'PageView');
     </div>
   </div>
 
-  <!-- ESTADO 2: ÉXITO (cupón o sorteo) -->
+  <!-- ESTADO 2: ÉXITO -->
   <div id="stateSuccess" class="state">
     <div class="result-header">
       <span class="result-icon" id="successIcon">🎉</span>
@@ -192,8 +187,6 @@ fbq('track', 'PageView');
           <button class="copy-btn" onclick="copiar('outCode',this)">📋 Copiar</button>
         </div>
       </div>
-
-      <!-- Info cupón -->
       <div id="infoCupon">
         <div class="info-pill purple">
           <span class="icon">📍</span>
@@ -204,8 +197,6 @@ fbq('track', 'PageView');
           <span>Uso único. Una vez canjeado en tienda no podrá volver a usarse.</span>
         </div>
       </div>
-
-      <!-- Info sorteo -->
       <div id="infoSorteo" style="display:none;">
         <div class="info-pill green">
           <span class="icon">🏆</span>
@@ -238,6 +229,9 @@ fbq('track', 'PageView');
         <span class="icon">💡</span>
         <span id="usedTip">Si ya canjeaste este cupón en tienda, acércate a cualquier punto Oakberry.</span>
       </div>
+    </div>
+  </div>
+
   <!-- ESTADO 4: BLOQUEADO POR LOOPY -->
   <div id="stateLoopy" class="state">
     <div class="result-header" style="background:#c0392b;">
@@ -271,7 +265,7 @@ const CFG = {
 const P = (() => {
   const p = new URLSearchParams(window.location.search);
   return {
-    modo:      p.get("modo")      || "cupon",   // "cupon" o "sorteo"
+    modo:      p.get("modo")      || "cupon",
     ciudad:    p.get("ciudad")    || "No especificada",
     tienda:    p.get("tienda")    || "No especificada",
     fase:      p.get("fase")      || "organico",
@@ -286,11 +280,12 @@ const P = (() => {
 
 const esSorteo = P.modo === "sorteo";
 
-// ── PRECALENTAR servidor apenas carga la página ──────────────
+// ── PRECALENTAR servidor ──────────────────────────────────────
 (function warmup() {
   const s = document.createElement("script");
   s.src = CFG.SCRIPT_URL + "?accion=ping&callback=_warmup";
   window._warmup = () => {};
+  s.onerror = () => {}; // silencioso
   document.head.appendChild(s);
 })();
 
@@ -312,7 +307,6 @@ if (esSorteo) {
 }
 
 function genCodigo() {
-  // Sin O,0,I,1 para evitar confusión visual en caja
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let r = "";
   for (let i = 0; i < 5; i++) r += chars[Math.floor(Math.random() * chars.length)];
@@ -351,30 +345,61 @@ function validar() {
   return ok;
 }
 
+// ── FETCH JSONP — CORREGIDO PARA MÓVIL ───────────────────────
+// Problema original: onerror vacío + timeout 35s → en Safari/iOS la
+// promesa quedaba colgada 35 segundos antes de mostrar error.
+// Fix: onerror rechaza inmediatamente + reintento automático con delay.
 function fetchGET(params) {
   return new Promise((resolve, reject) => {
     const cbName = "cb_" + Math.random().toString(36).slice(2);
     const url = CFG.SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cbName});
     const script = document.createElement("script");
-    window[cbName] = (data) => {
+    let settled = false;
+
+    function cleanup() {
+      settled = true;
       clearTimeout(timer);
       delete window[cbName];
-      if (script.parentNode) document.body.removeChild(script);
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = (data) => {
+      if (settled) return;
+      cleanup();
       resolve(data);
     };
-    // No rechazar en onerror — Google redirige 302 y Chrome lo marca como error
-    // pero el callback igual llega desde googleusercontent.com
-    script.onerror = () => { /* ignorar — el callback llega igual tras el redirect */ };
+
+    // CORRECCIÓN CLAVE: rechazar en onerror para no dejar la promesa colgada
+    // en Safari/iOS donde los redirects 302 disparan onerror
+    script.onerror = () => {
+      if (settled) return;
+      cleanup();
+      reject(new Error("script-error"));
+    };
+
     script.src = url;
     document.body.appendChild(script);
+
+    // Timeout reducido de 35s → 12s para mejor UX en móvil
     const timer = setTimeout(() => {
-      if (window[cbName]) {
-        delete window[cbName];
-        if (script.parentNode) document.body.removeChild(script);
-        reject(new Error("Timeout"));
+      if (!settled) {
+        cleanup();
+        reject(new Error("timeout"));
       }
-    }, 35000);
+    }, 12000);
   });
+}
+
+// Wrapper con reintento automático — en móvil el primer intento puede
+// fallar por el redirect 302, pero el segundo funciona porque el redirect
+// ya está en caché del navegador.
+async function fetchGETSafe(params) {
+  try {
+    return await fetchGET(params);
+  } catch(e) {
+    await new Promise(r => setTimeout(r, 400));
+    return await fetchGET(params);
+  }
 }
 
 async function solicitar() {
@@ -382,16 +407,15 @@ async function solicitar() {
   const btn = document.getElementById("mainBtn");
   btn.classList.add("loading");
   btn.disabled = true;
-  btn.textContent = "Estamos preparando tu cupón...";
 
-  const nombre  = document.getElementById("inp-nombre").value.trim();
+  const nombre     = document.getElementById("inp-nombre").value.trim();
   const celularRaw = document.getElementById("inp-cel").value.replace(/\D/g,"");
   const esColombia = celularRaw.length === 10;
-  const celular = esColombia ? "57" + celularRaw : celularRaw;
+  const celular    = esColombia ? "57" + celularRaw : celularRaw;
 
-  // Verificar primero si el celular ya existe ANTES de generar código
+  // Verificar primero si el celular ya existe
   try {
-    const check = await fetchGET({ accion: "verificarCelular", celular });
+    const check = await fetchGETSafe({ accion: "verificarCelular", celular });
     if (check.existe) {
       mostrarExistente(check, nombre);
       btn.classList.remove("loading");
@@ -408,7 +432,7 @@ async function solicitar() {
   const producto = esSorteo ? P.premio : P.producto;
 
   try {
-    const res = await fetchGET({
+    const res = await fetchGETSafe({
       accion:     "registrarCupon",
       codigo, nombre, celular,
       ciudad:     P.ciudad,
@@ -436,7 +460,6 @@ async function solicitar() {
     alert("Hubo un problema al conectar. Intenta de nuevo.");
     btn.classList.remove("loading");
     btn.disabled = false;
-    btn.textContent = "RECIBIR MI CUPÓN GRATIS →";
   }
 }
 
@@ -467,16 +490,10 @@ function mostrarMomentos(momentosStr) {
 
 function mostrarNuevo({ codigo, nombre, vence }) {
   show("stateSuccess");
-
-  // ── Meta Pixel: Lead ──────────────────────────────────────
-  // Se dispara solo cuando es un cupón NUEVO, no cuando ya existía
   try { fbq('track', 'Lead'); } catch(e) {}
-  // ─────────────────────────────────────────────────────────
-
   document.getElementById("outCode").textContent     = codigo;
   document.getElementById("outNombre").textContent   = "Hola, " + nombre.split(" ")[0] + " 👋";
   document.getElementById("outValidity").textContent = "Válido hasta: " + fmt(vence);
-
   if (esSorteo) {
     document.getElementById("successIcon").textContent    = "🏆";
     document.getElementById("successTitle").textContent   = "¡Estás participando!";
@@ -525,7 +542,6 @@ function mostrarExistente(data, nombre) {
   document.getElementById("outExistingCode").textContent     = data.codigo;
   document.getElementById("usedNombre").textContent          = "Hola, " + nombre.split(" ")[0] + " 👋";
   document.getElementById("outExistingValidity").textContent = data.fechaVence ? "Válido hasta: " + fmt(new Date(data.fechaVence)) : "";
-
   if (esSorteo) {
     document.getElementById("usedTitle").textContent    = "Ya estás participando";
     document.getElementById("usedSubtitle").textContent = "Encontramos tu número de participación";
