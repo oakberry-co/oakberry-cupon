@@ -35,16 +35,8 @@
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .divider{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-family:'Space Mono',monospace;margin:20px 0 16px;display:flex;align-items:center;gap:10px;}
   .divider::after{content:'';flex:1;height:1px;background:var(--border);}
-
-  /* MOMENTOS CHECKBOX */
   .momentos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
-  .momento-btn{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:12px 8px;border-radius:12px;border:1.5px solid var(--border);
-    background:var(--card2);cursor:pointer;transition:all 0.18s;
-    font-family:'Montserrat',sans-serif;text-align:center;
-    user-select:none;
-  }
+  .momento-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);cursor:pointer;transition:all 0.18s;font-family:'Montserrat',sans-serif;text-align:center;user-select:none;}
   .momento-btn:hover{border-color:rgba(95,75,139,0.5);}
   .momento-btn.selected{background:rgba(95,75,139,0.25);border-color:var(--p);box-shadow:0 0 0 2px rgba(95,75,139,0.2);}
   .momento-emoji{font-size:22px;margin-bottom:4px;}
@@ -52,7 +44,6 @@
   .momento-hora{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
   .err-momento{font-size:10px;color:#ff5c5c;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:none;margin-top:4px;font-family:'Space Mono',monospace;}
   .err-momento.show{display:block;}
-
   .gen-btn{width:100%;padding:16px;background:var(--y);color:var(--pd);border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;margin-top:8px;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 6px 24px rgba(245,200,66,0.25);}
   .gen-btn:hover{transform:translateY(-1px);box-shadow:0 10px 32px rgba(245,200,66,0.35);}
   .preview-panel{display:flex;flex-direction:column;gap:16px;}
@@ -84,8 +75,6 @@
   .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#0e0b16;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;padding:12px 24px;border-radius:50px;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;}
   .toast.show{transform:translateX(-50%) translateY(0);}
   .modo-sorteo{display:none;}
-
-  /* Status indicator */
   .status-bar{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);padding:8px 0;}
   .status-dot{width:7px;height:7px;border-radius:50%;background:#ff5c5c;flex-shrink:0;}
   .status-dot.ok{background:var(--green);}
@@ -105,13 +94,11 @@
     <div class="header-badge">Uso interno</div>
   </div>
 
-  <!-- STATUS BAR -->
   <div class="status-bar" id="statusBar">
     <span class="status-dot" id="statusDot"></span>
     <span id="statusText">Conectando con backend...</span>
   </div>
 
-  <!-- FORMULARIO -->
   <div>
     <div class="panel">
       <div class="panel-title">Configurar campaña</div>
@@ -155,7 +142,6 @@
         </div>
       </div>
 
-      <!-- MODO CUPÓN -->
       <div id="modoCupon">
         <div class="divider">Oferta</div>
         <div class="row">
@@ -184,7 +170,6 @@
           </select>
         </div>
 
-        <!-- MOMENTOS DE CONSUMO -->
         <div class="divider">Momento de consumo</div>
         <div style="margin-bottom:8px">
           <div class="momento-btn" onclick="toggleTodosMomentos(this)" id="btnTodosMomentos" style="width:100%;text-align:center;">
@@ -218,7 +203,6 @@
         <div class="err-momento" id="errMomento">⚠ Selecciona al menos un momento</div>
       </div>
 
-      <!-- MODO SORTEO -->
       <div class="modo-sorteo" id="modeSorteo">
         <div class="divider">Premio</div>
         <div class="field">
@@ -247,7 +231,6 @@
     </div>
   </div>
 
-  <!-- PREVIEW -->
   <div class="preview-panel">
     <div class="link-card">
       <div class="link-card-title">Link corto</div>
@@ -291,7 +274,6 @@ const MOMENTOS = {
   onces:    { nombre: "Onces",     inicio: 15, fin: 19 },
   cena:     { nombre: "Cena",      inicio: 20, fin: 22 },
 };
-
 const TODOS_MOMENTOS = ["desayuno","almuerzo","onces","cena"];
 
 // ── ESTADO ────────────────────────────────────────────────────
@@ -300,54 +282,78 @@ let momentosSelected = new Set();
 let historial        = [];
 let linkActual       = "";
 
-// ── CACHE — declarado PRIMERO para que todas las funciones lo usen ──
+// ── CACHE ─────────────────────────────────────────────────────
 const _cache = {};
 
 function fetchGETCached(params) {
   const key = JSON.stringify(params);
   if (_cache[key]) return Promise.resolve(_cache[key]);
-  return fetchGET(params).then(d => { _cache[key] = d; return d; });
+  return fetchGETSafe(params).then(d => { _cache[key] = d; return d; });
 }
 
-// ── FETCH JSONP ───────────────────────────────────────────────
+// ── FETCH JSONP — CORREGIDO PARA MÓVIL ───────────────────────
+// Problema original: en Safari/iOS el onerror se dispara en redirects 302
+// de Google Apps Script y la promesa quedaba colgada indefinidamente.
+// Fix: onerror rechaza correctamente + reintento automático con delay.
 function fetchGET(params) {
   return new Promise((resolve, reject) => {
     const cb  = "cb_" + Math.random().toString(36).slice(2);
     const url = SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
     const s   = document.createElement("script");
-    window[cb] = d => {
+    let settled = false;
+
+    function cleanup() {
+      settled = true;
       delete window[cb];
-      if (s.parentNode) document.body.removeChild(s);
+      if (s.parentNode) s.parentNode.removeChild(s);
+    }
+
+    window[cb] = d => {
+      if (settled) return;
+      cleanup();
       resolve(d);
     };
+
+    // CORRECCIÓN CLAVE: rechazar en onerror para no dejar la promesa colgada
     s.onerror = () => {
-      // Google Apps Script redirige 302 → el callback llega igual
-      // No rechazar aquí, esperar el timeout solo si el callback no llega
+      if (settled) return;
+      cleanup();
+      reject(new Error("script-error"));
     };
+
     s.src = url;
     document.body.appendChild(s);
+
     setTimeout(() => {
-      if (window[cb]) {
-        delete window[cb];
-        if (s.parentNode) document.body.removeChild(s);
-        reject(new Error("Timeout"));
+      if (!settled) {
+        cleanup();
+        reject(new Error("timeout"));
       }
     }, 12000);
   });
 }
 
+// Wrapper con reintento automático — en móvil el primer intento puede
+// fallar por el redirect 302, pero el segundo funciona porque el redirect
+// ya está en caché del navegador.
+async function fetchGETSafe(params) {
+  try {
+    return await fetchGET(params);
+  } catch(e) {
+    await new Promise(r => setTimeout(r, 400));
+    return await fetchGET(params);
+  }
+}
+
 // ── CARGA COMBINADA ───────────────────────────────────────────
 async function cargarTodo() {
   try {
-    const data = await fetchGET({ accion: "obtenerTodo" });
+    const data = await fetchGETSafe({ accion: "obtenerTodo" });
     if (!data || !data.ciudades || !data.ciudades.length) return false;
-
-    // Poblar cache con los datos recibidos
     _cache[JSON.stringify({accion:"obtenerCiudades"})] = { ciudades: data.ciudades };
     Object.entries(data.tiendas || {}).forEach(([ciudad, tiendas]) => {
       _cache[JSON.stringify({accion:"obtenerTiendas", ciudad})] = { tiendas };
     });
-
     return data;
   } catch(e) {
     console.error("cargarTodo error:", e);
@@ -360,14 +366,11 @@ async function cargarCiudades() {
     const data = await fetchGETCached({ accion: "obtenerCiudades" });
     const ciudades = Array.isArray(data) ? data : (data.ciudades || []);
     if (!ciudades.length) return;
-
     const sel = document.getElementById("ciudad");
     sel.innerHTML = "";
     sel.add(new Option("Todas las ciudades", "todas"));
     ciudades.forEach(c => sel.add(new Option(c, c)));
     await cargarTiendas();
-
-    // Precalentar cache de todas las ciudades en paralelo
     ciudades.forEach(c => fetchGETCached({ accion: "obtenerTiendas", ciudad: c }));
   } catch(e) {
     console.error("cargarCiudades error:", e);
@@ -393,14 +396,13 @@ async function cargarTiendas() {
   const s = document.createElement("script");
   s.src = SCRIPT_URL + "?accion=ping&callback=_warmup";
   window._warmup = () => {};
+  s.onerror = () => {}; // silencioso
   document.head.appendChild(s);
 })();
 
 window.addEventListener("DOMContentLoaded", async () => {
   setStatus("Cargando ciudades y tiendas...", false);
-
   const todo = await cargarTodo();
-
   if (todo && todo.ciudades && todo.ciudades.length) {
     const sel = document.getElementById("ciudad");
     sel.innerHTML = "";
@@ -409,7 +411,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     await cargarTiendas();
     setStatus("Backend conectado · " + todo.ciudades.length + " ciudades cargadas", true);
   } else {
-    // Fallback a carga individual
     await cargarCiudades();
     const sel = document.getElementById("ciudad");
     if (sel.options.length > 1) {
@@ -440,7 +441,6 @@ function toggleTodosMomentos(el) {
   const allSelected = TODOS_MOMENTOS.every(m => momentosSelected.has(m));
   if (allSelected) {
     TODOS_MOMENTOS.forEach(m => momentosSelected.delete(m));
-    // FIX: usar data-momento en lugar de querySelector con comillas tipográficas
     document.querySelectorAll(".momento-btn[data-momento]").forEach(b => b.classList.remove("selected"));
     el.classList.remove("selected");
   } else {
@@ -471,15 +471,12 @@ function generar() {
     document.getElementById("errMomento").classList.add("show");
     return;
   }
-
   const ciudad = document.getElementById("ciudad").value;
   const fase   = document.getElementById("fase").value;
   const tienda = document.getElementById("tienda").value || "general";
   const fuente = document.getElementById("fuente").value;
   const nombre = document.getElementById("campañaNombre").value.trim() || `${ciudad}-${fase}-${Date.now()}`;
-
   let params = { modo: modoActual, ciudad, tienda, fase, fuente };
-
   if (modoActual === "cupon") {
     params.descuento = document.getElementById("descuento").value;
     params.producto  = document.getElementById("producto").value;
@@ -489,23 +486,18 @@ function generar() {
     params.premio   = document.getElementById("premio").value.trim().replace(/\s+/g, "+");
     params.vigencia = document.getElementById("vigenciaSorteo").value;
   }
-
   const qs = Object.entries(params).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join("&");
   linkActual = `${BASE}?${qs}`;
-
   const display = document.getElementById("linkDisplay");
   display.textContent = linkActual;
   display.classList.remove("empty");
-
   const alias = nombre.toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"");
   const shortLink = `${BASE}/r#${alias}`;
   const shortDisplay = document.getElementById("shortLinkDisplay");
   shortDisplay.textContent = shortLink;
   shortDisplay.classList.remove("empty");
   shortDisplay.dataset.alias = alias;
-
   mostrarResumen(params, nombre);
-
   const item = { nombre, link: linkActual, params, ts: new Date() };
   historial.unshift(item);
   renderHistorial();
@@ -520,11 +512,9 @@ function mostrarResumen(params, nombre) {
     fuente:"Fuente", descuento:"Descuento", producto:"Producto",
     premio:"Premio", vigencia:"Vigencia (h)", momentos:"Momentos"
   };
-
   const momentosLabel = params.momentos
     ? params.momentos.split(",").map(m => MOMENTOS[m]?.nombre || m).join(" · ")
     : "—";
-
   const rows = Object.entries(params).map(([k,v]) => {
     let val = k === "momentos" ? momentosLabel : decodeURIComponent(v.replace(/\+/g," "));
     const hl = ["descuento","premio","producto","momentos"].includes(k);
@@ -533,7 +523,6 @@ function mostrarResumen(params, nombre) {
       <span class="summary-val ${hl?"highlight":""}">${k==="descuento"?val+"%":val}</span>
     </div>`;
   }).join("");
-
   document.getElementById("summaryRows").innerHTML = rows;
 }
 
@@ -565,23 +554,19 @@ function renderHistorial() {
 function copiarItemLink(i) {
   navigator.clipboard.writeText(historial[i].link).then(() => showToast("✅ Link copiado"));
 }
-
 function copiarShortLink() {
   const el = document.getElementById("shortLinkDisplay");
   if (!el || el.classList.contains("empty")) return;
   navigator.clipboard.writeText(el.textContent).then(() => showToast("✅ Link corto copiado"));
 }
-
 function copiarLink() {
   if (!linkActual) return;
   navigator.clipboard.writeText(linkActual).then(() => showToast("✅ ¡Copiado!"));
 }
-
 function abrirLink() {
   if (!linkActual) return;
   window.open(linkActual, "_blank");
 }
-
 function showToast(msg) {
   const t = document.getElementById("toast");
   t.textContent = msg;
@@ -604,7 +589,7 @@ function guardarEnSheet(item) {
     vigencia:p.vigencia, momentos:momentosStr,
     link:item.link, fecha:item.ts.toISOString(),
   };
-  fetchGET(params).catch(() => {});
+  fetchGETSafe(params).catch(() => {});
 }
 </script>
 </body>
