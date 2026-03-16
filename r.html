@@ -19,26 +19,77 @@
   <p id="errMsg"></p>
 </div>
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXgiwi0TVSa26VJK5M0n2YOnSBm0XvOkNn_6QXFeJQGwm6Nz8Dj8GfvA4GbKKyWX-AdQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
 
-// El alias viene del hash: oakberry-cupones.com/r#bog-tofu-marzo
 const alias = window.location.hash.replace("#","").trim();
 
 if (!alias) {
   document.getElementById("errMsg").textContent = "Link inválido";
 } else {
-  const cb = "cb_r";
-  const url = SCRIPT_URL + "?accion=resolverAlias&alias=" + encodeURIComponent(alias) + "&callback=" + cb;
-  const s = document.createElement("script");
-  window[cb] = function(data) {
+  resolverConReintento(alias);
+}
+
+function resolverAlias(alias) {
+  return new Promise((resolve, reject) => {
+    const cb = "cb_r_" + Math.random().toString(36).slice(2);
+    const url = SCRIPT_URL + "?accion=resolverAlias&alias=" + encodeURIComponent(alias) + "&callback=" + cb;
+    const s = document.createElement("script");
+    let settled = false;
+
+    function cleanup() {
+      settled = true;
+      delete window[cb];
+      if (s.parentNode) s.parentNode.removeChild(s);
+    }
+
+    window[cb] = function(data) {
+      if (settled) return;
+      cleanup();
+      resolve(data);
+    };
+
+    // FIX MÓVIL: onerror rechaza en lugar de ignorar
+    s.onerror = function() {
+      if (settled) return;
+      cleanup();
+      reject(new Error("script-error"));
+    };
+
+    s.src = url;
+    document.body.appendChild(s);
+
+    setTimeout(function() {
+      if (!settled) {
+        cleanup();
+        reject(new Error("timeout"));
+      }
+    }, 12000);
+  });
+}
+
+async function resolverConReintento(alias) {
+  try {
+    const data = await resolverAlias(alias);
     if (data && data.link) {
       window.location.replace(data.link);
     } else {
       document.getElementById("errMsg").textContent = "Link no encontrado: " + alias;
     }
-  };
-  s.src = url;
-  document.body.appendChild(s);
+  } catch(e) {
+    // Reintento automático — en móvil Safari el primer intento falla
+    // por el redirect 302 pero el segundo funciona
+    try {
+      await new Promise(r => setTimeout(r, 400));
+      const data = await resolverAlias(alias);
+      if (data && data.link) {
+        window.location.replace(data.link);
+      } else {
+        document.getElementById("errMsg").textContent = "Link no encontrado: " + alias;
+      }
+    } catch(e2) {
+      document.getElementById("errMsg").textContent = "Error de conexión. Intenta de nuevo.";
+    }
+  }
 }
 </script>
 </body>
