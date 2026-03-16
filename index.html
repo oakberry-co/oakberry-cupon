@@ -111,6 +111,30 @@ fbq('track', 'PageView');
   .existing-validity{font-size:11px;font-weight:600;color:var(--gray);}
   .copy-btn-solid{width:100%;padding:15px;background:var(--primary);color:var(--white);border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;margin-bottom:14px;transition:background 0.18s;}
   .copy-btn-solid:hover{background:var(--primary-dark);}
+
+  /* ── PANTALLA DE CARGA ── */
+  #stateLoading { display:none; }
+  #stateLoading.show { display:block; animation:cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+  .loading-header { background:var(--primary); padding:28px 30px 24px; text-align:center; }
+  .loading-icon { font-size:44px; display:block; margin-bottom:8px; animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.12);opacity:0.8;} }
+  .loading-title { font-size:18px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+  .loading-sub { font-size:11px; font-weight:700; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:1.5px; }
+  .loading-body { padding:28px 28px 32px; }
+  .progress-wrap { background:#f0ebff; border-radius:50px; height:10px; overflow:hidden; margin-bottom:12px; }
+  .progress-bar { height:100%; border-radius:50px; background:linear-gradient(90deg,var(--primary),var(--yellow)); width:0%; transition:width 0.4s ease; }
+  .progress-pct { font-size:11px; font-weight:900; color:var(--primary); text-align:right; margin-bottom:20px; font-family:'Montserrat',sans-serif; letter-spacing:1px; }
+  .loading-msg { font-size:13px; font-weight:700; color:#444; text-align:center; text-transform:uppercase; letter-spacing:0.5px; line-height:1.6; min-height:44px; transition:opacity 0.3s; }
+  .loading-steps { display:flex; flex-direction:column; gap:10px; margin-top:20px; }
+  .loading-step { display:flex; align-items:center; gap:10px; font-size:11px; font-weight:700; color:#bbb; text-transform:uppercase; letter-spacing:0.5px; transition:color 0.3s; }
+  .loading-step.done { color:var(--primary); }
+  .loading-step.active { color:var(--primary); }
+  .step-icon { font-size:16px; width:24px; text-align:center; flex-shrink:0; }
+  .step-check { width:18px; height:18px; border-radius:50%; border:2px solid #ddd; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all 0.3s; }
+  .loading-step.done .step-check { background:var(--primary); border-color:var(--primary); }
+  .loading-step.done .step-check::after { content:'✓'; font-size:10px; color:#fff; font-weight:900; }
+  .loading-step.active .step-check { border-color:var(--primary); animation:stepPulse 0.8s ease-in-out infinite; }
+  @keyframes stepPulse { 0%,100%{box-shadow:0 0 0 0 rgba(95,75,139,0.4);} 50%{box-shadow:0 0 0 4px rgba(95,75,139,0.1);} }
 </style>
 </head>
 <body>
@@ -161,6 +185,26 @@ fbq('track', 'PageView');
         <span class="btn-loader"><span class="spin"></span></span>
       </button>
       <p class="terms" id="formTerms">1 cupón por número · Válido solo en tiendas Oakberry Colombia</p>
+    </div>
+  </div>
+
+  <!-- ESTADO CARGA -->
+  <div id="stateLoading" class="state">
+    <div class="loading-header">
+      <span class="loading-icon">🫐</span>
+      <div class="loading-title">Preparando tu cupón</div>
+      <div class="loading-sub" id="loadingSub">Esto toma unos segundos</div>
+    </div>
+    <div class="loading-body">
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-pct" id="progressPct">0%</div>
+      <div class="loading-msg" id="loadingMsg">Verificando disponibilidad...</div>
+      <div class="loading-steps">
+        <div class="loading-step" id="step1"><span class="step-icon">🔍</span><span style="flex:1">Verificando número</span><span class="step-check"></span></div>
+        <div class="loading-step" id="step2"><span class="step-icon">🎟</span><span style="flex:1">Generando cupón único</span><span class="step-check"></span></div>
+        <div class="loading-step" id="step3"><span class="step-icon">💾</span><span style="flex:1">Guardando en sistema</span><span class="step-check"></span></div>
+        <div class="loading-step" id="step4"><span class="step-icon">✅</span><span style="flex:1">¡Listo para canjear!</span><span class="step-check"></span></div>
+      </div>
     </div>
   </div>
 
@@ -402,33 +446,90 @@ async function fetchGETSafe(params) {
   }
 }
 
+// ── BARRA DE PROGRESO ────────────────────────────────────────
+let _progressTimer = null;
+let _progressVal   = 0;
+
+function iniciarProgreso() {
+  _progressVal = 0;
+  _progressTimer = null;
+  setProgreso(0, "Verificando disponibilidad...");
+  setStep(1, "active");
+  setStep(2, ""); setStep(3, ""); setStep(4, "");
+
+  // Avance automático simulado: rápido al inicio, se frena cerca del 85%
+  const pasos = [
+    { hasta: 25, delay: 400,  msg: "Verificando disponibilidad..." },
+    { hasta: 45, delay: 700,  msg: "Comprobando historial..." },
+    { hasta: 62, delay: 900,  msg: "Generando código único..." },
+    { hasta: 78, delay: 1100, msg: "Registrando en sistema..." },
+    { hasta: 85, delay: 1400, msg: "Casi listo..." },
+  ];
+
+  let i = 0;
+  function tick() {
+    if (i >= pasos.length) return;
+    const paso = pasos[i++];
+    _progressTimer = setTimeout(() => {
+      if (i === 2) { setStep(1,"done"); setStep(2,"active"); }
+      if (i === 4) { setStep(2,"done"); setStep(3,"active"); }
+      setProgreso(paso.hasta, paso.msg);
+      tick();
+    }, paso.delay);
+  }
+  tick();
+}
+
+function completarProgreso(cb) {
+  clearTimeout(_progressTimer);
+  setStep(3,"done"); setStep(4,"active");
+  setProgreso(95, "¡Casi listo!");
+  setTimeout(() => {
+    setProgreso(100, "¡Cupón generado!");
+    setStep(4,"done");
+    setTimeout(cb, 400);
+  }, 350);
+}
+
+function setProgreso(pct, msg) {
+  document.getElementById("progressBar").style.width = pct + "%";
+  document.getElementById("progressPct").textContent = pct + "%";
+  if (msg) document.getElementById("loadingMsg").textContent = msg;
+}
+
+function setStep(n, estado) {
+  const el = document.getElementById("step" + n);
+  if (!el) return;
+  el.className = "loading-step" + (estado ? " " + estado : "");
+}
+
 async function solicitar() {
   if (!validar()) return;
-  const btn = document.getElementById("mainBtn");
-  btn.classList.add("loading");
-  btn.disabled = true;
 
   const nombre     = document.getElementById("inp-nombre").value.trim();
   const celularRaw = document.getElementById("inp-cel").value.replace(/\D/g,"");
   const esColombia = celularRaw.length === 10;
   const celular    = esColombia ? "57" + celularRaw : celularRaw;
 
+  // Mostrar pantalla de carga con barra de progreso
+  show("stateLoading");
+  iniciarProgreso();
+
   // Verificar primero si el celular ya existe
   try {
     const check = await fetchGETSafe({ accion: "verificarCelular", celular });
     if (check.existe) {
+      clearTimeout(_progressTimer);
       mostrarExistente(check, nombre);
-      btn.classList.remove("loading");
-      btn.disabled = false;
       return;
     }
   } catch(e) {
     // Si falla la verificación, continuamos normal
   }
 
-  const codigo  = genCodigo();
-  const ahora   = new Date();
-  const vence   = new Date(ahora.getTime() + P.vigencia * 3_600_000);
+  const codigo   = genCodigo();
+  const ahora    = new Date();
+  const vence    = new Date(ahora.getTime() + P.vigencia * 3_600_000);
   const producto = esSorteo ? P.premio : P.producto;
 
   try {
@@ -446,20 +547,24 @@ async function solicitar() {
       fechaVence: vence.toISOString(),
     });
 
-    if (res.esLoopy) {
-      mostrarBloqueadoLoopy(nombre);
-    } else if (res.existe) {
-      mostrarExistente(res, nombre);
-    } else if (res.ok) {
-      mostrarNuevo({ codigo: res.codigo || codigo, nombre, vence });
-    } else {
-      throw new Error(res.mensaje || "Error");
-    }
+    completarProgreso(() => {
+      if (res.esLoopy) {
+        mostrarBloqueadoLoopy(nombre);
+      } else if (res.existe) {
+        mostrarExistente(res, nombre);
+      } else if (res.ok) {
+        mostrarNuevo({ codigo: res.codigo || codigo, nombre, vence });
+      } else {
+        alert(res.mensaje || "Error al generar el cupón. Intenta de nuevo.");
+        show("stateForm");
+      }
+    });
+
   } catch (err) {
     console.error(err);
+    clearTimeout(_progressTimer);
     alert("Hubo un problema al conectar. Intenta de nuevo.");
-    btn.classList.remove("loading");
-    btn.disabled = false;
+    show("stateForm");
   }
 }
 
@@ -551,7 +656,7 @@ function mostrarExistente(data, nombre) {
 }
 
 function show(id) {
-  ["stateForm","stateSuccess","stateUsed","stateLoopy"].forEach(s => {
+  ["stateForm","stateSuccess","stateUsed","stateLoopy","stateLoading"].forEach(s => {
     const el = document.getElementById(s);
     if (el) el.classList.remove("show");
   });
