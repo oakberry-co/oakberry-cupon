@@ -6,7 +6,7 @@
   <title>Oakberry · Validar Cupón</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
   <style>
-    :root { --primary:#5F4B8B; --pd:#4a3a6e; --yellow:#F5C842; --red:#e74c3c; --green:#27ae60; }
+    :root { --primary:#5F4B8B; --pd:#4a3a6e; --yellow:#F5C842; --red:#e74c3c; --green:#27ae60; --orange:#e67e22; }
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family:'Montserrat',sans-serif;
@@ -37,6 +37,53 @@
     }
     input { text-transform:uppercase; letter-spacing:2px; font-size:15px; }
     input:focus, select:focus { border-color:var(--primary); }
+
+    /* ── Separador de sección ── */
+    .section-sep {
+      font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:2px;
+      color:#bbb; margin:18px 0 12px; display:flex; align-items:center; gap:8px;
+    }
+    .section-sep::before, .section-sep::after {
+      content:''; flex:1; height:1px; background:#eee;
+    }
+
+    /* ── Toggle de dos opciones ── */
+    .toggle-wrap { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .toggle-btn {
+      padding:13px 8px; border-radius:12px; border:2px solid #eee;
+      background:#fafafa; font-family:'Montserrat',sans-serif;
+      font-size:12px; font-weight:700; color:#aaa;
+      cursor:pointer; text-align:center; text-transform:uppercase;
+      letter-spacing:0.5px; transition:all 0.18s; user-select:none;
+    }
+    .toggle-btn:hover { border-color:var(--primary); color:var(--primary); }
+    .toggle-btn.selected-si  { background:#eafaf1; border-color:var(--green);  color:var(--green); }
+    .toggle-btn.selected-no  { background:#fef9e7; border-color:var(--orange); color:var(--orange); }
+
+    /* ── Banner Loopy recordatorio (pre-canje) ── */
+    .loopy-banner {
+      display:none; margin-top:4px; margin-bottom:4px;
+      background:linear-gradient(135deg, #fff8e1, #fffde7);
+      border:2px solid var(--yellow); border-radius:16px;
+      padding:16px 18px; animation:fadeIn 0.3s ease;
+    }
+    .loopy-banner.show { display:block; }
+    .loopy-banner-title {
+      font-size:13px; font-weight:900; color:#7a5c00;
+      text-transform:uppercase; letter-spacing:0.5px;
+      margin-bottom:8px; display:flex; align-items:center; gap:8px;
+    }
+    .loopy-banner-body { font-size:12px; font-weight:700; color:#5d4200; line-height:1.6; }
+    .loopy-steps { margin-top:10px; display:flex; flex-direction:column; gap:5px; }
+    .loopy-step { display:flex; align-items:flex-start; gap:8px; font-size:11px; font-weight:700; color:#7a5c00; }
+    .loopy-step-num {
+      min-width:20px; height:20px; border-radius:50%;
+      background:var(--yellow); color:#5d4200;
+      font-size:10px; font-weight:900;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0; margin-top:1px;
+    }
+
     .btn {
       width:100%; padding:17px; background:var(--primary); color:#fff;
       border:none; border-radius:12px; font-family:'Montserrat',sans-serif;
@@ -67,6 +114,21 @@
     .result-row { font-size:12px; font-weight:700; color:#444; margin-bottom:5px; line-height:1.5; }
     .result-row span { color:var(--primary); }
     .divider-line { border:none; border-top:1.5px dashed #ddd; margin:10px 0; }
+
+    /* Banner Loopy post-canje */
+    .post-loopy-banner {
+      display:none; margin-top:14px;
+      background:linear-gradient(135deg,#fff8e1,#fffde7);
+      border:2px solid var(--yellow); border-radius:14px;
+      padding:14px 16px;
+    }
+    .post-loopy-banner.show { display:block; animation:fadeIn 0.3s ease 0.2s both; }
+    .post-loopy-title {
+      font-size:12px; font-weight:900; color:#7a5c00;
+      text-transform:uppercase; letter-spacing:0.4px;
+      margin-bottom:6px; display:flex; align-items:center; gap:6px;
+    }
+    .post-loopy-body { font-size:11px; font-weight:700; color:#5d4200; line-height:1.7; }
   </style>
 </head>
 <body>
@@ -93,13 +155,38 @@
         <option value="">Selecciona tienda</option>
       </select>
     </div>
+
+    <div class="section-sep">Perfil del cliente</div>
+
+    <!-- Pregunta 1: ¿Primera vez en Oakberry? -->
     <div class="field">
-      <label>¿Es usuario Loopy?</label>
-      <select id="loopy">
-        <option value="">Selecciona</option>
-        <option value="SÍ">SÍ</option>
-        <option value="NO">NO</option>
-      </select>
+      <label>¿Es la primera vez que prueba Oakberry?</label>
+      <div class="toggle-wrap">
+        <button class="toggle-btn" id="nuevo-si" onclick="setNuevo('SI')">✅ Sí, es nuevo</button>
+        <button class="toggle-btn" id="nuevo-no" onclick="setNuevo('NO')">🔄 Ya nos conoce</button>
+      </div>
+    </div>
+
+    <!-- Pregunta 2: ¿Tiene Loopy? -->
+    <div class="field">
+      <label>¿Tiene tarjeta Loopy?</label>
+      <div class="toggle-wrap">
+        <button class="toggle-btn" id="loopy-si" onclick="setLoopy('SI')">✅ Sí tiene</button>
+        <button class="toggle-btn" id="loopy-no" onclick="setLoopy('NO')">❌ No tiene</button>
+      </div>
+    </div>
+
+    <!-- Banner recordatorio Loopy (aparece al seleccionar "No tiene") -->
+    <div class="loopy-banner" id="loopyBanner">
+      <div class="loopy-banner-title">⭐ ¡Invítalo a Loopy ahora!</div>
+      <div class="loopy-banner-body">
+        Este cliente no tiene tarjeta Loopy. Es el momento perfecto para inscribirlo — acumula sellos y gana productos gratis.
+        <div class="loopy-steps">
+          <div class="loopy-step"><span class="loopy-step-num">1</span><span>Pídele su número de celular</span></div>
+          <div class="loopy-step"><span class="loopy-step-num">2</span><span>Regístralo en la app Loopy de caja</span></div>
+          <div class="loopy-step"><span class="loopy-step-num">3</span><span>¡Listo! Ya empieza a acumular con esta compra</span></div>
+        </div>
+      </div>
     </div>
 
     <button class="btn" id="mainBtn" onclick="validar()">
@@ -115,26 +202,69 @@
       <div id="resRows"></div>
     </div>
 
+    <!-- Banner post-canje si no tiene Loopy -->
+    <div class="post-loopy-banner" id="postLoopyBanner">
+      <div class="post-loopy-title">⭐ Recuerda inscribir al cliente en Loopy</div>
+      <div class="post-loopy-body">
+        Antes de que se vaya: regístralo en la app Loopy de caja con su celular. Esta compra ya le puede contar su primer sello. 🫐
+      </div>
+    </div>
+
   </div>
 </div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
 
+// ── Estado de los toggles ─────────────────────────────────────
+let _nuevo = ""; // "SI" | "NO"
+let _loopy = ""; // "SI" | "NO"
+
+function setNuevo(val) {
+  _nuevo = val;
+  document.getElementById("nuevo-si").className = "toggle-btn" + (val === "SI" ? " selected-si" : "");
+  document.getElementById("nuevo-no").className = "toggle-btn" + (val === "NO" ? " selected-no" : "");
+}
+
+function setLoopy(val) {
+  _loopy = val;
+  document.getElementById("loopy-si").className = "toggle-btn" + (val === "SI" ? " selected-si" : "");
+  document.getElementById("loopy-no").className = "toggle-btn" + (val === "NO" ? " selected-no" : "");
+  document.getElementById("loopyBanner").classList.toggle("show", val === "NO");
+}
+
+// ── Fix descuento: normaliza "0.2" → "20%" ────────────────────
+function formatearDescuento(str) {
+  if (!str) return str;
+  const s = str.toString().trim();
+  if (s.includes("%")) return s;
+  const n = parseFloat(s);
+  if (!isNaN(n) && n > 0 && n <= 1) return Math.round(n * 100) + "%";
+  if (!isNaN(n)) return Math.round(n) + "%";
+  return s;
+}
+
+// ── FETCH ─────────────────────────────────────────────────────
 function fetchGET(params) {
   return new Promise((resolve, reject) => {
     const cb  = "cb_" + Math.random().toString(36).slice(2);
     const url = SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
     const s   = document.createElement("script");
-    window[cb] = d => { delete window[cb]; document.body.removeChild(s); resolve(d); };
-    s.onerror  = () => reject(new Error("Error de red"));
+    let settled = false;
+    function cleanup() {
+      settled = true;
+      delete window[cb];
+      if (s.parentNode) s.parentNode.removeChild(s);
+    }
+    window[cb] = d => { if(settled)return; cleanup(); resolve(d); };
+    s.onerror  = () => { if(settled)return; cleanup(); reject(new Error("Error de red")); };
     s.src = url;
     document.body.appendChild(s);
-    setTimeout(() => reject(new Error("Timeout")), 10000);
+    setTimeout(() => { if(!settled){ cleanup(); reject(new Error("Timeout")); } }, 10000);
   });
 }
 
-// ── CACHE DE CIUDADES Y TIENDAS ──────────────────────────────
+// ── CACHE ─────────────────────────────────────────────────────
 const _cache = {};
 function fetchGETCached(params) {
   const key = JSON.stringify(params);
@@ -142,7 +272,6 @@ function fetchGETCached(params) {
   return fetchGET(params).then(d => { _cache[key] = d; return d; });
 }
 
-// ── CARGA COMBINADA (ciudades + todas las tiendas en 1 sola llamada) ──
 async function cargarTodo() {
   try {
     const data = await fetchGET({ accion: "obtenerTodo" });
@@ -181,11 +310,21 @@ async function validar() {
   const codigo = document.getElementById("codigo").value.trim().toUpperCase();
   const ciudad = document.getElementById("ciudad").value;
   const tienda = document.getElementById("tienda").value;
-  const loopy  = document.getElementById("loopy").value;
 
-  if (!codigo || !ciudad || !tienda || !loopy) {
-    return mostrarResultado(false, "Completa todos los campos", []);
+  if (!codigo || !ciudad || !tienda) {
+    return mostrarResultado(false, "Completa código, ciudad y tienda", []);
   }
+  if (!_nuevo) {
+    return mostrarResultado(false, "Indica si es la primera vez del cliente", []);
+  }
+  if (!_loopy) {
+    return mostrarResultado(false, "Indica si el cliente tiene tarjeta Loopy", []);
+  }
+
+  // Valor consolidado para Sheets — columna E
+  const perfilCliente = (_nuevo === "SI" ? "Cliente nuevo" : "Ya nos conocía")
+                      + " · "
+                      + (_loopy === "SI" ? "Con Loopy" : "Sin Loopy");
 
   const btn = document.getElementById("mainBtn");
   btn.classList.add("loading");
@@ -194,15 +333,21 @@ async function validar() {
   try {
     const res = await fetchGET({
       accion: "canjearCodigo",
-      codigo, tienda, ciudad, loopy
+      codigo, tienda, ciudad,
+      loopy: perfilCliente,
     });
 
     if (res.ok) {
-      const lineas = res.mensaje.split("\n");
-      const titulo = lineas[0];
-      const filas  = lineas.slice(1);
-      mostrarResultado(true, titulo, filas);
+      // Arreglar el formato del descuento en la línea de regalo
+      const lineas = res.mensaje.split("\n").map(l =>
+        l.replace(/([\d.]+)\s+en\s+/g, (match, num) => formatearDescuento(num) + " en ")
+      );
+      mostrarResultado(true, lineas[0], lineas.slice(1));
       document.getElementById("codigo").value = "";
+      // Recordatorio post-canje si no tiene Loopy
+      if (_loopy === "NO") {
+        document.getElementById("postLoopyBanner").classList.add("show");
+      }
     } else {
       const lineas = res.mensaje.split("\n");
       mostrarResultado(false, lineas[0], lineas.slice(1));
@@ -223,13 +368,15 @@ function mostrarResultado(ok, titulo, filas) {
   document.getElementById("resRows").innerHTML    = filas
     .map(f => f ? `<div class="result-row">${f}</div>` : "")
     .join("");
+  if (!ok) document.getElementById("postLoopyBanner").classList.remove("show");
 }
 
 // ── PRECALENTAR servidor ──────────────────────────────────────
 (function warmup() {
   const s = document.createElement("script");
-  s.src = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec?accion=ping&callback=_warmup";
+  s.src = SCRIPT_URL + "?accion=ping&callback=_warmup";
   window._warmup = () => {};
+  s.onerror = () => {};
   document.head.appendChild(s);
 })();
 
@@ -246,6 +393,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 document.getElementById("codigo").addEventListener("input", function() {
   this.value = this.value.toUpperCase();
   document.getElementById("resultado").className = "result";
+  document.getElementById("postLoopyBanner").classList.remove("show");
 });
 </script>
 </body>
