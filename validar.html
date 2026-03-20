@@ -129,6 +129,19 @@
       margin-bottom:6px; display:flex; align-items:center; gap:6px;
     }
     .post-loopy-body { font-size:11px; font-weight:700; color:#5d4200; line-height:1.7; }
+
+    /* ── Botón reiniciar ── */
+    .reset-btn {
+      width:100%; padding:14px; margin-top:14px;
+      background:transparent; border:2px solid var(--primary);
+      border-radius:12px; font-family:'Montserrat',sans-serif;
+      font-size:13px; font-weight:900; color:var(--primary);
+      text-transform:uppercase; letter-spacing:1px;
+      cursor:pointer; transition:all 0.18s;
+    }
+    .reset-btn:hover { background:var(--primary); color:#fff; }
+    .form-section { transition:opacity 0.2s; }
+    .form-section.hidden { display:none; }
   </style>
 </head>
 <body>
@@ -139,6 +152,7 @@
   </div>
   <div class="card-body">
 
+    <div class="form-section" id="formSection">
     <div class="field">
       <label>Código del cupón</label>
       <input type="text" id="codigo" placeholder="XXXXX" maxlength="5">
@@ -188,6 +202,8 @@
       </div>
     </div>
 
+    </div><!-- /form-section -->
+
     <button class="btn" id="mainBtn" onclick="validar()">
       <span class="btn-text">Validar cupón</span>
       <span class="btn-loader"><span class="spin"></span></span>
@@ -208,6 +224,11 @@
         Antes de que se vaya: regístralo en la app Loopy de caja con su celular. Esta compra ya le puede contar su primer sello. 🫐
       </div>
     </div>
+
+    <!-- Botón para validar otro cupón -->
+    <button class="reset-btn" id="resetBtn" style="display:none;" onclick="resetForm()">
+      ← Validar otro cupón
+    </button>
 
   </div>
 </div>
@@ -367,7 +388,36 @@ function mostrarResultado(ok, titulo, filas) {
   document.getElementById("resRows").innerHTML    = filas
     .map(f => f ? `<div class="result-row">${f}</div>` : "")
     .join("");
-  if (!ok) document.getElementById("postLoopyBanner").classList.remove("show");
+
+  if (ok) {
+    // Ocultar formulario, mostrar solo resultado + botón reset
+    document.getElementById("formSection").classList.add("hidden");
+    document.getElementById("mainBtn").style.display = "none";
+    document.getElementById("resetBtn").style.display = "block";
+  } else {
+    // Error: mantener formulario visible para corregir
+    document.getElementById("postLoopyBanner").classList.remove("show");
+    document.getElementById("formSection").classList.remove("hidden");
+    document.getElementById("mainBtn").style.display = "block";
+    document.getElementById("resetBtn").style.display = "none";
+  }
+}
+
+function resetForm() {
+  // Limpiar y mostrar el formulario de nuevo
+  document.getElementById("codigo").value = "";
+  document.getElementById("resultado").className = "result";
+  document.getElementById("postLoopyBanner").classList.remove("show");
+  document.getElementById("loopyBanner").classList.remove("show");
+  document.getElementById("formSection").classList.remove("hidden");
+  document.getElementById("mainBtn").style.display = "block";
+  document.getElementById("resetBtn").style.display = "none";
+  // Resetear toggles
+  _nuevo = ""; _loopy = "";
+  ["nuevo-si","nuevo-no","loopy-si","loopy-no"].forEach(id =>
+    document.getElementById(id).className = "toggle-btn"
+  );
+  document.getElementById("codigo").focus();
 }
 
 // ── PRECALENTAR servidor ──────────────────────────────────────
