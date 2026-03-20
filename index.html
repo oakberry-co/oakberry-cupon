@@ -333,6 +333,10 @@ const esSorteo = P.modo === "sorteo";
 // Se captura al cargar la página — incluye todos los parámetros UTM
 const LINK_CAMP = window.location.href;
 
+// ── MODO DEVELOPER (solo para pruebas internas) ───────────────
+// Agrega ?dev=dzuluaga a cualquier link para saltar todas las validaciones
+const DEV_MODE = new URLSearchParams(window.location.search).get("dev") === "dzuluaga";
+
 // ── FINGERPRINT DE DISPOSITIVO (anti-fraude silencioso) ───────
 // Genera un ID único basado en características del navegador.
 // Se guarda en localStorage — si el dispositivo ya generó un cupón
@@ -370,13 +374,27 @@ function marcarDispositivoUsado() {
 }
 
 // ── GEOLOCALIZACIÓN SILENCIOSA ────────────────────────────────
-// Estado geo — se rellena antes de que el usuario envíe el formulario
+// Capa 1: ipapi.co por IP (silenciosa, ~300ms)
+// Capa 2: Nominatim reverse geocoding si ipapi falla (silenciosa, ~500ms)
+// Capa 3: ciudad vacía — sin popups, sin permisos, sin fricción
 let _geo = { ciudad: "", coordenadas: "", fuente: "desconocido" };
 
-// 1. Intentar por IP (silencioso, sin permiso)
-// 2. Si falla o ciudad vacía → pedir permiso GPS como respaldo
+async function ciudadPorNominatim(lat, lng) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`;
+    const res  = await fetch(url, {
+      signal: AbortSignal.timeout(4000),
+      headers: { "User-Agent": "oakberry-cupones/1.0" }
+    });
+    const data = await res.json();
+    // Nominatim devuelve city > town > village > county en ese orden de precisión
+    return (data.address?.city || data.address?.town || data.address?.village || data.address?.county || "").trim();
+  } catch(e) { return ""; }
+}
+
 async function iniciarGeo() {
   try {
+    // Capa 1 — IP silenciosa
     const res  = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(4000) });
     const data = await res.json();
     const ciudad = (data.city || "").trim();
@@ -386,30 +404,44 @@ async function iniciarGeo() {
         coordenadas: data.latitude && data.longitude ? data.latitude + "," + data.longitude : "",
         fuente: "ip",
       };
-      return; // IP fue suficiente
+      return; // ipapi funcionó — no necesitamos más
     }
-  } catch(e) { /* IP falló — intentamos GPS */ }
-
-  // GPS como respaldo
-  if (navigator.geolocation) {
-    try {
-      const pos = await new Promise((res, rej) =>
-        navigator.geolocation.getCurrentPosition(res, rej, { timeout: 6000 })
-      );
-      const lat = pos.coords.latitude.toFixed(6);
-      const lng = pos.coords.longitude.toFixed(6);
-      // Reverse geocoding con ipapi usando coords
-      try {
-        const r2   = await fetch(`https://ipapi.co/${lat},${lng}/json/`, { signal: AbortSignal.timeout(4000) });
-        const d2   = await r2.json();
-        _geo = { ciudad: d2.city || "", coordenadas: lat + "," + lng, fuente: "gps" };
-      } catch(e2) {
-        _geo = { ciudad: "", coordenadas: lat + "," + lng, fuente: "gps" };
+    // ipapi respondió pero sin ciudad — intentar Nominatim con coords de ipapi
+    if (data.latitude && data.longitude) {
+      const ciudadNom = await ciudadPorNominatim(data.latitude, data.longitude);
+      if (ciudadNom) {
+        _geo = {
+          ciudad: ciudadNom,
+          coordenadas: data.latitude + "," + data.longitude,
+          fuente: "nominatim",
+        };
       }
-    } catch(e) { /* usuario rechazó o error GPS */ }
+    }
+  } catch(e) {
+    // Capa 2 — ipapi falló completamente, intentar Nominatim con IP pública
+    try {
+      // Obtener IP pública primero
+      const ipRes  = await fetch("https://api.ipify.org?format=json", { signal: AbortSignal.timeout(3000) });
+      const ipData = await ipRes.json();
+      // Usar ipapi con solo la IP para obtener coords
+      const geoRes  = await fetch(`https://ipapi.co/${ipData.ip}/json/`, { signal: AbortSignal.timeout(4000) });
+      const geoData = await geoRes.json();
+      const lat = geoData.latitude;
+      const lng = geoData.longitude;
+      if (lat && lng) {
+        const ciudadNom = await ciudadPorNominatim(lat, lng);
+        if (ciudadNom) {
+          _geo = {
+            ciudad: ciudadNom,
+            coordenadas: lat + "," + lng,
+            fuente: "nominatim",
+          };
+        }
+      }
+    } catch(e2) { /* todo falló — ciudad vacía, sin fricción */ }
   }
 }
-// Lanzar geo en paralelo al cargar — no bloquea el formulario
+// Lanzar en paralelo al cargar — no bloquea el formulario
 iniciarGeo();
 
 // ── PRECALENTAR servidor ──────────────────────────────────────
@@ -604,7 +636,7 @@ async function solicitar() {
   if (!validar()) return;
 
   // ── Verificar fingerprint de dispositivo ─────────────────────
-  if (dispositivoYaUsado()) {
+  if (!DEV_MODE && dispositivoYaUsado()) {
     show("stateLoading");
     iniciarProgreso();
     setTimeout(() => {
@@ -625,15 +657,18 @@ async function solicitar() {
   iniciarProgreso();
 
   // Verificar si el celular ya tiene cupón registrado
-  try {
-    const check = await fetchGETSafe({ accion: "verificarCelular", celular });
-    if (check.existe) {
-      clearTimeout(_progressTimer);
-      mostrarExistente(check, nombre);
-      return;
+  // En DEV_MODE se salta esta validación para poder probar libremente
+  if (!DEV_MODE) {
+    try {
+      const check = await fetchGETSafe({ accion: "verificarCelular", celular });
+      if (check.existe) {
+        clearTimeout(_progressTimer);
+        mostrarExistente(check, nombre);
+        return;
+      }
+    } catch(e) {
+      // Si falla la verificación, continuamos normal
     }
-  } catch(e) {
-    // Si falla la verificación, continuamos normal
   }
   // NOTA: Validación de email contra Loopy en pausa (activar tras análisis 5 días)
 
@@ -670,7 +705,7 @@ async function solicitar() {
       } else if (res.existe) {
         mostrarExistente(res, nombre);
       } else if (res.ok) {
-        marcarDispositivoUsado();
+        if (!DEV_MODE) marcarDispositivoUsado();
         mostrarNuevo({ codigo: res.codigo || codigo, nombre, vence });
       } else {
         alert(res.mensaje || "Error al generar el cupón. Intenta de nuevo.");
