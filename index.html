@@ -324,6 +324,53 @@ const P = (() => {
 
 const esSorteo = P.modo === "sorteo";
 
+// ── LINK DE CAMPAÑA (URL completa que originó este cupón) ─────
+// Se captura al cargar la página — incluye todos los parámetros UTM
+const LINK_CAMP = window.location.href;
+
+// ── GEOLOCALIZACIÓN SILENCIOSA ────────────────────────────────
+// Estado geo — se rellena antes de que el usuario envíe el formulario
+let _geo = { ciudad: "", coordenadas: "", fuente: "desconocido" };
+
+// 1. Intentar por IP (silencioso, sin permiso)
+// 2. Si falla o ciudad vacía → pedir permiso GPS como respaldo
+async function iniciarGeo() {
+  try {
+    const res  = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(4000) });
+    const data = await res.json();
+    const ciudad = (data.city || "").trim();
+    if (ciudad) {
+      _geo = {
+        ciudad,
+        coordenadas: data.latitude && data.longitude ? data.latitude + "," + data.longitude : "",
+        fuente: "ip",
+      };
+      return; // IP fue suficiente
+    }
+  } catch(e) { /* IP falló — intentamos GPS */ }
+
+  // GPS como respaldo
+  if (navigator.geolocation) {
+    try {
+      const pos = await new Promise((res, rej) =>
+        navigator.geolocation.getCurrentPosition(res, rej, { timeout: 6000 })
+      );
+      const lat = pos.coords.latitude.toFixed(6);
+      const lng = pos.coords.longitude.toFixed(6);
+      // Reverse geocoding con ipapi usando coords
+      try {
+        const r2   = await fetch(`https://ipapi.co/${lat},${lng}/json/`, { signal: AbortSignal.timeout(4000) });
+        const d2   = await r2.json();
+        _geo = { ciudad: d2.city || "", coordenadas: lat + "," + lng, fuente: "gps" };
+      } catch(e2) {
+        _geo = { ciudad: "", coordenadas: lat + "," + lng, fuente: "gps" };
+      }
+    } catch(e) { /* usuario rechazó o error GPS */ }
+  }
+}
+// Lanzar geo en paralelo al cargar — no bloquea el formulario
+iniciarGeo();
+
 // ── PRECALENTAR servidor ──────────────────────────────────────
 (function warmup() {
   const s = document.createElement("script");
@@ -534,17 +581,22 @@ async function solicitar() {
 
   try {
     const res = await fetchGETSafe({
-      accion:     "registrarCupon",
+      accion:      "registrarCupon",
       codigo, nombre, celular,
-      ciudad:     P.ciudad,
-      tienda:     P.tienda,
-      fase:       P.fase,
-      fuente:     P.fuente,
-      descuento:  esSorteo ? "sorteo" : P.descuento + "%",
+      ciudad:      P.ciudad,
+      tienda:      P.tienda,
+      fase:        P.fase,
+      fuente:      P.fuente,
+      descuento:   esSorteo ? "sorteo" : P.descuento + "%",
       producto,
-      momentos:   P.momentos || "",
-      fechaGen:   ahora.toISOString(),
-      fechaVence: vence.toISOString(),
+      momentos:    P.momentos || "",
+      fechaGen:    ahora.toISOString(),
+      fechaVence:  vence.toISOString(),
+      // ── Trazabilidad nueva ──────────────────────────────────
+      linkCamp:    LINK_CAMP,           // URL completa de la campaña de origen
+      ciudadReal:  _geo.ciudad,         // Ciudad detectada por geo
+      coordenadas: _geo.coordenadas,    // "lat,lng" del dispositivo
+      fuenteGeo:   _geo.fuente,         // "ip" | "gps" | "desconocido"
     });
 
     completarProgreso(() => {
