@@ -46,9 +46,10 @@ fbq('track', 'PageView');
   .section-title{color:var(--primary);text-transform:uppercase;font-weight:900;font-size:17px;letter-spacing:0.5px;text-align:center;margin-bottom:6px;}
   .section-sub{font-size:11px;font-weight:700;color:var(--gray);text-align:center;margin-bottom:22px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.6;}
   .form-group{margin-bottom:14px;position:relative;}
-  input[type=text],input[type=tel]{width:100%;padding:15px 16px;border-radius:12px;border:2px solid var(--border);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--primary);outline:none;background:#fff;transition:border-color 0.18s,box-shadow 0.18s;-webkit-appearance:none;}
+  input[type=text],input[type=tel],input[type=email]{width:100%;padding:15px 16px;border-radius:12px;border:2px solid var(--border);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--primary);outline:none;background:#fff;transition:border-color 0.18s,box-shadow 0.18s;-webkit-appearance:none;}
   input::placeholder{color:#bbb;font-weight:600;}
   input[type=tel]{padding-left:52px;}
+  input[type=email]{text-transform:none;letter-spacing:0;}
   input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(95,75,139,0.12);}
   input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(192,57,43,0.1);}
   .phone-prefix{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--primary);pointer-events:none;}
@@ -162,6 +163,10 @@ fbq('track', 'PageView');
       <div class="form-group">
         <input type="text" id="inp-nombre" placeholder="TU NOMBRE" autocomplete="given-name">
         <div class="err-msg" id="err-nombre">⚠ Ingresa tu nombre</div>
+      </div>
+      <div class="form-group">
+        <input type="email" id="inp-email" placeholder="tu@correo.com" autocomplete="email">
+        <div class="err-msg" id="err-email">⚠ Ingresa un email válido</div>
       </div>
       <div class="form-group">
         <span class="phone-prefix">+57</span>
@@ -328,6 +333,42 @@ const esSorteo = P.modo === "sorteo";
 // Se captura al cargar la página — incluye todos los parámetros UTM
 const LINK_CAMP = window.location.href;
 
+// ── FINGERPRINT DE DISPOSITIVO (anti-fraude silencioso) ───────
+// Genera un ID único basado en características del navegador.
+// Se guarda en localStorage — si el dispositivo ya generó un cupón
+// en esta campaña, se bloquea aunque cambie el número de celular.
+function generarFingerprint() {
+  const data = [
+    navigator.userAgent,
+    navigator.language,
+    screen.width + "x" + screen.height + "x" + screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency || "",
+    navigator.platform || "",
+  ].join("|");
+  // Hash simple pero suficiente para fingerprinting básico
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    hash = ((hash << 5) - hash) + data.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+const DEVICE_FP = generarFingerprint();
+
+// Verificar si este dispositivo ya generó un cupón
+function dispositivoYaUsado() {
+  try {
+    const used = localStorage.getItem("oak_fp_used");
+    return used === DEVICE_FP;
+  } catch(e) { return false; }
+}
+
+function marcarDispositivoUsado() {
+  try { localStorage.setItem("oak_fp_used", DEVICE_FP); } catch(e) {}
+}
+
 // ── GEOLOCALIZACIÓN SILENCIOSA ────────────────────────────────
 // Estado geo — se rellena antes de que el usuario envíe el formulario
 let _geo = { ciudad: "", coordenadas: "", fuente: "desconocido" };
@@ -414,6 +455,15 @@ function validar() {
   } else {
     document.getElementById("inp-nombre").classList.remove("err");
     document.getElementById("err-nombre").classList.remove("show");
+  }
+  const emailVal = document.getElementById("inp-email").value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    document.getElementById("inp-email").classList.add("err");
+    document.getElementById("err-email").classList.add("show");
+    ok = false;
+  } else {
+    document.getElementById("inp-email").classList.remove("err");
+    document.getElementById("err-email").classList.remove("show");
   }
   const cel = document.getElementById("inp-cel").value.replace(/\D/g,"");
   if (!/^3\d{9}$/.test(cel)) {
@@ -553,7 +603,19 @@ function setStep(n, estado) {
 async function solicitar() {
   if (!validar()) return;
 
+  // ── Verificar fingerprint de dispositivo ─────────────────────
+  if (dispositivoYaUsado()) {
+    show("stateLoading");
+    iniciarProgreso();
+    setTimeout(() => {
+      clearTimeout(_progressTimer);
+      mostrarBloqueadoLoopy(document.getElementById("inp-nombre").value.trim());
+    }, 1800);
+    return;
+  }
+
   const nombre     = document.getElementById("inp-nombre").value.trim();
+  const email      = document.getElementById("inp-email").value.trim().toLowerCase();
   const celularRaw = document.getElementById("inp-cel").value.replace(/\D/g,"");
   const esColombia = celularRaw.length === 10;
   const celular    = esColombia ? "57" + celularRaw : celularRaw;
@@ -562,7 +624,7 @@ async function solicitar() {
   show("stateLoading");
   iniciarProgreso();
 
-  // Verificar primero si el celular ya existe
+  // Verificar si el celular ya tiene cupón registrado
   try {
     const check = await fetchGETSafe({ accion: "verificarCelular", celular });
     if (check.existe) {
@@ -573,6 +635,7 @@ async function solicitar() {
   } catch(e) {
     // Si falla la verificación, continuamos normal
   }
+  // NOTA: Validación de email contra Loopy en pausa (activar tras análisis 5 días)
 
   const codigo   = genCodigo();
   const ahora    = new Date();
@@ -597,6 +660,8 @@ async function solicitar() {
       ciudadReal:  _geo.ciudad,         // Ciudad detectada por geo
       coordenadas: _geo.coordenadas,    // "lat,lng" del dispositivo
       fuenteGeo:   _geo.fuente,         // "ip" | "gps" | "desconocido"
+      email,                            // Email para validación Loopy
+      fingerprint: DEVICE_FP,           // Fingerprint del dispositivo
     });
 
     completarProgreso(() => {
@@ -605,6 +670,7 @@ async function solicitar() {
       } else if (res.existe) {
         mostrarExistente(res, nombre);
       } else if (res.ok) {
+        marcarDispositivoUsado();
         mostrarNuevo({ codigo: res.codigo || codigo, nombre, vence });
       } else {
         alert(res.mensaje || "Error al generar el cupón. Intenta de nuevo.");
