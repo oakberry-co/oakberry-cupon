@@ -130,6 +130,36 @@
     }
     .post-loopy-body { font-size:11px; font-weight:700; color:#5d4200; line-height:1.7; }
 
+    /* ── Tarjetas de error tipificadas ── */
+    .err-card { display:none; margin-top:18px; border-radius:16px; padding:18px 20px; animation:fadeIn 0.3s ease; }
+    .err-card.show { display:block; }
+    .err-card .err-icon { font-size:36px; display:block; margin-bottom:10px; }
+    .err-card .err-reason { font-size:14px; font-weight:900; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px; }
+    .err-card .err-detail { font-size:12px; font-weight:700; color:#666; margin-bottom:14px; line-height:1.6; }
+    .err-card .err-action-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#aaa; margin-bottom:6px; }
+    .err-card .err-action { font-size:12px; font-weight:700; line-height:1.6; padding:10px 14px; border-radius:10px; }
+
+    /* Variantes por tipo */
+    .err-card.type-canjeado  { background:#fdf0f0; border:2px solid #f5c6c6; }
+    .err-card.type-canjeado  .err-reason { color:#c0392b; }
+    .err-card.type-canjeado  .err-action { background:#fce4e4; color:#922b21; }
+
+    .err-card.type-ciudad    { background:#f0f4ff; border:2px solid #c5cff5; }
+    .err-card.type-ciudad    .err-reason { color:#2c3e8c; }
+    .err-card.type-ciudad    .err-action { background:#e0e8ff; color:#1a2460; }
+
+    .err-card.type-horario   { background:#fff8f0; border:2px solid #f5dbb8; }
+    .err-card.type-horario   .err-reason { color:#b7570a; }
+    .err-card.type-horario   .err-action { background:#ffecd6; color:#7d3a05; }
+
+    .err-card.type-formato   { background:#f5f0ff; border:2px solid #d4c8f5; }
+    .err-card.type-formato   .err-reason { color:#5F4B8B; }
+    .err-card.type-formato   .err-action { background:#ede6ff; color:#3a2a6e; }
+
+    .err-card.type-noexiste  { background:#f0f0f0; border:2px solid #d0d0d0; }
+    .err-card.type-noexiste  .err-reason { color:#444; }
+    .err-card.type-noexiste  .err-action { background:#e4e4e4; color:#333; }
+
     /* ── Botón reiniciar ── */
     .reset-btn {
       width:100%; padding:14px; margin-top:14px;
@@ -215,6 +245,47 @@
       <div class="result-title" id="resTitle"></div>
       <hr class="divider-line">
       <div id="resRows"></div>
+    </div>
+
+    <!-- TARJETAS DE ERROR TIPIFICADAS -->
+    <div class="err-card type-canjeado" id="errCanjeado">
+      <span class="err-icon">🔒</span>
+      <div class="err-reason">Cupón ya utilizado</div>
+      <div class="err-detail">Este código ya fue canjeado anteriormente y no puede volver a usarse.</div>
+      <div class="err-action-label">Qué decirle al cliente</div>
+      <div class="err-action">Este cupón ya fue redimido. Si tienes dudas, comunícate con nosotros.</div>
+    </div>
+
+    <div class="err-card type-ciudad" id="errCiudad">
+      <span class="err-icon">📍</span>
+      <div class="err-reason">Ciudad incorrecta</div>
+      <div class="err-detail" id="errCiudadDetalle">Este cupón fue generado para otra ciudad.</div>
+      <div class="err-action-label">Qué decirle al cliente</div>
+      <div class="err-action">Tu cupón solo es válido en la ciudad donde lo generaste. Puedes usarlo allá dentro de su vigencia.</div>
+    </div>
+
+    <div class="err-card type-horario" id="errHorario">
+      <span class="err-icon">⏰</span>
+      <div class="err-reason">Fuera del horario permitido</div>
+      <div class="err-detail" id="errHorarioDetalle">Este cupón tiene restricción de horario.</div>
+      <div class="err-action-label">Qué decirle al cliente</div>
+      <div class="err-action" id="errHorarioAccion">Tu cupón solo aplica en el horario indicado. ¡Vuelve en ese momento y con gusto te lo aplicamos!</div>
+    </div>
+
+    <div class="err-card type-formato" id="errFormato">
+      <span class="err-icon">🔤</span>
+      <div class="err-reason">Código inválido</div>
+      <div class="err-detail">El código ingresado no tiene el formato correcto. Debe ser 5 caracteres.</div>
+      <div class="err-action-label">Qué hacer</div>
+      <div class="err-action">Pídele al cliente que muestre el código en pantalla y vuelve a digitarlo con cuidado.</div>
+    </div>
+
+    <div class="err-card type-noexiste" id="errNoExiste">
+      <span class="err-icon">❓</span>
+      <div class="err-reason">Código no encontrado</div>
+      <div class="err-detail">El código ingresado no existe en el sistema.</div>
+      <div class="err-action-label">Qué hacer</div>
+      <div class="err-action">Pídele al cliente que muestre el código en su celular y verifica que lo estés digitando correctamente.</div>
     </div>
 
     <!-- Banner post-canje si no tiene Loopy -->
@@ -369,8 +440,7 @@ async function validar() {
         document.getElementById("postLoopyBanner").classList.add("show");
       }
     } else {
-      const lineas = res.mensaje.split("\n");
-      mostrarResultado(false, lineas[0], lineas.slice(1));
+      mostrarError(res.mensaje);
     }
   } catch(e) {
     mostrarResultado(false, "❌ Error de conexión", ["Intenta de nuevo"]);
@@ -403,10 +473,49 @@ function mostrarResultado(ok, titulo, filas) {
   }
 }
 
+function ocultarTodosErrores() {
+  ["errCanjeado","errCiudad","errHorario","errFormato","errNoExiste"].forEach(id => {
+    document.getElementById(id).classList.remove("show");
+  });
+  document.getElementById("resultado").className = "result";
+}
+
+function mostrarError(mensaje) {
+  ocultarTodosErrores();
+  // Detectar tipo por el contenido del mensaje
+  if (mensaje.includes("ya fue canjeado")) {
+    document.getElementById("errCanjeado").classList.add("show");
+  } else if (mensaje.includes("Ciudad incorrecta")) {
+    // Extraer la ciudad del mensaje
+    const match = mensaje.match(/válido en: (.+)/);
+    if (match) document.getElementById("errCiudadDetalle").textContent =
+      "Este cupón fue generado para: " + match[1] + ". No aplica en esta tienda.";
+    document.getElementById("errCiudad").classList.add("show");
+  } else if (mensaje.includes("fuera de horario") || mensaje.includes("Cupón fuera")) {
+    const match = mensaje.match(/Solo válido en:\n(.+)/s);
+    if (match) {
+      document.getElementById("errHorarioDetalle").textContent =
+        "Solo válido en: " + match[1].trim();
+      document.getElementById("errHorarioAccion").textContent =
+        "Tu cupón aplica en: " + match[1].trim() + ". ¡Vuelve en ese horario y con gusto te lo aplicamos!";
+    }
+    document.getElementById("errHorario").classList.add("show");
+  } else if (mensaje.includes("Formato") || mensaje.includes("inválido")) {
+    document.getElementById("errFormato").classList.add("show");
+  } else {
+    // No existe u otro error
+    document.getElementById("errNoExiste").classList.add("show");
+  }
+  // Mantener formulario visible para corregir
+  document.getElementById("formSection").classList.remove("hidden");
+  document.getElementById("mainBtn").style.display = "block";
+  document.getElementById("resetBtn").style.display = "none";
+}
+
 function resetForm() {
   // Limpiar y mostrar el formulario de nuevo
   document.getElementById("codigo").value = "";
-  document.getElementById("resultado").className = "result";
+  ocultarTodosErrores();
   document.getElementById("postLoopyBanner").classList.remove("show");
   document.getElementById("loopyBanner").classList.remove("show");
   document.getElementById("formSection").classList.remove("hidden");
@@ -441,7 +550,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 document.getElementById("codigo").addEventListener("input", function() {
   this.value = this.value.toUpperCase();
-  document.getElementById("resultado").className = "result";
+  ocultarTodosErrores();
   document.getElementById("postLoopyBanner").classList.remove("show");
 });
 </script>
