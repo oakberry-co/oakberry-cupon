@@ -211,17 +211,6 @@
           </div>
         </div>
 
-        <!-- URL dinámica para pegar en Meta -->
-        <div class="meta-url-box">
-          <div class="meta-url-label">URL para pegar en Meta Ads</div>
-          <div class="meta-url-text" id="metaUrlPreview">
-            Completa los campos de arriba para ver la URL...
-          </div>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="action-btn" onclick="copiarMetaUrl()" style="flex:1;font-size:10px;">📋 Copiar URL Meta</button>
-            <button class="action-btn" onclick="verAyudaMeta()" style="font-size:10px;padding:10px 12px;">❓</button>
-          </div>
-        </div>
       </div>
 
       <!-- ── OFERTA (cupón) ── -->
@@ -341,6 +330,19 @@
       <div class="field">
         <label>Nombre interno de la campaña</label>
         <input type="text" id="campañaNombre" placeholder="Ej: TOFU Mujeres Bogotá Bowl Mar26">
+      </div>
+
+      <!-- ── URL PARA META ADS ── -->
+      <div class="divider">URL para Meta Ads</div>
+      <div class="meta-url-box">
+        <div class="meta-url-label">URL para pegar en cada Ad Set · Meta rellena las variables automáticamente</div>
+        <div class="meta-url-text" id="metaUrlPreview">
+          Completa los campos de arriba para ver la URL...
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="action-btn primary" onclick="copiarMetaUrl()" style="flex:1;font-size:10px;">📋 Copiar URL Meta</button>
+          <button class="action-btn" onclick="verAyudaMeta()" style="font-size:10px;padding:10px 12px;">❓ Ayuda</button>
+        </div>
       </div>
 
       <button class="gen-btn" onclick="generar()">⚡ Generar link</button>
