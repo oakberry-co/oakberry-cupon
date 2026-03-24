@@ -10,11 +10,12 @@
     --p:#5F4B8B; --pd:#3d2f66; --y:#F5C842; --bg:#0e0b16;
     --card:#1a1427; --card2:#221935; --border:rgba(255,255,255,0.07);
     --text:#e8e0ff; --muted:rgba(232,224,255,0.4); --green:#39d98a;
+    --orange:#f5a623; --red:#ff5c5c;
   }
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:40px 20px;}
-  .layout{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 380px;gap:24px;}
-  @media(max-width:780px){.layout{grid-template-columns:1fr;}}
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr 400px;gap:24px;}
+  @media(max-width:820px){.layout{grid-template-columns:1fr;}}
   .header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding-bottom:24px;border-bottom:1px solid var(--border);margin-bottom:8px;}
   .logo{display:flex;align-items:center;gap:14px;}
   .logo-icon{width:44px;height:44px;background:var(--p);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
@@ -29,29 +30,53 @@
   .tab.active{background:var(--p);color:#fff;box-shadow:0 4px 16px rgba(95,75,139,0.4);}
   .field{margin-bottom:16px;}
   label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:7px;}
-  input,select{width:100%;padding:12px 16px;background:var(--card2);border:1px solid var(--border);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--text);outline:none;transition:border-color 0.18s,box-shadow 0.18s;-webkit-appearance:none;}
-  input:focus,select:focus{border-color:rgba(95,75,139,0.6);box-shadow:0 0 0 3px rgba(95,75,139,0.15);}
+  input,select,textarea{width:100%;padding:12px 16px;background:var(--card2);border:1px solid var(--border);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--text);outline:none;transition:border-color 0.18s,box-shadow 0.18s;-webkit-appearance:none;}
+  input:focus,select:focus,textarea:focus{border-color:rgba(95,75,139,0.6);box-shadow:0 0 0 3px rgba(95,75,139,0.15);}
   select option{background:#1a1427;}
+  textarea{resize:none;font-size:11px;font-family:'Space Mono',monospace;line-height:1.6;color:var(--y);}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
   .divider{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-family:'Space Mono',monospace;margin:20px 0 16px;display:flex;align-items:center;gap:10px;}
   .divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* ── Momentos ── */
   .momentos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
-  .momento-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);cursor:pointer;transition:all 0.18s;font-family:'Montserrat',sans-serif;text-align:center;user-select:none;}
+  .momento-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 8px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);cursor:pointer;transition:all 0.18s;font-family:'Montserrat',sans-serif;text-align:center;user-select:none;position:relative;}
   .momento-btn:hover{border-color:rgba(95,75,139,0.5);}
   .momento-btn.selected{background:rgba(95,75,139,0.25);border-color:var(--p);box-shadow:0 0 0 2px rgba(95,75,139,0.2);}
-  .momento-emoji{font-size:22px;margin-bottom:4px;}
+  .momento-btn.todos-btn{grid-column:1/-1;}
+  .momento-emoji{font-size:20px;margin-bottom:3px;}
   .momento-nombre{font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:0.5px;}
   .momento-hora{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
-  .err-momento{font-size:10px;color:#ff5c5c;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:none;margin-top:4px;font-family:'Space Mono',monospace;}
+  .err-momento{font-size:10px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:1px;display:none;margin-top:4px;font-family:'Space Mono',monospace;}
   .err-momento.show{display:block;}
+
+  /* ── Sección pauta ── */
+  .pauta-section{background:rgba(95,75,139,0.08);border:1px solid rgba(95,75,139,0.2);border-radius:14px;padding:18px;margin-bottom:16px;}
+  .pauta-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:rgba(95,75,139,0.8);font-family:'Space Mono',monospace;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+  .pauta-title::before{content:'';display:block;width:3px;height:12px;background:var(--p);border-radius:2px;}
+  .hint{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:5px;line-height:1.5;}
+  .hint code{background:rgba(95,75,139,0.2);padding:1px 5px;border-radius:4px;color:rgba(232,224,255,0.7);}
+
+  /* ── URL Meta dinámica ── */
+  .meta-url-box{background:var(--card2);border:1px dashed rgba(245,200,66,0.3);border-radius:10px;padding:14px;margin-top:16px;}
+  .meta-url-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--y);font-family:'Space Mono',monospace;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .meta-url-label::before{content:'⚡';font-size:12px;}
+  .meta-url-text{font-family:'Space Mono',monospace;font-size:10px;color:rgba(232,224,255,0.6);line-height:1.7;word-break:break-all;}
+  .meta-url-text .dynamic{color:var(--y);}
+  .meta-url-text .static{color:var(--green);}
+
+  /* ── Botón generar ── */
   .gen-btn{width:100%;padding:16px;background:var(--y);color:var(--pd);border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;margin-top:8px;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 6px 24px rgba(245,200,66,0.25);}
   .gen-btn:hover{transform:translateY(-1px);box-shadow:0 10px 32px rgba(245,200,66,0.35);}
+
+  /* ── Preview panel ── */
   .preview-panel{display:flex;flex-direction:column;gap:16px;}
   .link-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;position:relative;overflow:hidden;}
   .link-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--p),var(--y));}
   .link-card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:14px;}
-  .link-display{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'Space Mono',monospace;font-size:11px;color:var(--y);word-break:break-all;line-height:1.6;min-height:60px;margin-bottom:14px;}
-  .link-display.empty{color:var(--muted);font-style:italic;}
+  .link-display{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'Space Mono',monospace;font-size:10px;color:var(--y);word-break:break-all;line-height:1.7;min-height:60px;margin-bottom:14px;}
+  .link-display.empty{color:var(--muted);font-style:italic;font-size:11px;}
   .link-actions{display:flex;gap:8px;}
   .action-btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;transition:all 0.18s;text-align:center;}
   .action-btn:hover{border-color:var(--p);color:var(--y);}
@@ -74,10 +99,24 @@
   .history-copy:hover{border-color:var(--y);color:var(--y);}
   .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#0e0b16;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;padding:12px 24px;border-radius:50px;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;}
   .toast.show{transform:translateX(-50%) translateY(0);}
-  .modo-sorteo{display:none;}
   .status-bar{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);padding:8px 0;}
   .status-dot{width:7px;height:7px;border-radius:50%;background:#ff5c5c;flex-shrink:0;}
   .status-dot.ok{background:var(--green);}
+
+  /* ── Timeline de 24h ── */
+  .timeline-wrap{margin:12px 0 16px;}
+  .timeline-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:8px;}
+  .timeline{display:flex;height:28px;border-radius:8px;overflow:hidden;width:100%;}
+  .tl-seg{display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;font-family:'Space Mono',monospace;letter-spacing:0.5px;transition:opacity 0.2s;cursor:default;overflow:hidden;white-space:nowrap;}
+  .tl-seg.active{opacity:1;}
+  .tl-seg.inactive{opacity:0.25;}
+  .tl-madrugada{background:#1a2040;color:#6680cc;}
+  .tl-desayuno{background:#f5a623;color:#7a4a00;}
+  .tl-almuerzo{background:#e8593c;color:#fff;}
+  .tl-onces{background:#5F4B8B;color:#e8e0ff;}
+  .tl-cena{background:#1a3a2a;color:#39d98a;}
+  .tl-noche{background:#0e0b16;color:#6680cc;border:1px solid rgba(102,128,204,0.3);}
+  .tl-dia{background:linear-gradient(90deg,#f5a623,#e8593c,#5F4B8B,#1a3a2a);color:#fff;}
 </style>
 </head>
 <body>
@@ -108,6 +147,7 @@
         <button class="tab" onclick="setModo('sorteo')">🏆 Sorteo</button>
       </div>
 
+      <!-- ── CAMPAÑA BASE ── -->
       <div class="divider">Campaña</div>
       <div class="row">
         <div class="field">
@@ -117,7 +157,7 @@
           </select>
         </div>
         <div class="field">
-          <label>Fase</label>
+          <label>Fase del funnel</label>
           <select id="fase">
             <option value="tofu">TOFU · Awareness</option>
             <option value="mofu">MOFU · Consideración</option>
@@ -131,26 +171,70 @@
           <select id="tienda"><option value="general">Todas las tiendas</option></select>
         </div>
         <div class="field">
-          <label>Fuente</label>
+          <label>Fuente principal</label>
           <select id="fuente">
-            <option value="meta">Meta</option>
-            <option value="instagram">Instagram</option>
+            <option value="meta">Meta (FB/IG)</option>
+            <option value="instagram">Instagram orgánico</option>
             <option value="tiktok">TikTok</option>
             <option value="organico">Orgánico</option>
             <option value="influencer">Influencer</option>
+            <option value="email">Email</option>
           </select>
         </div>
       </div>
 
+      <!-- ── TRAZABILIDAD DE PAUTA (nuevo) ── -->
+      <div class="divider">Trazabilidad de pauta</div>
+      <div class="pauta-section">
+        <div class="pauta-title">Parámetros de Ad Set</div>
+        <div class="field">
+          <label>Nombre del Ad Set</label>
+          <input type="text" id="adset" placeholder="Ej: muj-18-34-bogota">
+          <div class="hint">Nombre corto sin espacios · Ej: <code>hom-25-40-med</code> · <code>lal-clientes</code> · <code>retarget-web</code></div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Anuncio / Creatividad</label>
+            <input type="text" id="anuncio" placeholder="Ej: video-bowl-v1">
+            <div class="hint">Ej: <code>img-acai</code> · <code>ugc-mar26</code></div>
+          </div>
+          <div class="field">
+            <label>Placement</label>
+            <select id="placement">
+              <option value="{{placement}}">Auto (Meta lo llena)</option>
+              <option value="feed">Feed</option>
+              <option value="story">Story</option>
+              <option value="reels">Reels</option>
+              <option value="search">Search</option>
+              <option value="todos">Todos los placements</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- URL dinámica para pegar en Meta -->
+        <div class="meta-url-box">
+          <div class="meta-url-label">URL para pegar en Meta Ads</div>
+          <div class="meta-url-text" id="metaUrlPreview">
+            Completa los campos de arriba para ver la URL...
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="action-btn" onclick="copiarMetaUrl()" style="flex:1;font-size:10px;">📋 Copiar URL Meta</button>
+            <button class="action-btn" onclick="verAyudaMeta()" style="font-size:10px;padding:10px 12px;">❓</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── OFERTA (cupón) ── -->
       <div id="modoCupon">
         <div class="divider">Oferta</div>
         <div class="row">
           <div class="field">
             <label>Producto</label>
             <select id="producto">
-              <option value="Bowl+9oz">Bowl 9oz</option>
-              <option value="Bowl+12oz" selected>Bowl 12oz</option>
-              <option value="Bowl+16oz">Bowl 16oz</option>
+              <option value="Bowl+9oz">Bowl 9oz · $21.900</option>
+              <option value="Bowl+12oz" selected>Bowl 12oz · $25.400</option>
+              <option value="Bowl+16oz">Bowl 16oz · $33.800</option>
+              <option value="Bowl+22oz">Bowl 22oz · $39.400</option>
               <option value="Smoothie">Smoothie</option>
               <option value="Açaí+puro">Açaí puro</option>
             </select>
@@ -161,7 +245,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Vigencia (horas)</label>
+          <label>Vigencia</label>
           <select id="vigencia">
             <option value="24">24 horas</option>
             <option value="48">48 horas</option>
@@ -170,40 +254,71 @@
           </select>
         </div>
 
+        <!-- ── MOMENTOS DE CONSUMO ── -->
         <div class="divider">Momento de consumo</div>
-        <div style="margin-bottom:8px">
-          <div class="momento-btn" onclick="toggleTodosMomentos(this)" id="btnTodosMomentos" style="width:100%;text-align:center;">
-            <span class="momento-emoji">🕐</span>
-            <span class="momento-nombre">Todos los momentos</span>
-            <span class="momento-hora">Sin restricción de horario</span>
+
+        <!-- Timeline visual 24h -->
+        <div class="timeline-wrap">
+          <div class="timeline-label">Cobertura horaria del cupón</div>
+          <div class="timeline" id="timeline24h">
+            <div class="tl-seg tl-madrugada inactive" data-key="madrugada" style="width:29.17%">MADRUGADA</div>
+            <div class="tl-seg tl-desayuno inactive"  data-key="desayuno"  style="width:18.75%">DESAYUNO</div>
+            <div class="tl-seg tl-almuerzo inactive"  data-key="almuerzo"  style="width:16.67%">ALMUERZO</div>
+            <div class="tl-seg tl-onces inactive"     data-key="onces"     style="width:14.58%">ONCES</div>
+            <div class="tl-seg tl-cena inactive"      data-key="cena"      style="width:16.67%">CENA</div>
+            <div class="tl-seg tl-noche inactive"     data-key="noche"     style="width:4.17%">NOCHE</div>
           </div>
         </div>
+
         <div class="momentos-grid">
-          <div class="momento-btn" data-momento="desayuno" onclick="toggleMomento('desayuno', this)">
+          <!-- Todos los momentos -->
+          <div class="momento-btn todos-btn" id="btnTodosMomentos" onclick="toggleTodosMomentos(this)">
+            <span class="momento-emoji">🕐</span>
+            <span class="momento-nombre">Todo el día</span>
+            <span class="momento-hora">Sin restricción de horario · 24h</span>
+          </div>
+          <!-- Madrugada -->
+          <div class="momento-btn" data-momento="madrugada" onclick="toggleMomento('madrugada',this)">
+            <span class="momento-emoji">🌃</span>
+            <span class="momento-nombre">Madrugada</span>
+            <span class="momento-hora">11:00 pm – 7:00 am</span>
+          </div>
+          <!-- Desayuno -->
+          <div class="momento-btn" data-momento="desayuno" onclick="toggleMomento('desayuno',this)">
             <span class="momento-emoji">☀️</span>
             <span class="momento-nombre">Desayuno</span>
-            <span class="momento-hora">6:00 am – 12:00 pm</span>
+            <span class="momento-hora">7:00 am – 11:30 am</span>
           </div>
-          <div class="momento-btn" data-momento="almuerzo" onclick="toggleMomento('almuerzo', this)">
+          <!-- Almuerzo -->
+          <div class="momento-btn" data-momento="almuerzo" onclick="toggleMomento('almuerzo',this)">
             <span class="momento-emoji">🍽️</span>
             <span class="momento-nombre">Almuerzo</span>
-            <span class="momento-hora">12:00 pm – 3:00 pm</span>
+            <span class="momento-hora">11:30 am – 3:30 pm</span>
           </div>
-          <div class="momento-btn" data-momento="onces" onclick="toggleMomento('onces', this)">
+          <!-- Onces -->
+          <div class="momento-btn" data-momento="onces" onclick="toggleMomento('onces',this)">
             <span class="momento-emoji">🧃</span>
             <span class="momento-nombre">Onces</span>
-            <span class="momento-hora">3:00 pm – 7:00 pm</span>
+            <span class="momento-hora">3:30 pm – 7:00 pm</span>
           </div>
-          <div class="momento-btn" data-momento="cena" onclick="toggleMomento('cena', this)">
+          <!-- Cena -->
+          <div class="momento-btn" data-momento="cena" onclick="toggleMomento('cena',this)">
             <span class="momento-emoji">🌙</span>
             <span class="momento-nombre">Cena</span>
-            <span class="momento-hora">8:00 pm – 10:00 pm</span>
+            <span class="momento-hora">7:00 pm – 11:00 pm</span>
+          </div>
+          <!-- Noche -->
+          <div class="momento-btn" data-momento="noche" onclick="toggleMomento('noche',this)">
+            <span class="momento-emoji">🌌</span>
+            <span class="momento-nombre">Noche</span>
+            <span class="momento-hora">11:00 pm – 12:00 am</span>
           </div>
         </div>
         <div class="err-momento" id="errMomento">⚠ Selecciona al menos un momento</div>
       </div>
 
-      <div class="modo-sorteo" id="modeSorteo">
+      <!-- ── SORTEO ── -->
+      <div style="display:none;" id="modeSorteo">
         <div class="divider">Premio</div>
         <div class="field">
           <label>Premio del sorteo</label>
@@ -221,25 +336,27 @@
         </div>
       </div>
 
+      <!-- ── IDENTIFICACIÓN ── -->
       <div class="divider">Identificación</div>
       <div class="field">
-        <label>Nombre de la campaña (interno)</label>
-        <input type="text" id="campañaNombre" placeholder="Ej: Bogotá MOFU Marzo Bowl">
+        <label>Nombre interno de la campaña</label>
+        <input type="text" id="campañaNombre" placeholder="Ej: TOFU Mujeres Bogotá Bowl Mar26">
       </div>
 
       <button class="gen-btn" onclick="generar()">⚡ Generar link</button>
     </div>
   </div>
 
+  <!-- ── PREVIEW PANEL ── -->
   <div class="preview-panel">
     <div class="link-card">
-      <div class="link-card-title">Link corto</div>
+      <div class="link-card-title">Link corto (para compartir)</div>
       <div class="link-display empty" id="shortLinkDisplay">Se generará al crear el link...</div>
       <div class="link-actions" style="margin-bottom:14px;">
         <button class="action-btn primary" onclick="copiarShortLink()">📋 Copiar link corto</button>
       </div>
-      <div class="link-card-title" style="margin-top:4px;">Link completo</div>
-      <div class="link-display empty" id="linkDisplay" style="font-size:10px;">El link aparecerá aquí...</div>
+      <div class="link-card-title" style="margin-top:4px;">Link completo (con todos los parámetros)</div>
+      <div class="link-display empty" id="linkDisplay">El link aparecerá aquí...</div>
       <div class="link-actions">
         <button class="action-btn" onclick="copiarLink()">📋 Copiar</button>
         <button class="action-btn primary" onclick="abrirLink()">↗ Probar</button>
@@ -247,7 +364,7 @@
     </div>
 
     <div class="summary-card" id="summaryCard" style="display:none;">
-      <div class="panel-title">Resumen</div>
+      <div class="panel-title">Resumen de la campaña</div>
       <div id="summaryRows"></div>
     </div>
 
@@ -263,177 +380,104 @@
 
 <div class="toast" id="toast">✅ ¡Copiado!</div>
 
+<!-- Modal ayuda Meta -->
+<div id="modalMeta" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#1a1427;border:1px solid rgba(95,75,139,0.4);border-radius:20px;padding:28px;max-width:500px;width:100%;">
+    <div style="font-size:13px;font-weight:700;color:var(--y);margin-bottom:16px;">¿Cómo usar esta URL en Meta Ads?</div>
+    <ol style="font-size:12px;color:var(--text);line-height:2;padding-left:18px;">
+      <li>Ve al administrador de anuncios de Meta</li>
+      <li>Abre el Ad Set que quieres configurar</li>
+      <li>En el campo <strong style="color:var(--y);">URL del sitio web</strong>, pega la URL copiada</li>
+      <li>Meta reemplazará automáticamente las partes en <strong style="color:var(--y);">amarillo</strong> (<code style="font-size:10px;background:rgba(245,200,66,0.15);padding:1px 5px;border-radius:3px;">{{adset.name}}</code>, etc.) con los datos reales de cada clic</li>
+      <li>Los parámetros en <strong style="color:#39d98a;">verde</strong> son fijos — definen el producto y descuento de esa campaña</li>
+    </ol>
+    <div style="margin-top:16px;padding:12px;background:rgba(95,75,139,0.15);border-radius:10px;font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;line-height:1.8;">
+      Si el Ad Set se llama <span style="color:var(--y);">muj-18-34-bogota</span>, Meta enviará ese nombre exacto en el link. No necesitas crear un link diferente por Ad Set.
+    </div>
+    <button onclick="document.getElementById('modalMeta').style.display='none'" style="margin-top:16px;width:100%;padding:12px;background:var(--p);border:none;border-radius:10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Entendido</button>
+  </div>
+</div>
+
 <script>
-// ── CONSTANTES ────────────────────────────────────────────────
 const BASE       = "https://oakberry-cupones.com";
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
 
+// ── MOMENTOS con nuevos rangos 24h ───────────────────────────
 const MOMENTOS = {
-  desayuno: { nombre: "Desayuno",  inicio: 6,  fin: 12 },
-  almuerzo: { nombre: "Almuerzo",  inicio: 12, fin: 15 },
-  onces:    { nombre: "Onces",     inicio: 15, fin: 19 },
-  cena:     { nombre: "Cena",      inicio: 20, fin: 22 },
+  madrugada: { nombre:"Madrugada", inicio:23, fin:7,  cruce:true }, // cruza medianoche
+  desayuno:  { nombre:"Desayuno",  inicio:7,  fin:11.5             },
+  almuerzo:  { nombre:"Almuerzo",  inicio:11.5,fin:15.5            },
+  onces:     { nombre:"Onces",     inicio:15.5,fin:19              },
+  cena:      { nombre:"Cena",      inicio:19, fin:23               },
+  noche:     { nombre:"Noche",     inicio:23, fin:24               },
 };
-const TODOS_MOMENTOS = ["desayuno","almuerzo","onces","cena"];
+const TODOS_MOMENTOS = Object.keys(MOMENTOS);
 
-// ── ESTADO ────────────────────────────────────────────────────
 let modoActual       = "cupon";
 let momentosSelected = new Set();
 let historial        = [];
 let linkActual       = "";
+let metaUrlActual    = "";
 
 // ── CACHE ─────────────────────────────────────────────────────
 const _cache = {};
-
 function fetchGETCached(params) {
   const key = JSON.stringify(params);
   if (_cache[key]) return Promise.resolve(_cache[key]);
   return fetchGETSafe(params).then(d => { _cache[key] = d; return d; });
 }
 
-// ── FETCH JSONP — CORREGIDO PARA MÓVIL ───────────────────────
-// Problema original: en Safari/iOS el onerror se dispara en redirects 302
-// de Google Apps Script y la promesa quedaba colgada indefinidamente.
-// Fix: onerror rechaza correctamente + reintento automático con delay.
 function fetchGET(params) {
   return new Promise((resolve, reject) => {
     const cb  = "cb_" + Math.random().toString(36).slice(2);
     const url = SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
     const s   = document.createElement("script");
     let settled = false;
-
-    function cleanup() {
-      settled = true;
-      delete window[cb];
-      if (s.parentNode) s.parentNode.removeChild(s);
-    }
-
-    window[cb] = d => {
-      if (settled) return;
-      cleanup();
-      resolve(d);
-    };
-
-    // CORRECCIÓN CLAVE: rechazar en onerror para no dejar la promesa colgada
-    s.onerror = () => {
-      if (settled) return;
-      cleanup();
-      reject(new Error("script-error"));
-    };
-
+    function cleanup() { settled=true; delete window[cb]; if(s.parentNode) s.parentNode.removeChild(s); }
+    window[cb] = d => { if(settled)return; cleanup(); resolve(d); };
+    s.onerror  = () => { if(settled)return; cleanup(); reject(new Error("script-error")); };
     s.src = url;
     document.body.appendChild(s);
-
-    setTimeout(() => {
-      if (!settled) {
-        cleanup();
-        reject(new Error("timeout"));
-      }
-    }, 12000);
+    setTimeout(() => { if(!settled){ cleanup(); reject(new Error("timeout")); }}, 12000);
   });
 }
-
-// Wrapper con reintento automático — en móvil el primer intento puede
-// fallar por el redirect 302, pero el segundo funciona porque el redirect
-// ya está en caché del navegador.
 async function fetchGETSafe(params) {
-  try {
-    return await fetchGET(params);
-  } catch(e) {
-    await new Promise(r => setTimeout(r, 400));
-    return await fetchGET(params);
-  }
+  try { return await fetchGET(params); }
+  catch(e) { await new Promise(r=>setTimeout(r,400)); return await fetchGET(params); }
 }
 
-// ── CARGA COMBINADA ───────────────────────────────────────────
+// ── CARGA CIUDADES Y TIENDAS ──────────────────────────────────
 async function cargarTodo() {
   try {
-    const data = await fetchGETSafe({ accion: "obtenerTodo" });
-    if (!data || !data.ciudades || !data.ciudades.length) return false;
+    const data = await fetchGETSafe({ accion:"obtenerTodo" });
+    if (!data?.ciudades?.length) return false;
     _cache[JSON.stringify({accion:"obtenerCiudades"})] = { ciudades: data.ciudades };
-    Object.entries(data.tiendas || {}).forEach(([ciudad, tiendas]) => {
-      _cache[JSON.stringify({accion:"obtenerTiendas", ciudad})] = { tiendas };
+    Object.entries(data.tiendas||{}).forEach(([ciudad,tiendas]) => {
+      _cache[JSON.stringify({accion:"obtenerTiendas",ciudad})] = { tiendas };
     });
     return data;
-  } catch(e) {
-    console.error("cargarTodo error:", e);
-    return false;
-  }
-}
-
-async function cargarCiudades() {
-  try {
-    const data = await fetchGETCached({ accion: "obtenerCiudades" });
-    const ciudades = Array.isArray(data) ? data : (data.ciudades || []);
-    if (!ciudades.length) return;
-    const sel = document.getElementById("ciudad");
-    sel.innerHTML = "";
-    sel.add(new Option("Todas las ciudades", "todas"));
-    ciudades.forEach(c => sel.add(new Option(c, c)));
-    await cargarTiendas();
-    ciudades.forEach(c => fetchGETCached({ accion: "obtenerTiendas", ciudad: c }));
-  } catch(e) {
-    console.error("cargarCiudades error:", e);
-  }
+  } catch(e) { return false; }
 }
 
 async function cargarTiendas() {
   const ciudad = document.getElementById("ciudad").value;
   const sel    = document.getElementById("tienda");
   sel.innerHTML = '<option value="general">Todas las tiendas</option>';
-  if (!ciudad || ciudad === "todas") return;
+  if (!ciudad || ciudad==="todas") return;
   try {
-    const data    = await fetchGETCached({ accion: "obtenerTiendas", ciudad });
-    const tiendas = Array.isArray(data) ? data : (data.tiendas || []);
-    tiendas.forEach(t => sel.add(new Option(t, t)));
-  } catch(e) {
-    console.error("cargarTiendas error:", e);
-  }
-}
-
-// ── INIT ──────────────────────────────────────────────────────
-(function warmup() {
-  const s = document.createElement("script");
-  s.src = SCRIPT_URL + "?accion=ping&callback=_warmup";
-  window._warmup = () => {};
-  s.onerror = () => {}; // silencioso
-  document.head.appendChild(s);
-})();
-
-window.addEventListener("DOMContentLoaded", async () => {
-  setStatus("Cargando ciudades y tiendas...", false);
-  const todo = await cargarTodo();
-  if (todo && todo.ciudades && todo.ciudades.length) {
-    const sel = document.getElementById("ciudad");
-    sel.innerHTML = "";
-    sel.add(new Option("Todas las ciudades", "todas"));
-    todo.ciudades.forEach(c => sel.add(new Option(c, c)));
-    await cargarTiendas();
-    setStatus("Backend conectado · " + todo.ciudades.length + " ciudades cargadas", true);
-  } else {
-    await cargarCiudades();
-    const sel = document.getElementById("ciudad");
-    if (sel.options.length > 1) {
-      setStatus("Backend conectado (modo fallback)", true);
-    } else {
-      setStatus("⚠ No se pudieron cargar ciudades — revisa el backend", false);
-    }
-  }
-});
-
-function setStatus(msg, ok) {
-  document.getElementById("statusText").textContent = msg;
-  document.getElementById("statusDot").className = "status-dot" + (ok ? " ok" : "");
+    const data    = await fetchGETCached({ accion:"obtenerTiendas", ciudad });
+    const tiendas = Array.isArray(data) ? data : (data.tiendas||[]);
+    tiendas.forEach(t => sel.add(new Option(t,t)));
+  } catch(e) {}
 }
 
 // ── MODO ──────────────────────────────────────────────────────
 function setModo(modo) {
   modoActual = modo;
-  document.querySelectorAll(".tab").forEach((t, i) =>
-    t.classList.toggle("active", (modo === "cupon" && i === 0) || (modo === "sorteo" && i === 1))
-  );
-  document.getElementById("modoCupon").style.display  = modo === "cupon"  ? "block" : "none";
-  document.getElementById("modeSorteo").style.display = modo === "sorteo" ? "block" : "none";
+  document.querySelectorAll(".tab").forEach((t,i) =>
+    t.classList.toggle("active",(modo==="cupon"&&i===0)||(modo==="sorteo"&&i===1)));
+  document.getElementById("modoCupon").style.display  = modo==="cupon"  ? "block":"none";
+  document.getElementById("modeSorteo").style.display = modo==="sorteo" ? "block":"none";
 }
 
 // ── MOMENTOS ──────────────────────────────────────────────────
@@ -449,56 +493,131 @@ function toggleTodosMomentos(el) {
     el.classList.add("selected");
   }
   document.getElementById("errMomento").classList.remove("show");
+  actualizarTimeline();
+  actualizarMetaUrl();
 }
 
 function toggleMomento(key, el) {
-  if (momentosSelected.has(key)) {
-    momentosSelected.delete(key);
-    el.classList.remove("selected");
-  } else {
-    momentosSelected.add(key);
-    el.classList.add("selected");
-  }
+  if (momentosSelected.has(key)) { momentosSelected.delete(key); el.classList.remove("selected"); }
+  else { momentosSelected.add(key); el.classList.add("selected"); }
   const allSelected = TODOS_MOMENTOS.every(m => momentosSelected.has(m));
-  const btnTodos = document.getElementById("btnTodosMomentos");
-  if (btnTodos) btnTodos.classList.toggle("selected", allSelected);
+  document.getElementById("btnTodosMomentos").classList.toggle("selected", allSelected);
   document.getElementById("errMomento").classList.remove("show");
+  actualizarTimeline();
+  actualizarMetaUrl();
 }
 
-// ── GENERAR ───────────────────────────────────────────────────
+function actualizarTimeline() {
+  const allSelected = TODOS_MOMENTOS.every(m => momentosSelected.has(m));
+  document.querySelectorAll(".tl-seg").forEach(seg => {
+    const key = seg.dataset.key;
+    const activo = allSelected || momentosSelected.has(key);
+    seg.classList.toggle("active", activo);
+    seg.classList.toggle("inactive", !activo);
+  });
+}
+
+// ── PREVIEW URL META ─────────────────────────────────────────
+function actualizarMetaUrl() {
+  const ciudad    = document.getElementById("ciudad").value || "todas";
+  const fase      = document.getElementById("fase").value;
+  const fuente    = document.getElementById("fuente").value;
+  const descuento = document.getElementById("descuento")?.value || "30";
+  const producto  = document.getElementById("producto")?.value || "Bowl+12oz";
+  const momentos  = Array.from(momentosSelected).join(",");
+  const vigencia  = document.getElementById("vigencia")?.value || "72";
+  const placement = document.getElementById("placement")?.value || "{{placement}}";
+  const tienda    = document.getElementById("tienda")?.value || "general";
+
+  // Parámetros dinámicos (Meta los llena) en amarillo
+  // Parámetros estáticos (equipo los define) en verde
+  const dinamicos = {
+    fase:        "{{campaign.name}}",
+    adset:       "{{adset.name}}",
+    adset_id:    "{{adset.id}}",
+    campaign_id: "{{campaign.id}}",
+    anuncio:     "{{ad.name}}",
+    placement:   placement === "{{placement}}" ? "{{placement}}" : placement,
+    fuente:      "{{site_source_name}}",
+  };
+  const estaticos = {
+    ciudad, tienda, descuento, producto, momentos, vigencia,
+  };
+
+  const partes = [
+    ...Object.entries(dinamicos).map(([k,v]) =>
+      `<span class="dynamic">${k}=${v}</span>`),
+    ...Object.entries(estaticos).map(([k,v]) =>
+      `<span class="static">${k}=${encodeURIComponent(v)}</span>`),
+  ];
+
+  const urlPlana = BASE + "?" + [
+    ...Object.entries(dinamicos).map(([k,v])=>`${k}=${v}`),
+    ...Object.entries(estaticos).map(([k,v])=>`${k}=${encodeURIComponent(v)}`),
+  ].join("&");
+
+  metaUrlActual = urlPlana;
+  document.getElementById("metaUrlPreview").innerHTML =
+    BASE + "?<br>" + partes.join("<br>&amp;");
+}
+
+function copiarMetaUrl() {
+  if (!metaUrlActual) { showToast("⚠ Genera un link primero"); return; }
+  navigator.clipboard.writeText(metaUrlActual).then(() => showToast("✅ URL Meta copiada"));
+}
+
+function verAyudaMeta() {
+  document.getElementById("modalMeta").style.display = "flex";
+}
+
+// ── GENERAR LINK ─────────────────────────────────────────────
 function generar() {
   if (modoActual === "cupon" && momentosSelected.size === 0) {
     document.getElementById("errMomento").classList.add("show");
     return;
   }
-  const ciudad = document.getElementById("ciudad").value;
-  const fase   = document.getElementById("fase").value;
-  const tienda = document.getElementById("tienda").value || "general";
-  const fuente = document.getElementById("fuente").value;
-  const nombre = document.getElementById("campañaNombre").value.trim() || `${ciudad}-${fase}-${Date.now()}`;
-  let params = { modo: modoActual, ciudad, tienda, fase, fuente };
+  const ciudad   = document.getElementById("ciudad").value;
+  const fase     = document.getElementById("fase").value;
+  const tienda   = document.getElementById("tienda").value || "general";
+  const fuente   = document.getElementById("fuente").value;
+  const adset    = document.getElementById("adset").value.trim().replace(/\s+/g,"-").toLowerCase();
+  const anuncio  = document.getElementById("anuncio").value.trim().replace(/\s+/g,"-").toLowerCase();
+  const placement= document.getElementById("placement").value;
+  const nombre   = document.getElementById("campañaNombre").value.trim() ||
+                   `${ciudad}-${fase}-${adset||Date.now()}`;
+
+  let params = { modo:modoActual, ciudad, tienda, fase, fuente };
+  if (adset)     params.adset     = adset;
+  if (anuncio)   params.anuncio   = anuncio;
+  if (placement && placement !== "{{placement}}") params.placement = placement;
+
   if (modoActual === "cupon") {
     params.descuento = document.getElementById("descuento").value;
     params.producto  = document.getElementById("producto").value;
     params.vigencia  = document.getElementById("vigencia").value;
     params.momentos  = Array.from(momentosSelected).join(",");
   } else {
-    params.premio   = document.getElementById("premio").value.trim().replace(/\s+/g, "+");
+    params.premio   = document.getElementById("premio").value.trim().replace(/\s+/g,"+");
     params.vigencia = document.getElementById("vigenciaSorteo").value;
   }
+
   const qs = Object.entries(params).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join("&");
   linkActual = `${BASE}?${qs}`;
+
   const display = document.getElementById("linkDisplay");
   display.textContent = linkActual;
   display.classList.remove("empty");
-  const alias = nombre.toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"");
+
+  const alias     = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+                     .replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"");
   const shortLink = `${BASE}/r#${alias}`;
   const shortDisplay = document.getElementById("shortLinkDisplay");
   shortDisplay.textContent = shortLink;
   shortDisplay.classList.remove("empty");
   shortDisplay.dataset.alias = alias;
+
   mostrarResumen(params, nombre);
-  const item = { nombre, link: linkActual, params, ts: new Date() };
+  const item = { nombre, link:linkActual, params, ts:new Date() };
   historial.unshift(item);
   renderHistorial();
   guardarEnSheet({ ...item, nombre });
@@ -508,16 +627,17 @@ function generar() {
 function mostrarResumen(params, nombre) {
   document.getElementById("summaryCard").style.display = "block";
   const labels = {
-    modo:"Modo", ciudad:"Ciudad", tienda:"Tienda", fase:"Fase",
-    fuente:"Fuente", descuento:"Descuento", producto:"Producto",
-    premio:"Premio", vigencia:"Vigencia (h)", momentos:"Momentos"
+    modo:"Modo", ciudad:"Ciudad", tienda:"Tienda", fase:"Fase", fuente:"Fuente",
+    adset:"Ad Set", anuncio:"Anuncio", placement:"Placement",
+    descuento:"Descuento", producto:"Producto", premio:"Premio",
+    vigencia:"Vigencia (h)", momentos:"Momentos"
   };
   const momentosLabel = params.momentos
     ? params.momentos.split(",").map(m => MOMENTOS[m]?.nombre || m).join(" · ")
     : "—";
   const rows = Object.entries(params).map(([k,v]) => {
-    let val = k === "momentos" ? momentosLabel : decodeURIComponent(v.replace(/\+/g," "));
-    const hl = ["descuento","premio","producto","momentos"].includes(k);
+    let val = k==="momentos" ? momentosLabel : decodeURIComponent((v||"").replace(/\+/g," "));
+    const hl = ["descuento","premio","producto","momentos","adset","anuncio"].includes(k);
     return `<div class="summary-row">
       <span class="summary-key">${labels[k]||k}</span>
       <span class="summary-val ${hl?"highlight":""}">${k==="descuento"?val+"%":val}</span>
@@ -529,18 +649,13 @@ function mostrarResumen(params, nombre) {
 // ── HISTORIAL ─────────────────────────────────────────────────
 function renderHistorial() {
   const list = document.getElementById("historyList");
-  if (!historial.length) {
-    list.innerHTML = '<div class="history-empty">Sin links generados aún</div>';
-    return;
-  }
+  if (!historial.length) { list.innerHTML='<div class="history-empty">Sin links generados aún</div>'; return; }
   list.innerHTML = historial.slice(0,10).map((item,i) => {
     const hora = item.ts.toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"});
-    const momentosStr = item.params.momentos
-      ? item.params.momentos.split(",").map(m => MOMENTOS[m]?.nombre||m).join("+")
-      : "";
-    const det = item.params.modo === "sorteo"
+    const adsetStr = item.params.adset ? ` · ${item.params.adset}` : "";
+    const det = item.params.modo==="sorteo"
       ? `Sorteo · ${item.params.ciudad}`
-      : `${item.params.descuento}% · ${decodeURIComponent((item.params.producto||"").replace(/\+/g," "))} · ${momentosStr}`;
+      : `${item.params.descuento}% · ${decodeURIComponent((item.params.producto||"").replace(/\+/g," "))}${adsetStr}`;
     return `<div class="history-item">
       <div class="history-meta">
         <div class="history-name">${item.nombre}</div>
@@ -551,45 +666,79 @@ function renderHistorial() {
   }).join("");
 }
 
-function copiarItemLink(i) {
-  navigator.clipboard.writeText(historial[i].link).then(() => showToast("✅ Link copiado"));
-}
+function copiarItemLink(i) { navigator.clipboard.writeText(historial[i].link).then(()=>showToast("✅ Link copiado")); }
 function copiarShortLink() {
   const el = document.getElementById("shortLinkDisplay");
-  if (!el || el.classList.contains("empty")) return;
-  navigator.clipboard.writeText(el.textContent).then(() => showToast("✅ Link corto copiado"));
+  if (!el||el.classList.contains("empty")) return;
+  navigator.clipboard.writeText(el.textContent).then(()=>showToast("✅ Link corto copiado"));
 }
-function copiarLink() {
-  if (!linkActual) return;
-  navigator.clipboard.writeText(linkActual).then(() => showToast("✅ ¡Copiado!"));
-}
-function abrirLink() {
-  if (!linkActual) return;
-  window.open(linkActual, "_blank");
-}
+function copiarLink() { if(!linkActual)return; navigator.clipboard.writeText(linkActual).then(()=>showToast("✅ ¡Copiado!")); }
+function abrirLink() { if(!linkActual)return; window.open(linkActual,"_blank"); }
 function showToast(msg) {
   const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2200);
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2200);
 }
 
 // ── GUARDAR EN SHEET ──────────────────────────────────────────
 function guardarEnSheet(item) {
   const p = item.params;
   const momentosStr = p.momentos
-    ? p.momentos.split(",").map(m => MOMENTOS[m]?.nombre || m).join(" + ")
+    ? p.momentos.split(",").map(m=>MOMENTOS[m]?.nombre||m).join(" + ")
     : "";
   const params = {
     accion:"guardarLink", nombre:item.nombre,
     modo:p.modo, ciudad:p.ciudad, tienda:p.tienda,
     fase:p.fase, fuente:p.fuente,
-    descuento:p.descuento||"", producto:decodeURIComponent((p.producto||"").replace(/\+/g," ")),
+    adset:p.adset||"", anuncio:p.anuncio||"", placement:p.placement||"",
+    descuento:p.descuento||"",
+    producto:decodeURIComponent((p.producto||"").replace(/\+/g," ")),
     premio:decodeURIComponent((p.premio||"").replace(/\+/g," ")),
     vigencia:p.vigencia, momentos:momentosStr,
     link:item.link, fecha:item.ts.toISOString(),
   };
-  fetchGETSafe(params).catch(() => {});
+  fetchGETSafe(params).catch(()=>{});
+}
+
+// ── PRECALENTAR + INIT ────────────────────────────────────────
+(function warmup() {
+  const s = document.createElement("script");
+  s.src = SCRIPT_URL + "?accion=ping&callback=_warmup";
+  window._warmup = ()=>{};
+  s.onerror = ()=>{};
+  document.head.appendChild(s);
+})();
+
+window.addEventListener("DOMContentLoaded", async () => {
+  setStatus("Cargando ciudades y tiendas...", false);
+
+  // Actualizar preview URL cuando cambian los campos
+  ["ciudad","fase","fuente","descuento","producto","momentos","vigencia","placement","tienda"]
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("change", actualizarMetaUrl);
+    });
+  document.getElementById("adset").addEventListener("input", actualizarMetaUrl);
+  document.getElementById("anuncio").addEventListener("input", actualizarMetaUrl);
+
+  const todo = await cargarTodo();
+  if (todo?.ciudades?.length) {
+    const sel = document.getElementById("ciudad");
+    sel.innerHTML = "";
+    sel.add(new Option("Todas las ciudades","todas"));
+    todo.ciudades.forEach(c => sel.add(new Option(c,c)));
+    await cargarTiendas();
+    setStatus("Backend conectado · " + todo.ciudades.length + " ciudades", true);
+  } else {
+    setStatus("⚠ Error cargando ciudades", false);
+  }
+
+  actualizarMetaUrl();
+});
+
+function setStatus(msg, ok) {
+  document.getElementById("statusText").textContent = msg;
+  document.getElementById("statusDot").className = "status-dot" + (ok?" ok":"");
 }
 </script>
 </body>
