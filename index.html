@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Oakberry</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+<!-- ═══════════════════════════════════════════════════
+     META PIXEL
+     Cuando tengas el ID, reemplaza 914682538016264
+     por tu número (ej: 1234567890123456)
+     ═══════════════════════════════════════════════════ -->
 <script>
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -17,8 +23,11 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 fbq('init', '914682538016264');
 fbq('track', 'PageView');
 </script>
-<noscript><img height="1" width="1" style="display:none"
-  src="https://www.facebook.com/tr?id=914682538016264&ev=PageView&noscript=1"/></noscript>
+<noscript>
+  <img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=914682538016264&ev=PageView&noscript=1"/>
+</noscript>
+<!-- ═══════════════════════════════════════════════════ -->
 <style>
   :root{--primary:#5F4B8B;--primary-dark:#4a3a6e;--yellow:#F5C842;--white:#ffffff;--off-white:rgba(255,255,255,0.96);--border:#eee;--gray:#999;--red:#c0392b;}
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -37,9 +46,10 @@ fbq('track', 'PageView');
   .section-title{color:var(--primary);text-transform:uppercase;font-weight:900;font-size:17px;letter-spacing:0.5px;text-align:center;margin-bottom:6px;}
   .section-sub{font-size:11px;font-weight:700;color:var(--gray);text-align:center;margin-bottom:22px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.6;}
   .form-group{margin-bottom:14px;position:relative;}
-  input[type=text],input[type=tel]{width:100%;padding:15px 16px;border-radius:12px;border:2px solid var(--border);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--primary);outline:none;background:#fff;transition:border-color 0.18s,box-shadow 0.18s;-webkit-appearance:none;}
+  input[type=text],input[type=tel],input[type=email]{width:100%;padding:15px 16px;border-radius:12px;border:2px solid var(--border);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--primary);outline:none;background:#fff;transition:border-color 0.18s,box-shadow 0.18s;-webkit-appearance:none;}
   input::placeholder{color:#bbb;font-weight:600;}
   input[type=tel]{padding-left:52px;}
+  input[type=email]{text-transform:none;letter-spacing:0;}
   input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(95,75,139,0.12);}
   input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(192,57,43,0.1);}
   .phone-prefix{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--primary);pointer-events:none;}
@@ -103,35 +113,35 @@ fbq('track', 'PageView');
   .copy-btn-solid{width:100%;padding:15px;background:var(--primary);color:var(--white);border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;margin-bottom:14px;transition:background 0.18s;}
   .copy-btn-solid:hover{background:var(--primary-dark);}
 
-  /* ── LOADING ── */
-  #stateLoading{display:none;}
-  #stateLoading.show{display:block;animation:cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both;}
-  .loading-header{background:var(--primary);padding:28px 30px 24px;text-align:center;}
-  .loading-icon{font-size:44px;display:block;margin-bottom:8px;animation:pulse 1.4s ease-in-out infinite;}
-  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.12);opacity:0.8;}}
-  .loading-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
-  .loading-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:1.5px;}
-  .loading-body{padding:28px 28px 32px;}
-  .progress-wrap{background:#f0ebff;border-radius:50px;height:10px;overflow:hidden;margin-bottom:12px;}
-  .progress-bar{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));width:0%;transition:width 0.4s ease;}
-  .progress-pct{font-size:11px;font-weight:900;color:var(--primary);text-align:right;margin-bottom:20px;font-family:'Montserrat',sans-serif;letter-spacing:1px;}
-  .loading-msg{font-size:13px;font-weight:700;color:#444;text-align:center;text-transform:uppercase;letter-spacing:0.5px;line-height:1.6;min-height:44px;transition:opacity 0.3s;}
-  .loading-steps{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
-  .loading-step{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:0.5px;transition:color 0.3s;}
-  .loading-step.done{color:var(--primary);}
-  .loading-step.active{color:var(--primary);}
-  .step-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0;}
-  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.3s;}
-  .loading-step.done .step-check{background:var(--primary);border-color:var(--primary);}
-  .loading-step.done .step-check::after{content:'✓';font-size:10px;color:#fff;font-weight:900;}
-  .loading-step.active .step-check{border-color:var(--primary);animation:stepPulse 0.8s ease-in-out infinite;}
-  @keyframes stepPulse{0%,100%{box-shadow:0 0 0 0 rgba(95,75,139,0.4);}50%{box-shadow:0 0 0 4px rgba(95,75,139,0.1);}}
+  /* ── PANTALLA DE CARGA ── */
+  #stateLoading { display:none; }
+  #stateLoading.show { display:block; animation:cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+  .loading-header { background:var(--primary); padding:28px 30px 24px; text-align:center; }
+  .loading-icon { font-size:44px; display:block; margin-bottom:8px; animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.12);opacity:0.8;} }
+  .loading-title { font-size:18px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+  .loading-sub { font-size:11px; font-weight:700; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:1.5px; }
+  .loading-body { padding:28px 28px 32px; }
+  .progress-wrap { background:#f0ebff; border-radius:50px; height:10px; overflow:hidden; margin-bottom:12px; }
+  .progress-bar { height:100%; border-radius:50px; background:linear-gradient(90deg,var(--primary),var(--yellow)); width:0%; transition:width 0.4s ease; }
+  .progress-pct { font-size:11px; font-weight:900; color:var(--primary); text-align:right; margin-bottom:20px; font-family:'Montserrat',sans-serif; letter-spacing:1px; }
+  .loading-msg { font-size:13px; font-weight:700; color:#444; text-align:center; text-transform:uppercase; letter-spacing:0.5px; line-height:1.6; min-height:44px; transition:opacity 0.3s; }
+  .loading-steps { display:flex; flex-direction:column; gap:10px; margin-top:20px; }
+  .loading-step { display:flex; align-items:center; gap:10px; font-size:11px; font-weight:700; color:#bbb; text-transform:uppercase; letter-spacing:0.5px; transition:color 0.3s; }
+  .loading-step.done { color:var(--primary); }
+  .loading-step.active { color:var(--primary); }
+  .step-icon { font-size:16px; width:24px; text-align:center; flex-shrink:0; }
+  .step-check { width:18px; height:18px; border-radius:50%; border:2px solid #ddd; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all 0.3s; }
+  .loading-step.done .step-check { background:var(--primary); border-color:var(--primary); }
+  .loading-step.done .step-check::after { content:'✓'; font-size:10px; color:#fff; font-weight:900; }
+  .loading-step.active .step-check { border-color:var(--primary); animation:stepPulse 0.8s ease-in-out infinite; }
+  @keyframes stepPulse { 0%,100%{box-shadow:0 0 0 0 rgba(95,75,139,0.4);} 50%{box-shadow:0 0 0 4px rgba(95,75,139,0.1);} }
 </style>
 </head>
 <body>
 <div class="card">
 
-  <!-- FORMULARIO -->
+  <!-- ESTADO 1: FORMULARIO -->
   <div id="stateForm" class="state show">
     <div class="card-header">
       <div class="brand">Oakberry</div>
@@ -145,27 +155,36 @@ fbq('track', 'PageView');
         <span class="premio" id="headerPremio">Un año de açaí gratis</span>
       </div>
     </div>
+
     <div class="card-body">
       <h2 class="section-title" id="formTitle">Obtén tu cupón</h2>
       <p class="section-sub" id="formSub">Ingresa tus datos y recíbelo al instante</p>
+
       <div class="form-group">
         <input type="text" id="inp-nombre" placeholder="TU NOMBRE" autocomplete="given-name">
         <div class="err-msg" id="err-nombre">⚠ Ingresa tu nombre</div>
+      </div>
+      <div class="form-group">
+        <input type="email" id="inp-email" placeholder="tu@correo.com" autocomplete="email">
+        <div class="err-msg" id="err-email">⚠ Ingresa un email válido</div>
       </div>
       <div class="form-group">
         <span class="phone-prefix">+57</span>
         <input type="tel" id="inp-cel" placeholder="300 000 0000" inputmode="numeric" maxlength="10" autocomplete="tel">
         <div class="err-msg" id="err-cel">⚠ Celular colombiano inválido — 10 dígitos, empieza en 3</div>
       </div>
+
       <div class="validity-pill" id="validityPill">
         <span class="validity-dot"></span>
         <span id="pillText">Válido <span id="pillVigencia" style="font-weight:900;">72 horas</span> · 1 cupón por número</span>
       </div>
+
       <label class="tyc-wrap">
         <input type="checkbox" id="chk-tyc">
-        <span class="tyc-label">He leído y acepto los <a href="/tyc" target="_blank">Términos y Condiciones</a> y la <a href="/tyc#privacidad" target="_blank">Política de Privacidad</a> de Oakberry Colombia.</span>
+        <span class="tyc-label">He leído y acepto los <a href="/tyc" target="_blank">Términos y Condiciones</a> y la <a href="/tyc#privacidad" target="_blank">Política de Privacidad</a> de Oakberry Colombia. Autorizo el uso de mis datos para el canje del cupón.</span>
       </label>
       <div class="tyc-err" id="err-tyc">⚠ Debes aceptar los términos y condiciones</div>
+
       <button class="btn" id="mainBtn" onclick="solicitar()">
         <span class="btn-text" id="btnText">Recibir mi cupón gratis →</span>
         <span class="btn-loader"><span class="spin"></span></span>
@@ -174,7 +193,7 @@ fbq('track', 'PageView');
     </div>
   </div>
 
-  <!-- CARGA -->
+  <!-- ESTADO CARGA -->
   <div id="stateLoading" class="state">
     <div class="loading-header">
       <span class="loading-icon">🫐</span>
@@ -194,7 +213,7 @@ fbq('track', 'PageView');
     </div>
   </div>
 
-  <!-- ÉXITO -->
+  <!-- ESTADO 2: ÉXITO -->
   <div id="stateSuccess" class="state">
     <div class="result-header">
       <span class="result-icon" id="successIcon">🎉</span>
@@ -207,10 +226,7 @@ fbq('track', 'PageView');
         <div class="ticket-code" id="outCode">—</div>
         <div class="ticket-validity" id="outValidity"></div>
         <div class="ticket-product" id="outProducto"></div>
-        <div class="momento-pill" id="momentoPill" style="display:none;">
-          <span class="mp-icon">🕐</span>
-          <span class="mp-text" id="momentoText"></span>
-        </div>
+        <div class="momento-pill" id="momentoPill" style="display:none;"><span class="mp-icon">🕐</span><span class="mp-text" id="momentoText"></span></div>
         <div class="ticket-dashed"></div>
         <div class="ticket-bottom">
           <div>
@@ -227,17 +243,23 @@ fbq('track', 'PageView');
         </div>
         <div class="info-pill yellow">
           <span class="icon">⚠️</span>
-          <span>Uso único. Una vez canjeado no podrá volver a usarse.</span>
+          <span>Uso único. Una vez canjeado en tienda no podrá volver a usarse.</span>
         </div>
       </div>
       <div id="infoSorteo" style="display:none;">
-        <div class="info-pill green"><span class="icon">🏆</span><span>Tu número está registrado. El sorteo se realiza en vivo por Instagram.</span></div>
-        <div class="info-pill yellow"><span class="icon">📲</span><span>Guarda este número — lo necesitarás si eres el ganador.</span></div>
+        <div class="info-pill green">
+          <span class="icon">🏆</span>
+          <span>Tu número de participación está registrado. El sorteo se realiza en vivo por Instagram.</span>
+        </div>
+        <div class="info-pill yellow">
+          <span class="icon">📲</span>
+          <span>Guarda este número — lo necesitarás si eres el ganador.</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- YA TIENE CUPÓN -->
+  <!-- ESTADO 3: YA TIENE REGISTRO -->
   <div id="stateUsed" class="state">
     <div class="result-header">
       <span class="result-icon">🔍</span>
@@ -245,7 +267,7 @@ fbq('track', 'PageView');
       <div class="result-name" id="usedNombre"></div>
     </div>
     <div class="result-body">
-      <p style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:18px;" id="usedSubtitle">Encontramos tu código registrado</p>
+      <p style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:18px;" id="usedSubtitle">Encontramos tu código registrado con este número</p>
       <div class="existing-ticket">
         <div class="existing-label" id="usedLabel">Tu código</div>
         <div class="existing-code" id="outExistingCode">—</div>
@@ -254,7 +276,30 @@ fbq('track', 'PageView');
       <button class="copy-btn-solid" onclick="copiar('outExistingCode',this)">📋 Copiar código</button>
       <div class="info-pill yellow">
         <span class="icon">💡</span>
-        <span id="usedTip">Si ya canjeaste este cupón, acércate a cualquier tienda Oakberry.</span>
+        <span id="usedTip">Si ya canjeaste este cupón en tienda, acércate a cualquier punto Oakberry.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTADO 4: BLOQUEADO POR LOOPY -->
+  <div id="stateLoopy" class="state">
+    <div class="result-header" style="background:#c0392b;">
+      <span class="result-icon">🎖️</span>
+      <div class="result-title">¡Ya eres cliente Oakberry!</div>
+      <div class="result-name" id="loopyNombre"></div>
+    </div>
+    <div class="result-body">
+      <div class="info-pill purple">
+        <span class="icon">⭐</span>
+        <span>Ya eres cliente de Oakberry Colombia. Este cupón es exclusivo para clientes nuevos.</span>
+      </div>
+      <div class="info-pill yellow">
+        <span class="icon">🎁</span>
+        <span>Como cliente frecuente puedes acumular sellos y canjear recompensas exclusivas en cualquier tienda Oakberry.</span>
+      </div>
+      <div class="info-pill green">
+        <span class="icon">📲</span>
+        <span>Presenta tu tarjeta Loopy en caja para seguir acumulando beneficios.</span>
       </div>
     </div>
   </div>
@@ -266,22 +311,20 @@ const CFG = {
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec",
 };
 
-// ── LEER PARÁMETROS DE LA URL ─────────────────────────────────
-// Captura tanto parámetros manuales como los dinámicos de Meta
 const P = (() => {
   const p = new URLSearchParams(window.location.search);
   return {
-    modo:        p.get("modo")        || "cupon",
-    ciudad:      p.get("ciudad")      || "No especificada",
-    tienda:      p.get("tienda")      || "No especificada",
-    fase:        p.get("fase")        || "organico",
-    fuente:      p.get("fuente")      || p.get("site_source_name") || "directo",
-    descuento:   p.get("descuento")   || "30",
-    producto:    p.get("producto")    || "Bowl 12oz",
-    premio:      p.get("premio")      || "Un año de açaí gratis",
-    vigencia:    parseInt(p.get("vigencia") || "72"),
-    momentos:    p.get("momentos")    || "",
-    // ── Parámetros de trazabilidad de pauta (nuevos) ──
+    modo:      p.get("modo")      || "cupon",
+    ciudad:    p.get("ciudad")    || "No especificada",
+    tienda:    p.get("tienda")    || "No especificada",
+    fase:      p.get("fase")      || "organico",
+    fuente:    p.get("fuente")    || "meta",
+    descuento: p.get("descuento") || "30",
+    producto:  p.get("producto")  || "Bowl 12oz",
+    premio:    p.get("premio")    || "Un año de açaí gratis",
+    vigencia:  parseInt(p.get("vigencia") || "72"),
+    momentos:  p.get("momentos")  || "",
+    // ── Parámetros de trazabilidad de pauta ──
     adset:       p.get("adset")       || p.get("utm_content")  || "",
     adset_id:    p.get("adset_id")    || "",
     campaign_id: p.get("campaign_id") || "",
@@ -292,51 +335,154 @@ const P = (() => {
 
 const esSorteo = P.modo === "sorteo";
 
-// ── MOMENTOS — nuevos rangos 24h ─────────────────────────────
-const MOMENTOS_LABELS = {
-  madrugada: { emoji:"🌃", texto:"Solo válido en madrugada · 11:00pm – 7:00am",  inicio:23, fin:7,  cruce:true },
-  desayuno:  { emoji:"☀️", texto:"Solo válido en desayuno · 7:00am – 11:30am",   inicio:7,  fin:11.5 },
-  almuerzo:  { emoji:"🍽️", texto:"Solo válido en almuerzo · 11:30am – 3:30pm",   inicio:11.5,fin:15.5},
-  onces:     { emoji:"🧃", texto:"Solo válido en onces · 3:30pm – 7:00pm",       inicio:15.5,fin:19  },
-  cena:      { emoji:"🌙", texto:"Solo válido en cena · 7:00pm – 11:00pm",       inicio:19, fin:23   },
-  noche:     { emoji:"🌌", texto:"Solo válido en noche · 11:00pm – 12:00am",     inicio:23, fin:24   },
-};
+// ── LINK DE CAMPAÑA (URL completa que originó este cupón) ─────
+// Se captura al cargar la página — incluye todos los parámetros UTM
+const LINK_CAMP = window.location.href;
+
+// ── MODO DEVELOPER (solo para pruebas internas) ───────────────
+// Agrega ?dev=dzuluaga a cualquier link para saltar todas las validaciones
+const DEV_MODE = new URLSearchParams(window.location.search).get("dev") === "dzuluaga";
+
+// ── FINGERPRINT DE DISPOSITIVO (anti-fraude silencioso) ───────
+// Genera un ID único basado en características del navegador.
+// Se guarda en localStorage — si el dispositivo ya generó un cupón
+// en esta campaña, se bloquea aunque cambie el número de celular.
+function generarFingerprint() {
+  const data = [
+    navigator.userAgent,
+    navigator.language,
+    screen.width + "x" + screen.height + "x" + screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency || "",
+    navigator.platform || "",
+  ].join("|");
+  // Hash simple pero suficiente para fingerprinting básico
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    hash = ((hash << 5) - hash) + data.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+const DEVICE_FP = generarFingerprint();
+
+// Verificar si este dispositivo ya generó un cupón
+function dispositivoYaUsado() {
+  try {
+    const used = localStorage.getItem("oak_fp_used");
+    return used === DEVICE_FP;
+  } catch(e) { return false; }
+}
+
+function marcarDispositivoUsado() {
+  try { localStorage.setItem("oak_fp_used", DEVICE_FP); } catch(e) {}
+}
+
+// ── GEOLOCALIZACIÓN SILENCIOSA ────────────────────────────────
+// Capa 1: ipapi.co por IP (silenciosa, ~300ms)
+// Capa 2: Nominatim reverse geocoding si ipapi falla (silenciosa, ~500ms)
+// Capa 3: ciudad vacía — sin popups, sin permisos, sin fricción
+let _geo = { ciudad: "", coordenadas: "", fuente: "desconocido" };
+
+async function ciudadPorNominatim(lat, lng) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`;
+    const res  = await fetch(url, {
+      signal: AbortSignal.timeout(4000),
+      headers: { "User-Agent": "oakberry-cupones/1.0" }
+    });
+    const data = await res.json();
+    // Nominatim devuelve city > town > village > county en ese orden de precisión
+    return (data.address?.city || data.address?.town || data.address?.village || data.address?.county || "").trim();
+  } catch(e) { return ""; }
+}
+
+async function iniciarGeo() {
+  try {
+    // Capa 1 — IP silenciosa
+    const res  = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(4000) });
+    const data = await res.json();
+    const ciudad = (data.city || "").trim();
+    if (ciudad) {
+      _geo = {
+        ciudad,
+        coordenadas: data.latitude && data.longitude ? data.latitude + "," + data.longitude : "",
+        fuente: "ip",
+      };
+      return; // ipapi funcionó — no necesitamos más
+    }
+    // ipapi respondió pero sin ciudad — intentar Nominatim con coords de ipapi
+    if (data.latitude && data.longitude) {
+      const ciudadNom = await ciudadPorNominatim(data.latitude, data.longitude);
+      if (ciudadNom) {
+        _geo = {
+          ciudad: ciudadNom,
+          coordenadas: data.latitude + "," + data.longitude,
+          fuente: "nominatim",
+        };
+      }
+    }
+  } catch(e) {
+    // Capa 2 — ipapi falló completamente, intentar Nominatim con IP pública
+    try {
+      // Obtener IP pública primero
+      const ipRes  = await fetch("https://api.ipify.org?format=json", { signal: AbortSignal.timeout(3000) });
+      const ipData = await ipRes.json();
+      // Usar ipapi con solo la IP para obtener coords
+      const geoRes  = await fetch(`https://ipapi.co/${ipData.ip}/json/`, { signal: AbortSignal.timeout(4000) });
+      const geoData = await geoRes.json();
+      const lat = geoData.latitude;
+      const lng = geoData.longitude;
+      if (lat && lng) {
+        const ciudadNom = await ciudadPorNominatim(lat, lng);
+        if (ciudadNom) {
+          _geo = {
+            ciudad: ciudadNom,
+            coordenadas: lat + "," + lng,
+            fuente: "nominatim",
+          };
+        }
+      }
+    } catch(e2) { /* todo falló — ciudad vacía, sin fricción */ }
+  }
+}
+// Lanzar en paralelo al cargar — no bloquea el formulario
+iniciarGeo();
 
 // ── PRECALENTAR servidor ──────────────────────────────────────
 (function warmup() {
   const s = document.createElement("script");
   s.src = CFG.SCRIPT_URL + "?accion=ping&callback=_warmup";
-  window._warmup = ()=>{};
-  s.onerror = ()=>{};
+  window._warmup = () => {};
+  s.onerror = () => {}; // silencioso
   document.head.appendChild(s);
 })();
 
-// ── ADAPTAR UI según modo ─────────────────────────────────────
+// Adaptar copy según modo
 if (esSorteo) {
-  document.getElementById("headerSub").textContent     = "Sorteo · Nuevos registros";
-  document.getElementById("badgeCupon").style.display  = "none";
-  document.getElementById("badgeSorteo").style.display = "inline-flex";
-  document.getElementById("headerPremio").textContent  = P.premio;
-  document.getElementById("formTitle").textContent     = "Participa gratis";
-  document.getElementById("formSub").textContent       = "Ingresa tus datos y queda inscrito al sorteo";
-  document.getElementById("pillText").innerHTML        = `⏳ Sorteo en <span style="font-weight:900;">${P.vigencia} horas</span> · 1 registro por número`;
-  document.getElementById("btnText").textContent       = "Quiero participar →";
-  document.getElementById("formTerms").textContent     = "1 registro por número · Sin spam · Oakberry Colombia";
+  document.getElementById("headerSub").textContent    = "Sorteo · Nuevos registros";
+  document.getElementById("badgeCupon").style.display = "none";
+  document.getElementById("badgeSorteo").style.display= "inline-flex";
+  document.getElementById("headerPremio").textContent = P.premio;
+  document.getElementById("formTitle").textContent    = "Participa gratis";
+  document.getElementById("formSub").textContent      = "Ingresa tus datos y queda inscrito al sorteo";
+  document.getElementById("pillText").innerHTML       = `⏳ Sorteo en <span style="font-weight:900;">${P.vigencia} horas</span> · 1 registro por número`;
+  document.getElementById("btnText").textContent      = "Quiero participar →";
+  document.getElementById("formTerms").textContent    = "1 registro por número · Sin spam · Oakberry Colombia";
 } else {
-  document.getElementById("headerPct").textContent       = P.descuento + "%";
-  document.getElementById("headerProducto").textContent  = P.producto;
-  document.getElementById("pillVigencia").textContent    = P.vigencia + " horas";
+  document.getElementById("headerPct").textContent      = P.descuento + "%";
+  document.getElementById("headerProducto").textContent = P.producto;
+  document.getElementById("pillVigencia").textContent   = P.vigencia + " horas";
 }
 
-// ── GENERAR CÓDIGO ────────────────────────────────────────────
 function genCodigo() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let r = "";
-  for (let i=0;i<5;i++) r+=chars[Math.floor(Math.random()*chars.length)];
+  for (let i = 0; i < 5; i++) r += chars[Math.floor(Math.random() * chars.length)];
   return r;
 }
 
-// ── VALIDACIÓN ────────────────────────────────────────────────
 function validar() {
   let ok = true;
   const nombre = document.getElementById("inp-nombre").value.trim();
@@ -347,6 +493,15 @@ function validar() {
   } else {
     document.getElementById("inp-nombre").classList.remove("err");
     document.getElementById("err-nombre").classList.remove("show");
+  }
+  const emailVal = document.getElementById("inp-email").value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    document.getElementById("inp-email").classList.add("err");
+    document.getElementById("err-email").classList.add("show");
+    ok = false;
+  } else {
+    document.getElementById("inp-email").classList.remove("err");
+    document.getElementById("err-email").classList.remove("show");
   }
   const cel = document.getElementById("inp-cel").value.replace(/\D/g,"");
   if (!/^3\d{9}$/.test(cel)) {
@@ -369,220 +524,347 @@ function validar() {
   return ok;
 }
 
-// ── FETCH JSONP ───────────────────────────────────────────────
+// ── FETCH JSONP — CORREGIDO PARA MÓVIL ───────────────────────
+// Problema original: onerror vacío + timeout 35s → en Safari/iOS la
+// promesa quedaba colgada 35 segundos antes de mostrar error.
+// Fix: onerror rechaza inmediatamente + reintento automático con delay.
 function fetchGET(params) {
   return new Promise((resolve, reject) => {
     const cbName = "cb_" + Math.random().toString(36).slice(2);
-    const url    = CFG.SCRIPT_URL + "?" + new URLSearchParams({...params, callback:cbName});
+    const url = CFG.SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cbName});
     const script = document.createElement("script");
-    let settled  = false;
-    function cleanup() { settled=true; clearTimeout(timer); delete window[cbName]; if(script.parentNode) script.parentNode.removeChild(script); }
-    window[cbName] = (data) => { if(settled)return; cleanup(); resolve(data); };
-    script.onerror  = () => { if(settled)return; cleanup(); reject(new Error("script-error")); };
+    let settled = false;
+
+    function cleanup() {
+      settled = true;
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = (data) => {
+      if (settled) return;
+      cleanup();
+      resolve(data);
+    };
+
+    // CORRECCIÓN CLAVE: rechazar en onerror para no dejar la promesa colgada
+    // en Safari/iOS donde los redirects 302 disparan onerror
+    script.onerror = () => {
+      if (settled) return;
+      cleanup();
+      reject(new Error("script-error"));
+    };
+
     script.src = url;
     document.body.appendChild(script);
-    const timer = setTimeout(() => { if(!settled){ cleanup(); reject(new Error("timeout")); }}, 12000);
+
+    // Timeout reducido de 35s → 12s para mejor UX en móvil
+    const timer = setTimeout(() => {
+      if (!settled) {
+        cleanup();
+        reject(new Error("timeout"));
+      }
+    }, 12000);
   });
 }
+
+// Wrapper con reintento automático — en móvil el primer intento puede
+// fallar por el redirect 302, pero el segundo funciona porque el redirect
+// ya está en caché del navegador.
 async function fetchGETSafe(params) {
-  try { return await fetchGET(params); }
-  catch(e) { await new Promise(r=>setTimeout(r,400)); return await fetchGET(params); }
+  try {
+    return await fetchGET(params);
+  } catch(e) {
+    await new Promise(r => setTimeout(r, 400));
+    return await fetchGET(params);
+  }
 }
 
-// ── PROGRESO ──────────────────────────────────────────────────
+// ── BARRA DE PROGRESO ────────────────────────────────────────
 let _progressTimer = null;
+let _progressVal   = 0;
+
 function iniciarProgreso() {
+  _progressVal = 0;
   _progressTimer = null;
-  setProgreso(0,"Verificando disponibilidad...");
-  setStep(1,"active"); setStep(2,""); setStep(3,""); setStep(4,"");
+  setProgreso(0, "Verificando disponibilidad...");
+  setStep(1, "active");
+  setStep(2, ""); setStep(3, ""); setStep(4, "");
+
+  // Avance automático simulado: rápido al inicio, se frena cerca del 85%
   const pasos = [
-    {hasta:25,delay:400,msg:"Verificando disponibilidad..."},
-    {hasta:45,delay:700,msg:"Comprobando historial..."},
-    {hasta:62,delay:900,msg:"Generando código único..."},
-    {hasta:78,delay:1100,msg:"Registrando en sistema..."},
-    {hasta:85,delay:1400,msg:"Casi listo..."},
+    { hasta: 25, delay: 400,  msg: "Verificando disponibilidad..." },
+    { hasta: 45, delay: 700,  msg: "Comprobando historial..." },
+    { hasta: 62, delay: 900,  msg: "Generando código único..." },
+    { hasta: 78, delay: 1100, msg: "Registrando en sistema..." },
+    { hasta: 85, delay: 1400, msg: "Casi listo..." },
   ];
-  let i=0;
+
+  let i = 0;
   function tick() {
-    if(i>=pasos.length) return;
-    const paso=pasos[i++];
-    _progressTimer=setTimeout(()=>{
-      if(i===2){setStep(1,"done");setStep(2,"active");}
-      if(i===4){setStep(2,"done");setStep(3,"active");}
-      setProgreso(paso.hasta,paso.msg); tick();
-    },paso.delay);
+    if (i >= pasos.length) return;
+    const paso = pasos[i++];
+    _progressTimer = setTimeout(() => {
+      if (i === 2) { setStep(1,"done"); setStep(2,"active"); }
+      if (i === 4) { setStep(2,"done"); setStep(3,"active"); }
+      setProgreso(paso.hasta, paso.msg);
+      tick();
+    }, paso.delay);
   }
   tick();
 }
+
 function completarProgreso(cb) {
   clearTimeout(_progressTimer);
   setStep(3,"done"); setStep(4,"active");
-  setProgreso(95,"¡Casi listo!");
-  setTimeout(()=>{ setProgreso(100,"¡Cupón generado!"); setStep(4,"done"); setTimeout(cb,400); },350);
-}
-function setProgreso(pct,msg) {
-  document.getElementById("progressBar").style.width = pct+"%";
-  document.getElementById("progressPct").textContent = pct+"%";
-  if(msg) document.getElementById("loadingMsg").textContent=msg;
-}
-function setStep(n,estado) {
-  const el=document.getElementById("step"+n);
-  if(!el)return;
-  el.className="loading-step"+(estado?" "+estado:"");
+  setProgreso(95, "¡Casi listo!");
+  setTimeout(() => {
+    setProgreso(100, "¡Cupón generado!");
+    setStep(4,"done");
+    setTimeout(cb, 400);
+  }, 350);
 }
 
-// ── SOLICITAR CUPÓN ───────────────────────────────────────────
+function setProgreso(pct, msg) {
+  document.getElementById("progressBar").style.width = pct + "%";
+  document.getElementById("progressPct").textContent = pct + "%";
+  if (msg) document.getElementById("loadingMsg").textContent = msg;
+}
+
+function setStep(n, estado) {
+  const el = document.getElementById("step" + n);
+  if (!el) return;
+  el.className = "loading-step" + (estado ? " " + estado : "");
+}
+
 async function solicitar() {
   if (!validar()) return;
 
-  const nombre     = document.getElementById("inp-nombre").value.trim();
-  const celularRaw = document.getElementById("inp-cel").value.replace(/\D/g,"");
-  const celular    = "57" + celularRaw;
+  // ── Verificar fingerprint de dispositivo ─────────────────────
+  if (!DEV_MODE && dispositivoYaUsado()) {
+    show("stateLoading");
+    iniciarProgreso();
+    setTimeout(() => {
+      clearTimeout(_progressTimer);
+      mostrarBloqueadoLoopy(document.getElementById("inp-nombre").value.trim());
+    }, 1800);
+    return;
+  }
 
+  const nombre     = document.getElementById("inp-nombre").value.trim();
+  const email      = document.getElementById("inp-email").value.trim().toLowerCase();
+  const celularRaw = document.getElementById("inp-cel").value.replace(/\D/g,"");
+  const esColombia = celularRaw.length === 10;
+  const celular    = esColombia ? "57" + celularRaw : celularRaw;
+
+  // Mostrar pantalla de carga con barra de progreso
   show("stateLoading");
   iniciarProgreso();
 
-  // Verificar si ya existe
-  try {
-    const check = await fetchGETSafe({ accion:"verificarCelular", celular });
-    if (check.existe) { clearTimeout(_progressTimer); mostrarExistente(check,nombre); return; }
-  } catch(e) {}
+  // Verificar si el celular ya tiene cupón registrado
+  // Lógica de vencimiento:
+  // - Cupón Disponible y NO vencido → mostrar cupón existente
+  // - Cupón Canjeado → mostrar cupón canjeado
+  // - Cupón Disponible y VENCIDO → permitir generar uno nuevo
+  if (!DEV_MODE) {
+    try {
+      const check = await fetchGETSafe({ accion: "verificarCelular", celular });
+      if (check.existe) {
+        const ahora = new Date();
+        const vencimiento = check.fechaVence ? new Date(check.fechaVence) : null;
+        const estaVencido = vencimiento && ahora > vencimiento;
+        const estaCanjeado = check.estado === "Canjeado";
+        // Solo bloquear si: canjeado, o disponible y no vencido
+        if (estaCanjeado || !estaVencido) {
+          clearTimeout(_progressTimer);
+          mostrarExistente(check, nombre);
+          return;
+        }
+        // Si está vencido y disponible → permitir generar uno nuevo
+      }
+    } catch(e) {
+      // Si falla la verificación, continuamos normal
+    }
+  }
+  // NOTA: Validación de email contra Loopy en pausa (activar tras análisis 5 días)
 
-  const codigo  = genCodigo();
-  const ahora   = new Date();
-  const vence   = new Date(ahora.getTime() + P.vigencia * 3_600_000);
+  const codigo   = genCodigo();
+  const ahora    = new Date();
+  const vence    = new Date(ahora.getTime() + P.vigencia * 3_600_000);
   const producto = esSorteo ? P.premio : P.producto;
 
   try {
     const res = await fetchGETSafe({
-      accion:     "registrarCupon",
+      accion:      "registrarCupon",
       codigo, nombre, celular,
-      ciudad:     P.ciudad,
-      tienda:     P.tienda,
-      fase:       P.fase,
-      fuente:     P.fuente,
-      descuento:  esSorteo ? "sorteo" : P.descuento + "%",
+      ciudad:      P.ciudad,
+      tienda:      P.tienda,
+      fase:        P.fase,
+      fuente:      P.fuente,
+      descuento:   esSorteo ? "sorteo" : P.descuento + "%",
       producto,
-      momentos:   P.momentos || "",
-      fechaGen:   ahora.toISOString(),
-      fechaVence: vence.toISOString(),
-      // ── Parámetros de trazabilidad de pauta ──
+      momentos:    P.momentos || "",
+      fechaGen:    ahora.toISOString(),
+      fechaVence:  vence.toISOString(),
+      // ── Trazabilidad nueva ──────────────────────────────────
+      linkCamp:    LINK_CAMP,           // URL completa de la campaña de origen
+      ciudadReal:  _geo.ciudad,         // Ciudad detectada por geo
+      coordenadas: _geo.coordenadas,    // "lat,lng" del dispositivo
+      fuenteGeo:   _geo.fuente,         // "ip" | "gps" | "desconocido"
+      email,                            // Email para validación Loopy
+      fingerprint: DEVICE_FP,           // Fingerprint del dispositivo
+      // ── Parámetros de pauta Meta ─────────────────────────────
       adset:       P.adset,
       adset_id:    P.adset_id,
       campaign_id: P.campaign_id,
       anuncio:     P.anuncio,
       placement:   P.placement,
-      linkCamp:    window.location.href,
     });
 
     completarProgreso(() => {
-      if (res.esLoopy)      mostrarBloqueadoLoopy(nombre);
-      else if (res.existe)  mostrarExistente(res, nombre);
-      else if (res.ok)      mostrarNuevo({ codigo:res.codigo||codigo, nombre, vence });
-      else { alert(res.mensaje||"Error al generar el cupón. Intenta de nuevo."); show("stateForm"); }
+      if (res.esLoopy) {
+        mostrarBloqueadoLoopy(nombre);
+      } else if (res.existe) {
+        mostrarExistente(res, nombre);
+      } else if (res.ok) {
+        if (!DEV_MODE) marcarDispositivoUsado();
+        mostrarNuevo({ codigo: res.codigo || codigo, nombre, vence });
+      } else {
+        alert(res.mensaje || "Error al generar el cupón. Intenta de nuevo.");
+        show("stateForm");
+      }
     });
 
-  } catch(err) {
+  } catch (err) {
+    console.error(err);
     clearTimeout(_progressTimer);
     alert("Hubo un problema al conectar. Intenta de nuevo.");
     show("stateForm");
   }
 }
 
-// ── MOSTRAR MOMENTOS ──────────────────────────────────────────
+const MOMENTOS_LABELS = {
+  madrugada: { emoji:"🌃", texto:"Solo válido en madrugada · 11:00pm – 7:00am",  inicio:23, fin:7,  cruce:true },
+  desayuno:  { emoji:"☀️", texto:"Solo válido en desayuno · 7:00am – 11:30am",   inicio:7,  fin:11.5 },
+  almuerzo:  { emoji:"🍽️", texto:"Solo válido en almuerzo · 11:30am – 3:30pm",   inicio:11.5, fin:15.5 },
+  onces:     { emoji:"🧃", texto:"Solo válido en onces · 3:30pm – 7:00pm",       inicio:15.5, fin:19  },
+  cena:      { emoji:"🌙", texto:"Solo válido en cena · 7:00pm – 11:00pm",       inicio:19, fin:23   },
+  noche:     { emoji:"🌌", texto:"Solo válido en noche · 11:00pm – 12:00am",     inicio:23, fin:24   },
+};
+
 function mostrarMomentos(momentosStr) {
   if (!momentosStr) return;
-  const lista = momentosStr.split(",").map(m=>m.trim()).filter(Boolean);
+  const lista = momentosStr.split(",").map(m => m.trim()).filter(Boolean);
   if (!lista.length) return;
-
   const pill = document.getElementById("momentoPill");
   const icon = document.querySelector(".momento-pill .mp-icon");
   const text = document.getElementById("momentoText");
-
   if (lista.length === 1) {
     const m = MOMENTOS_LABELS[lista[0]];
-    if (m) { icon.textContent=m.emoji; text.textContent=m.texto; }
+    if (m) { icon.textContent = m.emoji; text.textContent = m.texto; }
   } else {
-    const nombres = lista.map(m=>(MOMENTOS_LABELS[m]?.emoji||"")+" "+
-      m.charAt(0).toUpperCase()+m.slice(1)).join(" · ");
+    const nombres = lista.map(m => (MOMENTOS_LABELS[m]?.emoji||"") + " " + m.charAt(0).toUpperCase() + m.slice(1)).join(" · ");
     icon.textContent = "🕐";
     text.textContent = "Solo válido en: " + nombres;
   }
   pill.style.display = "flex";
 }
 
-// ── PANTALLAS DE RESULTADO ────────────────────────────────────
 function mostrarNuevo({ codigo, nombre, vence }) {
   show("stateSuccess");
-  try { fbq('track','Lead'); } catch(e) {}
-  document.getElementById("outCode").textContent    = codigo;
-  document.getElementById("outNombre").textContent  = "Hola, "+nombre.split(" ")[0]+" 👋";
-  document.getElementById("outValidity").textContent= "Válido hasta: "+fmt(vence);
+  try { fbq('track', 'Lead'); } catch(e) {}
+  document.getElementById("outCode").textContent     = codigo;
+  document.getElementById("outNombre").textContent   = "Hola, " + nombre.split(" ")[0] + " 👋";
+  document.getElementById("outValidity").textContent = "Válido hasta: " + fmt(vence);
   if (esSorteo) {
-    document.getElementById("successIcon").textContent       = "🏆";
-    document.getElementById("successTitle").textContent      = "¡Estás participando!";
-    document.getElementById("ticketLabel").textContent       = "Tu número de participación";
-    document.getElementById("outProducto").textContent       = "🫐 "+P.premio;
+    document.getElementById("successIcon").textContent    = "🏆";
+    document.getElementById("successTitle").textContent   = "¡Estás participando!";
+    document.getElementById("ticketLabel").textContent    = "Tu número de participación";
+    document.getElementById("outProducto").textContent    = "🫐 " + P.premio;
     document.getElementById("ticketBottomLabel").textContent = "Premio";
-    document.getElementById("outDescuento").textContent      = P.premio;
-    document.getElementById("infoCupon").style.display       = "none";
-    document.getElementById("infoSorteo").style.display      = "block";
+    document.getElementById("outDescuento").textContent   = P.premio;
+    document.getElementById("infoCupon").style.display    = "none";
+    document.getElementById("infoSorteo").style.display   = "block";
   } else {
-    document.getElementById("outProducto").textContent  = "🫐 "+P.producto;
-    document.getElementById("outDescuento").textContent = P.descuento+"% OFF";
-    document.getElementById("outCiudad").textContent    = P.ciudad!=="No especificada" ? P.ciudad : "tu ciudad";
+    document.getElementById("outProducto").textContent    = "🫐 " + P.producto;
+    document.getElementById("outDescuento").textContent   = P.descuento + "% OFF";
+    document.getElementById("outCiudad").textContent      = P.ciudad !== "No especificada" ? P.ciudad : "tu ciudad";
     mostrarMomentos(P.momentos);
   }
 }
 
 function mostrarBloqueadoLoopy(nombre) {
   const primer = nombre.split(" ")[0];
-  document.querySelector(".card").innerHTML = `
+  const card = document.querySelector(".card");
+  card.innerHTML = `
     <div class="result-header" style="background:#c0392b;">
       <span class="result-icon">🏆</span>
       <div class="result-title">¡Ya eres cliente Oakberry!</div>
       <div class="result-name">Hola, ${primer} 👋</div>
     </div>
     <div class="result-body">
-      <div class="info-pill purple"><span class="icon">⭐</span><span>Ya eres cliente de Oakberry Colombia. Este cupón es exclusivo para clientes nuevos.</span></div>
-      <div class="info-pill yellow"><span class="icon">🎁</span><span>Como cliente frecuente puedes acumular sellos y canjear recompensas en cualquier tienda Oakberry.</span></div>
-      <div class="info-pill green"><span class="icon">💳</span><span>Presenta tu tarjeta en caja para seguir acumulando beneficios.</span></div>
-    </div>`;
+      <div class="info-pill purple">
+        <span class="icon">⭐</span>
+        <span>Ya eres cliente de Oakberry Colombia. Este cupón es exclusivo para clientes nuevos.</span>
+      </div>
+      <div class="info-pill yellow">
+        <span class="icon">🎁</span>
+        <span>Como cliente frecuente puedes acumular sellos y canjear recompensas exclusivas en cualquier tienda Oakberry.</span>
+      </div>
+      <div class="info-pill green">
+        <span class="icon">💳</span>
+        <span>Presenta tu tarjeta en caja para seguir acumulando beneficios.</span>
+      </div>
+    </div>
+  `;
 }
 
 function mostrarExistente(data, nombre) {
   show("stateUsed");
   document.getElementById("outExistingCode").textContent     = data.codigo;
-  document.getElementById("usedNombre").textContent          = "Hola, "+nombre.split(" ")[0]+" 👋";
-  document.getElementById("outExistingValidity").textContent = data.fechaVence ? "Válido hasta: "+fmt(new Date(data.fechaVence)) : "";
+  document.getElementById("usedNombre").textContent          = "Hola, " + nombre.split(" ")[0] + " 👋";
+  document.getElementById("outExistingValidity").textContent = data.fechaVence ? "Válido hasta: " + fmt(new Date(data.fechaVence)) : "";
   if (esSorteo) {
     document.getElementById("usedTitle").textContent    = "Ya estás participando";
     document.getElementById("usedSubtitle").textContent = "Encontramos tu número de participación";
     document.getElementById("usedLabel").textContent    = "Tu número";
-    document.getElementById("usedTip").textContent      = "Guarda este número — lo necesitarás si eres el ganador.";
+    document.getElementById("usedTip").textContent      = "Guarda este número — lo necesitarás si eres el ganador del sorteo.";
+  } else if (data.estado === "Canjeado") {
+    document.getElementById("usedTitle").textContent    = "Cupón ya utilizado";
+    document.getElementById("usedSubtitle").textContent = "Este código ya fue canjeado en tienda";
+    document.getElementById("usedTip").textContent      = "Este cupón ya fue redimido. Si tienes dudas, acércate a cualquier tienda Oakberry.";
+  } else {
+    document.getElementById("usedTitle").textContent    = "Ya tienes un cupón activo";
+    document.getElementById("usedSubtitle").textContent = "Encontramos tu código registrado con este número";
+    document.getElementById("usedTip").textContent      = "Presenta este código en caja antes de que venza.";
   }
 }
 
 function show(id) {
-  ["stateForm","stateSuccess","stateUsed","stateLoopy","stateLoading"].forEach(s=>{
-    const el=document.getElementById(s); if(el) el.classList.remove("show");
+  ["stateForm","stateSuccess","stateUsed","stateLoopy","stateLoading"].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.classList.remove("show");
   });
-  const target=document.getElementById(id);
-  if(target) target.classList.add("show");
+  const target = document.getElementById(id);
+  if (target) target.classList.add("show");
 }
 
-function fmt(d) { return d.toLocaleDateString("es-CO",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}); }
+function fmt(d) {
+  return d.toLocaleDateString("es-CO",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
+}
 
 function copiar(elId, btn) {
   const code = document.getElementById(elId).textContent;
-  navigator.clipboard.writeText(code).then(()=>{
-    const prev=btn.textContent; btn.textContent="✅ ¡Copiado!";
-    setTimeout(()=>btn.textContent=prev,2200);
+  navigator.clipboard.writeText(code).then(() => {
+    const prev = btn.textContent;
+    btn.textContent = "✅ ¡Copiado!";
+    setTimeout(() => btn.textContent = prev, 2200);
   });
 }
 
-document.getElementById("inp-cel").addEventListener("input", function(){
-  this.value=this.value.replace(/\D/g,"");
+document.getElementById("inp-cel").addEventListener("input", function() {
+  this.value = this.value.replace(/\D/g,"");
 });
 </script>
 </body>
