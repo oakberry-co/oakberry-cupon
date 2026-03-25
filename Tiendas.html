@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oakberry · Nuestras Tiendas</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  :root {
+    --primary:#5F4B8B; --primary-dark:#4a3a6e; --primary-light:#7a63b0;
+    --yellow:#F5C842; --white:#fff; --off-white:#F7F5FF;
+    --text:#1A1427; --gray:#888; --border:#eee;
+    --shadow:0 4px 24px rgba(95,75,139,0.10);
+    --coral:#e8593c;
+  }
+  *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Montserrat',sans-serif; background:var(--off-white); color:var(--text); min-height:100vh; }
+
+  /* ── Header ── */
+  .header {
+    background:var(--primary); padding:16px 20px;
+    display:flex; align-items:center; gap:14px;
+    position:sticky; top:0; z-index:1000;
+    box-shadow:0 2px 16px rgba(0,0,0,0.2);
+  }
+  .header-logo { width:38px; height:38px; background:var(--yellow); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .header-text { flex:1; }
+  .header-brand { font-size:16px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:2px; }
+  .header-sub { font-size:10px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1.5px; margin-top:2px; }
+  .header-count { background:var(--yellow); color:var(--primary); font-size:11px; font-weight:900; padding:4px 12px; border-radius:50px; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
+
+  /* ── Geolocation banner ── */
+  .geo-banner {
+    background:var(--primary); color:#fff;
+    padding:10px 20px; font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    display:none;
+  }
+  .geo-banner.show { display:flex; }
+  .geo-banner.success { background:#1a5c3a; }
+  .geo-banner.error   { background:#7a1a1a; }
+  .geo-text { display:flex; align-items:center; gap:8px; }
+  .geo-spin { width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; flex-shrink:0; }
+  .geo-close { background:rgba(255,255,255,0.2); border:none; color:#fff; font-size:14px; cursor:pointer; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+  /* ── Layout ── */
+  .layout { display:grid; grid-template-columns:360px 1fr; height:calc(100vh - 62px); }
+  @media(max-width:768px) { .layout { grid-template-columns:1fr; grid-template-rows:auto 1fr; } }
+
+  /* ── Sidebar ── */
+  .sidebar { background:#fff; border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+
+  .city-filter { padding:14px 16px; border-bottom:1px solid var(--border); background:var(--off-white); }
+  .city-filter-label { font-size:9px; font-weight:700; color:var(--gray); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; }
+  .city-pills { display:flex; flex-wrap:wrap; gap:6px; }
+  .city-pill { padding:5px 14px; border-radius:50px; border:1.5px solid var(--border); font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700; color:var(--gray); background:#fff; cursor:pointer; transition:all 0.18s; white-space:nowrap; }
+  .city-pill:hover { border-color:var(--primary); color:var(--primary); }
+  .city-pill.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+
+  .store-list { flex:1; overflow-y:auto; padding:12px; }
+  .store-list::-webkit-scrollbar { width:4px; }
+  .store-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  /* ── Store card ── */
+  .store-card { background:#fff; border:1.5px solid var(--border); border-radius:14px; padding:16px; margin-bottom:10px; cursor:pointer; transition:all 0.18s; position:relative; overflow:hidden; }
+  .store-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--border); transition:background 0.18s; }
+  .store-card:hover { border-color:var(--primary); box-shadow:var(--shadow); }
+  .store-card:hover::before { background:var(--primary); }
+  .store-card.active { border-color:var(--primary); box-shadow:var(--shadow); background:var(--off-white); }
+  .store-card.active::before { background:var(--yellow); }
+  .store-card.nearest { border-color:var(--yellow) !important; }
+  .store-card.nearest::before { background:var(--yellow) !important; }
+
+  .store-badges { display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
+  .store-badge { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; padding:2px 8px; border-radius:50px; }
+  .badge-ciudad { background:rgba(95,75,139,0.1); color:var(--primary); }
+  .badge-nearest { background:var(--yellow); color:var(--primary); }
+  .badge-distancia { background:#f0f0f0; color:var(--gray); }
+
+  .store-nombre { font-size:14px; font-weight:900; color:var(--text); margin-bottom:6px; }
+  .store-direccion { font-size:11px; font-weight:600; color:var(--gray); line-height:1.5; margin-bottom:6px; }
+  .store-horario { font-size:10px; font-weight:700; color:var(--primary-light); margin-bottom:10px; }
+  .store-actions { display:flex; gap:8px; }
+  .btn-maps { flex:1; padding:9px 12px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px; transition:background 0.18s; }
+  .btn-maps:hover { background:var(--primary-dark); }
+  .btn-focus { padding:9px 12px; background:var(--off-white); color:var(--primary); border:1.5px solid var(--primary); border-radius:8px; font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.18s; }
+  .btn-focus:hover { background:var(--primary); color:#fff; }
+
+  /* ── States ── */
+  .empty-state { text-align:center; padding:40px 20px; color:var(--gray); }
+  .empty-icon { font-size:36px; margin-bottom:12px; display:block; }
+  .empty-text { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+  .loading-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; gap:12px; }
+  .loading-spin { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { font-size:11px; font-weight:700; color:var(--gray); text-transform:uppercase; letter-spacing:1px; }
+
+  /* ── Mapa ── */
+  #map { width:100%; height:100%; z-index:1; }
+  @media(max-width:768px) { #map { height:60vw; min-height:280px; } }
+
+  /* ── Popup ── */
+  .leaflet-popup-content-wrapper { border-radius:14px !important; box-shadow:0 8px 32px rgba(95,75,139,0.2) !important; border:none !important; padding:0 !important; overflow:hidden; }
+  .leaflet-popup-content { margin:0 !important; width:230px !important; }
+  .popup-header { background:var(--primary); padding:12px 16px; }
+  .popup-nearest-badge { font-size:9px; font-weight:700; background:var(--yellow); color:var(--primary); padding:2px 8px; border-radius:50px; display:inline-block; margin-bottom:4px; }
+  .popup-ciudad { font-size:9px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:3px; }
+  .popup-nombre { font-size:13px; font-weight:900; color:#fff; }
+  .popup-body { padding:12px 16px; }
+  .popup-dir { font-size:11px; font-weight:600; color:var(--gray); line-height:1.5; margin-bottom:6px; }
+  .popup-horario { font-size:10px; font-weight:700; color:var(--primary-light); margin-bottom:10px; }
+  .popup-dist { font-size:10px; font-weight:700; color:var(--primary); margin-bottom:10px; }
+  .popup-btn { display:block; width:100%; padding:9px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700; text-align:center; text-decoration:none; transition:background 0.18s; }
+  .popup-btn:hover { background:var(--primary-dark); color:#fff; }
+  .leaflet-popup-tip { background:var(--primary) !important; }
+
+  /* ── Botón geo flotante ── */
+  .geo-fab { position:absolute; bottom:24px; right:24px; z-index:500; background:var(--primary); color:#fff; border:none; border-radius:50px; padding:12px 18px; font-family:'Montserrat',sans-serif; font-size:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 20px rgba(95,75,139,0.4); display:flex; align-items:center; gap:8px; transition:all 0.18s; }
+  .geo-fab:hover { background:var(--primary-dark); transform:translateY(-1px); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">🫐</div>
+  <div class="header-text">
+    <div class="header-brand">Oakberry</div>
+    <div class="header-sub">Nuestras tiendas · Colombia</div>
+  </div>
+  <div class="header-count" id="headerCount">Cargando...</div>
+</div>
+
+<!-- Banner geolocalización -->
+<div class="geo-banner" id="geoBanner">
+  <div class="geo-text">
+    <div class="geo-spin" id="geoSpin"></div>
+    <span id="geoMsg">Buscando tu tienda más cercana...</span>
+  </div>
+  <button class="geo-close" onclick="cerrarGeoBanner()">✕</button>
+</div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="city-filter">
+      <div class="city-filter-label">Filtrar por ciudad</div>
+      <div class="city-pills" id="cityPills">
+        <button class="city-pill active" onclick="filtrarCiudad('todas', this)">Todas</button>
+      </div>
+    </div>
+    <div class="store-list" id="storeList">
+      <div class="loading-state">
+        <div class="loading-spin"></div>
+        <div class="loading-text">Cargando tiendas...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mapa -->
+  <div style="position:relative;">
+    <div id="map"></div>
+    <button class="geo-fab" onclick="buscarMasCercana()" id="geoFab">
+      📍 Mi tienda más cercana
+    </button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
+
+// Coordenadas por ciudad como fallback
+const COORDS_CIUDAD = {
+  "bogotá":[4.7110,-74.0721],"bogota":[4.7110,-74.0721],
+  "medellín":[6.2442,-75.5812],"medellin":[6.2442,-75.5812],
+  "cali":[3.4516,-76.5320],"cartagena":[10.3910,-75.4794],
+  "barranquilla":[10.9639,-74.7964],"bucaramanga":[7.1193,-73.1227],
+};
+
+let todasTiendas  = [];
+let ciudadActiva  = "todas";
+let marcadores    = [];
+let map;
+let tiendaMasCercanaIdx = -1;
+
+// ── Init mapa ─────────────────────────────────────────────────
+function initMap() {
+  map = L.map("map", { zoomControl:true }).setView([4.7110,-74.0721], 6);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    attribution:'&copy; OpenStreetMap &copy; CARTO',
+    subdomains:"abcd", maxZoom:19,
+  }).addTo(map);
+}
+
+// ── Iconos ────────────────────────────────────────────────────
+function crearIcono(tipo) {
+  const configs = {
+    normal:   { bg:"#5F4B8B", border:"#fff",     emoji:"🫐" },
+    activo:   { bg:"#F5C842", border:"#5F4B8B",  emoji:"🫐" },
+    cercano:  { bg:"#e8593c", border:"#fff",     emoji:"📍" },
+    usuario:  { bg:"#39d98a", border:"#fff",     emoji:"📍" },
+  };
+  const c = configs[tipo] || configs.normal;
+  return L.divIcon({
+    className:"",
+    html:`<div style="width:32px;height:32px;border-radius:50% 50% 50% 0;background:${c.bg};border:3px solid ${c.border};transform:rotate(-45deg);box-shadow:0 3px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:13px;">${c.emoji}</span></div>`,
+    iconSize:[32,32], iconAnchor:[16,32], popupAnchor:[0,-36],
+  });
+}
+
+// ── Extraer coords desde Google Maps URL ──────────────────────
+function extraerCoords(mapsUrl) {
+  if (!mapsUrl) return null;
+  const m = mapsUrl.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (m) return [parseFloat(m[1]), parseFloat(m[2])];
+  const q = mapsUrl.match(/q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (q) return [parseFloat(q[1]), parseFloat(q[2])];
+  return null;
+}
+
+function getCoordstienda(tienda) {
+  if (tienda.mapsUrl) {
+    const c = extraerCoords(tienda.mapsUrl);
+    if (c) return c;
+  }
+  const key = (tienda.ciudad||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  return COORDS_CIUDAD[key] || COORDS_CIUDAD[(tienda.ciudad||"").toLowerCase()] || [4.7110,-74.0721];
+}
+
+// ── Distancia entre dos puntos (km) ──────────────────────────
+function distanciaKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+            Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function formatDistancia(km) {
+  if (km < 1) return Math.round(km * 1000) + " m";
+  return km.toFixed(1) + " km";
+}
+
+// ── Popup content ─────────────────────────────────────────────
+function crearPopup(t, esCercana, distKm) {
+  const distTag = distKm !== undefined
+    ? `<div class="popup-dist">📍 A ${formatDistancia(distKm)} de ti</div>` : "";
+  const nearBadge = esCercana
+    ? `<div class="popup-nearest-badge">⭐ Más cercana</div>` : "";
+  return `<div class="popup-header">
+    ${nearBadge}
+    <div class="popup-ciudad">${t.ciudad}</div>
+    <div class="popup-nombre">${t.nombre}</div>
+  </div>
+  <div class="popup-body">
+    ${t.direccion ? `<div class="popup-dir">📍 ${t.direccion}</div>` : ""}
+    ${t.horario   ? `<div class="popup-horario">🕐 ${t.horario}</div>` : ""}
+    ${distTag}
+    ${t.mapsUrl
+      ? `<a href="${t.mapsUrl}" target="_blank" class="popup-btn">🗺️ Cómo llegar</a>`
+      : `<div style="font-size:10px;color:var(--gray);text-align:center;">Sin link de Maps aún</div>`
+    }
+  </div>`;
+}
+
+// ── Renderizar tiendas ────────────────────────────────────────
+function renderTiendas(tiendas, distancias) {
+  const list = document.getElementById("storeList");
+  marcadores.forEach(m => map.removeLayer(m));
+  marcadores = [];
+
+  if (!tiendas.length) {
+    list.innerHTML = `<div class="empty-state"><span class="empty-icon">📍</span><div class="empty-text">No hay tiendas en esta ciudad</div></div>`;
+    return;
+  }
+
+  list.innerHTML = tiendas.map((t, i) => {
+    const esCercana = tiendaMasCercanaIdx === i;
+    const dist = distancias ? distancias[i] : null;
+    return `<div class="store-card${esCercana?" nearest":""}" id="card-${i}" onclick="seleccionarTienda(${i})">
+      <div class="store-badges">
+        <span class="store-badge badge-ciudad">${t.ciudad}</span>
+        ${esCercana ? '<span class="store-badge badge-nearest">⭐ Más cercana</span>' : ""}
+        ${dist !== null ? `<span class="store-badge badge-distancia">${formatDistancia(dist)}</span>` : ""}
+      </div>
+      <div class="store-nombre">${t.nombre}</div>
+      ${t.direccion ? `<div class="store-direccion">📍 ${t.direccion}</div>` : ""}
+      ${t.horario   ? `<div class="store-horario">🕐 ${t.horario}</div>` : ""}
+      <div class="store-actions">
+        ${t.mapsUrl
+          ? `<a href="${t.mapsUrl}" target="_blank" class="btn-maps" onclick="event.stopPropagation()">🗺️ Cómo llegar</a>`
+          : `<button class="btn-maps" onclick="event.stopPropagation();centrarEnTienda(${i})">🗺️ Ver en mapa</button>`
+        }
+        <button class="btn-focus" onclick="event.stopPropagation();centrarEnTienda(${i})">📌</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  // Marcadores
+  const bounds = [];
+  tiendas.forEach((t, i) => {
+    const coords = getCoordstienda(t);
+    bounds.push(coords);
+    const esCercana = tiendaMasCercanaIdx === i;
+    const dist = distancias ? distancias[i] : undefined;
+    const marker = L.marker(coords, { icon: crearIcono(esCercana ? "cercano" : "normal") })
+      .addTo(map)
+      .bindPopup(crearPopup(t, esCercana, dist), { maxWidth:250 });
+    marker.on("click", () => seleccionarTienda(i, false));
+    marcadores.push(marker);
+  });
+
+  if (bounds.length === 1) {
+    map.setView(bounds[0], 15);
+  } else if (bounds.length > 1) {
+    map.fitBounds(bounds, { padding:[40,40] });
+  }
+}
+
+// ── Seleccionar tienda ────────────────────────────────────────
+function seleccionarTienda(idx, scrollCard=true) {
+  document.querySelectorAll(".store-card").forEach(c => c.classList.remove("active"));
+  const card = document.getElementById("card-"+idx);
+  if (card) {
+    card.classList.add("active");
+    if (scrollCard) card.scrollIntoView({ behavior:"smooth", block:"nearest" });
+  }
+  marcadores.forEach((m,i) => {
+    const esCercana = tiendaMasCercanaIdx === i;
+    m.setIcon(crearIcono(i===idx ? "activo" : (esCercana ? "cercano" : "normal")));
+  });
+  centrarEnTienda(idx);
+}
+
+function centrarEnTienda(idx) {
+  const tiendas = ciudadActiva === "todas"
+    ? todasTiendas
+    : todasTiendas.filter(t => t.ciudad.toLowerCase()===ciudadActiva.toLowerCase());
+  const t = tiendas[idx];
+  if (!t || !marcadores[idx]) return;
+  map.setView(getCoordstienda(t), 16, { animate:true });
+  marcadores[idx].openPopup();
+}
+
+// ── Filtrar por ciudad ────────────────────────────────────────
+function filtrarCiudad(ciudad, btn) {
+  ciudadActiva = ciudad;
+  document.querySelectorAll(".city-pill").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active");
+  tiendaMasCercanaIdx = -1;
+  const filtradas = ciudad === "todas"
+    ? todasTiendas
+    : todasTiendas.filter(t => t.ciudad.toLowerCase()===ciudad.toLowerCase());
+  renderTiendas(filtradas, null);
+}
+
+// ── GEOLOCALIZACIÓN — tienda más cercana ──────────────────────
+let marcadorUsuario = null;
+
+function buscarMasCercana() {
+  if (!navigator.geolocation) {
+    mostrarGeoBanner("Tu navegador no soporta geolocalización", "error");
+    return;
+  }
+  mostrarGeoBanner("Buscando tu ubicación...", "loading");
+  navigator.geolocation.getCurrentPosition(
+    (pos) => encontrarMasCercana(pos.coords.latitude, pos.coords.longitude),
+    (err) => {
+      const msgs = {
+        1: "Permiso de ubicación denegado",
+        2: "No se pudo obtener tu ubicación",
+        3: "Tiempo de espera agotado",
+      };
+      mostrarGeoBanner(msgs[err.code] || "Error de geolocalización", "error");
+    },
+    { timeout:10000, maximumAge:60000 }
+  );
+}
+
+function encontrarMasCercana(userLat, userLng) {
+  if (!todasTiendas.length) {
+    mostrarGeoBanner("No hay tiendas registradas", "error");
+    return;
+  }
+
+  // Calcular distancia a cada tienda
+  const distancias = todasTiendas.map(t => {
+    const [lat, lng] = getCoordstienda(t);
+    return distanciaKm(userLat, userLng, lat, lng);
+  });
+
+  // Encontrar la más cercana
+  let minIdx = 0;
+  distancias.forEach((d, i) => { if (d < distancias[minIdx]) minIdx = i; });
+  tiendaMasCercanaIdx = minIdx;
+
+  // Marcador de usuario
+  if (marcadorUsuario) map.removeLayer(marcadorUsuario);
+  marcadorUsuario = L.marker([userLat, userLng], { icon: crearIcono("usuario") })
+    .addTo(map)
+    .bindPopup("<div style='padding:8px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:#1A1427'>📍 Tu ubicación</div>");
+
+  // Mostrar todas con distancias
+  renderTiendas(todasTiendas, distancias);
+
+  // Seleccionar la más cercana
+  setTimeout(() => seleccionarTienda(minIdx), 400);
+
+  const tienda = todasTiendas[minIdx];
+  mostrarGeoBanner(
+    "⭐ Tienda más cercana: " + tienda.nombre + " · " + formatDistancia(distancias[minIdx]),
+    "success"
+  );
+
+  // Resetear pills
+  document.querySelectorAll(".city-pill").forEach(p => p.classList.remove("active"));
+  document.querySelector(".city-pill").classList.add("active");
+  ciudadActiva = "todas";
+}
+
+// ── Banner geo ────────────────────────────────────────────────
+function mostrarGeoBanner(msg, tipo) {
+  const banner = document.getElementById("geoBanner");
+  const spin   = document.getElementById("geoSpin");
+  document.getElementById("geoMsg").textContent = msg;
+  banner.className = "geo-banner show" + (tipo==="success" ? " success" : tipo==="error" ? " error" : "");
+  spin.style.display = tipo==="loading" ? "block" : "none";
+  if (tipo !== "loading") setTimeout(cerrarGeoBanner, 5000);
+}
+
+function cerrarGeoBanner() {
+  document.getElementById("geoBanner").classList.remove("show");
+}
+
+// ── FETCH JSONP ───────────────────────────────────────────────
+function fetchGET(params) {
+  return new Promise((resolve, reject) => {
+    const cb  = "cb_" + Math.random().toString(36).slice(2);
+    const url = SCRIPT_URL + "?" + new URLSearchParams({...params, callback:cb});
+    const s   = document.createElement("script");
+    let settled = false;
+    function cleanup() { settled=true; clearTimeout(timer); delete window[cb]; if(s.parentNode) s.parentNode.removeChild(s); }
+    window[cb] = d => { if(settled)return; cleanup(); resolve(d); };
+    s.onerror  = () => { if(settled)return; cleanup(); reject(new Error("error")); };
+    s.src = url;
+    document.body.appendChild(s);
+    const timer = setTimeout(() => { if(!settled){ cleanup(); reject(new Error("timeout")); }}, 12000);
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", async () => {
+  initMap();
+
+  // Pedir geolocalización automáticamente al cargar
+  setTimeout(() => buscarMasCercana(), 1000);
+
+  try {
+    const data = await fetchGET({ accion:"obtenerTiendasCompleto" });
+    todasTiendas = data.tiendas || [];
+
+    if (!todasTiendas.length) {
+      document.getElementById("storeList").innerHTML = `<div class="empty-state"><span class="empty-icon">🏪</span><div class="empty-text">Sin tiendas registradas aún<br><br>Agrega tiendas en la<br>hoja "Tiendas" de Sheets</div></div>`;
+      document.getElementById("headerCount").textContent = "0 tiendas";
+      document.getElementById("geoFab").style.display = "none";
+      return;
+    }
+
+    document.getElementById("headerCount").textContent =
+      todasTiendas.length + " tienda" + (todasTiendas.length!==1?"s":"");
+
+    // Pills ciudades
+    const ciudades = [...new Set(todasTiendas.map(t=>t.ciudad))].sort();
+    const pills    = document.getElementById("cityPills");
+    ciudades.forEach(c => {
+      const btn = document.createElement("button");
+      btn.className = "city-pill";
+      btn.textContent = c;
+      btn.onclick = () => filtrarCiudad(c, btn);
+      pills.appendChild(btn);
+    });
+
+    renderTiendas(todasTiendas, null);
+
+  } catch(e) {
+    document.getElementById("storeList").innerHTML = `<div class="empty-state"><span class="empty-icon">⚠️</span><div class="empty-text">Error cargando tiendas</div></div>`;
+    document.getElementById("headerCount").textContent = "Error";
+  }
+});
+</script>
+</body>
+</html>
