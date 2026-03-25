@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oakberry · Tu segunda oportunidad</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:#5F4B8B; --primary-dark:#4a3a6e;
+    --yellow:#F5C842; --white:#fff;
+    --off-white:rgba(255,255,255,0.96);
+    --border:#eee; --gray:#999; --red:#c0392b;
+    --coral:#e8593c;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+  body {
+    font-family:'Montserrat',sans-serif;
+    min-height:100vh;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:24px 16px;
+    background:linear-gradient(rgba(95,75,139,0.6),rgba(95,75,139,0.6)),
+               url('bg.png') center/cover no-repeat fixed;
+  }
+
+  .card {
+    background:var(--off-white);
+    border-radius:30px;
+    width:100%;max-width:400px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+    overflow:hidden;
+    animation:cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes cardIn {
+    from{opacity:0;transform:translateY(28px) scale(0.97);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+  }
+
+  /* ── BIENVENIDA ── */
+  .welcome-screen { display:block; }
+  .welcome-header {
+    background:var(--coral);
+    padding:32px 28px 24px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .welcome-header::before {
+    content:'';
+    position:absolute;inset:0;
+    background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,transparent 60%);
+  }
+  .welcome-icon {
+    font-size:52px;display:block;
+    animation:popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+    margin-bottom:10px;
+  }
+  @keyframes popIn {
+    from{opacity:0;transform:scale(0.3);}
+    to{opacity:1;transform:scale(1);}
+  }
+  .welcome-brand {
+    font-size:11px;font-weight:700;
+    color:rgba(255,255,255,0.65);
+    text-transform:uppercase;letter-spacing:2.5px;
+    margin-bottom:8px;
+  }
+  .welcome-title {
+    font-size:22px;font-weight:900;
+    color:#fff;text-transform:uppercase;
+    letter-spacing:1px;line-height:1.2;
+    margin-bottom:6px;
+  }
+  .welcome-sub {
+    font-size:12px;font-weight:600;
+    color:rgba(255,255,255,0.75);
+    line-height:1.6;
+  }
+
+  .offer-badge {
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--yellow);
+    border-radius:50px;padding:10px 22px;
+    margin-top:18px;
+  }
+  .offer-badge .pct {
+    font-size:32px;font-weight:900;
+    color:var(--primary);line-height:1;
+  }
+  .offer-badge .desc {
+    font-size:11px;font-weight:700;
+    color:var(--primary);text-align:left;line-height:1.4;
+    text-transform:uppercase;
+  }
+
+  .urgency-pill {
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    background:#fff3f0;border:1.5px solid #f5b7a1;
+    border-radius:50px;padding:8px 16px;
+    margin:16px 24px 0;
+    font-size:10px;font-weight:700;
+    color:var(--coral);text-transform:uppercase;letter-spacing:0.5px;
+  }
+  .urgency-dot {
+    width:6px;height:6px;
+    background:var(--coral);border-radius:50%;
+    animation:blink 1.4s ease-in-out infinite;flex-shrink:0;
+  }
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+  .welcome-body { padding:24px 24px 28px; }
+  .welcome-steps { display:flex;flex-direction:column;gap:12px;margin-bottom:22px; }
+  .step { display:flex;align-items:flex-start;gap:12px; }
+  .step-num {
+    min-width:28px;height:28px;border-radius:50%;
+    background:var(--primary);color:#fff;
+    font-size:12px;font-weight:900;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;margin-top:1px;
+  }
+  .step-text { font-size:12px;font-weight:600;color:#444;line-height:1.6; }
+  .step-text strong { color:var(--primary);font-weight:800; }
+
+  .btn-welcome {
+    width:100%;padding:18px;
+    background:var(--coral);color:#fff;
+    border:none;border-radius:12px;
+    font-family:'Montserrat',sans-serif;
+    font-size:14px;font-weight:900;
+    text-transform:uppercase;letter-spacing:1px;
+    cursor:pointer;
+    transition:background 0.18s,transform 0.12s;
+    box-shadow:0 6px 20px rgba(232,89,60,0.4);
+  }
+  .btn-welcome:hover { background:#d44e32;transform:translateY(-1px); }
+
+  /* ── FORMULARIO ── */
+  .form-screen { display:none; }
+  .card-header { background:var(--primary);padding:28px 30px 24px;text-align:center; }
+  .brand { font-size:28px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px; }
+  .brand-sub { font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:2.5px; }
+  .discount-badge {
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--yellow);border-radius:50px;
+    padding:10px 22px;margin-top:18px;
+  }
+  .discount-badge .pct { font-size:30px;font-weight:900;color:var(--primary);line-height:1; }
+  .discount-badge .desc { font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;text-align:left;line-height:1.4; }
+
+  .card-body { padding:26px 30px 30px; }
+  .section-title { color:var(--primary);text-transform:uppercase;font-weight:900;font-size:16px;letter-spacing:0.5px;text-align:center;margin-bottom:6px; }
+  .section-sub { font-size:11px;font-weight:700;color:var(--gray);text-align:center;margin-bottom:22px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.6; }
+
+  .form-group { margin-bottom:14px;position:relative; }
+  input[type=text],input[type=tel] {
+    width:100%;padding:15px 16px;border-radius:12px;
+    border:2px solid var(--border);
+    font-family:'Montserrat',sans-serif;
+    font-size:13px;font-weight:700;color:var(--primary);
+    outline:none;background:#fff;
+    transition:border-color 0.18s,box-shadow 0.18s;
+    -webkit-appearance:none;
+  }
+  input::placeholder { color:#bbb;font-weight:600; }
+  input[type=tel] { padding-left:52px; }
+  input:focus { border-color:var(--primary);box-shadow:0 0 0 3px rgba(95,75,139,0.12); }
+  input.err { border-color:var(--red);box-shadow:0 0 0 3px rgba(192,57,43,0.1); }
+  input[disabled] {
+    background:#f5f0ff;color:var(--primary);
+    border-color:#d4c8f5;cursor:not-allowed;opacity:1;
+  }
+
+  .phone-prefix { position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--primary);pointer-events:none; }
+  .cel-lock { position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.5; }
+
+  .err-msg { font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.3px;margin-top:5px;display:none;padding-left:4px; }
+  .err-msg.show { display:block; }
+
+  .validity-pill {
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    background:#fff3f0;border:1.5px solid #f5b7a1;
+    border-radius:50px;padding:8px 16px;margin-bottom:18px;
+    font-size:10px;font-weight:700;color:var(--coral);
+    text-transform:uppercase;letter-spacing:0.5px;
+  }
+
+  .tyc-wrap { display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;cursor:pointer; }
+  .tyc-wrap input[type=checkbox] {
+    appearance:none;-webkit-appearance:none;
+    min-width:18px;height:18px;
+    border:2px solid var(--border);border-radius:5px;
+    background:#fff;cursor:pointer;
+    transition:border-color 0.18s,background 0.18s;
+    margin-top:1px;position:relative;
+  }
+  .tyc-wrap input[type=checkbox]:checked { background:var(--primary);border-color:var(--primary); }
+  .tyc-wrap input[type=checkbox]:checked::after {
+    content:'';position:absolute;left:4px;top:1px;
+    width:6px;height:10px;
+    border:2.5px solid #fff;border-top:none;border-left:none;
+    transform:rotate(45deg);
+  }
+  .tyc-wrap input[type=checkbox].err { border-color:var(--red); }
+  .tyc-label { font-size:11px;font-weight:600;color:#666;line-height:1.6; }
+  .tyc-label a { color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:2px; }
+  .tyc-err { font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.3px;margin-top:-10px;margin-bottom:10px;display:none;padding-left:4px; }
+  .tyc-err.show { display:block; }
+
+  .btn {
+    width:100%;padding:18px;
+    background:var(--primary);color:#fff;border:none;border-radius:12px;
+    font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;
+    text-transform:uppercase;letter-spacing:1px;cursor:pointer;
+    position:relative;overflow:hidden;
+    transition:background 0.18s,transform 0.12s,box-shadow 0.18s;
+    box-shadow:0 6px 20px rgba(95,75,139,0.4);
+  }
+  .btn:hover:not(:disabled) { background:var(--primary-dark);transform:translateY(-1px); }
+  .btn:disabled { opacity:0.55;cursor:not-allowed;box-shadow:none; }
+  .btn-text { transition:opacity 0.18s; }
+  .btn-loader { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.18s; }
+  .btn.loading .btn-text { opacity:0; }
+  .btn.loading .btn-loader { opacity:1; }
+  .spin { width:20px;height:20px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.65s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg);} }
+
+  /* ── LOADING ── */
+  .loading-screen { display:none; }
+  .loading-header { background:var(--primary);padding:28px 30px 24px;text-align:center; }
+  .loading-icon { font-size:44px;display:block;margin-bottom:8px;animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.12);opacity:0.8;} }
+  .loading-title { font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px; }
+  .loading-sub { font-size:11px;font-weight:700;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:1.5px; }
+  .loading-body { padding:28px 28px 32px; }
+  .progress-wrap { background:#f0ebff;border-radius:50px;height:10px;overflow:hidden;margin-bottom:12px; }
+  .progress-bar { height:100%;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));width:0%;transition:width 0.4s ease; }
+  .progress-pct { font-size:11px;font-weight:900;color:var(--primary);text-align:right;margin-bottom:20px; }
+  .loading-msg { font-size:13px;font-weight:700;color:#444;text-align:center;text-transform:uppercase;letter-spacing:0.5px;line-height:1.6;min-height:44px; }
+
+  /* ── ÉXITO ── */
+  .success-screen { display:none; }
+  .result-header { background:var(--primary);padding:28px 30px 22px;text-align:center; }
+  .result-icon { font-size:44px;display:block;margin-bottom:8px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.15s both; }
+  .result-title { font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px; }
+  .result-name { font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px; }
+  .result-body { padding:24px 30px 30px;text-align:center; }
+
+  .ticket { background:var(--primary);border-radius:16px;padding:20px 24px;margin-bottom:18px;position:relative;overflow:hidden; }
+  .ticket::before { content:'';position:absolute;top:0;right:0;width:80px;height:80px;background:rgba(255,255,255,0.04);border-radius:0 0 0 80px; }
+  .ticket-label { font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;text-align:left; }
+  .ticket-code { font-size:36px;font-weight:900;color:#fff;letter-spacing:4px;text-align:left;line-height:1;margin-bottom:4px; }
+  .ticket-validity { font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);text-align:left;margin-bottom:4px; }
+  .ticket-product { font-size:11px;font-weight:700;color:var(--yellow);text-align:left;text-transform:uppercase;letter-spacing:0.5px; }
+  .ticket-dashed { border-top:1.5px dashed rgba(255,255,255,0.2);margin:14px -24px;position:relative; }
+  .ticket-dashed::before,.ticket-dashed::after { content:'';position:absolute;top:50%;transform:translateY(-50%);width:16px;height:16px;background:var(--off-white);border-radius:50%; }
+  .ticket-dashed::before { left:-8px; }
+  .ticket-dashed::after  { right:-8px; }
+  .ticket-bottom { display:flex;justify-content:space-between;align-items:center; }
+  .d-label { font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;text-align:left; }
+  .d-value { font-size:18px;font-weight:900;color:var(--yellow);line-height:1; }
+  .copy-btn { background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.9);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:9px 16px;border-radius:8px;cursor:pointer;transition:background 0.18s; }
+  .copy-btn:hover { background:rgba(255,255,255,0.22); }
+
+  .segunda-pill {
+    display:flex;align-items:center;gap:8px;
+    background:rgba(232,89,60,0.2);
+    border:1.5px solid rgba(232,89,60,0.4);
+    border-radius:8px;padding:8px 12px;
+    margin-bottom:10px;margin-top:2px;
+  }
+  .segunda-pill .sp-text { font-size:10px;font-weight:700;color:rgba(255,200,180,0.9);text-transform:uppercase;letter-spacing:0.5px;line-height:1.4; }
+
+  .info-pill { display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.2px;line-height:1.5;margin-bottom:10px;text-align:left; }
+  .info-pill.purple { background:#f5f0ff;border:1.5px solid #d4c8f5;color:var(--primary); }
+  .info-pill.orange { background:#fff3f0;border:1.5px solid #f5c6b0;color:var(--coral); }
+  .info-pill .icon { font-size:16px;flex-shrink:0; }
+
+  /* ── YA TIENE CUPÓN ── */
+  .used-screen { display:none; }
+  .existing-ticket { background:#f5f0ff;border:2px dashed #d4c8f5;border-radius:16px;padding:20px 24px;margin-bottom:18px;text-align:center; }
+  .existing-label { font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px; }
+  .existing-code { font-size:30px;font-weight:900;color:var(--primary);letter-spacing:3px;margin-bottom:4px; }
+  .existing-validity { font-size:11px;font-weight:600;color:var(--gray); }
+  .copy-btn-solid { width:100%;padding:15px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;margin-bottom:14px;transition:background 0.18s; }
+  .copy-btn-solid:hover { background:var(--primary-dark); }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- ══ PANTALLA 1: BIENVENIDA ══ -->
+  <div class="welcome-screen" id="stateWelcome">
+    <div class="welcome-header">
+      <span class="welcome-icon">🫐</span>
+      <div class="welcome-brand">Oakberry Colombia</div>
+      <div class="welcome-title">Tu segunda<br>oportunidad</div>
+      <div class="welcome-sub">Te guardamos un descuento especial.<br>Esta vez no te lo pierdas.</div>
+      <div class="offer-badge">
+        <span class="pct" id="welcomePct">35%</span>
+        <span class="desc">OFF en tu<br><span id="welcomeProducto">Bowl The One 9oz</span></span>
+      </div>
+    </div>
+    <div class="urgency-pill">
+      <span class="urgency-dot"></span>
+      <span>Válido solo <span id="welcomeVigencia" style="font-weight:900;">48 horas</span> · Oferta exclusiva</span>
+    </div>
+    <div class="welcome-body">
+      <div class="welcome-steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <span class="step-text">Ingresa tu nombre y confirma tu número de celular</span>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <span class="step-text">Acepta los términos y recibe tu <strong>código de descuento al instante</strong></span>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <span class="step-text">Preséntalo en caja en cualquier tienda Oakberry Colombia</span>
+        </div>
+      </div>
+      <button class="btn-welcome" onclick="mostrarFormulario()">
+        Quiero mi descuento →
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ PANTALLA 2: FORMULARIO ══ -->
+  <div class="form-screen" id="stateForm">
+    <div class="card-header">
+      <div class="brand">Oakberry</div>
+      <div class="brand-sub">Oferta exclusiva · Segunda oportunidad</div>
+      <div class="discount-badge">
+        <span class="pct" id="headerPct">35%</span>
+        <span class="desc">OFF en tu<br><span id="headerProducto">Bowl The One 9oz</span></span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h2 class="section-title">Confirma tus datos</h2>
+      <p class="section-sub">Solo falta un paso para recibir tu cupón</p>
+
+      <div class="form-group">
+        <input type="text" id="inp-nombre" placeholder="TU NOMBRE" autocomplete="given-name">
+        <div class="err-msg" id="err-nombre">⚠ Ingresa tu nombre</div>
+      </div>
+
+      <div class="form-group">
+        <span class="phone-prefix">+57</span>
+        <input type="tel" id="inp-cel" placeholder="300 000 0000"
+               inputmode="numeric" maxlength="10" disabled>
+        <span class="cel-lock">🔒</span>
+      </div>
+
+      <div class="validity-pill">
+        <span class="urgency-dot"></span>
+        <span>Válido <span id="pillVigencia" style="font-weight:900;">48 horas</span> · Oferta exclusiva para ti</span>
+      </div>
+
+      <label class="tyc-wrap">
+        <input type="checkbox" id="chk-tyc">
+        <span class="tyc-label">He leído y acepto los <a href="/tyc" target="_blank">Términos y Condiciones</a> y la <a href="/tyc#privacidad" target="_blank">Política de Privacidad</a> de Oakberry Colombia.</span>
+      </label>
+      <div class="tyc-err" id="err-tyc">⚠ Debes aceptar los términos</div>
+
+      <button class="btn" id="mainBtn" onclick="solicitar()">
+        <span class="btn-text">Recibir mi cupón →</span>
+        <span class="btn-loader"><span class="spin"></span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ PANTALLA 3: CARGANDO ══ -->
+  <div class="loading-screen" id="stateLoading">
+    <div class="loading-header">
+      <span class="loading-icon">🫐</span>
+      <div class="loading-title">Preparando tu cupón</div>
+      <div class="loading-sub">Esto toma unos segundos</div>
+    </div>
+    <div class="loading-body">
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-pct" id="progressPct">0%</div>
+      <div class="loading-msg" id="loadingMsg">Verificando disponibilidad...</div>
+    </div>
+  </div>
+
+  <!-- ══ PANTALLA 4: ÉXITO ══ -->
+  <div class="success-screen" id="stateSuccess">
+    <div class="result-header">
+      <span class="result-icon">🎉</span>
+      <div class="result-title">¡Cupón listo!</div>
+      <div class="result-name" id="outNombre"></div>
+    </div>
+    <div class="result-body">
+      <div class="ticket">
+        <div class="segunda-pill">
+          <span>🔥</span>
+          <span class="sp-text">Segunda oportunidad · Oferta exclusiva para ti</span>
+        </div>
+        <div class="ticket-label">Tu código de descuento</div>
+        <div class="ticket-code" id="outCode">—</div>
+        <div class="ticket-validity" id="outValidity"></div>
+        <div class="ticket-product" id="outProducto"></div>
+        <div class="ticket-dashed"></div>
+        <div class="ticket-bottom">
+          <div>
+            <div class="d-label">Descuento</div>
+            <div class="d-value" id="outDescuento">35% OFF</div>
+          </div>
+          <button class="copy-btn" onclick="copiar('outCode',this)">📋 Copiar</button>
+        </div>
+      </div>
+      <div class="info-pill purple">
+        <span class="icon">📍</span>
+        <span>Muestra este código al cajero en cualquier tienda Oakberry de <strong id="outCiudad">tu ciudad</strong>.</span>
+      </div>
+      <div class="info-pill orange">
+        <span class="icon">⚡</span>
+        <span>Uso único. Válido solo durante la vigencia indicada. ¡No lo dejes ir!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANTALLA 5: YA TIENE CUPÓN ══ -->
+  <div class="used-screen" id="stateUsed">
+    <div class="result-header" style="background:var(--coral);">
+      <span class="result-icon">🔍</span>
+      <div class="result-title">Ya tienes un cupón</div>
+      <div class="result-name" id="usedNombre"></div>
+    </div>
+    <div class="result-body">
+      <p style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:18px;">
+        Encontramos tu código activo
+      </p>
+      <div class="existing-ticket">
+        <div class="existing-label">Tu código</div>
+        <div class="existing-code" id="outExistingCode">—</div>
+        <div class="existing-validity" id="outExistingValidity"></div>
+      </div>
+      <button class="copy-btn-solid" onclick="copiar('outExistingCode',this)">📋 Copiar código</button>
+      <div class="info-pill orange">
+        <span class="icon">💡</span>
+        <span>Preséntalo en caja en cualquier tienda Oakberry Colombia.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const CFG = {
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec",
+};
+
+// ── Leer parámetros de la URL ─────────────────────────────
+const P = (() => {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    cel:       p.get("cel")       || "",
+    // FIX 3: proteger contra % doble en descuento
+    descuento: (p.get("descuento") || "35").toString().replace(/%/g, ""),
+    producto:  p.get("producto")  || "Bowl The One 9oz",
+    vigencia:  parseInt(p.get("vigencia") || "48"),
+    ciudad:    p.get("ciudad")    || "No especificada",
+    tienda:    p.get("tienda")    || "general",
+    momentos:  p.get("momentos")  || "",
+    origen:    p.get("origen")    || "",
+    fase:      "reactivacion",
+    // FIX 1: fuente dinámica desde URL, fallback a wa_vencido
+    fuente:    p.get("fuente")    || "wa_vencido",
+  };
+})();
+
+const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function genCodigo() {
+  let r = "";
+  for (let i=0;i<5;i++) r+=CHARS[Math.floor(Math.random()*CHARS.length)];
+  return r;
+}
+
+// ── Adaptar UI con parámetros ─────────────────────────────
+document.getElementById("welcomePct").textContent       = P.descuento + "%";
+document.getElementById("welcomeProducto").textContent  = P.producto;
+document.getElementById("welcomeVigencia").textContent  = P.vigencia + " horas";
+document.getElementById("headerPct").textContent        = P.descuento + "%";
+document.getElementById("headerProducto").textContent   = P.producto;
+document.getElementById("pillVigencia").textContent     = P.vigencia + " horas";
+
+// Precargar celular si viene en URL
+if (P.cel) {
+  document.getElementById("inp-cel").value = P.cel;
+}
+
+// ── FETCH JSONP ───────────────────────────────────────────
+function fetchGET(params) {
+  return new Promise((resolve, reject) => {
+    const cb  = "cb_" + Math.random().toString(36).slice(2);
+    const url = CFG.SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
+    const s   = document.createElement("script");
+    let settled = false;
+    function cleanup() {
+      settled=true; clearTimeout(timer);
+      delete window[cb];
+      if(s.parentNode) s.parentNode.removeChild(s);
+    }
+    window[cb] = d => { if(settled)return; cleanup(); resolve(d); };
+    s.onerror  = () => { if(settled)return; cleanup(); reject(new Error("script-error")); };
+    s.src = url;
+    document.body.appendChild(s);
+    const timer = setTimeout(() => { if(!settled){ cleanup(); reject(new Error("timeout")); }}, 12000);
+  });
+}
+async function fetchSafe(p) {
+  try { return await fetchGET(p); }
+  catch(e) { await new Promise(r=>setTimeout(r,400)); return await fetchGET(p); }
+}
+
+// ── Mostrar formulario desde bienvenida ───────────────────
+function mostrarFormulario() {
+  document.getElementById("stateWelcome").style.display = "none";
+  document.getElementById("stateForm").style.display    = "block";
+  setTimeout(() => document.getElementById("inp-nombre").focus(), 100);
+}
+
+// ── Progreso ──────────────────────────────────────────────
+let _pt = null;
+function iniciarProgreso() {
+  setProgreso(0, "Verificando disponibilidad...");
+  const pasos = [
+    { hasta:30, delay:400,  msg:"Comprobando tu registro..."  },
+    { hasta:55, delay:700,  msg:"Generando código único..."   },
+    { hasta:75, delay:1000, msg:"Registrando tu cupón..."     },
+    { hasta:85, delay:1300, msg:"¡Casi listo..."              },
+  ];
+  let i = 0;
+  function tick() {
+    if (i >= pasos.length) return;
+    const paso = pasos[i++];
+    _pt = setTimeout(() => { setProgreso(paso.hasta, paso.msg); tick(); }, paso.delay);
+  }
+  tick();
+}
+function completarProgreso(cb) {
+  clearTimeout(_pt);
+  setProgreso(95, "¡Cupón generado!");
+  setTimeout(() => { setProgreso(100, "¡Listo!"); setTimeout(cb, 300); }, 300);
+}
+function setProgreso(pct, msg) {
+  document.getElementById("progressBar").style.width  = pct + "%";
+  document.getElementById("progressPct").textContent  = pct + "%";
+  if (msg) document.getElementById("loadingMsg").textContent = msg;
+}
+
+// ── Helpers botón ─────────────────────────────────────────
+function btnLoading(on) {
+  const btn = document.getElementById("mainBtn");
+  btn.classList.toggle("loading", on);
+  btn.disabled = on;
+}
+
+// ── Validar ───────────────────────────────────────────────
+function validar() {
+  let ok = true;
+  const nombre = document.getElementById("inp-nombre").value.trim();
+  if (nombre.length < 2) {
+    document.getElementById("inp-nombre").classList.add("err");
+    document.getElementById("err-nombre").classList.add("show");
+    ok = false;
+  } else {
+    document.getElementById("inp-nombre").classList.remove("err");
+    document.getElementById("err-nombre").classList.remove("show");
+  }
+  const tyc = document.getElementById("chk-tyc");
+  if (!tyc.checked) {
+    tyc.classList.add("err");
+    document.getElementById("err-tyc").classList.add("show");
+    ok = false;
+  } else {
+    tyc.classList.remove("err");
+    document.getElementById("err-tyc").classList.remove("show");
+  }
+  return ok;
+}
+
+// ── Solicitar cupón ───────────────────────────────────────
+async function solicitar() {
+  if (!validar()) return;
+
+  // FIX 2: activar loading en el botón
+  btnLoading(true);
+
+  const nombre  = document.getElementById("inp-nombre").value.trim();
+  const celular = "57" + P.cel.replace(/\D/g, "").slice(-10);
+
+  show("stateLoading");
+  iniciarProgreso();
+
+  // Verificar si ya tiene cupón activo (no vencido)
+  try {
+    const check = await fetchSafe({ accion:"verificarCelular", celular });
+    if (check.existe && check.estado !== "Vencido") {
+      clearTimeout(_pt);
+      btnLoading(false);
+      mostrarExistente(check, nombre);
+      return;
+    }
+  } catch(e) {}
+
+  const codigo = genCodigo();
+  const ahora  = new Date();
+  const vence  = new Date(ahora.getTime() + P.vigencia * 3_600_000);
+
+  try {
+    const res = await fetchSafe({
+      accion:     "registrarCupon",
+      codigo,
+      nombre,
+      celular,
+      ciudad:     P.ciudad,
+      tienda:     P.tienda,
+      fase:       P.fase,
+      fuente:     P.fuente,
+      // FIX 3: descuento ya limpio de % duplicado
+      descuento:  P.descuento + "%",
+      producto:   P.producto,
+      momentos:   P.momentos,
+      fechaGen:   ahora.toISOString(),
+      fechaVence: vence.toISOString(),
+      origen:     P.origen,
+      vigencia:   P.vigencia,
+    });
+
+    completarProgreso(() => {
+      btnLoading(false);
+      if (res.existe)        mostrarExistente(res, nombre);
+      else if (res.ok)       mostrarNuevo({ codigo: res.codigo || codigo, nombre, vence });
+      else {
+        alert(res.mensaje || "Error al generar el cupón. Intenta de nuevo.");
+        show("stateForm");
+      }
+    });
+
+  } catch(err) {
+    clearTimeout(_pt);
+    // FIX 2: desactivar loading en el botón si hay error
+    btnLoading(false);
+    alert("Hubo un problema al conectar. Intenta de nuevo.");
+    show("stateForm");
+  }
+}
+
+// ── Mostrar resultados ────────────────────────────────────
+function mostrarNuevo({ codigo, nombre, vence }) {
+  show("stateSuccess");
+  document.getElementById("outCode").textContent      = codigo;
+  document.getElementById("outNombre").textContent    = "Hola, " + nombre.split(" ")[0] + " 👋";
+  document.getElementById("outValidity").textContent  = "Válido hasta: " + fmt(vence);
+  document.getElementById("outProducto").textContent  = "🫐 " + P.producto;
+  document.getElementById("outDescuento").textContent = P.descuento + "% OFF";
+  document.getElementById("outCiudad").textContent    =
+    P.ciudad !== "No especificada" && P.ciudad !== "todas" ? P.ciudad : "tu ciudad";
+}
+
+function mostrarExistente(data, nombre) {
+  show("stateUsed");
+  document.getElementById("outExistingCode").textContent     = data.codigo;
+  document.getElementById("usedNombre").textContent          = "Hola, " + nombre.split(" ")[0] + " 👋";
+  document.getElementById("outExistingValidity").textContent = data.fechaVence
+    ? "Válido hasta: " + fmt(new Date(data.fechaVence)) : "";
+}
+
+function show(id) {
+  ["stateWelcome","stateForm","stateLoading","stateSuccess","stateUsed"].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.style.display = "none";
+  });
+  const t = document.getElementById(id);
+  if (t) {
+    t.style.display = "block";
+    t.style.animation = "cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both";
+  }
+}
+
+function fmt(d) {
+  return d.toLocaleDateString("es-CO", {
+    day:"numeric", month:"long", hour:"2-digit", minute:"2-digit"
+  });
+}
+
+function copiar(elId, btn) {
+  const code = document.getElementById(elId).textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const prev = btn.textContent;
+    btn.textContent = "✅ ¡Copiado!";
+    setTimeout(() => btn.textContent = prev, 2200);
+  });
+}
+
+// ── Warmup servidor ───────────────────────────────────────
+(function() {
+  const s = document.createElement("script");
+  s.src = CFG.SCRIPT_URL + "?accion=ping&callback=_warmup";
+  window._warmup = () => {};
+  s.onerror = () => {};
+  document.head.appendChild(s);
+})();
+</script>
+</body>
+</html>
