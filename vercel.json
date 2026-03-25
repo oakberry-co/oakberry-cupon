@@ -1,13 +1,14 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/validar", "destination": "/validar.html" },
-    { "source": "/links",   "destination": "/links.html"   },
-    { "source": "/r",       "destination": "/r.html"       },
-    { "source": "/tyc",     "destination": "/tyc.html"     },
-    { "source": "/portal",  "destination": "/portal.html"  },
-    { "source": "/cursos",  "destination": "/cursos.html"  },
-    { "source": "/api/(.*)", "destination": "/api/$1"      }
-    { "source": "/tiendas", "destination": "/tiendas.html" }
+    { "source": "/validar",  "destination": "/validar.html"  },
+    { "source": "/links",    "destination": "/links.html"    },
+    { "source": "/r",        "destination": "/r.html"        },
+    { "source": "/tyc",      "destination": "/tyc.html"      },
+    { "source": "/portal",   "destination": "/portal.html"   },
+    { "source": "/cursos",   "destination": "/cursos.html"   },
+    { "source": "/reactivar","destination": "/reactivar.html"},
+    { "source": "/tiendas",  "destination": "/tiendas.html"  },
+    { "source": "/api/(.*)", "destination": "/api/$1"        }
   ]
 }
