@@ -453,6 +453,61 @@ const CFG = {
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec",
 };
 
+// ── MODO DEVELOPER ────────────────────────────────────────────
+const DEV_MODE = new URLSearchParams(window.location.search).get("dev") === "dzuluaga";
+
+// ── FINGERPRINT DE DISPOSITIVO ────────────────────────────────
+function generarFingerprint() {
+  const data = [
+    navigator.userAgent, navigator.language,
+    screen.width + "x" + screen.height + "x" + screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency || "",
+    navigator.platform || "",
+  ].join("|");
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    hash = ((hash << 5) - hash) + data.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+const DEVICE_FP = generarFingerprint();
+
+// ── LINK DE CAMPAÑA ───────────────────────────────────────────
+const LINK_CAMP = window.location.href;
+
+// ── GEOLOCALIZACIÓN SILENCIOSA ────────────────────────────────
+let _geo = { ciudad: "", coordenadas: "", fuente: "desconocido" };
+
+async function ciudadPorNominatim(lat, lng) {
+  try {
+    const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`, {
+      signal: AbortSignal.timeout(4000),
+      headers: { "User-Agent": "oakberry-cupones/1.0" }
+    });
+    const data = await res.json();
+    return (data.address?.city || data.address?.town || data.address?.village || "").trim();
+  } catch(e) { return ""; }
+}
+
+async function iniciarGeo() {
+  try {
+    const res  = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(4000) });
+    const data = await res.json();
+    const ciudad = (data.city || "").trim();
+    if (ciudad) {
+      _geo = { ciudad, coordenadas: data.latitude && data.longitude ? data.latitude + "," + data.longitude : "", fuente: "ip" };
+      return;
+    }
+    if (data.latitude && data.longitude) {
+      const ciudadNom = await ciudadPorNominatim(data.latitude, data.longitude);
+      if (ciudadNom) _geo = { ciudad: ciudadNom, coordenadas: data.latitude + "," + data.longitude, fuente: "nominatim" };
+    }
+  } catch(e) { /* ciudad vacía, sin fricción */ }
+}
+iniciarGeo();
+
 // ── Leer parámetros de la URL ─────────────────────────────
 const P = (() => {
   const p = new URLSearchParams(window.location.search);
@@ -599,11 +654,15 @@ async function solicitar() {
   // Verificar si ya tiene cupón activo (no vencido)
   try {
     const check = await fetchSafe({ accion:"verificarCelular", celular });
-    if (check.existe && check.estado !== "Vencido") {
-      clearTimeout(_pt);
-      btnLoading(false);
-      mostrarExistente(check, nombre);
-      return;
+    if (check.existe) {
+      const estadosReactivables = ["Vencido", "Vencido_REA"];
+      if (!estadosReactivables.includes(check.estado)) {
+        clearTimeout(_pt);
+        btnLoading(false);
+        mostrarExistente(check, nombre);
+        return;
+      }
+      // Estado Vencido o Vencido_REA → puede continuar y generar nuevo cupón
     }
   } catch(e) {}
 
@@ -621,7 +680,6 @@ async function solicitar() {
       tienda:     P.tienda,
       fase:       P.fase,
       fuente:     P.fuente,
-      // FIX 3: descuento ya limpio de % duplicado
       descuento:  P.descuento + "%",
       producto:   P.producto,
       momentos:   P.momentos,
@@ -629,6 +687,12 @@ async function solicitar() {
       fechaVence: vence.toISOString(),
       origen:     P.origen,
       vigencia:   P.vigencia,
+      // ── Trazabilidad Q–V ─────────────────────────────────
+      linkCamp:    LINK_CAMP,
+      ciudadReal:  _geo.ciudad,
+      coordenadas: _geo.coordenadas,
+      fuenteGeo:   _geo.fuente,
+      fingerprint: DEVICE_FP,
     });
 
     completarProgreso(() => {
