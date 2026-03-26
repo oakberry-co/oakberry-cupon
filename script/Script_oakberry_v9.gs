@@ -399,6 +399,251 @@ function poblarEnLoopyHistorico() {
   console.log("=== FIN === Procesadas: "+procesadas+" | Ya tenían W: "+yaTeníanW+" | Sin email: "+sinEmail+" | Errores: "+errores);
 }
 
+// ============================================================
+// ── WHATSAPP CLOUD API ───────────────────────────────────────
+// ============================================================
+const WA_PHONE_NUMBER_ID = "1060781240452634";
+const WA_TOKEN           = "EAAKrFCnuYsoBRAq8UAqtNZAE6uTCocIKfbtr8q67Rn5yd0ZAnC0Kgo4btueXmAbDAHj7piGtSCatg4aEjoLm9EJ3XtZBGnXNfqJs3RY25ibmer7xxkbI66GpBDIcK9Gs1YPPZCiHJYWxXVpUxCZBNE2RCEGL10F21ibxJlKMORN6mH18DZBl5Mczw5oKyPAGmcevApThnam6CdlU8kZAN84bYqI7fuvgHOPXwTIB9uXa3Y7aUqH";
+const WA_API_URL         = "https://graph.facebook.com/v19.0/" + WA_PHONE_NUMBER_ID + "/messages";
+
+// ── Enviar mensaje WA via Cloud API ──────────────────────────
+function enviarWA(celular, templateName, languageCode, components) {
+  // Normalizar celular: asegurar formato 57XXXXXXXXXX
+  let cel = celular.toString().trim().replace(/\+/g,"").replace(/\s/g,"");
+  if (!cel.startsWith("57")) cel = "57" + cel.slice(-10);
+
+  const payload = {
+    messaging_product: "whatsapp",
+    to: cel,
+    type: "template",
+    template: {
+      name: templateName,
+      language: { code: languageCode },
+      components: components || [],
+    },
+  };
+
+  try {
+    const res = UrlFetchApp.fetch(WA_API_URL, {
+      method: "POST",
+      contentType: "application/json",
+      headers: { Authorization: "Bearer " + WA_TOKEN },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true,
+    });
+    const data = JSON.parse(res.getContentText());
+    if (res.getResponseCode() === 200) {
+      console.log("✅ WA enviado a " + cel + " · template: " + templateName);
+      return { ok: true, data };
+    } else {
+      console.log("❌ WA error · " + cel + " · " + JSON.stringify(data));
+      return { ok: false, error: data };
+    }
+  } catch(e) {
+    console.log("❌ WA excepción: " + e.message);
+    return { ok: false, error: e.message };
+  }
+}
+
+// ── FLUJO 1: Entrega del cupón al generarlo ───────────────────
+// Plantilla: oakberry_cupon_nuevo (en revisión — activar cuando aprueben)
+// Variables: {{1}}=nombre {{2}}=codigo {{3}}=descuento {{4}}=producto {{5}}=vigencia
+function waEnviarCupon(celular, nombre, codigo, descuento, producto, vigencia) {
+  // Limpiar descuento: "30%" → "30"
+  const descPct = descuento.toString().replace(/[^0-9]/g,"");
+  return enviarWA(celular, "oakberry_cupon_nuevo", "en", [{
+    type: "body",
+    parameters: [
+      { type:"text", text: primerNombre(nombre) },
+      { type:"text", text: codigo },
+      { type:"text", text: descPct + "%" },
+      { type:"text", text: producto },
+      { type:"text", text: vigencia.toString() },
+    ],
+  }]);
+}
+
+// ── FLUJO 2: Recordatorio 24h antes de vencer ────────────────
+// Plantilla: _oakberry_recordatorio (activa ✅)
+// Variables: {{1}}=nombre {{2}}=codigo {{3}}=descuento {{4}}=producto
+// Se dispara desde trigger diario a las 10am
+function waEnviarRecordatorio(celular, nombre, codigo, descuento, producto) {
+  const descPct = descuento.toString().replace(/[^0-9]/g,"");
+  return enviarWA(celular, "_oakberry_recordatorio", "es", [{
+    type: "body",
+    parameters: [
+      { type:"text", text: primerNombre(nombre) },
+      { type:"text", text: codigo },
+      { type:"text", text: descPct + "%" },
+      { type:"text", text: producto },
+    ],
+  }]);
+}
+
+// ── FLUJO 3: Segunda oportunidad al vencer ───────────────────
+// Plantilla: oakberry_reactivacion (activa ✅)
+// Variables: {{1}}=nombre {{2}}=vigencia {{3}}=link de reactivación
+function waEnviarReactivacion(celular, nombre, vigencia, linkReactivacion) {
+  return enviarWA(celular, "oakberry_reactivacion", "en", [{
+    type: "body",
+    parameters: [
+      { type:"text", text: primerNombre(nombre) },
+      { type:"text", text: vigencia.toString() },
+      { type:"text", text: linkReactivacion },
+    ],
+  }]);
+}
+
+// ── FLUJO 4: Agradecimiento post-canje ───────────────────────
+// Plantilla: oakberry_post_canje (en revisión — activar cuando aprueben)
+// Variables: {{1}}=nombre
+function waEnviarPostCanje(celular, nombre) {
+  return enviarWA(celular, "oakberry_post_canje", "en", [{
+    type: "body",
+    parameters: [
+      { type:"text", text: primerNombre(nombre) },
+    ],
+  }]);
+}
+
+// ── TRIGGER DIARIO 10AM: Recordatorios de vencimiento ────────
+// Ejecutar instalarTriggerRecordatorios() UNA SOLA VEZ para activar
+function enviarRecordatoriosDiarios() {
+  const sh    = SpreadsheetApp.getActive().getSheetByName(HOJA_CODIGOS);
+  const data  = sh.getDataRange().getValues();
+  const ahora = new Date();
+
+  // Ventana: cupones que vencen entre las próximas 24h y 48h
+  const en24h = new Date(ahora.getTime() + 24 * 3600000);
+  const en48h = new Date(ahora.getTime() + 48 * 3600000);
+
+  let enviados = 0;
+  let saltados = 0;
+
+  for (let i = 1; i < data.length; i++) {
+    const estado    = (data[i][COL_ESTADO-1]    ||"").toString().trim();
+    const fechaVenc = data[i][COL_FECHA_VENC-1];
+    const celular   = (data[i][COL_CELULAR-1]   ||"").toString().trim();
+    const nombre    = (data[i][COL_NOMBRE-1]    ||"").toString().trim();
+    const codigo    = (data[i][COL_CODIGO-1]    ||"").toString().trim();
+    const descuento = (data[i][COL_DESCUENTO-1] ||"").toString().trim();
+    const producto  = (data[i][COL_PRODUCTO-1]  ||"").toString().trim();
+
+    // Solo cupones disponibles (no canjeados, no vencidos)
+    if (!ESTADOS_CANJEABLES.includes(estado)) { saltados++; continue; }
+    if (!fechaVenc || !celular) { saltados++; continue; }
+
+    const vence = new Date(fechaVenc);
+    if (isNaN(vence.getTime())) { saltados++; continue; }
+
+    // ¿Vence en las próximas 24–48h?
+    if (vence >= en24h && vence <= en48h) {
+      waEnviarRecordatorio(celular, nombre, codigo, descuento, producto);
+      enviados++;
+      Utilities.sleep(500); // Respetar rate limit de Meta
+    }
+  }
+
+  console.log("📲 Recordatorios enviados: " + enviados + " | Saltados: " + saltados);
+}
+
+// ── TRIGGER DIARIO: Reactivaciones de vencidos ───────────────
+// Cupones vencidos hace menos de 48h que no han tenido REA
+function enviarReactivacionesDiarias() {
+  const sh    = SpreadsheetApp.getActive().getSheetByName(HOJA_CODIGOS);
+  const data  = sh.getDataRange().getValues();
+  const ahora = new Date();
+  const camp  = getCampanaReactivacion();
+
+  // Ventana: cupones que vencieron entre hace 2h y 26h
+  const hace2h  = new Date(ahora.getTime() - 2  * 3600000);
+  const hace26h = new Date(ahora.getTime() - 26 * 3600000);
+
+  let enviados = 0;
+
+  for (let i = 1; i < data.length; i++) {
+    const estado    = (data[i][COL_ESTADO-1]    ||"").toString().trim();
+    const fechaVenc = data[i][COL_FECHA_VENC-1];
+    const celular   = (data[i][COL_CELULAR-1]   ||"").toString().trim();
+    const nombre    = (data[i][COL_NOMBRE-1]    ||"").toString().trim();
+
+    // Solo estado Vencido (no Vencido_REA — ya tuvo su oportunidad)
+    if (estado !== ESTADO_VENCIDO) continue;
+    if (!fechaVenc || !celular) continue;
+
+    const vence = new Date(fechaVenc);
+    if (isNaN(vence.getTime())) continue;
+
+    // ¿Venció en las últimas 2–26h?
+    if (vence <= hace2h && vence >= hace26h) {
+      // Construir link de reactivación
+      const params = [
+        "cel=" + celular.toString().replace(/\+/g,"").slice(-10),
+        "descuento=" + encodeURIComponent(camp.descuento),
+        "producto="  + encodeURIComponent(camp.producto),
+        "vigencia="  + camp.vigencia,
+        "ciudad="    + encodeURIComponent(camp.ciudad),
+        "tienda="    + encodeURIComponent(camp.tienda),
+        "momentos="  + encodeURIComponent(camp.momentos),
+        "fase=reactivacion",
+        "fuente=wa_reactivacion",
+      ].join("&");
+      const linkRea = BASE_URL + "/reactivar?" + params;
+
+      waEnviarReactivacion(celular, nombre, camp.vigencia, linkRea);
+      enviados++;
+      Utilities.sleep(500);
+    }
+  }
+
+  console.log("♻️ Reactivaciones enviadas: " + enviados);
+}
+
+// ── Instalar triggers diarios (ejecutar UNA SOLA VEZ) ────────
+function instalarTriggersWA() {
+  // Limpiar triggers WA existentes
+  ScriptApp.getProjectTriggers().forEach(t => {
+    const fn = t.getHandlerFunction();
+    if (fn === "enviarRecordatoriosDiarios" || fn === "enviarReactivacionesDiarias") {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+
+  // Recordatorios: todos los días a las 10am hora Colombia
+  ScriptApp.newTrigger("enviarRecordatoriosDiarios")
+    .timeBased().everyDays(1).atHour(10).inTimezone("America/Bogota").create();
+
+  // Reactivaciones: todos los días a las 11am hora Colombia
+  ScriptApp.newTrigger("enviarReactivacionesDiarias")
+    .timeBased().everyDays(1).atHour(11).inTimezone("America/Bogota").create();
+
+  console.log("✅ Triggers WA instalados — recordatorios 10am · reactivaciones 11am");
+}
+
+// ── Test manual de los 4 flujos WA ───────────────────────────
+function testWA() {
+  const cel   = "573213691317"; // ← cambia por tu número de prueba
+  const nom   = "Julio";
+  const cod   = "ABC12";
+  const desc  = "30%";
+  const prod  = "Bowl 12oz";
+  const vig   = "48";
+  const link  = BASE_URL + "/reactivar?cel=3213691317&fase=reactivacion&fuente=wa_test";
+
+  console.log("=== TEST WA — 4 flujos ===");
+  console.log("1. Cupón nuevo:");
+  console.log(JSON.stringify(waEnviarCupon(cel, nom, cod, desc, prod, vig)));
+  Utilities.sleep(1000);
+  console.log("2. Recordatorio:");
+  console.log(JSON.stringify(waEnviarRecordatorio(cel, nom, cod, desc, prod)));
+  Utilities.sleep(1000);
+  console.log("3. Reactivación:");
+  console.log(JSON.stringify(waEnviarReactivacion(cel, nom, vig, link)));
+  Utilities.sleep(1000);
+  console.log("4. Post-canje:");
+  console.log(JSON.stringify(waEnviarPostCanje(cel, nom)));
+}
+
 // ── Inspección de sellos Loopy (diagnóstico) ─────────────────
 function inspeccionarSellosLoopy() {
   const jwt = generarJWTLoopy();
@@ -739,6 +984,14 @@ function registrarCuponDesdeLanding(p) {
     fechaVerif,           // X
     tipoUsuario,          // Y — N1 | E1 | E2 | E3
   ]);
+  // ── Enviar cupón por WA (Flujo 1) ───────────────────────────
+  // Plantilla oakberry_cupon_nuevo — activa cuando Meta apruebe
+  try {
+    waEnviarCupon(celular, nombre, codigo, descuento, producto, p.vigencia || "72");
+  } catch(e) {
+    console.log("WA cupón fallido (no bloquea el registro): " + e.message);
+  }
+
   return { ok:true, existe:false, codigo };
 }
 
@@ -813,6 +1066,14 @@ function canjearCodigo(p) {
       if (!isNaN(n)) return Math.round(n)+"%";
       return descuento;
     })();
+
+    // ── Enviar agradecimiento por WA (Flujo 4) ──────────────
+    // Plantilla oakberry_post_canje — activa cuando Meta apruebe
+    try {
+      waEnviarPostCanje(celCli, nombreCli);
+    } catch(e) {
+      console.log("WA post-canje fallido (no bloquea el canje): " + e.message);
+    }
 
     return { ok:true, mensaje:[
       "✅ Cupón válido" + (nuevoEstado===ESTADO_CANJEADO_REA ? " · Reactivación" : ""),
