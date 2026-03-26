@@ -403,7 +403,7 @@ function poblarEnLoopyHistorico() {
 // ── WHATSAPP CLOUD API ───────────────────────────────────────
 // ============================================================
 const WA_PHONE_NUMBER_ID = "1060781240452634";
-const WA_TOKEN           = "EAAKrFCnuYsoBRAq8UAqtNZAE6uTCocIKfbtr8q67Rn5yd0ZAnC0Kgo4btueXmAbDAHj7piGtSCatg4aEjoLm9EJ3XtZBGnXNfqJs3RY25ibmer7xxkbI66GpBDIcK9Gs1YPPZCiHJYWxXVpUxCZBNE2RCEGL10F21ibxJlKMORN6mH18DZBl5Mczw5oKyPAGmcevApThnam6CdlU8kZAN84bYqI7fuvgHOPXwTIB9uXa3Y7aUqH";
+const WA_TOKEN           = "EAANSyZAoGciIBRFK5nNfiuzNFsD31xGtfEBbHqXjnQ0ZBhfajB8NhkWQU2epd2hw9jc1GP5ZC4uIiiWGjUc2hfWOq3IOLAbakO3khKIHgttTVaZCa2uRcwlgSMWk4XxpkkOnNjaum0uWmw78ormIcO5nmS045z3WPpDe6S64QYxZB4JuaaZCQirZAfquuZBBTwZDZD";
 const WA_API_URL         = "https://graph.facebook.com/v19.0/" + WA_PHONE_NUMBER_ID + "/messages";
 
 // ── Enviar mensaje WA via Cloud API ──────────────────────────
