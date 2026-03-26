@@ -405,7 +405,8 @@ function poblarEnLoopyHistorico() {
 // ── WHATSAPP CLOUD API ───────────────────────────────────────
 // ============================================================
 const WA_PHONE_NUMBER_ID = "1060781240452634";
-const WA_TOKEN           = "EAANSyZAoGciIBRFGF1vqZC2rv0WQcFp4Npf0iam6KeQNCcOlJD5KHKlSEuqwAlP3AZAaV4zMzy0g1v5SzgC3tAEmtaOgJARGWZAHan9TPvIeinEZAhTxtibqlqgpAZB3KDNZCZB1BCFZChvkMkruR9cZAY5rF5FsPGgpbWJyUhaZCRCYGEGZAEBRrEloZAW3JjRnZAuzlxCixOJmnUeYgYg3Mk7cA13wrf2EcnaKvES58fEbRjGuV4sZAjS5xHabpV0foOP7iQMSa3lwxcURGf6rZAaWYpSrZAgnKVAGobDkHyLknImgZD";
+const WA_TOKEN           = "EAAKrFCnuYsoBRI7Rd4lUhcUW26GEvb9ensB0MiXdVr5xEEhZBpPlh37ubSdDjSZCa255IRjCSddqV3nQOqyZBK2Yl7VxcwkpENkeB1PzZAzYayDoOxmtB6JDhWs8afATNKw0UBbIBTx8ud6nn30Mvp2SbllTDIWLbxwQxThXVeu3ekj9yDJ6bZCwDjMxZB1EG98QZDZD"; // Permanente — Never expires
+const META_ADS_TOKEN     = "EAAKrFCnuYsoBRI7Rd4lUhcUW26GEvb9ensB0MiXdVr5xEEhZBpPlh37ubSdDjSZCa255IRjCSddqV3nQOqyZBK2Yl7VxcwkpENkeB1PzZAzYayDoOxmtB6JDhWs8afATNKw0UBbIBTx8ud6nn30Mvp2SbllTDIWLbxwQxThXVeu3ekj9yDJ6bZCwDjMxZB1EG98QZDZD"; // Mismo token — permisos ads_read + business_management
 const WA_API_URL         = "https://graph.facebook.com/v22.0/" + WA_PHONE_NUMBER_ID + "/messages";
 
 // ── Enviar mensaje WA via Cloud API ──────────────────────────
