@@ -7,7 +7,7 @@
     { "source": "/tyc",        "destination": "/tyc.html"      },
     { "source": "/portal",     "destination": "/portal.html"   },
     { "source": "/cursos",     "destination": "/cursos.html"   },
-    { "source": "/reactivar",  "destination": "/index.html"    },
+    { "source": "/reactivar",  "destination": "/reactivar.html"    },
     { "source": "/tiendas",    "destination": "/tiendas.html"  },
     { "source": "/api/(.*)",   "destination": "/api/$1"        }
   ]
