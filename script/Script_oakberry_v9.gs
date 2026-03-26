@@ -34,6 +34,8 @@ const COL_FINGERPRINT = 22; // V — Fingerprint del dispositivo
 const COL_EN_LOOPY    = 23; // W — "SÍ" | "NO" | "Sin email"
 const COL_FECHA_VERIF   = 24; // X — Fecha verificación contra Loopy
 const COL_TIPO_USUARIO  = 25; // Y — Segmento: N1 | E1 | E2 | E3
+const COL_GRUPO_AB      = 26; // Z  — Grupo A/B test reactivación: "A-30%" | "B-40%" | "Control"
+const COL_DESC_FINAL    = 27; // AA — Descuento final canjeado (solo se llena al canjear)
 
 // ── 6 estados columna B ───────────────────────────────────────
 const ESTADO_DISPONIBLE     = "Disponible";
@@ -403,8 +405,8 @@ function poblarEnLoopyHistorico() {
 // ── WHATSAPP CLOUD API ───────────────────────────────────────
 // ============================================================
 const WA_PHONE_NUMBER_ID = "1060781240452634";
-const WA_TOKEN           = "EAANSyZAoGciIBRFK5nNfiuzNFsD31xGtfEBbHqXjnQ0ZBhfajB8NhkWQU2epd2hw9jc1GP5ZC4uIiiWGjUc2hfWOq3IOLAbakO3khKIHgttTVaZCa2uRcwlgSMWk4XxpkkOnNjaum0uWmw78ormIcO5nmS045z3WPpDe6S64QYxZB4JuaaZCQirZAfquuZBBTwZDZD";
-const WA_API_URL         = "https://graph.facebook.com/v19.0/" + WA_PHONE_NUMBER_ID + "/messages";
+const WA_TOKEN           = "EAANSyZAoGciIBRFGF1vqZC2rv0WQcFp4Npf0iam6KeQNCcOlJD5KHKlSEuqwAlP3AZAaV4zMzy0g1v5SzgC3tAEmtaOgJARGWZAHan9TPvIeinEZAhTxtibqlqgpAZB3KDNZCZB1BCFZChvkMkruR9cZAY5rF5FsPGgpbWJyUhaZCRCYGEGZAEBRrEloZAW3JjRnZAuzlxCixOJmnUeYgYg3Mk7cA13wrf2EcnaKvES58fEbRjGuV4sZAjS5xHabpV0foOP7iQMSa3lwxcURGf6rZAaWYpSrZAgnKVAGobDkHyLknImgZD";
+const WA_API_URL         = "https://graph.facebook.com/v22.0/" + WA_PHONE_NUMBER_ID + "/messages";
 
 // ── Enviar mensaje WA via Cloud API ──────────────────────────
 function enviarWA(celular, templateName, languageCode, components) {
@@ -446,21 +448,34 @@ function enviarWA(celular, templateName, languageCode, components) {
 }
 
 // ── FLUJO 1: Entrega del cupón al generarlo ───────────────────
-// Plantilla: oakberry_cupon_nuevo (en revisión — activar cuando aprueben)
-// Variables: {{1}}=nombre {{2}}=codigo {{3}}=descuento {{4}}=producto {{5}}=vigencia
+// Plantilla: oakberry_cupon_nuevo
+// Cuerpo: {{1}}=nombre {{2}}=codigo {{3}}=descuento {{4}}=producto {{5}}=vigencia
+// Botón 1: URL estática → oakberry-cupones.com/tiendas
+// Botón 2: copy_code → coupon_code = codigo
 function waEnviarCupon(celular, nombre, codigo, descuento, producto, vigencia) {
-  // Limpiar descuento: "30%" → "30"
   const descPct = descuento.toString().replace(/[^0-9]/g,"");
-  return enviarWA(celular, "oakberry_cupon_nuevo", "en", [{
-    type: "body",
-    parameters: [
-      { type:"text", text: primerNombre(nombre) },
-      { type:"text", text: codigo },
-      { type:"text", text: descPct + "%" },
-      { type:"text", text: producto },
-      { type:"text", text: vigencia.toString() },
-    ],
-  }]);
+  return enviarWA(celular, "oakberry_cupon_nuevo", "en", [
+    {
+      type: "body",
+      parameters: [
+        { type:"text", text: primerNombre(nombre) },
+        { type:"text", text: codigo },
+        { type:"text", text: descPct + "%" },
+        { type:"text", text: producto },
+        { type:"text", text: vigencia.toString() },
+      ],
+    },
+    {
+      // Botón índice 1: Copy offer code — requiere coupon_code
+      // (índice 1 porque el botón URL estática no necesita componente)
+      type: "button",
+      sub_type: "copy_code",
+      index: "1",
+      parameters: [
+        { type: "coupon_code", coupon_code: codigo.toString().trim() },
+      ],
+    },
+  ]);
 }
 
 // ── FLUJO 2: Recordatorio 24h antes de vencer ────────────────
@@ -469,29 +484,59 @@ function waEnviarCupon(celular, nombre, codigo, descuento, producto, vigencia) {
 // Se dispara desde trigger diario a las 10am
 function waEnviarRecordatorio(celular, nombre, codigo, descuento, producto) {
   const descPct = descuento.toString().replace(/[^0-9]/g,"");
-  return enviarWA(celular, "_oakberry_recordatorio", "es", [{
-    type: "body",
-    parameters: [
-      { type:"text", text: primerNombre(nombre) },
-      { type:"text", text: codigo },
-      { type:"text", text: descPct + "%" },
-      { type:"text", text: producto },
-    ],
-  }]);
+  return enviarWA(celular, "_oakberry_recordatorio", "es_CO", [
+    {
+      type: "body",
+      parameters: [
+        { type:"text", text: primerNombre(nombre) },
+        { type:"text", text: codigo },
+        { type:"text", text: descPct + "%" },
+        { type:"text", text: producto },
+      ],
+    },
+    {
+      // Botón índice 1: copy_code con el código del cupón
+      type: "button",
+      sub_type: "copy_code",
+      index: "1",
+      parameters: [
+        { type: "coupon_code", coupon_code: codigo.toString().trim() },
+      ],
+    },
+  ]);
 }
 
 // ── FLUJO 3: Segunda oportunidad al vencer ───────────────────
-// Plantilla: oakberry_reactivacion (activa ✅)
-// Variables: {{1}}=nombre {{2}}=vigencia {{3}}=link de reactivación
+// Plantilla: oakberry_reactivacion
+// Cuerpo: {{1}}=nombre {{2}}=vigencia
+// Botón URL dinámica: {{1}}=link de reactivación (sufijo de la URL base)
 function waEnviarReactivacion(celular, nombre, vigencia, linkReactivacion) {
-  return enviarWA(celular, "oakberry_reactivacion", "en", [{
-    type: "body",
-    parameters: [
-      { type:"text", text: primerNombre(nombre) },
-      { type:"text", text: vigencia.toString() },
-      { type:"text", text: linkReactivacion },
-    ],
-  }]);
+  // La URL base de la plantilla es "https://oakberry-cupones.com/reactivar"
+  // El botón dinámico recibe solo el sufijo después de la base
+  // Como el link completo ya incluye la base, extraemos solo los params
+  const urlBase = "https://oakberry-cupones.com/reactivar";
+  const sufijo = linkReactivacion.startsWith(urlBase)
+    ? linkReactivacion.slice(urlBase.length)
+    : linkReactivacion;
+
+  return enviarWA(celular, "oakberry_reactivacion", "en", [
+    {
+      type: "body",
+      parameters: [
+        { type:"text", text: primerNombre(nombre) },
+        { type:"text", text: vigencia.toString() },
+      ],
+    },
+    {
+      // Botón URL dinámica "Generar mi cupon" — recibe el sufijo de la URL
+      type: "button",
+      sub_type: "url",
+      index: "0",
+      parameters: [
+        { type: "text", text: sufijo },
+      ],
+    },
+  ]);
 }
 
 // ── FLUJO 4: Agradecimiento post-canje ───────────────────────
@@ -547,8 +592,10 @@ function enviarRecordatoriosDiarios() {
   console.log("📲 Recordatorios enviados: " + enviados + " | Saltados: " + saltados);
 }
 
-// ── TRIGGER DIARIO: Reactivaciones de vencidos ───────────────
-// Cupones vencidos hace menos de 48h que no han tenido REA
+// ── TRIGGER DIARIO: Reactivaciones con A/B test ──────────────
+// Grupos: A=30% descuento · B=40% descuento · Control=sin mensaje
+// Asignación aleatoria 25% A / 25% B / 50% Control
+// Columna Z registra el grupo asignado para análisis posterior
 function enviarReactivacionesDiarias() {
   const sh    = SpreadsheetApp.getActive().getSheetByName(HOJA_CODIGOS);
   const data  = sh.getDataRange().getValues();
@@ -560,43 +607,99 @@ function enviarReactivacionesDiarias() {
   const hace26h = new Date(ahora.getTime() - 26 * 3600000);
 
   let enviados = 0;
+  let controles = 0;
 
   for (let i = 1; i < data.length; i++) {
     const estado    = (data[i][COL_ESTADO-1]    ||"").toString().trim();
     const fechaVenc = data[i][COL_FECHA_VENC-1];
     const celular   = (data[i][COL_CELULAR-1]   ||"").toString().trim();
     const nombre    = (data[i][COL_NOMBRE-1]    ||"").toString().trim();
+    const grupoYa   = (data[i][COL_GRUPO_AB-1]  ||"").toString().trim();
 
     // Solo estado Vencido (no Vencido_REA — ya tuvo su oportunidad)
     if (estado !== ESTADO_VENCIDO) continue;
     if (!fechaVenc || !celular) continue;
+    // Si ya tiene grupo asignado, no reasignar
+    if (grupoYa) continue;
 
     const vence = new Date(fechaVenc);
     if (isNaN(vence.getTime())) continue;
 
     // ¿Venció en las últimas 2–26h?
-    if (vence <= hace2h && vence >= hace26h) {
-      // Construir link de reactivación
-      const params = [
-        "cel=" + celular.toString().replace(/\+/g,"").slice(-10),
-        "descuento=" + encodeURIComponent(camp.descuento),
-        "producto="  + encodeURIComponent(camp.producto),
-        "vigencia="  + camp.vigencia,
-        "ciudad="    + encodeURIComponent(camp.ciudad),
-        "tienda="    + encodeURIComponent(camp.tienda),
-        "momentos="  + encodeURIComponent(camp.momentos),
-        "fase=reactivacion",
-        "fuente=wa_reactivacion",
-      ].join("&");
-      const linkRea = BASE_URL + "/reactivar?" + params;
+    if (vence > hace2h || vence < hace26h) continue;
 
-      waEnviarReactivacion(celular, nombre, camp.vigencia, linkRea);
-      enviados++;
-      Utilities.sleep(500);
+    // ── Asignación aleatoria de grupo ──────────────────────────
+    // rand < 0.25 → A · rand < 0.50 → B · resto → Control
+    const rand = Math.random();
+    let grupo, descuento;
+
+    if (rand < 0.25) {
+      grupo = "A-30%";
+      descuento = "30";
+    } else if (rand < 0.50) {
+      grupo = "B-40%";
+      descuento = "40";
+    } else {
+      grupo = "Control";
+      descuento = null; // No recibe mensaje
     }
+
+    // Registrar grupo en col Z siempre (incluso controles)
+    sh.getRange(i + 1, COL_GRUPO_AB).setValue(grupo);
+
+    // Solo enviar WA a grupos A y B
+    if (!descuento) { controles++; continue; }
+
+    const params = [
+      "cel=" + celular.toString().replace(/\+/g,"").slice(-10),
+      "descuento=" + encodeURIComponent(descuento),
+      "producto="  + encodeURIComponent(camp.producto),
+      "vigencia="  + camp.vigencia,
+      "ciudad="    + encodeURIComponent(camp.ciudad),
+      "tienda="    + encodeURIComponent(camp.tienda),
+      "momentos="  + encodeURIComponent(camp.momentos),
+      "fase=reactivacion",
+      "fuente=wa_ab_" + grupo.toLowerCase().replace(/[^a-z0-9]/g,""),
+    ].join("&");
+    const linkRea = BASE_URL + "/reactivar?" + params;
+
+    waEnviarReactivacion(celular, nombre, camp.vigencia, linkRea);
+    enviados++;
+    Utilities.sleep(500);
   }
 
-  console.log("♻️ Reactivaciones enviadas: " + enviados);
+  console.log("♻️ A/B Reactivaciones — Enviados: " + enviados + " | Control: " + controles);
+}
+
+// ── Reporte A/B test ──────────────────────────────────────────
+// Corre manualmente para ver resultados del A/B test
+function reporteABTest() {
+  const sh   = SpreadsheetApp.getActive().getSheetByName(HOJA_CODIGOS);
+  const data = sh.getDataRange().getValues();
+
+  const grupos = {
+    "A-30%":   { enviados:0, canjeados:0 },
+    "B-40%":   { enviados:0, canjeados:0 },
+    "Control": { enviados:0, canjeados:0 },
+  };
+
+  for (let i = 1; i < data.length; i++) {
+    const grupo  = (data[i][COL_GRUPO_AB-1] ||"").toString().trim();
+    const estado = (data[i][COL_ESTADO-1]   ||"").toString().trim();
+    if (!grupo || !grupos[grupo]) continue;
+    grupos[grupo].enviados++;
+    if (estado === ESTADO_CANJEADO_REA) grupos[grupo].canjeados++;
+  }
+
+  console.log("════════════════════════════════");
+  console.log("REPORTE A/B TEST REACTIVACIÓN");
+  console.log("════════════════════════════════");
+  for (const g in grupos) {
+    const { enviados, canjeados } = grupos[g];
+    const tasa = enviados > 0 ? Math.round(canjeados / enviados * 100) : 0;
+    console.log(g + " → " + canjeados + "/" + enviados + " canjeados (" + tasa + "%)");
+  }
+  console.log("════════════════════════════════");
 }
 
 // ── Instalar triggers diarios (ejecutar UNA SOLA VEZ) ────────
@@ -917,7 +1020,11 @@ function registrarCuponDesdeLanding(p) {
         sh.getRange(row, COL_CIUDAD).setValue(ciudad!=="No especificada"?ciudad:existente.data[COL_CIUDAD-1]);
         sh.getRange(row, COL_FASE).setValue(fase);
         sh.getRange(row, COL_FUENTE).setValue(fuente);
-        sh.getRange(row, COL_DESCUENTO).setValue(descuento);
+        // Col L mantiene el descuento original — solo actualizar si era vacío
+        const descOriginal = (existente.data[COL_DESCUENTO-1]||"").toString().trim();
+        if (!descOriginal) sh.getRange(row, COL_DESCUENTO).setValue(descuento);
+        // Guardar el descuento de reactivación en col AA para comparación
+        sh.getRange(row, COL_DESC_FINAL).setValue(descuento + " (REA)");
         sh.getRange(row, COL_PRODUCTO).setValue(producto||existente.data[COL_PRODUCTO-1]);
         sh.getRange(row, COL_FECHA_GEN).setValue(fechaGen);
         sh.getRange(row, COL_FECHA_VENC).setValue(fechaVenc);
@@ -1057,6 +1164,8 @@ function canjearCodigo(p) {
     sh.getRange(i+1, COL_TIENDA).setValue(tienda+" - "+ciudad);
     sh.getRange(i+1, COL_FECHA).setValue(new Date());
     sh.getRange(i+1, COL_LOOPY).setValue(loopy);
+    // Col AA — descuento final canjeado (permite comparar con descuento original col L)
+    sh.getRange(i+1, COL_DESC_FINAL).setValue(descFormatado);
 
     // Fix descuento: normalizar decimal a %
     const descFormatado = (() => {
