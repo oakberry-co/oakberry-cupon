@@ -68,6 +68,8 @@ fbq('track', 'PageView');
   .spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.65s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .terms{font-size:10px;font-weight:600;color:#bbb;text-align:center;margin-top:10px;text-transform:uppercase;letter-spacing:0.3px;line-height:1.6;}
+  .info-rules{font-size:11px;font-weight:600;color:#555;background:#f7f4ff;border:1.5px solid #e0d8f8;border-radius:10px;padding:10px 14px;margin-bottom:14px;line-height:1.6;}
+  .info-rules strong{color:var(--primary);}
   .tyc-wrap{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;cursor:pointer;}
   .tyc-wrap input[type=checkbox]{appearance:none;-webkit-appearance:none;min-width:18px;height:18px;border:2px solid var(--border);border-radius:5px;background:#fff;cursor:pointer;transition:border-color 0.18s,background 0.18s;margin-top:1px;position:relative;}
   .tyc-wrap input[type=checkbox]:checked{background:var(--primary);border-color:var(--primary);}
@@ -177,6 +179,10 @@ fbq('track', 'PageView');
       <div class="validity-pill" id="validityPill">
         <span class="validity-dot"></span>
         <span id="pillText">Válido <span id="pillVigencia" style="font-weight:900;">72 horas</span> · 1 cupón por número</span>
+      </div>
+
+      <div class="info-rules">
+        1 cupón por celular · Compártelo con tus amigos, cada uno puede pedir el suyo 🫐
       </div>
 
       <label class="tyc-wrap">
