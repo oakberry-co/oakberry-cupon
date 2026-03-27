@@ -647,8 +647,15 @@ function setStep(n, estado) {
 async function solicitar() {
   if (!validar()) return;
 
+  // ── Whitelist de pruebas ─────────────────────────────────────
+  const _celTest = document.getElementById("inp-cel").value.replace(/\D/g,"");
+  const _emTest  = document.getElementById("inp-email").value.trim().toLowerCase();
+  const WL_CELS  = ["3213691318","573213691318"];
+  const WL_MAILS = ["dzuluaga@manelfoods.com"];
+  const ES_WL    = WL_CELS.includes(_celTest) || WL_CELS.includes("57"+_celTest) || WL_MAILS.includes(_emTest);
+
   // ── Verificar fingerprint de dispositivo ─────────────────────
-  if (!DEV_MODE && dispositivoYaUsado()) {
+  if (!DEV_MODE && !ES_WL && dispositivoYaUsado()) {
     show("stateLoading");
     iniciarProgreso();
     setTimeout(() => {
