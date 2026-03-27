@@ -156,6 +156,9 @@
     .err-card.type-formato   .err-reason { color:#5F4B8B; }
     .err-card.type-formato   .err-action { background:#ede6ff; color:#3a2a6e; }
 
+    .err-card.type-vencido   { background:#f5f0ff; border:2px solid #d4c8f5; }
+    .err-card.type-vencido   .err-reason { color:#5F4B8B; }
+    .err-card.type-vencido   .err-action { background:#ece6ff; color:#3d2d7a; }
     .err-card.type-noexiste  { background:#f0f0f0; border:2px solid #d0d0d0; }
     .err-card.type-noexiste  .err-reason { color:#444; }
     .err-card.type-noexiste  .err-action { background:#e4e4e4; color:#333; }
@@ -254,6 +257,14 @@
       <div class="err-detail">Este código ya fue canjeado anteriormente y no puede volver a usarse.</div>
       <div class="err-action-label">Qué decirle al cliente</div>
       <div class="err-action">Este cupón ya fue redimido. Si tienes dudas, comunícate con nosotros.</div>
+    </div>
+
+    <div class="err-card type-vencido" id="errVencido">
+      <span class="err-icon">⏳</span>
+      <div class="err-reason">Cupón vencido</div>
+      <div class="err-detail">Este cupón ya venció y no puede canjearse.</div>
+      <div class="err-action-label">Qué decirle al cliente</div>
+      <div class="err-action">Tu cupón ya expiró. Si recibiste un mensaje de segunda oportunidad, úsalo para generar uno nuevo.</div>
     </div>
 
     <div class="err-card type-ciudad" id="errCiudad">
@@ -474,7 +485,7 @@ function mostrarResultado(ok, titulo, filas) {
 }
 
 function ocultarTodosErrores() {
-  ["errCanjeado","errCiudad","errHorario","errFormato","errNoExiste"].forEach(id => {
+  ["errCanjeado","errVencido","errCiudad","errHorario","errFormato","errNoExiste"].forEach(id => {
     document.getElementById(id).classList.remove("show");
   });
   document.getElementById("resultado").className = "result";
@@ -485,6 +496,8 @@ function mostrarError(mensaje) {
   // Detectar tipo por el contenido del mensaje
   if (mensaje.includes("ya fue canjeado")) {
     document.getElementById("errCanjeado").classList.add("show");
+  } else if (mensaje.includes("ya venció")) {
+    document.getElementById("errVencido").classList.add("show");
   } else if (mensaje.includes("Ciudad incorrecta")) {
     // Extraer la ciudad del mensaje
     const match = mensaje.match(/válido en: (.+)/);
