@@ -642,6 +642,25 @@ function enviarReactivacionesDiarias() {
     // ¿Venció en las últimas 2–26h?
     if (vence > hace2h || vence < hace26h) continue;
 
+    // ── Verificar si es cliente Loopy (solo N1 reciben reactivación) ──
+    const emailRea  = (data[i][COL_EMAIL-1]  ||"").toString().trim();
+    const celularRea = (data[i][COL_CELULAR-1]||"").toString().trim();
+    let esLoopyRea = false;
+
+    if (emailRea) {
+      esLoopyRea = existeEmailEnLoopy(emailRea);
+    }
+    if (!esLoopyRea && celularRea) {
+      esLoopyRea = existeEnLoopy(celularRea);
+    }
+
+    if (esLoopyRea) {
+      // Cliente Loopy — no recibe reactivación, marcar como Control-Loopy
+      sh.getRange(i + 1, COL_GRUPO_AB).setValue("Control-Loopy");
+      controles++;
+      continue;
+    }
+
     // ── Asignación aleatoria de grupo ──────────────────────────
     // rand < 0.25 → A · rand < 0.50 → B · resto → Control
     const rand = Math.random();
@@ -682,7 +701,7 @@ function enviarReactivacionesDiarias() {
     Utilities.sleep(500);
   }
 
-  console.log("♻️ A/B Reactivaciones — Enviados: " + enviados + " | Control: " + controles);
+  console.log("♻️ A/B Reactivaciones — Enviados: " + enviados + " | Control: " + controles + " (incluye Control-Loopy)");
 }
 
 
@@ -746,9 +765,10 @@ function reporteABTest() {
   const data = sh.getDataRange().getValues();
 
   const grupos = {
-    "A-30%":   { enviados:0, canjeados:0 },
-    "B-40%":   { enviados:0, canjeados:0 },
-    "Control": { enviados:0, canjeados:0 },
+    "A-30%":        { enviados:0, canjeados:0 },
+    "B-40%":        { enviados:0, canjeados:0 },
+    "Control":      { enviados:0, canjeados:0 },
+    "Control-Loopy":{ enviados:0, canjeados:0 },
   };
 
   for (let i = 1; i < data.length; i++) {
