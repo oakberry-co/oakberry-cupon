@@ -1,5 +1,4 @@
 // ============================================================
-// ============================================================
 // OAKBERRY — Apps Script completo v9
 // 6 estados · Reactivación · Tiendas con mapa · Email/Fingerprint/Loopy
 // ============================================================
@@ -70,6 +69,10 @@ const PRECIOS_BASE = {
 
 const BASE_URL = "https://oakberry-cupones.com";
 
+// ── Lista blanca de pruebas — siempre pasan como N1 sin restricciones ──
+const WHITELIST_CELULARES = ["573213691318", "3213691318"];
+const WHITELIST_EMAILS    = ["dzuluaga@manelfoods.com"];
+
 // ============================================================
 // ── HELPERS ───────────────────────────────────────────────────
 // ============================================================
@@ -81,6 +84,15 @@ function generarCodigo() {
 
 function esCodigoValido(codigo) {
   return /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{5}$/.test(codigo);
+}
+
+// ── Verificar si es usuario de prueba ────────────────────────
+function isWhitelisted(celular, email) {
+  const cel = (celular||"").toString().trim().replace(/\+/g,"").replace(/\s/g,"");
+  const em  = (email||"").toString().trim().toLowerCase();
+  if (WHITELIST_CELULARES.some(w => cel.endsWith(w.replace(/\+/g,"").replace(/\s/g,"").slice(-10)))) return true;
+  if (WHITELIST_EMAILS.some(w => w.toLowerCase() === em)) return true;
+  return false;
 }
 
 function primerNombre(nombre) {
@@ -406,7 +418,7 @@ function poblarEnLoopyHistorico() {
 // ── WHATSAPP CLOUD API ───────────────────────────────────────
 // ============================================================
 const WA_PHONE_NUMBER_ID = "1060781240452634";
-const WA_TOKEN           = "EAAKrFCnuYsoBRI7Rd4lUhcUW26GEvb9ensB0MiXdVr5xEEhZBpPlh37ubSdDjSZCa255IRjCSddqV3nQOqyZBK2Yl7VxcwkpENkeB1PzZAzYayDoOxmtB6JDhWs8afATNKw0UBbIBTx8ud6nn30Mvp2SbllTDIWLbxwQxThXVeu3ekj9yDJ6bZCwDjMxZB1EG98QZDZD"; // Permanente — Never expires
+const WA_TOKEN           = "EAAKrFCnuYsoBRJGOTtYRass50UoTdOLXnkglKMpYo4X0WKXrHrhUpAzZB5VCgDcYlqZCNXufYp1MY5YPSeQBSNdbD5ax6tB3huLsn2Rcq7L4ipZCaKUctZAfC8RfpbnEqKkOXNea09KyZAbZBzAnXvsheKRDm6o1Nmnd1CJd4dVCghw5iyw00hsMR7UZASGHuoWPwZDZD"; // Permanente — Never expires
 const META_ADS_TOKEN     = "EAAKrFCnuYsoBRI7Rd4lUhcUW26GEvb9ensB0MiXdVr5xEEhZBpPlh37ubSdDjSZCa255IRjCSddqV3nQOqyZBK2Yl7VxcwkpENkeB1PzZAzYayDoOxmtB6JDhWs8afATNKw0UBbIBTx8ud6nn30Mvp2SbllTDIWLbxwQxThXVeu3ekj9yDJ6bZCwDjMxZB1EG98QZDZD"; // Mismo token — permisos ads_read + business_management
 const WA_API_URL         = "https://graph.facebook.com/v22.0/" + WA_PHONE_NUMBER_ID + "/messages";
 
@@ -673,6 +685,60 @@ function enviarReactivacionesDiarias() {
   console.log("♻️ A/B Reactivaciones — Enviados: " + enviados + " | Control: " + controles);
 }
 
+
+
+// ── Diagnóstico A/B test — ver distribución real ─────────────
+function diagnosticoAB() {
+  const sh   = SpreadsheetApp.getActive().getSheetByName(HOJA_CODIGOS);
+  const data = sh.getDataRange().getValues();
+  
+  const resumen = {};
+  let totalConGrupo = 0;
+
+  for (let i = 1; i < data.length; i++) {
+    const estado = (data[i][COL_ESTADO-1]  ||"").toString().trim();
+    const grupo  = (data[i][COL_GRUPO_AB-1]||"").toString().trim();
+    if (!grupo) continue;
+    totalConGrupo++;
+    const key = estado + " | " + grupo;
+    resumen[key] = (resumen[key] || 0) + 1;
+  }
+
+  console.log("════ DIAGNÓSTICO A/B ════");
+  console.log("Total con grupo asignado: " + totalConGrupo);
+  Object.keys(resumen).sort().forEach(k => {
+    console.log(k + " → " + resumen[k]);
+  });
+  console.log("═══════════════════════");
+}
+
+// ── Limpiar col Z de registros que no son Vencido ────────────
+// Borra el grupo AB de filas que no deberían tenerlo
+function limpiarGruposAB() {
+  const sh   = SpreadsheetApp.getActive().getSheetByName(HOJA_CODIGOS);
+  const data = sh.getDataRange().getValues();
+  let limpiados = 0;
+  let correctos = 0;
+
+  for (let i = 1; i < data.length; i++) {
+    const estado = (data[i][COL_ESTADO-1]  ||"").toString().trim();
+    const grupo  = (data[i][COL_GRUPO_AB-1]||"").toString().trim();
+
+    if (!grupo) continue; // Sin grupo, nada que hacer
+
+    // Solo Vencido y Vencido_REA deben tener grupo AB
+    const estadosValidos = [ESTADO_VENCIDO, ESTADO_VENCIDO_REA];
+    if (!estadosValidos.includes(estado)) {
+      sh.getRange(i + 1, COL_GRUPO_AB).clearContent();
+      limpiados++;
+    } else {
+      correctos++;
+    }
+  }
+
+  console.log("🧹 Limpieza A/B — Borrados: " + limpiados + " | Correctos: " + correctos);
+}
+
 // ── Reporte A/B test ──────────────────────────────────────────
 // Corre manualmente para ver resultados del A/B test
 function reporteABTest() {
@@ -727,7 +793,7 @@ function instalarTriggersWA() {
 
 // ── Test manual de los 4 flujos WA ───────────────────────────
 function testWA() {
-  const cel   = "573213691317"; // ← cambia por tu número de prueba
+  const cel   = "573213691318"; // número de prueba Oakberry
   const nom   = "Julio";
   const cod   = "ABC12";
   const desc  = "30%";
@@ -1048,17 +1114,22 @@ function registrarCuponDesdeLanding(p) {
   }
 
   // ── FLUJO NORMAL ──────────────────────────────────────────
-  // Verificar Loopy por celular
-  const celNorm    = celular.toString().replace(/\+/g,"").replace(/\s/g,"");
-  const esColombia = celNorm.length===10||(celNorm.startsWith("57")&&celNorm.length===12);
-  if (esColombia && existeEnLoopy(celular)) {
-    return { ok:false, esLoopy:true, mensaje:"Esta campaña es exclusiva para clientes nuevos. Ya tienes una cuenta Oakberry registrada." };
-  }
+  // Usuario de prueba — saltar todas las verificaciones
+  const esWhitelisted = isWhitelisted(celular, email);
 
-  // Verificar cupón activo (no vencido)
-  const check = verificarCelular(celular);
-  if (check.existe && !ESTADOS_REACTIVABLES.includes(check.estado)) {
-    return { ok:true, existe:true, codigo:check.codigo, fechaVence:check.fechaVence, estado:check.estado };
+  if (!esWhitelisted) {
+    // Verificar Loopy por celular
+    const celNorm    = celular.toString().replace(/\+/g,"").replace(/\s/g,"");
+    const esColombia = celNorm.length===10||(celNorm.startsWith("57")&&celNorm.length===12);
+    if (esColombia && existeEnLoopy(celular)) {
+      return { ok:false, esLoopy:true, mensaje:"Esta campaña es exclusiva para clientes nuevos. Ya tienes una cuenta Oakberry registrada." };
+    }
+
+    // Verificar cupón activo (no vencido)
+    const check = verificarCelular(celular);
+    if (check.existe && !ESTADOS_REACTIVABLES.includes(check.estado)) {
+      return { ok:true, existe:true, codigo:check.codigo, fechaVence:check.fechaVence, estado:check.estado };
+    }
   }
 
   // ── Verificar email en Loopy, clasificar segmento ───────────
@@ -1066,13 +1137,17 @@ function registrarCuponDesdeLanding(p) {
   let enLoopy    = "Sin email";
   let tipoUsuario = "";
 
-  if (email) {
-    const estaEnLoopy = existeEmailEnLoopy(email);
-    enLoopy = estaEnLoopy ? "SÍ" : "NO";
+  if (esWhitelisted) {
+    // Usuario de prueba — siempre N1
+    tipoUsuario = "N1 — Nuevo puro";
+  } else {
+    if (email) {
+      const estaEnLoopy = existeEmailEnLoopy(email);
+      enLoopy = estaEnLoopy ? "SÍ" : "NO";
+    }
+    // Clasificar segmento N1/E1/E2/E3 — usa email y celular
+    tipoUsuario = clasificarUsuarioLoopy(email, celular);
   }
-
-  // Clasificar segmento N1/E1/E2/E3 — usa email y celular
-  tipoUsuario = clasificarUsuarioLoopy(email, celular);
 
   // Crear fila nueva con todas las columnas Q–Y
   const sh = SpreadsheetApp.getActive().getSheetByName(HOJA_CODIGOS);
@@ -1125,9 +1200,9 @@ function canjearCodigo(p) {
     const estadoActual = (data[i][COL_ESTADO-1]||"").toString().trim();
 
     if (estadoActual===ESTADO_CANJEADO||estadoActual===ESTADO_CANJEADO_REA)
-      return { ok:false, mensaje:"❌ Este cupón ya fue canjeado" };
+      return { ok:false, mensaje:"ya fue canjeado" };
     if (estadoActual===ESTADO_VENCIDO||estadoActual===ESTADO_VENCIDO_REA)
-      return { ok:false, mensaje:"❌ Este cupón ya venció" };
+      return { ok:false, mensaje:"ya venció" };
     if (!ESTADOS_CANJEABLES.includes(estadoActual))
       return { ok:false, mensaje:"❌ Cupón no válido" };
 
@@ -1142,7 +1217,7 @@ function canjearCodigo(p) {
     if (ciudadCupon && !["no especificada","todas","general"].includes(ciudadCupon)) {
       const cc = ciudad.toLowerCase();
       if (!cc.includes(ciudadCupon) && !ciudadCupon.includes(cc))
-        return { ok:false, mensaje:"❌ Ciudad incorrecta\nEste cupón solo es válido en: "+data[i][COL_CIUDAD-1] };
+        return { ok:false, mensaje:"Ciudad incorrecta\nválido en: "+data[i][COL_CIUDAD-1] };
     }
 
     // Validar momento (soporte cruce de medianoche para madrugada)
@@ -1157,9 +1232,18 @@ function canjearCodigo(p) {
         return hora >= r.inicio && hora < r.fin;
       });
       if (!valido)
-        return { ok:false, mensaje:"⏰ Cupón fuera de horario\nSolo válido en:\n"
+        return { ok:false, mensaje:"fuera de horario\nSolo válido en:\n"
           +lista.map(m=>RANGOS_MOMENTOS[m]?.nombre||m).join(", ") };
     }
+
+    // Fix descuento: normalizar decimal a % — declarar ANTES de usar
+    const descFormatado = (() => {
+      if (descuento.includes("%")) return descuento;
+      const n = parseFloat(descuento);
+      if (!isNaN(n) && n > 0 && n <= 1) return Math.round(n*100)+"%";
+      if (!isNaN(n)) return Math.round(n)+"%";
+      return descuento;
+    })();
 
     const nuevoEstado = estadoActual===ESTADO_DISPONIBLE_REA ? ESTADO_CANJEADO_REA : ESTADO_CANJEADO;
     sh.getRange(i+1, COL_ESTADO).setValue(nuevoEstado);
@@ -1168,15 +1252,6 @@ function canjearCodigo(p) {
     sh.getRange(i+1, COL_LOOPY).setValue(loopy);
     // Col AA — descuento final canjeado (permite comparar con descuento original col L)
     sh.getRange(i+1, COL_DESC_FINAL).setValue(descFormatado);
-
-    // Fix descuento: normalizar decimal a %
-    const descFormatado = (() => {
-      if (descuento.includes("%")) return descuento;
-      const n = parseFloat(descuento);
-      if (!isNaN(n) && n > 0 && n <= 1) return Math.round(n*100)+"%";
-      if (!isNaN(n)) return Math.round(n)+"%";
-      return descuento;
-    })();
 
     // ── Enviar agradecimiento por WA (Flujo 4) ──────────────
     // Plantilla oakberry_post_canje — activa cuando Meta apruebe
@@ -1193,7 +1268,7 @@ function canjearCodigo(p) {
       "🎁 " + descFormatado + " en " + producto,
     ].join("\n") };
   }
-  return { ok:false, mensaje:"❌ El código no existe" };
+  return { ok:false, mensaje:"no existe" };
 }
 
 // ============================================================
