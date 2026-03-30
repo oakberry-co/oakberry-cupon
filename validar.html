@@ -250,6 +250,20 @@
       <div id="resRows"></div>
     </div>
 
+    <!-- BANNER ADIDAS -->
+    <div class="adidas-banner" id="adidasBanner">
+      <div class="adidas-stripes">
+        <div class="adidas-stripe"></div>
+        <div class="adidas-stripe"></div>
+        <div class="adidas-stripe"></div>
+      </div>
+      <div class="adidas-title">Cupón válido · Campaña oficial</div>
+      <div class="adidas-main">Adidas × Oakberry</div>
+      <div class="adidas-product">🫐 Bowl Especial Adidas</div>
+      <div class="adidas-action">✅ Entregar el bowl al cliente</div>
+      <div class="adidas-valid">Código canjeado · Uso único confirmado</div>
+    </div>
+
     <!-- TARJETAS DE ERROR TIPIFICADAS -->
     <div class="err-card type-canjeado" id="errCanjeado">
       <span class="err-icon">🔒</span>
@@ -440,15 +454,27 @@ async function validar() {
     });
 
     if (res.ok) {
-      // Arreglar el formato del descuento en la línea de regalo
       const lineas = res.mensaje.split("\n").map(l =>
         l.replace(/([\d.]+)\s+en\s+/g, (match, num) => formatearDescuento(num) + " en ")
       );
-      mostrarResultado(true, lineas[0], lineas.slice(1));
       document.getElementById("codigo").value = "";
-      // Recordatorio post-canje si no tiene Loopy
-      if (_loopy === "NO") {
-        document.getElementById("postLoopyBanner").classList.add("show");
+
+      // ── Detectar si es cupón Adidas ──────────────────────────
+      const esAdidas = res.mensaje.includes("Adidas");
+      if (esAdidas) {
+        // Mostrar banner especial Adidas
+        document.getElementById("adidasBanner").classList.add("show");
+        document.getElementById("resultado").className = "result";
+        document.getElementById("formSection").classList.add("hidden");
+        document.getElementById("mainBtn").style.display = "none";
+        document.getElementById("resetBtn").style.display = "block";
+        document.getElementById("postLoopyBanner").classList.remove("show");
+      } else {
+        mostrarResultado(true, lineas[0], lineas.slice(1));
+        // Recordatorio post-canje si no tiene Loopy
+        if (_loopy === "NO") {
+          document.getElementById("postLoopyBanner").classList.add("show");
+        }
       }
     } else {
       mostrarError(res.mensaje);
@@ -489,6 +515,7 @@ function ocultarTodosErrores() {
     document.getElementById(id).classList.remove("show");
   });
   document.getElementById("resultado").className = "result";
+  document.getElementById("adidasBanner").classList.remove("show");
 }
 
 function mostrarError(mensaje) {
