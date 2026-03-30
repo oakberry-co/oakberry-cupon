@@ -7,136 +7,93 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:     #0C0A0E;
-  --bg2:    #141118;
-  --bg3:    #1C1825;
-  --border: rgba(255,255,255,0.07);
-  --text:   #F0EBF8;
-  --muted:  #7A6E8A;
-  --p:      #7C4DFF;
-  --p2:     #9D71FF;
-  --coral:  #FF5B35;
-  --yellow: #F5C842;
-  --green:  #00C896;
-  --teal:   #00B8D4;
-  --card:   rgba(255,255,255,0.03);
-  --glow:   rgba(124,77,255,0.15);
+  --bg:#0C0A0E; --bg2:#141118; --bg3:#1C1825;
+  --border:rgba(255,255,255,0.07); --text:#F0EBF8; --muted:#7A6E8A;
+  --p:#7C4DFF; --p2:#9D71FF; --coral:#FF5B35; --yellow:#F5C842;
+  --green:#00C896; --teal:#00B8D4;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* ── NOISE TEXTURE ── */
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
-
-/* ── HEADER ── */
-.header{position:sticky;top:0;z-index:100;background:rgba(12,10,14,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;}
+.header{position:sticky;top:0;z-index:100;background:rgba(12,10,14,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;}
 .logo{display:flex;align-items:center;gap:12px;}
 .logo-dot{width:10px;height:10px;border-radius:50%;background:var(--coral);box-shadow:0 0 12px var(--coral);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 .logo-name{font-size:16px;font-weight:800;letter-spacing:3px;text-transform:uppercase;}
 .logo-sub{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:2px;margin-top:2px;}
-.header-right{display:flex;align-items:center;gap:16px;}
+.header-right{display:flex;align-items:center;gap:12px;}
 .last-update{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);}
-.refresh-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:1px;}
-.refresh-btn:hover{border-color:var(--p);color:var(--p2);}
+.btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:1px;}
+.btn:hover{border-color:var(--p);color:var(--p2);}
+.btn.coral{background:rgba(255,91,53,0.1);border-color:rgba(255,91,53,0.3);color:var(--coral);}
+.btn.coral:hover{background:rgba(255,91,53,0.2);}
 
-/* ── TABS ── */
 .tabs{display:flex;gap:4px;padding:24px 32px 0;position:relative;z-index:1;}
-.tab{padding:10px 20px;border-radius:8px 8px 0 0;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:1px solid transparent;border-bottom:none;transition:all .2s;color:var(--muted);background:transparent;}
+.tab{padding:10px 20px;border-radius:8px 8px 0 0;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:1px solid transparent;border-bottom:none;transition:all .2s;color:var(--muted);}
 .tab.active{background:var(--bg2);border-color:var(--border);color:var(--text);}
 .tab:hover:not(.active){color:var(--text);}
 
-/* ── MAIN ── */
 .main{padding:0 32px 48px;position:relative;z-index:1;}
 .panel{display:none;background:var(--bg2);border:1px solid var(--border);border-radius:0 12px 12px 12px;padding:32px;}
-.panel.active{display:block;}
+.panel.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
-/* ── KPI GRID ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px;}
-.kpi{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;transition:border-color .2s;}
-.kpi:hover{border-color:rgba(124,77,255,0.3);}
-.kpi::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:0 12px 0 80px;opacity:.06;}
-.kpi.purple::before{background:var(--p);}
-.kpi.coral::before{background:var(--coral);}
-.kpi.yellow::before{background:var(--yellow);}
-.kpi.green::before{background:var(--green);}
-.kpi.teal::before{background:var(--teal);}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px;}
+.kpi{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
+.kpi::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.08;}
+.kpi.p::after{background:var(--p);}
+.kpi.coral::after{background:var(--coral);}
+.kpi.yellow::after{background:var(--yellow);}
+.kpi.green::after{background:var(--green);}
+.kpi.teal::after{background:var(--teal);}
 .kpi-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;}
-.kpi-value{font-size:28px;font-weight:800;line-height:1;}
-.kpi-value.purple{color:var(--p2);}
-.kpi-value.coral{color:var(--coral);}
-.kpi-value.yellow{color:var(--yellow);}
-.kpi-value.green{color:var(--green);}
-.kpi-value.teal{color:var(--teal);}
+.kpi-value{font-size:26px;font-weight:800;line-height:1;}
+.kpi.p .kpi-value{color:var(--p2);}
+.kpi.coral .kpi-value{color:var(--coral);}
+.kpi.yellow .kpi-value{color:var(--yellow);}
+.kpi.green .kpi-value{color:var(--green);}
+.kpi.teal .kpi-value{color:var(--teal);}
 .kpi-sub{font-size:11px;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace;}
 
-/* ── SECTION TITLE ── */
-.section-title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.section-title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:24px 0 16px;display:flex;align-items:center;gap:10px;}
 .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
 
-/* ── TABLE ── */
-.table-wrap{overflow-x:auto;margin-bottom:32px;}
+.table-wrap{overflow-x:auto;margin-bottom:24px;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 thead th{padding:10px 14px;text-align:left;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border);}
 tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:background .15s;}
 tbody tr:hover{background:rgba(255,255,255,0.02);}
-tbody td{padding:12px 14px;font-family:'DM Mono',monospace;font-size:12px;}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px;}
-.badge.n1{background:rgba(0,200,150,0.12);color:var(--green);}
-.badge.e1{background:rgba(245,200,66,0.12);color:var(--yellow);}
-.badge.e2{background:rgba(0,184,212,0.12);color:var(--teal);}
-.badge.e3{background:rgba(124,77,255,0.12);color:var(--p2);}
+tbody td{padding:11px 14px;font-family:'DM Mono',monospace;font-size:12px;}
 
-/* ── BAR CHART ── */
-.chart-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;}
-.chart-box{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;}
-.chart-title{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;}
 .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-.bar-label{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);width:90px;flex-shrink:0;text-align:right;}
+.bar-label{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);width:100px;flex-shrink:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bar-track{flex:1;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(0.22,1,0.36,1);}
-.bar-val{font-size:11px;font-family:'DM Mono',monospace;color:var(--text);width:60px;}
+.bar-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(0.22,1,0.36,1);}
+.bar-val{font-size:11px;font-family:'DM Mono',monospace;color:var(--text);width:50px;text-align:right;}
 
-/* ── DONUT ── */
-.donut-wrap{display:flex;align-items:center;gap:24px;}
-.donut-legend{display:flex;flex-direction:column;gap:10px;flex:1;}
-.legend-row{display:flex;align-items:center;gap:8px;font-size:12px;font-family:'DM Mono',monospace;}
-.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-
-/* ── LOADING ── */
-.loading{display:flex;align-items:center;justify-content:center;padding:60px;flex-direction:column;gap:16px;}
-.spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--p);border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.loading-text{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:2px;}
-
-/* ── ERROR ── */
-.error-box{background:rgba(255,91,53,0.08);border:1px solid rgba(255,91,53,0.2);border-radius:12px;padding:20px;font-family:'DM Mono',monospace;font-size:12px;color:var(--coral);margin-bottom:16px;}
-
-/* ── CITY GRID ── */
-.city-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:32px;}
-.city-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .2s;}
-.city-card:hover{border-color:rgba(124,77,255,0.3);}
-.city-name{font-size:13px;font-weight:700;margin-bottom:12px;letter-spacing:1px;}
-.city-stat{display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;font-family:'DM Mono',monospace;}
-.city-stat-label{color:var(--muted);}
-.city-stat-val{color:var(--text);}
-
-/* ── AB TEST ── */
-.ab-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;}
+.ab-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
 .ab-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;}
-.ab-group{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
-.ab-pct{font-size:36px;font-weight:800;line-height:1;margin-bottom:4px;}
+.ab-label{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;color:var(--muted);}
+.ab-pct{font-size:34px;font-weight:800;line-height:1;margin-bottom:4px;}
 .ab-sub{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);}
-.ab-card.a .ab-pct{color:var(--green);}
-.ab-card.b .ab-pct{color:var(--teal);}
-.ab-card.ctrl .ab-pct{color:var(--muted);}
+
+.city-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px;}
+.city-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.city-name{font-size:13px;font-weight:700;margin-bottom:10px;}
+.city-row{display:flex;justify-content:space-between;font-size:11px;font-family:'DM Mono',monospace;margin-bottom:5px;}
+.city-row span:first-child{color:var(--muted);}
+
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;flex-direction:column;gap:16px;}
+.spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--p);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-txt{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:2px;}
+.error{background:rgba(255,91,53,0.08);border:1px solid rgba(255,91,53,0.2);border-radius:12px;padding:16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--coral);margin-bottom:16px;}
+.info{background:rgba(124,77,255,0.08);border:1px solid rgba(124,77,255,0.2);border-radius:12px;padding:16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--p2);margin-bottom:16px;}
 
 @media(max-width:768px){
-  .header{padding:12px 16px;}
-  .main{padding:0 16px 32px;}
-  .chart-wrap{grid-template-columns:1fr;}
-  .ab-grid{grid-template-columns:1fr;}
+  .header,.main{padding-left:16px;padding-right:16px;}
   .tabs{padding:16px 16px 0;}
+  .kpi-grid{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
@@ -147,438 +104,292 @@ tbody td{padding:12px 14px;font-family:'DM Mono',monospace;font-size:12px;}
     <div class="logo-dot"></div>
     <div>
       <div class="logo-name">Oakberry</div>
-      <div class="logo-sub">Dashboard de cupones</div>
+      <div class="logo-sub">Dashboard · Cupones Colombia</div>
     </div>
   </div>
   <div class="header-right">
-    <div class="last-update" id="lastUpdate">Cargando...</div>
-    <button class="refresh-btn" onclick="cargarTodo()">↻ Actualizar</button>
+    <div class="last-update" id="lastUpdate">—</div>
+    <button class="btn coral" onclick="actualizarDashboard()" id="btnActualizar">⟳ Recalcular</button>
+    <button class="btn" onclick="cargarTodo()">↻ Recargar</button>
   </div>
 </div>
 
 <div class="tabs">
   <div class="tab active" onclick="switchTab('resumen',this)">Resumen</div>
-  <div class="tab" onclick="switchTab('campanas',this)">Campañas & Meta</div>
-  <div class="tab" onclick="switchTab('segmentos',this)">Segmentos</div>
+  <div class="tab" onclick="switchTab('campanas',this)">Fuentes</div>
   <div class="tab" onclick="switchTab('ciudades',this)">Ciudades</div>
   <div class="tab" onclick="switchTab('reactivacion',this)">Reactivación</div>
 </div>
 
 <div class="main">
-
-  <!-- ══ RESUMEN ══ -->
-  <div class="panel active" id="panel-resumen">
-    <div id="resumen-content"><div class="loading"><div class="spinner"></div><div class="loading-text">Cargando datos...</div></div></div>
-  </div>
-
-  <!-- ══ CAMPAÑAS ══ -->
-  <div class="panel" id="panel-campanas">
-    <div id="campanas-content"><div class="loading"><div class="spinner"></div><div class="loading-text">Cargando campañas...</div></div></div>
-  </div>
-
-  <!-- ══ SEGMENTOS ══ -->
-  <div class="panel" id="panel-segmentos">
-    <div id="segmentos-content"><div class="loading"><div class="spinner"></div><div class="loading-text">Cargando segmentos...</div></div></div>
-  </div>
-
-  <!-- ══ CIUDADES ══ -->
-  <div class="panel" id="panel-ciudades">
-    <div id="ciudades-content"><div class="loading"><div class="spinner"></div><div class="loading-text">Cargando ciudades...</div></div></div>
-  </div>
-
-  <!-- ══ REACTIVACIÓN ══ -->
-  <div class="panel" id="panel-reactivacion">
-    <div id="reactivacion-content"><div class="loading"><div class="spinner"></div><div class="loading-text">Cargando reactivación...</div></div></div>
-  </div>
-
+  <div class="panel active" id="panel-resumen"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando datos...</div></div></div>
+  <div class="panel" id="panel-campanas"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando fuentes...</div></div></div>
+  <div class="panel" id="panel-ciudades"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando ciudades...</div></div></div>
+  <div class="panel" id="panel-reactivacion"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando reactivación...</div></div></div>
 </div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
-const META_TOKEN = "EAAKrFCnuYsoBRJGOTtYRass50UoTdOLXnkglKMpYo4X0WKXrHrhUpAzZB5VCgDcYlqZCNXufYp1MY5YPSeQBSNdbD5ax6tB3huLsn2Rcq7L4ipZCaKUctZAfC8RfpbnEqKkOXNea09KyZAbZBzAnXvsheKRDm6o1Nmnd1CJd4dVCghw5iyw00hsMR7UZASGHuoWPwZDZD";
-const META_ACCOUNT = "act_752081110313383";
-const PRECIO_BOWL  = 25400; // COP promedio bowl
+const PRECIO_BOWL = 25400;
 
-// ── TABS ─────────────────────────────────────────────────
-let tabsLoaded = {};
-function switchTab(name, el) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('panel-'+name).classList.add('active');
-  if (!tabsLoaded[name]) { tabsLoaded[name]=true; cargarTab(name); }
-}
-
-// ── FETCH SHEETS (JSONP) ──────────────────────────────────
+// ── JSONP ─────────────────────────────────────────────────────
 function fetchSheets(params) {
   return new Promise((res,rej)=>{
     const cb="cb_"+Math.random().toString(36).slice(2);
     const url=SCRIPT_URL+"?"+new URLSearchParams({...params,callback:cb});
     const s=document.createElement('script');
     let done=false;
-    const timer=setTimeout(()=>{if(!done){done=true;delete window[cb];rej(new Error('timeout'));}},15000);
+    const timer=setTimeout(()=>{if(!done){done=true;delete window[cb];if(s.parentNode)s.remove();rej(new Error('timeout'));}},20000);
     window[cb]=d=>{if(done)return;done=true;clearTimeout(timer);delete window[cb];if(s.parentNode)s.remove();res(d);};
     s.onerror=()=>{if(done)return;done=true;clearTimeout(timer);rej(new Error('error'));};
     s.src=url;document.body.appendChild(s);
   });
 }
 
-// ── FETCH META ADS ────────────────────────────────────────
-async function fetchMeta(endpoint) {
-  try {
-    const res = await fetch(`https://graph.facebook.com/v22.0/${endpoint}&access_token=${META_TOKEN}`);
-    return await res.json();
-  } catch(e) { return { error: e.message }; }
-}
+// ── HELPERS ───────────────────────────────────────────────────
+const fmt = n=>Number(n||0).toLocaleString('es-CO');
+const cop = n=>'$'+Number(n||0).toLocaleString('es-CO');
+const pct = (a,b)=>b>0?((a/b)*100).toFixed(1)+'%':'0%';
 
-// ── HELPERS ───────────────────────────────────────────────
-const fmt  = n => Number(n||0).toLocaleString('es-CO');
-const fmtP = n => (Number(n||0)*100).toFixed(1)+'%';
-const cop  = n => '$'+Number(n||0).toLocaleString('es-CO');
-const pct  = (a,b) => b>0 ? ((a/b)*100).toFixed(1)+'%' : '0%';
-
-function bar(val, max, color='var(--p)') {
-  const w = max>0 ? Math.round((val/max)*100) : 0;
-  return `<div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${color};"></div></div>`;
-}
-
-// ── CARGAR TODO ───────────────────────────────────────────
-async function cargarTodo() {
-  tabsLoaded = {};
-  cargarTab('resumen');
-  document.getElementById('lastUpdate').textContent =
-    'Actualizado: '+new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-}
-
-// ── CARGAR TAB ────────────────────────────────────────────
-async function cargarTab(name) {
-  if (name==='resumen')     await renderResumen();
-  if (name==='campanas')    await renderCampanas();
-  if (name==='segmentos')   await renderSegmentos();
-  if (name==='ciudades')    await renderCiudades();
-  if (name==='reactivacion') await renderReactivacion();
-}
-
-// ═══════════════════════════════════════════════════════════
-// ── RESUMEN ────────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════
-async function renderResumen() {
-  const el = document.getElementById('resumen-content');
-  try {
-    const data = await fetchSheets({ accion:'dashboardResumen' });
-    if (!data.ok) throw new Error(data.mensaje||'Error');
-    const d = data.resumen;
-    const tasaCanje = pct(d.canjeados, d.entregados);
-    const valorGen  = d.canjeados * PRECIO_BOWL;
-    const cac       = d.canjeados>0 ? Math.round(d.gastadoMeta/d.canjeados) : 0;
-
-    el.innerHTML = `
-      <div class="kpi-grid">
-        <div class="kpi purple">
-          <div class="kpi-label">Cupones entregados</div>
-          <div class="kpi-value purple">${fmt(d.entregados)}</div>
-          <div class="kpi-sub">Total generados</div>
-        </div>
-        <div class="kpi green">
-          <div class="kpi-label">Canjeados</div>
-          <div class="kpi-value green">${fmt(d.canjeados)}</div>
-          <div class="kpi-sub">Tasa: ${tasaCanje}</div>
-        </div>
-        <div class="kpi yellow">
-          <div class="kpi-label">Tasa de canje</div>
-          <div class="kpi-value yellow">${tasaCanje}</div>
-          <div class="kpi-sub">${fmt(d.canjeados)} de ${fmt(d.entregados)}</div>
-        </div>
-        <div class="kpi coral">
-          <div class="kpi-label">Valor generado</div>
-          <div class="kpi-value coral">${cop(valorGen)}</div>
-          <div class="kpi-sub">Bowl promedio ${cop(PRECIO_BOWL)}</div>
-        </div>
-        <div class="kpi teal">
-          <div class="kpi-label">CAC real</div>
-          <div class="kpi-value teal">${cop(cac)}</div>
-          <div class="kpi-sub">por cliente nuevo</div>
-        </div>
-        <div class="kpi purple">
-          <div class="kpi-label">Disponibles activos</div>
-          <div class="kpi-value purple">${fmt(d.disponibles)}</div>
-          <div class="kpi-sub">Pendientes de canje</div>
-        </div>
-      </div>
-
-      <div class="section-title">Distribución de estados</div>
-      <div class="chart-wrap">
-        <div class="chart-box">
-          <div class="chart-title">Estados del sistema</div>
-          ${renderBarras([
-            {label:'Disponible',val:d.disponibles,color:'var(--p)',max:d.entregados},
-            {label:'Canjeado',val:d.canjeados,color:'var(--green)',max:d.entregados},
-            {label:'Vencido',val:d.vencidos,color:'var(--muted)',max:d.entregados},
-            {label:'REA activa',val:d.dispRea,color:'var(--coral)',max:d.entregados},
-            {label:'Canjeado REA',val:d.canjeadoRea,color:'var(--yellow)',max:d.entregados},
-          ])}
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">Mix de usuarios</div>
-          ${renderBarras([
-            {label:'N1 Nuevo',val:d.n1,color:'var(--green)',max:d.entregados},
-            {label:'E1 Ocasional',val:d.e1,color:'var(--yellow)',max:d.entregados},
-            {label:'E2 Regular',val:d.e2,color:'var(--teal)',max:d.entregados},
-            {label:'E3 Frecuente',val:d.e3,color:'var(--p2)',max:d.entregados},
-          ])}
-        </div>
-      </div>`;
-  } catch(e) {
-    el.innerHTML = `<div class="error-box">Error cargando resumen: ${e.message}<br>Verifica que la función dashboardResumen existe en el script.</div>`;
-  }
-}
-
-function renderBarras(items) {
-  const max = Math.max(...items.map(i=>i.val));
+function bars(items, maxVal) {
+  const max = maxVal || Math.max(...items.map(i=>Number(i.val)||0), 1);
   return items.map(({label,val,color})=>`
     <div class="bar-row">
-      <div class="bar-label">${label}</div>
-      ${bar(val,max,color)}
-      <div class="bar-val" style="color:${color}">${fmt(val)}</div>
+      <div class="bar-label" title="${label}">${label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round((Number(val)||0)/max*100)}%;background:${color||'var(--p)'};"></div></div>
+      <div class="bar-val">${fmt(val)}</div>
     </div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════
-// ── CAMPAÑAS ───────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════
-async function renderCampanas() {
-  const el = document.getElementById('campanas-content');
+// ── TABS ─────────────────────────────────────────────────────
+let _loaded={};
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  if(!_loaded[name]){_loaded[name]=true;renderTab(name);}
+}
+
+// ── DATOS ─────────────────────────────────────────────────────
+let _dashData = null;
+
+async function cargarDatos() {
+  const d = await fetchSheets({accion:'leerHojaDashboard'});
+  if (!d.ok) throw new Error(d.mensaje||'Error al leer Dashboard');
+  return parsearHoja(d.rows);
+}
+
+function parsearHoja(rows) {
+  // La hoja tiene secciones separadas por headers morados
+  const d = {
+    actualizacion:'',
+    kpis:{}, fuentes:[], ciudades:[],
+    abTest:[], reactivacion:[]
+  };
+
+  let seccion = '';
+  for (let i=0; i<rows.length; i++) {
+    const r = rows[i];
+    const r0 = (r[0]||'').toString().trim();
+
+    if (r0.includes('Última actualización:')) {
+      d.actualizacion = r0.replace('OAKBERRY · Dashboard Cupones','').trim();
+      continue;
+    }
+    if (r0==='KPIs GLOBALES')        { seccion='kpis'; continue; }
+    if (r0==='CUPONES POR FUENTE')   { seccion='fuentes'; continue; }
+    if (r0==='CUPONES POR CIUDAD')   { seccion='ciudades'; continue; }
+    if (r0==='A/B TEST REACTIVACIÓN'){ seccion='ab'; continue; }
+    if (r0==='REACTIVACIÓN vs PRIMER IMPACTO'){ seccion='rea'; continue; }
+
+    // Headers (fila morada — primera celda es label)
+    if (r0==='Métrica'||r0==='Fuente'||r0==='Ciudad'||r0==='Grupo'||r0==='Flujo') continue;
+
+    if (!r0) continue;
+
+    if (seccion==='kpis') {
+      d.kpis[r0] = { total:r[1], n1:r[2], e1:r[3], e2:r[4], e3:r[5], nota:r[6] };
+    }
+    if (seccion==='fuentes') {
+      d.fuentes.push({ fuente:r[0], entregados:r[1], canjeados:r[2], tasa:r[3], vencidos:r[4] });
+    }
+    if (seccion==='ciudades') {
+      d.ciudades.push({ ciudad:r[0], entregados:r[1], canjeados:r[2], tasa:r[3], vencidos:r[4] });
+    }
+    if (seccion==='ab') {
+      d.abTest.push({ grupo:r[0], enviados:r[1], canjeados:r[2], tasa:r[3] });
+    }
+    if (seccion==='rea') {
+      d.reactivacion.push({ flujo:r[0], tasa:r[1], obs:r[2] });
+    }
+  }
+  return d;
+}
+
+async function cargarTodo() {
+  _loaded={};_dashData=null;
+  document.querySelectorAll('.panel').forEach(p=>p.innerHTML='<div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando...</div></div>');
+  document.getElementById('panel-resumen').classList.add('active');
+  _loaded['resumen']=true;
+  await renderTab('resumen');
+}
+
+async function actualizarDashboard() {
+  const btn = document.getElementById('btnActualizar');
+  btn.textContent='⟳ Calculando...';btn.disabled=true;
   try {
-    // Datos de Sheets + Meta Ads (el script hace la llamada a Meta internamente)
-    const sheetsData = await fetchSheets({ accion:'dashboardCampanas' });
-    const campanas = sheetsData.ok ? sheetsData.campanas : [];
-    const ads = sheetsData.metaAds || [];
-
-    el.innerHTML = `
-      <div class="section-title">Meta Ads — Últimos 30 días</div>
-      ${ads.length ? `
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Anuncio</th><th>Impresiones</th><th>Alcance</th>
-            <th>Clics</th><th>CPC</th><th>CPM</th><th>Gasto</th>
-          </tr></thead>
-          <tbody>
-            ${ads.map(a=>`<tr>
-              <td>${a.ad_name||a.adset_name||a.campaign_name||'—'}</td>
-              <td>${fmt(a.impressions)}</td>
-              <td>${fmt(a.reach)}</td>
-              <td>${fmt(a.clicks)}</td>
-              <td>${a.cpc?'$'+Number(a.cpc).toFixed(0):'—'}</td>
-              <td>${a.cpm?'$'+Number(a.cpm).toFixed(0):'—'}</td>
-              <td>${a.spend?cop(Number(a.spend)):'—'}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>` : `<div class="error-box">No hay datos de Meta Ads. Verifica que el token tiene permisos ads_read y está activo.</div>`}
-
-      <div class="section-title">Cupones por fuente</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Fuente</th><th>Entregados</th><th>Canjeados</th><th>Tasa</th><th>Vencidos</th>
-          </tr></thead>
-          <tbody>
-            ${campanas.length ? campanas.map(c=>`<tr>
-              <td>${c.fuente}</td>
-              <td>${fmt(c.entregados)}</td>
-              <td style="color:var(--green)">${fmt(c.canjeados)}</td>
-              <td style="color:var(--yellow)">${pct(c.canjeados,c.entregados)}</td>
-              <td style="color:var(--muted)">${fmt(c.vencidos)}</td>
-            </tr>`).join('') : '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:20px;">Sin datos</td></tr>'}
-          </tbody>
-        </table>
-      </div>`;
+    const r = await fetchSheets({accion:'dashboardHoja'});
+    if (r.ok) {
+      btn.textContent='✅ Listo';
+      await cargarTodo();
+    } else {
+      btn.textContent='❌ Error';
+      alert(r.mensaje||'Error al actualizar');
+    }
   } catch(e) {
-    el.innerHTML = `<div class="error-box">Error: ${e.message}</div>`;
+    btn.textContent='❌ Error';
+    alert(e.message);
+  }
+  setTimeout(()=>{btn.textContent='⟳ Recalcular';btn.disabled=false;},2000);
+}
+
+async function renderTab(name) {
+  try {
+    if (!_dashData) _dashData = await cargarDatos();
+    const d = _dashData;
+    document.getElementById('lastUpdate').textContent = d.actualizacion||'';
+    if (name==='resumen')     renderResumen(d);
+    if (name==='campanas')    renderCampanas(d);
+    if (name==='ciudades')    renderCiudades(d);
+    if (name==='reactivacion') renderReactivacion(d);
+  } catch(e) {
+    document.getElementById('panel-'+name).innerHTML =
+      `<div class="error">Error: ${e.message}<br><br>` +
+      `<strong>Solución:</strong> Haz clic en "⟳ Recalcular" para generar la hoja Dashboard por primera vez.</div>`;
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// ── SEGMENTOS ──────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════
-async function renderSegmentos() {
-  const el = document.getElementById('segmentos-content');
-  try {
-    const data = await fetchSheets({ accion:'dashboardSegmentos' });
-    if (!data.ok) throw new Error(data.mensaje||'Error');
-    const segs = data.segmentos;
+// ── RESUMEN ───────────────────────────────────────────────────
+function renderResumen(d) {
+  const k = d.kpis;
+  const gen   = Number(k['Cupones generados']?.total||0);
+  const canj  = Number(k['Canjeados']?.total||0);
+  const tasa  = k['Tasa de canje']?.total||'0%';
+  const disp  = Number(k['Disponibles activos']?.total||0);
+  const venc  = Number(k['Vencidos']?.total||0);
+  const n1    = Number(k['Cupones generados']?.n1||0);
+  const e1    = Number(k['Cupones generados']?.e1||0);
+  const e2    = Number(k['Cupones generados']?.e2||0);
+  const e3    = Number(k['Cupones generados']?.e3||0);
+  const valorGen = canj * PRECIO_BOWL;
 
-    el.innerHTML = `
-      <div class="section-title">Rendimiento por segmento Loopy</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Segmento</th><th>Total</th><th>% del total</th>
-            <th>Canjeados</th><th>Tasa canje</th><th>Valor generado</th><th>CAC estimado</th>
-          </tr></thead>
-          <tbody>
-            ${segs.map(s=>{
-              const clase = s.tipo.toLowerCase().split(' ')[0];
-              const valorGen = s.canjeados * PRECIO_BOWL;
-              return `<tr>
-                <td><span class="badge ${clase}">${s.tipo}</span></td>
-                <td>${fmt(s.total)}</td>
-                <td style="color:var(--muted)">${pct(s.total,segs.reduce((a,b)=>a+b.total,0))}</td>
-                <td style="color:var(--green)">${fmt(s.canjeados)}</td>
-                <td style="color:var(--yellow)">${pct(s.canjeados,s.total)}</td>
-                <td style="color:var(--coral)">${cop(valorGen)}</td>
-                <td style="color:var(--teal)">${s.canjeados>0?cop(Math.round(s.gastado/s.canjeados)):'—'}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
+  document.getElementById('panel-resumen').innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi p"><div class="kpi-label">Entregados</div><div class="kpi-value">${fmt(gen)}</div><div class="kpi-sub">Total generados</div></div>
+      <div class="kpi green"><div class="kpi-label">Canjeados</div><div class="kpi-value">${fmt(canj)}</div><div class="kpi-sub">Tasa: ${tasa}</div></div>
+      <div class="kpi yellow"><div class="kpi-label">Tasa de canje</div><div class="kpi-value">${tasa}</div><div class="kpi-sub">${fmt(canj)} de ${fmt(gen)}</div></div>
+      <div class="kpi coral"><div class="kpi-label">Valor generado</div><div class="kpi-value">${cop(valorGen)}</div><div class="kpi-sub">Bowl ~${cop(PRECIO_BOWL)}</div></div>
+      <div class="kpi teal"><div class="kpi-label">Disponibles</div><div class="kpi-value">${fmt(disp)}</div><div class="kpi-sub">Por canjear</div></div>
+      <div class="kpi p"><div class="kpi-label">Vencidos</div><div class="kpi-value">${fmt(venc)}</div><div class="kpi-sub">Sin canjear</div></div>
+    </div>
 
-      <div class="section-title">Mix visual</div>
-      <div class="chart-wrap">
-        <div class="chart-box">
-          <div class="chart-title">Distribución de usuarios</div>
-          ${renderBarras(segs.map(s=>({
-            label: s.tipo.split('—')[0].trim(),
-            val: s.total,
-            color: {N1:'var(--green)',E1:'var(--yellow)',E2:'var(--teal)',E3:'var(--p2)'}[s.tipo.split('—')[0].trim()]||'var(--muted)'
-          })))}
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">Tasa de canje por segmento</div>
-          ${renderBarras(segs.map(s=>({
-            label: s.tipo.split('—')[0].trim(),
-            val: s.canjeados,
-            color: {N1:'var(--green)',E1:'var(--yellow)',E2:'var(--teal)',E3:'var(--p2)'}[s.tipo.split('—')[0].trim()]||'var(--muted)'
-          })))}
-        </div>
-      </div>`;
-  } catch(e) {
-    el.innerHTML = `<div class="error-box">Error: ${e.message}</div>`;
-  }
+    <div class="section-title">Mix de usuarios Loopy</div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      ${bars([
+        {label:'N1 — Nuevo puro', val:n1, color:'var(--green)'},
+        {label:'E1 — Ocasional',  val:e1, color:'var(--yellow)'},
+        {label:'E2 — Regular',    val:e2, color:'var(--teal)'},
+        {label:'E3 — Frecuente',  val:e3, color:'var(--p2)'},
+      ])}
+    </div>`;
 }
 
-// ═══════════════════════════════════════════════════════════
-// ── CIUDADES ───────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════
-async function renderCiudades() {
-  const el = document.getElementById('ciudades-content');
-  try {
-    const data = await fetchSheets({ accion:'dashboardCiudades' });
-    if (!data.ok) throw new Error(data.mensaje||'Error');
-    const ciudades = data.ciudades;
-
-    el.innerHTML = `
-      <div class="section-title">Rendimiento por ciudad</div>
-      <div class="city-grid">
-        ${ciudades.map(c=>`
-          <div class="city-card">
-            <div class="city-name">${c.ciudad}</div>
-            <div class="city-stat"><span class="city-stat-label">Entregados</span><span class="city-stat-val">${fmt(c.entregados)}</span></div>
-            <div class="city-stat"><span class="city-stat-label">Canjeados</span><span class="city-stat-val" style="color:var(--green)">${fmt(c.canjeados)}</span></div>
-            <div class="city-stat"><span class="city-stat-label">Tasa</span><span class="city-stat-val" style="color:var(--yellow)">${pct(c.canjeados,c.entregados)}</span></div>
-            <div class="city-stat"><span class="city-stat-label">Vencidos</span><span class="city-stat-val" style="color:var(--muted)">${fmt(c.vencidos)}</span></div>
-          </div>`).join('')}
-      </div>
-
-      <div class="section-title">Comparativa</div>
-      <div class="chart-box" style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;">
-        <div class="chart-title">Cupones canjeados por ciudad</div>
-        ${renderBarras(ciudades.map(c=>({label:c.ciudad,val:c.canjeados,color:'var(--p)'}))).replace('class="bar-row"','class="bar-row" style="margin-bottom:12px"')}
-      </div>`;
-  } catch(e) {
-    el.innerHTML = `<div class="error-box">Error: ${e.message}</div>`;
-  }
+// ── FUENTES ───────────────────────────────────────────────────
+function renderCampanas(d) {
+  const maxEnt = Math.max(...d.fuentes.map(f=>Number(f.entregados)||0),1);
+  document.getElementById('panel-campanas').innerHTML = `
+    <div class="section-title">Cupones por fuente de campaña</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fuente</th><th>Entregados</th><th>Canjeados</th><th>Tasa</th><th>Vencidos</th></tr></thead>
+        <tbody>
+          ${d.fuentes.map(f=>`<tr>
+            <td>${f.fuente}</td>
+            <td>${fmt(f.entregados)}</td>
+            <td style="color:var(--green)">${fmt(f.canjeados)}</td>
+            <td style="color:var(--yellow)">${f.tasa}</td>
+            <td style="color:var(--muted)">${fmt(f.vencidos)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="section-title">Volumen por fuente</div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      ${bars(d.fuentes.map(f=>({label:f.fuente,val:Number(f.entregados)||0,color:'var(--p)'})),maxEnt)}
+    </div>`;
 }
 
-// ═══════════════════════════════════════════════════════════
-// ── REACTIVACIÓN ───────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════
-async function renderReactivacion() {
-  const el = document.getElementById('reactivacion-content');
-  try {
-    const data = await fetchSheets({ accion:'dashboardReactivacion' });
-    if (!data.ok) throw new Error(data.mensaje||'Error');
-    const d = data.reactivacion;
-    const ab = d.abTest;
-
-    const tasaA    = pct(ab['A-30%']?.canjeados||0, ab['A-30%']?.total||0);
-    const tasaB    = pct(ab['B-40%']?.canjeados||0, ab['B-40%']?.total||0);
-    const tasaCtrl = pct(ab['Control']?.canjeados||0, ab['Control']?.total||0);
-
-    el.innerHTML = `
-      <div class="kpi-grid">
-        <div class="kpi coral">
-          <div class="kpi-label">Vencidos totales</div>
-          <div class="kpi-value coral">${fmt(d.vencidosTotales)}</div>
-          <div class="kpi-sub">Candidatos a reactivar</div>
-        </div>
-        <div class="kpi yellow">
-          <div class="kpi-label">Reactivados</div>
-          <div class="kpi-value yellow">${fmt(d.reactivados)}</div>
-          <div class="kpi-sub">Generaron nuevo cupón</div>
-        </div>
-        <div class="kpi green">
-          <div class="kpi-label">Canjeados REA</div>
-          <div class="kpi-value green">${fmt(d.canjeadosRea)}</div>
-          <div class="kpi-sub">Tasa: ${pct(d.canjeadosRea,d.reactivados)}</div>
-        </div>
-        <div class="kpi teal">
-          <div class="kpi-label">CAC Reactivación</div>
-          <div class="kpi-value teal">${d.canjeadosRea>0?cop(Math.round(d.costoWA/d.canjeadosRea)):'—'}</div>
-          <div class="kpi-sub">vs primer impacto</div>
-        </div>
-      </div>
-
-      <div class="section-title">A/B Test — Descuento óptimo</div>
-      <div class="ab-grid">
-        <div class="ab-card a">
-          <div class="ab-group">Grupo A · 30% OFF</div>
-          <div class="ab-pct">${tasaA}</div>
-          <div class="ab-sub">${fmt(ab['A-30%']?.canjeados||0)} / ${fmt(ab['A-30%']?.total||0)} canjeados</div>
-        </div>
-        <div class="ab-card b">
-          <div class="ab-group">Grupo B · 40% OFF</div>
-          <div class="ab-pct">${tasaB}</div>
-          <div class="ab-sub">${fmt(ab['B-40%']?.canjeados||0)} / ${fmt(ab['B-40%']?.total||0)} canjeados</div>
-        </div>
-        <div class="ab-card ctrl">
-          <div class="ab-group">Control · Sin WA</div>
-          <div class="ab-pct">${tasaCtrl}</div>
-          <div class="ab-sub">${fmt(ab['Control']?.canjeados||0)} / ${fmt(ab['Control']?.total||0)} canjeados</div>
-        </div>
-      </div>
-
-      <div class="section-title">Reactivación vs Primer impacto</div>
-      <div class="chart-wrap">
-        <div class="chart-box">
-          <div class="chart-title">Tasa de conversión</div>
-          ${renderBarras([
-            {label:'1er impacto',val:d.tasaPrimer,color:'var(--p)'},
-            {label:'Reactivación',val:d.tasaReactivacion,color:'var(--coral)'},
-          ])}
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">Cupones activos REA</div>
-          ${renderBarras([
-            {label:'Disponible_REA',val:d.dispRea,color:'var(--yellow)'},
-            {label:'Canjeado_REA',val:d.canjeadosRea,color:'var(--green)'},
-            {label:'Vencido_REA',val:d.vencidosRea,color:'var(--muted)'},
-          ])}
-        </div>
-      </div>`;
-  } catch(e) {
-    el.innerHTML = `<div class="error-box">Error: ${e.message}</div>`;
-  }
+// ── CIUDADES ─────────────────────────────────────────────────
+function renderCiudades(d) {
+  document.getElementById('panel-ciudades').innerHTML = `
+    <div class="section-title">Rendimiento por ciudad</div>
+    <div class="city-grid">
+      ${d.ciudades.slice(0,12).map(c=>`
+        <div class="city-card">
+          <div class="city-name">${c.ciudad}</div>
+          <div class="city-row"><span>Entregados</span><span>${fmt(c.entregados)}</span></div>
+          <div class="city-row"><span>Canjeados</span><span style="color:var(--green)">${fmt(c.canjeados)}</span></div>
+          <div class="city-row"><span>Tasa</span><span style="color:var(--yellow)">${c.tasa}</span></div>
+          <div class="city-row"><span>Vencidos</span><span style="color:var(--muted)">${fmt(c.vencidos)}</span></div>
+        </div>`).join('')}
+    </div>
+    <div class="section-title">Canjeados por ciudad</div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      ${bars(d.ciudades.slice(0,10).map(c=>({label:c.ciudad,val:Number(c.canjeados)||0,color:'var(--coral)'})))}
+    </div>`;
 }
 
-// ── INIT ─────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  tabsLoaded['resumen'] = true;
-  cargarTab('resumen');
-  document.getElementById('lastUpdate').textContent =
-    'Actualizado: '+new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+// ── REACTIVACIÓN ─────────────────────────────────────────────
+function renderReactivacion(d) {
+  const colors = {'A-30%':'var(--green)','B-40%':'var(--teal)','Control':'var(--muted)','Control-Loopy':'var(--yellow)'};
+  const rea = d.reactivacion;
+
+  document.getElementById('panel-reactivacion').innerHTML = `
+    <div class="section-title">A/B Test — Descuento óptimo de reactivación</div>
+    <div class="ab-grid">
+      ${d.abTest.filter(a=>['A-30%','B-40%','Control'].includes(a.grupo)).map(a=>`
+        <div class="ab-card">
+          <div class="ab-label">${a.grupo}</div>
+          <div class="ab-pct" style="color:${colors[a.grupo]||'var(--muted)'}">${a.tasa||'0%'}</div>
+          <div class="ab-sub">${fmt(a.canjeados)} / ${fmt(a.enviados)} canjeados</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="section-title">Reactivación vs Primer impacto</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Flujo</th><th>Tasa de canje</th><th>Detalle</th></tr></thead>
+        <tbody>
+          ${rea.map(r=>`<tr>
+            <td style="font-weight:700">${r.flujo}</td>
+            <td style="color:var(--yellow);font-size:16px;font-weight:800">${r.tasa}</td>
+            <td style="color:var(--muted)">${r.obs}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">Grupos completos A/B</div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;">
+      ${bars(d.abTest.map(a=>({label:a.grupo,val:Number(a.enviados)||0,color:colors[a.grupo]||'var(--muted)'})))}
+    </div>`;
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  _loaded['resumen']=true;
+  renderTab('resumen');
 });
 </script>
 </body>
