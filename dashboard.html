@@ -349,16 +349,10 @@ function renderBarras(items) {
 async function renderCampanas() {
   const el = document.getElementById('campanas-content');
   try {
-    // Datos de Sheets
+    // Datos de Sheets + Meta Ads (el script hace la llamada a Meta internamente)
     const sheetsData = await fetchSheets({ accion:'dashboardCampanas' });
-
-    // Datos de Meta Ads
-    const metaData = await fetchMeta(
-      `${META_ACCOUNT}/insights?fields=campaign_name,adset_name,ad_name,impressions,reach,spend,clicks,cpc,cpm&date_preset=last_30d&level=ad&limit=50`
-    );
-
     const campanas = sheetsData.ok ? sheetsData.campanas : [];
-    const ads = (metaData.data||[]);
+    const ads = sheetsData.metaAds || [];
 
     el.innerHTML = `
       <div class="section-title">Meta Ads — Últimos 30 días</div>
@@ -377,13 +371,13 @@ async function renderCampanas() {
               <td>${fmt(a.clicks)}</td>
               <td>${a.cpc?'$'+Number(a.cpc).toFixed(0):'—'}</td>
               <td>${a.cpm?'$'+Number(a.cpm).toFixed(0):'—'}</td>
-              <td>${a.spend?'$'+Number(a.spend).toLocaleString('es-CO'):'—'}</td>
+              <td>${a.spend?cop(Number(a.spend)):'—'}</td>
             </tr>`).join('')}
           </tbody>
         </table>
-      </div>` : `<div class="error-box">No hay datos de Meta Ads disponibles. Verifica el token de acceso.</div>`}
+      </div>` : `<div class="error-box">No hay datos de Meta Ads. Verifica que el token tiene permisos ads_read y está activo.</div>`}
 
-      <div class="section-title">Cupones por fuente (Sheets)</div>
+      <div class="section-title">Cupones por fuente</div>
       <div class="table-wrap">
         <table>
           <thead><tr>
