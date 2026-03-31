@@ -119,6 +119,7 @@ tbody td{padding:11px 14px;font-family:'DM Mono',monospace;font-size:12px;}
   <div class="tab" onclick="switchTab('campanas',this)">Fuentes</div>
   <div class="tab" onclick="switchTab('ciudades',this)">Ciudades</div>
   <div class="tab" onclick="switchTab('reactivacion',this)">Reactivación</div>
+  <div class="tab" onclick="switchTab('meta',this)">Meta Ads</div>
 </div>
 
 <div class="main">
@@ -126,6 +127,7 @@ tbody td{padding:11px 14px;font-family:'DM Mono',monospace;font-size:12px;}
   <div class="panel" id="panel-campanas"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando fuentes...</div></div></div>
   <div class="panel" id="panel-ciudades"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando ciudades...</div></div></div>
   <div class="panel" id="panel-reactivacion"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando reactivación...</div></div></div>
+  <div class="panel" id="panel-meta"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando Meta Ads...</div></div></div>
 </div>
 
 <script>
@@ -256,17 +258,114 @@ async function actualizarDashboard() {
 
 async function renderTab(name) {
   try {
+    if (name === 'meta') {
+      await renderMeta();
+      return;
+    }
     if (!_dashData) _dashData = await cargarDatos();
     const d = _dashData;
-    document.getElementById('lastUpdate').textContent = d.actualizacion||'';
-    if (name==='resumen')     renderResumen(d);
-    if (name==='campanas')    renderCampanas(d);
-    if (name==='ciudades')    renderCiudades(d);
+    document.getElementById('lastUpdate').textContent = d.actualizacion||'';;
+    if (name==='resumen')      renderResumen(d);
+    if (name==='campanas')     renderCampanas(d);
+    if (name==='ciudades')     renderCiudades(d);
     if (name==='reactivacion') renderReactivacion(d);
   } catch(e) {
     document.getElementById('panel-'+name).innerHTML =
       `<div class="error">Error: ${e.message}<br><br>` +
       `<strong>Solución:</strong> Haz clic en "⟳ Recalcular" para generar la hoja Dashboard por primera vez.</div>`;
+  }
+}
+
+// ── META ADS ─────────────────────────────────────────────────
+async function renderMeta() {
+  const el = document.getElementById('panel-meta');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-txt">Consultando Meta Ads...</div></div>';
+  try {
+    const data = await fetchSheets({ accion:'leerMeta' });
+    if (!data.ok) {
+      el.innerHTML = `
+        <div class="info">No hay datos de Meta Ads aún.</div>
+        <button class="btn" onclick="sincronizarMeta()" id="btnSyncMeta">↻ Sincronizar Meta Ads ahora</button>`;
+      return;
+    }
+    const rows    = data.rows || [];
+    const totales = data.totales || [];
+    const act     = data.actualizado ? new Date(data.actualizado).toLocaleString('es-CO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+
+    // KPIs desde totales
+    const gastoTotal  = Number(totales[8]||0);
+    const impTotal    = Number(totales[2]||0);
+    const clicsTotal  = Number(totales[4]||0);
+    const resTotal    = Number(totales[9]||0);
+    const ctrTotal    = impTotal>0 ? (clicsTotal/impTotal*100).toFixed(2)+'%' : '0%';
+    const cpaTotal    = resTotal>0 ? '$'+Math.round(gastoTotal/resTotal).toLocaleString('es-CO') : '—';
+
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div class="section-title" style="margin:0">Últimos 30 días · ${rows.length} ad sets</div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--muted)">Actualizado: ${act}</span>
+          <button class="btn" onclick="sincronizarMeta()" id="btnSyncMeta">↻ Sincronizar</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi coral"><div class="kpi-label">Gasto total</div><div class="kpi-value">${cop(gastoTotal)}</div><div class="kpi-sub">últimos 30 días</div></div>
+        <div class="kpi p"><div class="kpi-label">Impresiones</div><div class="kpi-value">${fmt(impTotal)}</div><div class="kpi-sub">alcance total</div></div>
+        <div class="kpi teal"><div class="kpi-label">Clics</div><div class="kpi-value">${fmt(clicsTotal)}</div><div class="kpi-sub">CTR: ${ctrTotal}</div></div>
+        <div class="kpi yellow"><div class="kpi-label">Resultados</div><div class="kpi-value">${fmt(resTotal)}</div><div class="kpi-sub">leads/conversiones</div></div>
+        <div class="kpi green"><div class="kpi-label">Costo/resultado</div><div class="kpi-value">${cpaTotal}</div><div class="kpi-sub">CPA promedio</div></div>
+      </div>
+
+      <div class="section-title">Por conjunto de anuncios</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Campaña</th><th>Ad Set</th><th>Impresiones</th><th>Alcance</th>
+            <th>Clics</th><th>CTR</th><th>CPC</th><th>CPM</th><th>Gasto</th><th>Resultados</th><th>Costo/Res.</th>
+          </tr></thead>
+          <tbody>
+            ${rows.map(r=>`<tr>
+              <td style="color:var(--muted);font-size:11px">${r[0]||'—'}</td>
+              <td style="font-weight:700">${r[1]||'—'}</td>
+              <td>${fmt(r[2])}</td>
+              <td style="color:var(--muted)">${fmt(r[3])}</td>
+              <td>${fmt(r[4])}</td>
+              <td style="color:var(--yellow)">${r[5]||'—'}</td>
+              <td style="color:var(--teal)">${r[6]||'—'}</td>
+              <td style="color:var(--muted)">${r[7]||'—'}</td>
+              <td style="color:var(--coral);font-weight:700">${cop(Number(r[8]||0))}</td>
+              <td style="color:var(--green)">${fmt(r[9])}</td>
+              <td style="color:var(--p2)">${r[10]||'—'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title">Gasto por ad set</div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;">
+        ${bars(rows.map(r=>({label:r[1]||'—',val:Number(r[8]||0),color:'var(--coral)'})))}
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="error">Error: ${e.message}</div>`;
+  }
+}
+
+async function sincronizarMeta() {
+  const btn = document.getElementById('btnSyncMeta');
+  if (btn) { btn.textContent='⟳ Sincronizando...'; btn.disabled=true; }
+  try {
+    const r = await fetchSheets({ accion:'sincronizarMeta' });
+    if (r.ok) {
+      _loaded['meta'] = false;
+      await renderMeta();
+    } else {
+      alert('Error: ' + (r.mensaje||'No se pudo sincronizar'));
+      if (btn) { btn.textContent='↻ Sincronizar'; btn.disabled=false; }
+    }
+  } catch(e) {
+    alert('Error de conexión: ' + e.message);
+    if (btn) { btn.textContent='↻ Sincronizar'; btn.disabled=false; }
   }
 }
 
