@@ -702,7 +702,6 @@ async function solicitar() {
   }
   // NOTA: Validación de email contra Loopy en pausa (activar tras análisis 5 días)
 
-  const codigo   = genCodigo();
   const ahora    = new Date();
   const vence    = new Date(ahora.getTime() + P.vigencia * 3_600_000);
   const producto = esSorteo ? P.premio : P.producto;
@@ -710,7 +709,7 @@ async function solicitar() {
   try {
     const res = await fetchGETSafe({
       accion:      "registrarCupon",
-      codigo, nombre, celular,
+      nombre, celular,
       ciudad:      P.ciudad,
       tienda:      P.tienda,
       fase:        P.fase,
@@ -742,7 +741,7 @@ async function solicitar() {
         mostrarExistente(res, nombre);
       } else if (res.ok) {
         if (!DEV_MODE) marcarDispositivoUsado();
-        mostrarNuevo({ codigo: res.codigo || codigo, nombre, vence });
+        mostrarNuevo({ codigo: res.codigo, nombre, vence });
       } else {
         alert(res.mensaje || "Error al generar el cupón. Intenta de nuevo.");
         show("stateForm");
