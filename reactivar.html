@@ -666,14 +666,12 @@ async function solicitar() {
     }
   } catch(e) {}
 
-  const codigo = genCodigo();
   const ahora  = new Date();
   const vence  = new Date(ahora.getTime() + P.vigencia * 3_600_000);
 
   try {
     const res = await fetchSafe({
       accion:     "registrarCupon",
-      codigo,
       nombre,
       celular,
       ciudad:     P.ciudad,
@@ -698,7 +696,7 @@ async function solicitar() {
     completarProgreso(() => {
       btnLoading(false);
       if (res.existe)        mostrarExistente(res, nombre);
-      else if (res.ok)       mostrarNuevo({ codigo: res.codigo || codigo, nombre, vence });
+      else if (res.ok)       mostrarNuevo({ codigo: res.codigo, nombre, vence });
       else {
         alert(res.mensaje || "Error al generar el cupón. Intenta de nuevo.");
         show("stateForm");
