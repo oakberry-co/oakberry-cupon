@@ -187,6 +187,37 @@
   .adidas-product { font-size:13px; font-weight:700; color:#fff; margin-bottom:16px; }
   .adidas-action { background:#fff; color:#000; font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:1px; padding:12px 24px; border-radius:8px; display:inline-block; }
   .adidas-valid { font-size:10px; color:rgba(255,255,255,0.4); margin-top:12px; letter-spacing:1px; }
+
+  /* ── MODAL RESCATE ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:380px;position:relative;animation:modalIn .3s cubic-bezier(0.34,1.56,0.64,1);}
+  @keyframes modalIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
+  .modal-close{position:absolute;top:16px;right:16px;background:transparent;border:none;font-size:20px;cursor:pointer;color:#999;line-height:1;}
+  .modal-header{background:#f39c12;border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
+  .modal-header-icon{font-size:28px;margin-bottom:6px;}
+  .modal-header-title{font-size:15px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;}
+  .modal-header-sub{font-size:10px;color:rgba(255,255,255,0.85);font-weight:600;letter-spacing:1px;margin-top:3px;}
+  .modal-info{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:12px;margin-bottom:16px;font-size:11px;color:#7a5c00;line-height:1.6;}
+  .modal-field{margin-bottom:14px;}
+  .modal-field label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--primary);margin-bottom:6px;}
+  .modal-field input{width:100%;padding:12px 14px;border:2px solid #e0d9f0;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#2c2c2c;outline:none;transition:border-color .2s;}
+  .modal-field input:focus{border-color:var(--primary);}
+  .modal-btn{width:100%;padding:14px;background:#f39c12;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;color:#fff;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s;margin-top:4px;}
+  .modal-btn:hover{background:#e67e22;}
+  .modal-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .modal-result{display:none;text-align:center;padding:12px 0;}
+  .modal-result.ok .modal-result-code{background:var(--primary);border-radius:12px;padding:14px;margin:10px 0;}
+  .modal-result-code-label{font-size:10px;color:rgba(255,255,255,0.7);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+  .modal-result-code-val{font-size:32px;font-weight:900;color:#fff;letter-spacing:4px;}
+  .modal-result-code-sub{font-size:10px;color:rgba(255,255,255,0.7);margin-top:3px;}
+  .modal-result-instr{background:#e8f8f0;border:1px solid #27ae60;border-radius:10px;padding:10px;font-size:12px;color:#1a5c3a;font-weight:600;line-height:1.5;margin-top:8px;}
+  .modal-result-err{background:#fde8e8;border:1px solid #e74c3c;border-radius:10px;padding:12px;font-size:12px;color:#c0392b;line-height:1.5;}
+  .modal-audit{font-size:10px;color:#aaa;text-align:center;margin-top:12px;}
+
+  /* Botón rescate en tarjeta de error no-existe */
+  .rescue-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:10px 16px;background:#f39c12;color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+  .rescue-btn:hover{background:#e67e22;transform:translateY(-1px);}
 </style>
 </head>
 <body>
@@ -320,9 +351,10 @@
     <div class="err-card type-noexiste" id="errNoExiste">
       <span class="err-icon">❓</span>
       <div class="err-reason">Código no encontrado</div>
-      <div class="err-detail">El código ingresado no existe en el sistema.</div>
-      <div class="err-action-label">Qué hacer</div>
-      <div class="err-action">Pídele al cliente que muestre el código en su celular y verifica que lo estés digitando correctamente.</div>
+      <div class="err-detail">El código ingresado no existe en el sistema. Si el cliente puede mostrar su pantalla con el cupón, puedes generar un código de rescate válido por 10 minutos.</div>
+      <div class="err-action-label">Opciones</div>
+      <div class="err-action">Verifica que el código esté bien escrito. Si el cliente muestra su pantalla con el cupón, usa el rescate.</div>
+      <button class="rescue-btn" onclick="abrirRescate()">🚨 Generar código de rescate</button>
     </div>
 
     <!-- Banner post-canje si no tiene Loopy -->
@@ -605,6 +637,137 @@ document.getElementById("codigo").addEventListener("input", function() {
   ocultarTodosErrores();
   document.getElementById("postLoopyBanner").classList.remove("show");
 });
+
+// ── RESCATE DE CUPÓN ─────────────────────────────────────────
+function abrirRescate() {
+  // Pre-cargar el código que falló
+  const codFallo = document.getElementById("codigo").value.trim().toUpperCase();
+  if (codFallo) document.getElementById("rCodigo").value = codFallo;
+  document.getElementById("rescateOverlay").classList.add("show");
+  document.getElementById("rescateResult").style.display = "none";
+  document.getElementById("rescateForm").style.display = "block";
+  document.getElementById("rCelular").value = "";
+}
+
+function cerrarRescate(e) {
+  if (e.target === document.getElementById("rescateOverlay")) cerrarRescateBtn();
+}
+function cerrarRescateBtn() {
+  document.getElementById("rescateOverlay").classList.remove("show");
+}
+
+async function ejecutarRescate() {
+  const codigoOriginal = document.getElementById("rCodigo").value.trim().toUpperCase();
+  const celularRaw     = document.getElementById("rCelular").value.trim();
+  const tienda         = document.getElementById("inp-tienda")?.value || document.getElementById("tienda")?.value || "No especificada";
+  const ciudad         = document.getElementById("inp-ciudad")?.value || document.getElementById("ciudad")?.value || "Bogota";
+
+  if (!codigoOriginal || codigoOriginal.length !== 5) {
+    alert("Ingresa el código original de 5 caracteres"); return;
+  }
+  if (celularRaw.length < 10) {
+    alert("Ingresa el celular completo (10 dígitos)"); return;
+  }
+
+  const btn = document.getElementById("rescateSubmitBtn");
+  btn.disabled = true;
+  btn.textContent = "⟳ Procesando...";
+
+  try {
+    const res = await fetchGET({
+      accion:         "rescatarCupon",
+      codigoOriginal,
+      celular:        "57" + celularRaw,
+      ciudad,
+      tienda,
+    });
+
+    document.getElementById("rescateForm").style.display = "none";
+    const resEl = document.getElementById("rescateResult");
+    resEl.style.display = "block";
+
+    if (res.ok) {
+      resEl.className = "modal-result ok";
+      resEl.innerHTML = `
+        <div style="font-size:13px;font-weight:700;color:#27ae60;margin-bottom:10px">✅ Código de rescate generado</div>
+        <div class="modal-result-code">
+          <div class="modal-result-code-label">Nuevo código</div>
+          <div class="modal-result-code-val">${res.codigoNuevo}</div>
+          <div class="modal-result-code-sub">⏱ Válido por 10 minutos</div>
+        </div>
+        <div class="modal-result-instr">
+          👉 Cierra este modal e ingresa el código <strong>${res.codigoNuevo}</strong> en el validador para completar el canje.
+          ${res.rescatesRestantes !== undefined ? `<br><br>⚠️ Quedan <strong>${res.rescatesRestantes} rescates disponibles</strong> hoy para esta tienda.` : ''}
+        </div>
+        <button class="modal-btn" style="margin-top:12px;background:#5F4B8B"
+          onclick="usarCodigoRescate('${res.codigoNuevo}')">
+          → Usar este código ahora
+        </button>`;
+    } else {
+      resEl.className = "modal-result";
+      resEl.innerHTML = `<div class="modal-result-err">❌ ${res.mensaje}</div>
+        <button class="modal-btn" style="margin-top:12px" onclick="document.getElementById('rescateForm').style.display='block';this.closest('.modal-result').style.display='none';">← Intentar de nuevo</button>`;
+    }
+  } catch(e) {
+    document.getElementById("rescateResult").innerHTML =
+      `<div class="modal-result-err">❌ Error de conexión. Intenta de nuevo.</div>`;
+    document.getElementById("rescateResult").style.display = "block";
+  }
+
+  btn.disabled = false;
+  btn.textContent = "🚨 Generar código de rescate";
+}
+
+function usarCodigoRescate(codigo) {
+  cerrarRescateBtn();
+  document.getElementById("codigo").value = codigo;
+  // Limpiar errores y volver al formulario
+  ocultarTodosErrores();
+  document.getElementById("formSection").classList.remove("hidden");
+  document.getElementById("mainBtn").style.display = "block";
+  document.getElementById("resetBtn").style.display = "none";
+}
 </script>
+
+  <!-- ══ MODAL RESCATE ══ -->
+  <div class="modal-overlay" id="rescateOverlay" onclick="cerrarRescate(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="cerrarRescateBtn()">✕</button>
+      <div class="modal-header">
+        <div class="modal-header-icon">🚨</div>
+        <div class="modal-header-title">Rescate de Cupón</div>
+        <div class="modal-header-sub">Solo cajeros autorizados</div>
+      </div>
+      <div class="modal-info">
+        <strong>📋 Reglas del rescate — leer antes de usar</strong>
+        <div style="margin-top:8px;line-height:1.8">
+          ✅ <strong>Úsalo SOLO si:</strong> el cliente muestra su pantalla con el cupón y el validador dice "no encontrado"<br>
+          ⏱ El código de rescate es válido por <strong>10 minutos</strong> — canjéalo de inmediato<br>
+          🔢 Límite: <strong>máximo 5 rescates por tienda por día</strong><br>
+          👤 Máximo <strong>1 rescate por cliente por día</strong><br>
+          ❌ <strong>No uses esta opción si:</strong> el cliente simplemente olvidó su cupón, si el código ya fue canjeado, o si el cupón venció
+        </div>
+      </div>
+
+      <div id="rescateForm">
+        <div class="modal-field">
+          <label>Código original del cliente</label>
+          <input type="text" id="rCodigo" placeholder="XXXXX" maxlength="5"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+        </div>
+        <div class="modal-field">
+          <label>Celular del cliente</label>
+          <input type="tel" id="rCelular" placeholder="3001234567" maxlength="10"
+            oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+        <button class="modal-btn" id="rescateSubmitBtn" onclick="ejecutarRescate()">
+          🚨 Generar código de rescate
+        </button>
+      </div>
+
+      <div class="modal-result" id="rescateResult"></div>
+      <div class="modal-audit">Todos los rescates quedan registrados para auditoría.</div>
+    </div>
+  </div>
 </body>
 </html>
