@@ -120,6 +120,7 @@ tbody td{padding:11px 14px;font-family:'DM Mono',monospace;font-size:12px;}
   <div class="tab" onclick="switchTab('ciudades',this)">Ciudades</div>
   <div class="tab" onclick="switchTab('reactivacion',this)">Reactivación</div>
   <div class="tab" onclick="switchTab('meta',this)">Meta Ads</div>
+  <div class="tab" onclick="switchTab('cac',this)">CAC & ROI</div>
 </div>
 
 <div class="main">
@@ -128,6 +129,7 @@ tbody td{padding:11px 14px;font-family:'DM Mono',monospace;font-size:12px;}
   <div class="panel" id="panel-ciudades"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando ciudades...</div></div></div>
   <div class="panel" id="panel-reactivacion"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando reactivación...</div></div></div>
   <div class="panel" id="panel-meta"><div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando Meta Ads...</div></div></div>
+  <div class="panel" id="panel-cac"><div class="loading"><div class="spinner"></div><div class="loading-txt">Calculando CAC...</div></div></div>
 </div>
 
 <script>
@@ -258,10 +260,8 @@ async function actualizarDashboard() {
 
 async function renderTab(name) {
   try {
-    if (name === 'meta') {
-      await renderMeta();
-      return;
-    }
+    if (name === 'meta') { await renderMeta(); return; }
+    if (name === 'cac')  { await renderCAC();  return; }
     if (!_dashData) _dashData = await cargarDatos();
     const d = _dashData;
     document.getElementById('lastUpdate').textContent = d.actualizacion||'';;
@@ -490,6 +490,128 @@ window.addEventListener('DOMContentLoaded',()=>{
   _loaded['resumen']=true;
   renderTab('resumen');
 });
+
+// ── CAC & ROI ────────────────────────────────────────────────
+async function renderCAC() {
+  const el = document.getElementById('panel-cac');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-txt">Calculando CAC & ROI...</div></div>';
+  try {
+    const d = await fetchSheets({ accion:'dashboardCAC' });
+    if (!d.ok) throw new Error(d.mensaje||'Error');
+
+    const PRECIO = d.precio || 25400;
+
+    el.innerHTML = `
+      <!-- KPIs Meta -->
+      <div class="section-title">CAC Meta Ads — últimos 30 días</div>
+      <div class="kpi-grid">
+        <div class="kpi coral">
+          <div class="kpi-label">Gasto Meta</div>
+          <div class="kpi-value">${cop(d.gastoMeta)}</div>
+          <div class="kpi-sub">últimos 30 días</div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-label">CAC Meta</div>
+          <div class="kpi-value">${cop(d.cacMeta)}</div>
+          <div class="kpi-sub">por cliente nuevo canjeado</div>
+        </div>
+        <div class="kpi yellow">
+          <div class="kpi-label">Ingreso neto</div>
+          <div class="kpi-value">${cop(d.ingresoNetoMeta)}</div>
+          <div class="kpi-sub">${fmt(d.canjeadosMeta)} canjes × precio con desc.</div>
+        </div>
+        <div class="kpi teal">
+          <div class="kpi-label">ROI Meta</div>
+          <div class="kpi-value">${d.roiMeta}</div>
+          <div class="kpi-sub">ingreso neto ÷ gasto</div>
+        </div>
+        <div class="kpi p">
+          <div class="kpi-label">Cupones Meta</div>
+          <div class="kpi-value">${fmt(d.totalMeta)}</div>
+          <div class="kpi-sub">${fmt(d.canjeadosMeta)} canjeados · ${d.totalMeta>0?((d.canjeadosMeta/d.totalMeta)*100).toFixed(1):0}% tasa</div>
+        </div>
+      </div>
+
+      <!-- CAC Reactivación -->
+      <div class="section-title">CAC Reactivación (WA)</div>
+      <div class="kpi-grid">
+        <div class="kpi coral">
+          <div class="kpi-label">Costo WA enviados</div>
+          <div class="kpi-value">${cop(d.costoWA)}</div>
+          <div class="kpi-sub">~$275 por mensaje</div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-label">CAC Reactivación</div>
+          <div class="kpi-value">${cop(d.cacRea)}</div>
+          <div class="kpi-sub">por cliente reactivado</div>
+        </div>
+        <div class="kpi yellow">
+          <div class="kpi-label">Ingreso neto REA</div>
+          <div class="kpi-value">${cop(d.ingresoNetoRea)}</div>
+          <div class="kpi-sub">${fmt(d.canjeadosRea)} canjes reactivación</div>
+        </div>
+        <div class="kpi teal">
+          <div class="kpi-label">ROI Reactivación</div>
+          <div class="kpi-value">${d.roiRea}</div>
+          <div class="kpi-sub">ingreso neto ÷ costo WA</div>
+        </div>
+      </div>
+
+      <!-- CAC por segmento -->
+      <div class="section-title">CAC por segmento Loopy</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Segmento</th><th>Total</th><th>Canjeados</th><th>Tasa</th>
+            <th>Desc. prom.</th><th>Ingreso neto</th><th>CAC estimado</th><th>ROI</th>
+          </tr></thead>
+          <tbody>
+            ${d.cacSegmentos.map(s=>{
+              const color = {N1:'var(--green)',E1:'var(--yellow)',E2:'var(--teal)',E3:'var(--p2)'}[s.seg]||'var(--muted)';
+              return `<tr>
+                <td><span style="color:${color};font-weight:800">${s.seg}</span></td>
+                <td>${fmt(s.total)}</td>
+                <td style="color:var(--green)">${fmt(s.canjeados)}</td>
+                <td style="color:var(--yellow)">${s.total>0?((s.canjeados/s.total)*100).toFixed(1)+'%':'0%'}</td>
+                <td style="color:var(--muted)">${s.descProm}</td>
+                <td style="color:var(--coral)">${cop(s.ingresoNeto)}</td>
+                <td style="color:var(--teal);font-weight:700">${s.cac>0?cop(s.cac):'—'}</td>
+                <td style="color:var(--p2)">${s.roi}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- CAC por fuente -->
+      <div class="section-title">Ingreso neto por fuente</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Fuente</th><th>Entregados</th><th>Canjeados</th><th>Tasa</th><th>Ingreso neto total</th><th>Ingreso prom/canje</th>
+          </tr></thead>
+          <tbody>
+            ${d.cacFuentes.map(f=>`<tr>
+              <td style="font-weight:700">${f.fuente}</td>
+              <td>${fmt(f.total)}</td>
+              <td style="color:var(--green)">${fmt(f.canjeados)}</td>
+              <td style="color:var(--yellow)">${f.tasa}</td>
+              <td style="color:var(--coral)">${cop(f.ingresoNeto)}</td>
+              <td style="color:var(--muted)">${f.canjeados>0?cop(Math.round(f.ingresoNeto/f.canjeados)):'—'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info" style="font-size:11px;line-height:1.7">
+        💡 <strong>Nota metodológica:</strong> El ingreso neto = precio bowl ($${PRECIO.toLocaleString('es-CO')}) × (1 - descuento%). 
+        El CAC por segmento es una estimación proporcional al gasto Meta mientras no haya UTMs por ad set. 
+        Cuando actives los links V2.0 con <code>{{campaign.id}}</code>, el CAC será exacto por anuncio.
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="error">Error: ${e.message}</div>`;
+  }
+}
 </script>
 </body>
 </html>
