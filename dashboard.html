@@ -404,29 +404,85 @@ function renderResumen(d) {
     </div>`;
 }
 
-// ── FUENTES ───────────────────────────────────────────────────
-function renderCampanas(d) {
-  const maxEnt = Math.max(...d.fuentes.map(f=>Number(f.entregados)||0),1);
-  document.getElementById('panel-campanas').innerHTML = `
-    <div class="section-title">Cupones por fuente de campaña</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Fuente</th><th>Entregados</th><th>Canjeados</th><th>Tasa</th><th>Vencidos</th></tr></thead>
-        <tbody>
-          ${d.fuentes.map(f=>`<tr>
-            <td>${f.fuente}</td>
-            <td>${fmt(f.entregados)}</td>
-            <td style="color:var(--green)">${fmt(f.canjeados)}</td>
-            <td style="color:var(--yellow)">${f.tasa}</td>
-            <td style="color:var(--muted)">${fmt(f.vencidos)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
-    <div class="section-title">Volumen por fuente</div>
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;">
-      ${bars(d.fuentes.map(f=>({label:f.fuente,val:Number(f.entregados)||0,color:'var(--p)'})),maxEnt)}
-    </div>`;
+// ── FUENTES + UTM CRUZADO ─────────────────────────────────────
+async function renderCampanas(d) {
+  const el = document.getElementById('panel-campanas');
+  // Cargar data cruzada UTM
+  try {
+    const utm = await fetchSheets({ accion:'dashboardCampanasUTM' });
+    const camps = utm.ok ? utm.campanas : [];
+    const cruzados = utm.cruzados||0;
+    const sinCruce = utm.sinCruce||0;
+
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:8px;">
+        <div class="section-title" style="margin:0">Campañas × Links × Meta Ads</div>
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--muted)">
+          ${cruzados} cruzados · ${sinCruce} sin UTM
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Campaña</th><th>Ad Set</th><th>Fase</th>
+            <th>Entregados</th><th>Canjeados</th><th>Tasa</th>
+            <th>Ingreso neto</th><th>Gasto Meta</th><th>CAC</th><th>ROI</th>
+          </tr></thead>
+          <tbody>
+            ${camps.map(c=>{
+              const hasRoi = c.roi && c.roi !== 'null';
+              const hasCac = c.cac && c.cac > 0;
+              return `<tr>
+                <td style="font-weight:700;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.nombre}">${c.nombre||'—'}</td>
+                <td style="font-size:11px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.adset}">${c.adset||'—'}</td>
+                <td><span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(124,77,255,0.15);color:var(--p2)">${c.fase||'—'}</span></td>
+                <td>${fmt(c.total)}</td>
+                <td style="color:var(--green);font-weight:700">${fmt(c.canjeados)}</td>
+                <td style="color:var(--yellow)">${c.total>0?((c.canjeados/c.total)*100).toFixed(1)+'%':'0%'}</td>
+                <td style="color:var(--coral)">${cop(c.ingresoNeto||0)}</td>
+                <td style="color:var(--muted)">${c.meta?cop(c.meta.gasto):'—'}</td>
+                <td style="color:var(--teal);font-weight:700">${hasCac?cop(c.cac):'—'}</td>
+                <td style="color:${hasRoi&&parseFloat(c.roi)>100?'var(--green)':'var(--coral)'};font-weight:700">${hasRoi?c.roi:'—'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title">Cupones entregados por campaña</div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;">
+        ${bars(camps.slice(0,10).map(c=>({label:c.nombre||c.adset||'sin nombre',val:Number(c.total)||0,color:'var(--p)'})))}
+      </div>
+
+      <div class="section-title">Canjeados por campaña</div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;">
+        ${bars(camps.slice(0,10).map(c=>({label:c.nombre||c.adset||'sin nombre',val:Number(c.canjeados)||0,color:'var(--green)'})))}
+      </div>
+
+      ${sinCruce>0?`<div class="info" style="font-size:11px;margin-top:16px">
+        ℹ️ <strong>${sinCruce} cupones</strong> no tienen UTMs en col Q — son cupones anteriores a los links V2.0 o generados orgánicamente.
+        Se muestran agrupados en la tabla de fuentes del resumen.
+      </div>`:''}`;
+  } catch(e) {
+    // Fallback a data básica de Sheets
+    const maxEnt = Math.max(...d.fuentes.map(f=>Number(f.entregados)||0),1);
+    el.innerHTML = `
+      <div class="info">Usando datos básicos por fuente (sin cruce UTM)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fuente</th><th>Entregados</th><th>Canjeados</th><th>Tasa</th><th>Vencidos</th></tr></thead>
+          <tbody>
+            ${d.fuentes.map(f=>`<tr>
+              <td>${f.fuente}</td><td>${fmt(f.entregados)}</td>
+              <td style="color:var(--green)">${fmt(f.canjeados)}</td>
+              <td style="color:var(--yellow)">${f.tasa}</td>
+              <td style="color:var(--muted)">${fmt(f.vencidos)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
 }
 
 // ── CIUDADES ─────────────────────────────────────────────────
