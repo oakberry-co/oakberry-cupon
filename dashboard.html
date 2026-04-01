@@ -396,10 +396,11 @@ function renderResumen(d) {
     <div class="section-title">Mix de usuarios Loopy</div>
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;">
       ${bars([
-        {label:'N1 — Nuevo puro', val:n1, color:'var(--green)'},
-        {label:'E1 — Ocasional',  val:e1, color:'var(--yellow)'},
-        {label:'E2 — Regular',    val:e2, color:'var(--teal)'},
-        {label:'E3 — Frecuente',  val:e3, color:'var(--p2)'},
+        {label:'N1 — Nuevo',       val:n1,           color:'#27ae60'},
+        {label:'E1 — Ocasional',   val:e1,           color:'#f1c40f'},
+        {label:'E2 — Regular',     val:e2,           color:'#e67e22'},
+        {label:'E3 — Frecuente',   val:e3,           color:'#e74c3c'},
+        {label:'E4 — Revalidado',  val:Number(d.resumen?.e4||0), color:'#8e44ad'},
       ])}
     </div>`;
 }
