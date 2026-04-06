@@ -38,16 +38,12 @@
     input { text-transform:uppercase; letter-spacing:2px; font-size:15px; }
     input:focus, select:focus { border-color:var(--primary); }
 
-    /* ── Separador de sección ── */
     .section-sep {
       font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:2px;
       color:#bbb; margin:18px 0 12px; display:flex; align-items:center; gap:8px;
     }
-    .section-sep::before, .section-sep::after {
-      content:''; flex:1; height:1px; background:#eee;
-    }
+    .section-sep::before, .section-sep::after { content:''; flex:1; height:1px; background:#eee; }
 
-    /* ── Toggle de dos opciones ── */
     .toggle-wrap { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     .toggle-btn {
       padding:13px 8px; border-radius:12px; border:2px solid #eee;
@@ -60,7 +56,6 @@
     .toggle-btn.selected-si  { background:#eafaf1; border-color:var(--green);  color:var(--green); }
     .toggle-btn.selected-no  { background:#fef9e7; border-color:var(--orange); color:var(--orange); }
 
-    /* ── Banner Loopy recordatorio (pre-canje) ── */
     .loopy-banner {
       display:none; margin-top:4px; margin-bottom:4px;
       background:linear-gradient(135deg, #fff8e1, #fffde7);
@@ -68,21 +63,11 @@
       padding:16px 18px; animation:fadeIn 0.3s ease;
     }
     .loopy-banner.show { display:block; }
-    .loopy-banner-title {
-      font-size:13px; font-weight:900; color:#7a5c00;
-      text-transform:uppercase; letter-spacing:0.5px;
-      margin-bottom:8px; display:flex; align-items:center; gap:8px;
-    }
+    .loopy-banner-title { font-size:13px; font-weight:900; color:#7a5c00; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
     .loopy-banner-body { font-size:12px; font-weight:700; color:#5d4200; line-height:1.6; }
     .loopy-steps { margin-top:10px; display:flex; flex-direction:column; gap:5px; }
     .loopy-step { display:flex; align-items:flex-start; gap:8px; font-size:11px; font-weight:700; color:#7a5c00; }
-    .loopy-step-num {
-      min-width:20px; height:20px; border-radius:50%;
-      background:var(--yellow); color:#5d4200;
-      font-size:10px; font-weight:900;
-      display:flex; align-items:center; justify-content:center;
-      flex-shrink:0; margin-top:1px;
-    }
+    .loopy-step-num { min-width:20px; height:20px; border-radius:50%; background:var(--yellow); color:#5d4200; font-size:10px; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
 
     .btn {
       width:100%; padding:17px; background:var(--primary); color:#fff;
@@ -101,7 +86,6 @@
     .spin { width:20px; height:20px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.65s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
-    /* RESULTADO */
     .result { display:none; margin-top:18px; border-radius:16px; padding:18px 20px; text-align:left; }
     .result.show { display:block; animation:fadeIn 0.3s ease; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
@@ -115,20 +99,43 @@
     .result-row span { color:var(--primary); }
     .divider-line { border:none; border-top:1.5px dashed #ddd; margin:10px 0; }
 
-    /* Banner Loopy post-canje */
     .post-loopy-banner {
       display:none; margin-top:14px;
       background:linear-gradient(135deg,#fff8e1,#fffde7);
-      border:2px solid var(--yellow); border-radius:14px;
-      padding:14px 16px;
+      border:2px solid var(--yellow); border-radius:14px; padding:14px 16px;
     }
     .post-loopy-banner.show { display:block; animation:fadeIn 0.3s ease 0.2s both; }
-    .post-loopy-title {
-      font-size:12px; font-weight:900; color:#7a5c00;
-      text-transform:uppercase; letter-spacing:0.4px;
-      margin-bottom:6px; display:flex; align-items:center; gap:6px;
-    }
+    .post-loopy-title { font-size:12px; font-weight:900; color:#7a5c00; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
     .post-loopy-body { font-size:11px; font-weight:700; color:#5d4200; line-height:1.7; }
+
+    /* ── Tarjeta datos cliente Adidas ── */
+    .adidas-client-card {
+      display:none; margin-top:14px;
+      background:#0a0a0a; border:2px solid #fff;
+      border-radius:16px; overflow:hidden;
+      animation:fadeIn 0.3s ease 0.15s both;
+    }
+    .adidas-client-card.show { display:block; }
+    .adc-header {
+      background:#000; padding:11px 16px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid #222;
+    }
+    .adc-brand { font-weight:900; font-size:11px; letter-spacing:3px; color:#fff; text-transform:uppercase; }
+    .adc-badge { font-size:9px; font-weight:900; letter-spacing:1.5px; padding:4px 10px; border-radius:100px; text-transform:uppercase; white-space:nowrap; }
+    .adc-badge.nuevo    { background:rgba(34,197,94,0.15);  border:1.5px solid #22c55e; color:#22c55e; }
+    .adc-badge.conocido { background:rgba(245,200,66,0.12); border:1.5px solid #F5C842; color:#b8940f; }
+    .adc-body { padding:12px 16px; }
+    .adc-row  { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #1a1a1a; }
+    .adc-row:last-child { border-bottom:none; }
+    .adc-icon  { font-size:13px; width:20px; text-align:center; flex-shrink:0; }
+    .adc-label { font-size:9px; font-weight:900; letter-spacing:1px; text-transform:uppercase; color:#555; width:55px; flex-shrink:0; }
+    .adc-value { font-size:12px; font-weight:700; color:#fff; flex:1; word-break:break-all; }
+    .adc-loopy-tip {
+      margin-top:10px; padding:9px 12px;
+      background:rgba(34,197,94,0.08); border:1.5px solid rgba(34,197,94,0.25);
+      border-radius:10px; font-size:11px; font-weight:700; color:#86efac; line-height:1.5;
+    }
 
     /* ── Tarjetas de error tipificadas ── */
     .err-card { display:none; margin-top:18px; border-radius:16px; padding:18px 20px; animation:fadeIn 0.3s ease; }
@@ -138,24 +145,18 @@
     .err-card .err-detail { font-size:12px; font-weight:700; color:#666; margin-bottom:14px; line-height:1.6; }
     .err-card .err-action-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#aaa; margin-bottom:6px; }
     .err-card .err-action { font-size:12px; font-weight:700; line-height:1.6; padding:10px 14px; border-radius:10px; }
-
-    /* Variantes por tipo */
     .err-card.type-canjeado  { background:#fdf0f0; border:2px solid #f5c6c6; }
     .err-card.type-canjeado  .err-reason { color:#c0392b; }
     .err-card.type-canjeado  .err-action { background:#fce4e4; color:#922b21; }
-
     .err-card.type-ciudad    { background:#f0f4ff; border:2px solid #c5cff5; }
     .err-card.type-ciudad    .err-reason { color:#2c3e8c; }
     .err-card.type-ciudad    .err-action { background:#e0e8ff; color:#1a2460; }
-
     .err-card.type-horario   { background:#fff8f0; border:2px solid #f5dbb8; }
     .err-card.type-horario   .err-reason { color:#b7570a; }
     .err-card.type-horario   .err-action { background:#ffecd6; color:#7d3a05; }
-
     .err-card.type-formato   { background:#f5f0ff; border:2px solid #d4c8f5; }
     .err-card.type-formato   .err-reason { color:#5F4B8B; }
     .err-card.type-formato   .err-action { background:#ede6ff; color:#3a2a6e; }
-
     .err-card.type-vencido   { background:#f5f0ff; border:2px solid #d4c8f5; }
     .err-card.type-vencido   .err-reason { color:#5F4B8B; }
     .err-card.type-vencido   .err-action { background:#ece6ff; color:#3d2d7a; }
@@ -163,7 +164,18 @@
     .err-card.type-noexiste  .err-reason { color:#444; }
     .err-card.type-noexiste  .err-action { background:#e4e4e4; color:#333; }
 
-    /* ── Botón reiniciar ── */
+    /* ── Banner Adidas (cupón válido) ── */
+    .adidas-banner { display:none; background:#000; border-radius:16px; padding:24px; margin-bottom:16px; text-align:center; }
+    .adidas-banner.show { display:block; animation:adFadeIn 0.4s ease; }
+    @keyframes adFadeIn { from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);} }
+    .adidas-stripes { display:flex; justify-content:center; gap:6px; margin-bottom:16px; }
+    .adidas-stripe { width:8px; height:40px; background:#fff; border-radius:2px; transform:skewX(-15deg); }
+    .adidas-title { font-size:11px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:3px; margin-bottom:6px; }
+    .adidas-main { font-size:20px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:2px; margin-bottom:4px; }
+    .adidas-product { font-size:13px; font-weight:700; color:#fff; margin-bottom:16px; }
+    .adidas-action { background:#fff; color:#000; font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:1px; padding:12px 24px; border-radius:8px; display:inline-block; }
+    .adidas-valid { font-size:10px; color:rgba(255,255,255,0.4); margin-top:12px; letter-spacing:1px; }
+
     .reset-btn {
       width:100%; padding:14px; margin-top:14px;
       background:transparent; border:2px solid var(--primary);
@@ -175,50 +187,36 @@
     .reset-btn:hover { background:var(--primary); color:#fff; }
     .form-section { transition:opacity 0.2s; }
     .form-section.hidden { display:none; }
-  
-  /* ── BANNER ADIDAS ── */
-  .adidas-banner { display:none; background:#000; border-radius:16px; padding:24px; margin-bottom:16px; text-align:center; }
-  .adidas-banner.show { display:block; animation:adFadeIn 0.4s ease; }
-  @keyframes adFadeIn { from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);} }
-  .adidas-stripes { display:flex; justify-content:center; gap:6px; margin-bottom:16px; }
-  .adidas-stripe { width:8px; height:40px; background:#fff; border-radius:2px; transform:skewX(-15deg); }
-  .adidas-title { font-size:11px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:3px; margin-bottom:6px; }
-  .adidas-main { font-size:20px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:2px; margin-bottom:4px; }
-  .adidas-product { font-size:13px; font-weight:700; color:#fff; margin-bottom:16px; }
-  .adidas-action { background:#fff; color:#000; font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:1px; padding:12px 24px; border-radius:8px; display:inline-block; }
-  .adidas-valid { font-size:10px; color:rgba(255,255,255,0.4); margin-top:12px; letter-spacing:1px; }
 
-  /* ── MODAL RESCATE ── */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;padding:20px;}
-  .modal-overlay.show{display:flex;}
-  .modal{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:380px;position:relative;animation:modalIn .3s cubic-bezier(0.34,1.56,0.64,1);}
-  @keyframes modalIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
-  .modal-close{position:absolute;top:16px;right:16px;background:transparent;border:none;font-size:20px;cursor:pointer;color:#999;line-height:1;}
-  .modal-header{background:#f39c12;border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
-  .modal-header-icon{font-size:28px;margin-bottom:6px;}
-  .modal-header-title{font-size:15px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;}
-  .modal-header-sub{font-size:10px;color:rgba(255,255,255,0.85);font-weight:600;letter-spacing:1px;margin-top:3px;}
-  .modal-info{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:12px;margin-bottom:16px;font-size:11px;color:#7a5c00;line-height:1.6;}
-  .modal-field{margin-bottom:14px;}
-  .modal-field label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--primary);margin-bottom:6px;}
-  .modal-field input{width:100%;padding:12px 14px;border:2px solid #e0d9f0;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#2c2c2c;outline:none;transition:border-color .2s;}
-  .modal-field input:focus{border-color:var(--primary);}
-  .modal-btn{width:100%;padding:14px;background:#f39c12;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;color:#fff;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s;margin-top:4px;}
-  .modal-btn:hover{background:#e67e22;}
-  .modal-btn:disabled{opacity:.5;cursor:not-allowed;}
-  .modal-result{display:none;text-align:center;padding:12px 0;}
-  .modal-result.ok .modal-result-code{background:var(--primary);border-radius:12px;padding:14px;margin:10px 0;}
-  .modal-result-code-label{font-size:10px;color:rgba(255,255,255,0.7);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
-  .modal-result-code-val{font-size:32px;font-weight:900;color:#fff;letter-spacing:4px;}
-  .modal-result-code-sub{font-size:10px;color:rgba(255,255,255,0.7);margin-top:3px;}
-  .modal-result-instr{background:#e8f8f0;border:1px solid #27ae60;border-radius:10px;padding:10px;font-size:12px;color:#1a5c3a;font-weight:600;line-height:1.5;margin-top:8px;}
-  .modal-result-err{background:#fde8e8;border:1px solid #e74c3c;border-radius:10px;padding:12px;font-size:12px;color:#c0392b;line-height:1.5;}
-  .modal-audit{font-size:10px;color:#aaa;text-align:center;margin-top:12px;}
-
-  /* Botón rescate en tarjeta de error no-existe */
-  .rescue-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:10px 16px;background:#f39c12;color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .2s;}
-  .rescue-btn:hover{background:#e67e22;transform:translateY(-1px);}
-</style>
+    /* ── MODAL RESCATE ── */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;padding:20px;}
+    .modal-overlay.show{display:flex;}
+    .modal{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:380px;position:relative;animation:modalIn .3s cubic-bezier(0.34,1.56,0.64,1);}
+    @keyframes modalIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
+    .modal-close{position:absolute;top:16px;right:16px;background:transparent;border:none;font-size:20px;cursor:pointer;color:#999;line-height:1;}
+    .modal-header{background:#f39c12;border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
+    .modal-header-icon{font-size:28px;margin-bottom:6px;}
+    .modal-header-title{font-size:15px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;}
+    .modal-header-sub{font-size:10px;color:rgba(255,255,255,0.85);font-weight:600;letter-spacing:1px;margin-top:3px;}
+    .modal-info{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:12px;margin-bottom:16px;font-size:11px;color:#7a5c00;line-height:1.6;}
+    .modal-field{margin-bottom:14px;}
+    .modal-field label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--primary);margin-bottom:6px;}
+    .modal-field input{width:100%;padding:12px 14px;border:2px solid #e0d9f0;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#2c2c2c;outline:none;transition:border-color .2s;}
+    .modal-field input:focus{border-color:var(--primary);}
+    .modal-btn{width:100%;padding:14px;background:#f39c12;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;color:#fff;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s;margin-top:4px;}
+    .modal-btn:hover{background:#e67e22;}
+    .modal-btn:disabled{opacity:.5;cursor:not-allowed;}
+    .modal-result{display:none;text-align:center;padding:12px 0;}
+    .modal-result.ok .modal-result-code{background:var(--primary);border-radius:12px;padding:14px;margin:10px 0;}
+    .modal-result-code-label{font-size:10px;color:rgba(255,255,255,0.7);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+    .modal-result-code-val{font-size:32px;font-weight:900;color:#fff;letter-spacing:4px;}
+    .modal-result-code-sub{font-size:10px;color:rgba(255,255,255,0.7);margin-top:3px;}
+    .modal-result-instr{background:#e8f8f0;border:1px solid #27ae60;border-radius:10px;padding:10px;font-size:12px;color:#1a5c3a;font-weight:600;line-height:1.5;margin-top:8px;}
+    .modal-result-err{background:#fde8e8;border:1px solid #e74c3c;border-radius:10px;padding:12px;font-size:12px;color:#c0392b;line-height:1.5;}
+    .modal-audit{font-size:10px;color:#aaa;text-align:center;margin-top:12px;}
+    .rescue-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:10px 16px;background:#f39c12;color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+    .rescue-btn:hover{background:#e67e22;transform:translateY(-1px);}
+  </style>
 </head>
 <body>
 <div class="card">
@@ -248,7 +246,6 @@
 
     <div class="section-sep">Perfil del cliente</div>
 
-    <!-- Pregunta 1: ¿Primera vez en Oakberry? -->
     <div class="field">
       <label>¿Es la primera vez que prueba Oakberry?</label>
       <div class="toggle-wrap">
@@ -257,7 +254,6 @@
       </div>
     </div>
 
-    <!-- Pregunta 2: ¿Tiene Loopy? -->
     <div class="field">
       <label>¿Tiene tarjeta Loopy?</label>
       <div class="toggle-wrap">
@@ -266,7 +262,6 @@
       </div>
     </div>
 
-    <!-- Banner recordatorio Loopy (aparece al seleccionar "No tiene") -->
     <div class="loopy-banner" id="loopyBanner">
       <div class="loopy-banner-title">⭐ ¡Invítalo a Loopy ahora!</div>
       <div class="loopy-banner-body">
@@ -277,7 +272,6 @@
         </div>
       </div>
     </div>
-
     </div><!-- /form-section -->
 
     <button class="btn" id="mainBtn" onclick="validar()">
@@ -285,7 +279,7 @@
       <span class="btn-loader"><span class="spin"></span></span>
     </button>
 
-    <!-- RESULTADO -->
+    <!-- RESULTADO cupones normales -->
     <div class="result" id="resultado">
       <span class="result-icon" id="resIcon"></span>
       <div class="result-title" id="resTitle"></div>
@@ -293,18 +287,49 @@
       <div id="resRows"></div>
     </div>
 
-    <!-- BANNER ADIDAS -->
+    <!-- BANNER ADIDAS (cupón válido) -->
     <div class="adidas-banner" id="adidasBanner">
       <div class="adidas-stripes">
-        <div class="adidas-stripe"></div>
-        <div class="adidas-stripe"></div>
-        <div class="adidas-stripe"></div>
+        <div class="adidas-stripe"></div><div class="adidas-stripe"></div><div class="adidas-stripe"></div>
       </div>
       <div class="adidas-title">Cupón válido · Campaña oficial</div>
       <div class="adidas-main">Adidas × Oakberry</div>
       <div class="adidas-product">🫐 Bowl Especial Adidas</div>
       <div class="adidas-action">✅ Entregar el bowl al cliente</div>
       <div class="adidas-valid">Código canjeado · Uso único confirmado</div>
+    </div>
+
+    <!-- TARJETA DATOS CLIENTE ADIDAS (nueva) -->
+    <div class="adidas-client-card" id="adidasClientCard">
+      <div class="adc-header">
+        <span class="adc-brand">ADIDAS × OAKBERRY · Datos del cliente</span>
+        <span class="adc-badge" id="adcBadge">—</span>
+      </div>
+      <div class="adc-body">
+        <div class="adc-row">
+          <span class="adc-icon">👤</span>
+          <span class="adc-label">Nombre</span>
+          <span class="adc-value" id="adcNombre">—</span>
+        </div>
+        <div class="adc-row">
+          <span class="adc-icon">📱</span>
+          <span class="adc-label">Celular</span>
+          <span class="adc-value" id="adcCelular">—</span>
+        </div>
+        <div class="adc-row">
+          <span class="adc-icon">📧</span>
+          <span class="adc-label">Email</span>
+          <span class="adc-value" id="adcEmail">—</span>
+        </div>
+        <div class="adc-row">
+          <span class="adc-icon">📍</span>
+          <span class="adc-label">Ciudad</span>
+          <span class="adc-value" id="adcCiudad">—</span>
+        </div>
+        <div class="adc-loopy-tip" id="adcLoopyTip" style="display:none;">
+          ⭐ Cliente <strong>nuevo en Oakberry</strong> — invítalo a Loopy antes de que se vaya.
+        </div>
+      </div>
     </div>
 
     <!-- TARJETAS DE ERROR TIPIFICADAS -->
@@ -357,7 +382,6 @@
       <button class="rescue-btn" onclick="abrirRescate()">🚨 Generar código de rescate</button>
     </div>
 
-    <!-- Banner post-canje si no tiene Loopy -->
     <div class="post-loopy-banner" id="postLoopyBanner">
       <div class="post-loopy-title">⭐ Recuerda inscribir al cliente en Loopy</div>
       <div class="post-loopy-body">
@@ -365,7 +389,6 @@
       </div>
     </div>
 
-    <!-- Botón para validar otro cupón -->
     <button class="reset-btn" id="resetBtn" style="display:none;" onclick="resetForm()">
       ← Validar otro cupón
     </button>
@@ -376,9 +399,8 @@
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
 
-// ── Estado de los toggles ─────────────────────────────────────
-let _nuevo = ""; // "SI" | "NO"
-let _loopy = ""; // "SI" | "NO"
+let _nuevo = "";
+let _loopy = "";
 
 function setNuevo(val) {
   _nuevo = val;
@@ -393,7 +415,6 @@ function setLoopy(val) {
   document.getElementById("loopyBanner").classList.toggle("show", val === "NO");
 }
 
-// ── Fix descuento: normaliza "0.2" → "20%" ────────────────────
 function formatearDescuento(str) {
   if (!str) return str;
   const s = str.toString().trim();
@@ -404,18 +425,13 @@ function formatearDescuento(str) {
   return s;
 }
 
-// ── FETCH ─────────────────────────────────────────────────────
 function fetchGET(params) {
   return new Promise((resolve, reject) => {
     const cb  = "cb_" + Math.random().toString(36).slice(2);
     const url = SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
     const s   = document.createElement("script");
     let settled = false;
-    function cleanup() {
-      settled = true;
-      delete window[cb];
-      if (s.parentNode) s.parentNode.removeChild(s);
-    }
+    function cleanup() { settled = true; delete window[cb]; if (s.parentNode) s.parentNode.removeChild(s); }
     window[cb] = d => { if(settled)return; cleanup(); resolve(d); };
     s.onerror  = () => { if(settled)return; cleanup(); reject(new Error("Error de red")); };
     s.src = url;
@@ -424,7 +440,6 @@ function fetchGET(params) {
   });
 }
 
-// ── CACHE ─────────────────────────────────────────────────────
 const _cache = {};
 function fetchGETCached(params) {
   const key = JSON.stringify(params);
@@ -474,14 +489,9 @@ async function validar() {
   if (!codigo || !ciudad || !tienda) {
     return mostrarResultado(false, "Completa código, ciudad y tienda", []);
   }
-  if (!_nuevo) {
-    return mostrarResultado(false, "Indica si es la primera vez del cliente", []);
-  }
-  if (!_loopy) {
-    return mostrarResultado(false, "Indica si el cliente tiene tarjeta Loopy", []);
-  }
+  if (!_nuevo) return mostrarResultado(false, "Indica si es la primera vez del cliente", []);
+  if (!_loopy) return mostrarResultado(false, "Indica si el cliente tiene tarjeta Loopy", []);
 
-  // Valor consolidado para Sheets — columna E
   const perfilCliente = (_nuevo === "SI" ? "Cliente nuevo" : "Ya nos conocía")
                       + " · "
                       + (_loopy === "SI" ? "Con Loopy" : "Sin Loopy");
@@ -504,18 +514,18 @@ async function validar() {
       document.getElementById("codigo").value = "";
 
       // ── Detectar si es cupón Adidas ──────────────────────────
-      const esAdidas = res.mensaje.includes("Adidas");
+      const esAdidas = res.mensaje.includes("Adidas") || res.esAdidas === true;
       if (esAdidas) {
-        // Mostrar banner especial Adidas
         document.getElementById("adidasBanner").classList.add("show");
         document.getElementById("resultado").className = "result";
         document.getElementById("formSection").classList.add("hidden");
         document.getElementById("mainBtn").style.display = "none";
         document.getElementById("resetBtn").style.display = "block";
         document.getElementById("postLoopyBanner").classList.remove("show");
+        // ── Mostrar tarjeta de datos del cliente Adidas ──
+        mostrarDatosAdidas(res);
       } else {
         mostrarResultado(true, lineas[0], lineas.slice(1));
-        // Recordatorio post-canje si no tiene Loopy
         if (_loopy === "NO") {
           document.getElementById("postLoopyBanner").classList.add("show");
         }
@@ -531,6 +541,43 @@ async function validar() {
   btn.disabled = false;
 }
 
+// ── Mostrar tarjeta de datos del cliente Adidas ───────────────
+function mostrarDatosAdidas(res) {
+  const card = document.getElementById("adidasClientCard");
+  if (!card) return;
+
+  // Si el backend no tiene datos de activación aún (código no pasó por adidas-activar.html)
+  // mostramos la tarjeta vacía igualmente para que el cajero sepa que el sistema la buscó
+  const nombre   = res.activadoNombre || res.nombre   || "—";
+  const celular  = res.activadoPor    || res.celular   || "—";
+  const email    = res.activadoEmail  || res.email     || "—";
+  const ciudad   = res.ciudadRealGeo  || res.ciudadReal || "—";
+  const esNuevo  = (res.esNuevoOakberry === "NUEVO") || res.esNuevo === true;
+
+  document.getElementById("adcNombre").textContent  = nombre;
+  document.getElementById("adcCelular").textContent = celular;
+  document.getElementById("adcEmail").textContent   = email;
+  document.getElementById("adcCiudad").textContent  = ciudad;
+
+  const badge = document.getElementById("adcBadge");
+  if (celular === "—" && email === "—") {
+    // Sin datos de activación — cliente no pasó por el flujo
+    badge.textContent = "⚠ Sin activar";
+    badge.className   = "adc-badge conocido";
+    document.getElementById("adcLoopyTip").style.display = "none";
+  } else if (esNuevo) {
+    badge.textContent = "🆕 Nuevo en Oakberry";
+    badge.className   = "adc-badge nuevo";
+    document.getElementById("adcLoopyTip").style.display = "block";
+  } else {
+    badge.textContent = "👋 Ya nos conocía";
+    badge.className   = "adc-badge conocido";
+    document.getElementById("adcLoopyTip").style.display = "none";
+  }
+
+  card.classList.add("show");
+}
+
 function mostrarResultado(ok, titulo, filas) {
   const el = document.getElementById("resultado");
   el.className = "result show " + (ok ? "ok" : "err");
@@ -541,12 +588,10 @@ function mostrarResultado(ok, titulo, filas) {
     .join("");
 
   if (ok) {
-    // Ocultar formulario, mostrar solo resultado + botón reset
     document.getElementById("formSection").classList.add("hidden");
     document.getElementById("mainBtn").style.display = "none";
     document.getElementById("resetBtn").style.display = "block";
   } else {
-    // Error: mantener formulario visible para corregir
     document.getElementById("postLoopyBanner").classList.remove("show");
     document.getElementById("formSection").classList.remove("hidden");
     document.getElementById("mainBtn").style.display = "block";
@@ -560,17 +605,16 @@ function ocultarTodosErrores() {
   });
   document.getElementById("resultado").className = "result";
   document.getElementById("adidasBanner").classList.remove("show");
+  document.getElementById("adidasClientCard").classList.remove("show");
 }
 
 function mostrarError(mensaje) {
   ocultarTodosErrores();
-  // Detectar tipo por el contenido del mensaje
   if (mensaje.includes("ya fue canjeado")) {
     document.getElementById("errCanjeado").classList.add("show");
   } else if (mensaje.includes("ya venció")) {
     document.getElementById("errVencido").classList.add("show");
   } else if (mensaje.includes("Ciudad incorrecta")) {
-    // Extraer la ciudad del mensaje
     const match = mensaje.match(/válido en: (.+)/);
     if (match) document.getElementById("errCiudadDetalle").textContent =
       "Este cupón fue generado para: " + match[1] + ". No aplica en esta tienda.";
@@ -578,26 +622,21 @@ function mostrarError(mensaje) {
   } else if (mensaje.includes("fuera de horario") || mensaje.includes("Cupón fuera")) {
     const match = mensaje.match(/Solo válido en:\n(.+)/s);
     if (match) {
-      document.getElementById("errHorarioDetalle").textContent =
-        "Solo válido en: " + match[1].trim();
-      document.getElementById("errHorarioAccion").textContent =
-        "Tu cupón aplica en: " + match[1].trim() + ". ¡Vuelve en ese horario y con gusto te lo aplicamos!";
+      document.getElementById("errHorarioDetalle").textContent = "Solo válido en: " + match[1].trim();
+      document.getElementById("errHorarioAccion").textContent  = "Tu cupón aplica en: " + match[1].trim() + ". ¡Vuelve en ese horario!";
     }
     document.getElementById("errHorario").classList.add("show");
   } else if (mensaje.includes("Formato") || mensaje.includes("inválido")) {
     document.getElementById("errFormato").classList.add("show");
   } else {
-    // No existe u otro error
     document.getElementById("errNoExiste").classList.add("show");
   }
-  // Mantener formulario visible para corregir
   document.getElementById("formSection").classList.remove("hidden");
   document.getElementById("mainBtn").style.display = "block";
   document.getElementById("resetBtn").style.display = "none";
 }
 
 function resetForm() {
-  // Limpiar y mostrar el formulario de nuevo
   document.getElementById("codigo").value = "";
   ocultarTodosErrores();
   document.getElementById("postLoopyBanner").classList.remove("show");
@@ -605,7 +644,6 @@ function resetForm() {
   document.getElementById("formSection").classList.remove("hidden");
   document.getElementById("mainBtn").style.display = "block";
   document.getElementById("resetBtn").style.display = "none";
-  // Resetear toggles
   _nuevo = ""; _loopy = "";
   ["nuevo-si","nuevo-no","loopy-si","loopy-no"].forEach(id =>
     document.getElementById(id).className = "toggle-btn"
@@ -613,7 +651,6 @@ function resetForm() {
   document.getElementById("codigo").focus();
 }
 
-// ── PRECALENTAR servidor ──────────────────────────────────────
 (function warmup() {
   const s = document.createElement("script");
   s.src = SCRIPT_URL + "?accion=ping&callback=_warmup";
@@ -638,9 +675,8 @@ document.getElementById("codigo").addEventListener("input", function() {
   document.getElementById("postLoopyBanner").classList.remove("show");
 });
 
-// ── RESCATE DE CUPÓN ─────────────────────────────────────────
+// ── RESCATE ───────────────────────────────────────────────────
 function abrirRescate() {
-  // Pre-cargar el código que falló
   const codFallo = document.getElementById("codigo").value.trim().toUpperCase();
   if (codFallo) document.getElementById("rCodigo").value = codFallo;
   document.getElementById("rescateOverlay").classList.add("show");
@@ -659,15 +695,11 @@ function cerrarRescateBtn() {
 async function ejecutarRescate() {
   const codigoOriginal = document.getElementById("rCodigo").value.trim().toUpperCase();
   const celularRaw     = document.getElementById("rCelular").value.trim();
-  const tienda         = document.getElementById("inp-tienda")?.value || document.getElementById("tienda")?.value || "No especificada";
-  const ciudad         = document.getElementById("inp-ciudad")?.value || document.getElementById("ciudad")?.value || "Bogota";
+  const tienda         = document.getElementById("tienda").value || "No especificada";
+  const ciudad         = document.getElementById("ciudad").value || "Bogota";
 
-  if (!codigoOriginal || codigoOriginal.length !== 5) {
-    alert("Ingresa el código original de 5 caracteres"); return;
-  }
-  if (celularRaw.length < 10) {
-    alert("Ingresa el celular completo (10 dígitos)"); return;
-  }
+  if (!codigoOriginal || codigoOriginal.length !== 5) { alert("Ingresa el código original de 5 caracteres"); return; }
+  if (celularRaw.length < 10) { alert("Ingresa el celular completo (10 dígitos)"); return; }
 
   const btn = document.getElementById("rescateSubmitBtn");
   btn.disabled = true;
@@ -675,11 +707,8 @@ async function ejecutarRescate() {
 
   try {
     const res = await fetchGET({
-      accion:         "rescatarCupon",
-      codigoOriginal,
-      celular:        "57" + celularRaw,
-      ciudad,
-      tienda,
+      accion: "rescatarCupon", codigoOriginal,
+      celular: "57" + celularRaw, ciudad, tienda,
     });
 
     document.getElementById("rescateForm").style.display = "none";
@@ -696,21 +725,18 @@ async function ejecutarRescate() {
           <div class="modal-result-code-sub">⏱ Válido por 10 minutos</div>
         </div>
         <div class="modal-result-instr">
-          👉 Cierra este modal e ingresa el código <strong>${res.codigoNuevo}</strong> en el validador para completar el canje.
+          👉 Cierra este modal e ingresa el código <strong>${res.codigoNuevo}</strong> en el validador.
           ${res.rescatesRestantes !== undefined ? `<br><br>⚠️ Quedan <strong>${res.rescatesRestantes} rescates disponibles</strong> hoy para esta tienda.` : ''}
         </div>
         <button class="modal-btn" style="margin-top:12px;background:#5F4B8B"
-          onclick="usarCodigoRescate('${res.codigoNuevo}')">
-          → Usar este código ahora
-        </button>`;
+          onclick="usarCodigoRescate('${res.codigoNuevo}')">→ Usar este código ahora</button>`;
     } else {
       resEl.className = "modal-result";
       resEl.innerHTML = `<div class="modal-result-err">❌ ${res.mensaje}</div>
         <button class="modal-btn" style="margin-top:12px" onclick="document.getElementById('rescateForm').style.display='block';this.closest('.modal-result').style.display='none';">← Intentar de nuevo</button>`;
     }
   } catch(e) {
-    document.getElementById("rescateResult").innerHTML =
-      `<div class="modal-result-err">❌ Error de conexión. Intenta de nuevo.</div>`;
+    document.getElementById("rescateResult").innerHTML = `<div class="modal-result-err">❌ Error de conexión. Intenta de nuevo.</div>`;
     document.getElementById("rescateResult").style.display = "block";
   }
 
@@ -721,7 +747,6 @@ async function ejecutarRescate() {
 function usarCodigoRescate(codigo) {
   cerrarRescateBtn();
   document.getElementById("codigo").value = codigo;
-  // Limpiar errores y volver al formulario
   ocultarTodosErrores();
   document.getElementById("formSection").classList.remove("hidden");
   document.getElementById("mainBtn").style.display = "block";
@@ -729,45 +754,43 @@ function usarCodigoRescate(codigo) {
 }
 </script>
 
-  <!-- ══ MODAL RESCATE ══ -->
-  <div class="modal-overlay" id="rescateOverlay" onclick="cerrarRescate(event)">
-    <div class="modal">
-      <button class="modal-close" onclick="cerrarRescateBtn()">✕</button>
-      <div class="modal-header">
-        <div class="modal-header-icon">🚨</div>
-        <div class="modal-header-title">Rescate de Cupón</div>
-        <div class="modal-header-sub">Solo cajeros autorizados</div>
-      </div>
-      <div class="modal-info">
-        <strong>📋 Reglas del rescate — leer antes de usar</strong>
-        <div style="margin-top:8px;line-height:1.8">
-          ✅ <strong>Úsalo SOLO si:</strong> el cliente muestra su pantalla con el cupón y el validador dice "no encontrado"<br>
-          ⏱ El código de rescate es válido por <strong>10 minutos</strong> — canjéalo de inmediato<br>
-          🔢 Límite: <strong>máximo 5 rescates por tienda por día</strong><br>
-          👤 Máximo <strong>1 rescate por cliente por día</strong><br>
-          ❌ <strong>No uses esta opción si:</strong> el cliente simplemente olvidó su cupón, si el código ya fue canjeado, o si el cupón venció
-        </div>
-      </div>
-
-      <div id="rescateForm">
-        <div class="modal-field">
-          <label>Código original del cliente</label>
-          <input type="text" id="rCodigo" placeholder="XXXXX" maxlength="5"
-            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
-        </div>
-        <div class="modal-field">
-          <label>Celular del cliente</label>
-          <input type="tel" id="rCelular" placeholder="3001234567" maxlength="10"
-            oninput="this.value=this.value.replace(/\D/g,'')">
-        </div>
-        <button class="modal-btn" id="rescateSubmitBtn" onclick="ejecutarRescate()">
-          🚨 Generar código de rescate
-        </button>
-      </div>
-
-      <div class="modal-result" id="rescateResult"></div>
-      <div class="modal-audit">Todos los rescates quedan registrados para auditoría.</div>
+<!-- MODAL RESCATE -->
+<div class="modal-overlay" id="rescateOverlay" onclick="cerrarRescate(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="cerrarRescateBtn()">✕</button>
+    <div class="modal-header">
+      <div class="modal-header-icon">🚨</div>
+      <div class="modal-header-title">Rescate de Cupón</div>
+      <div class="modal-header-sub">Solo cajeros autorizados</div>
     </div>
+    <div class="modal-info">
+      <strong>📋 Reglas del rescate — leer antes de usar</strong>
+      <div style="margin-top:8px;line-height:1.8">
+        ✅ <strong>Úsalo SOLO si:</strong> el cliente muestra su pantalla con el cupón y el validador dice "no encontrado"<br>
+        ⏱ El código de rescate es válido por <strong>10 minutos</strong> — canjéalo de inmediato<br>
+        🔢 Límite: <strong>máximo 5 rescates por tienda por día</strong><br>
+        👤 Máximo <strong>1 rescate por cliente por día</strong><br>
+        ❌ <strong>No uses esta opción si:</strong> el cliente simplemente olvidó su cupón, si el código ya fue canjeado, o si el cupón venció
+      </div>
+    </div>
+    <div id="rescateForm">
+      <div class="modal-field">
+        <label>Código original del cliente</label>
+        <input type="text" id="rCodigo" placeholder="XXXXX" maxlength="5"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+      </div>
+      <div class="modal-field">
+        <label>Celular del cliente</label>
+        <input type="tel" id="rCelular" placeholder="3001234567" maxlength="10"
+          oninput="this.value=this.value.replace(/\D/g,'')">
+      </div>
+      <button class="modal-btn" id="rescateSubmitBtn" onclick="ejecutarRescate()">
+        🚨 Generar código de rescate
+      </button>
+    </div>
+    <div class="modal-result" id="rescateResult"></div>
+    <div class="modal-audit">Todos los rescates quedan registrados para auditoría.</div>
   </div>
+</div>
 </body>
 </html>
