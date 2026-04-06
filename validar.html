@@ -569,7 +569,13 @@ async function validar() {
         }
       }
     } else {
-      mostrarError(res.mensaje);
+      // ── Adidas no activado — viene del backend con noActivado:true ──
+      if (res.esAdidas && res.noActivado) {
+        document.getElementById("codigo").value = "";
+        mostrarBloqueadoSinActivar();
+      } else {
+        mostrarError(res.mensaje);
+      }
     }
   } catch(e) {
     mostrarResultado(false, "❌ Error de conexión", ["Intenta de nuevo"]);
@@ -580,17 +586,16 @@ async function validar() {
 }
 
 // ── Mostrar tarjeta de datos del cliente Adidas ───────────────
+// Solo se llama cuando res.ok === true — código activado y canjeado exitosamente
 function mostrarDatosAdidas(res) {
   const card = document.getElementById("adidasClientCard");
   if (!card) return;
 
-  // Si el backend no tiene datos de activación aún (código no pasó por adidas-activar.html)
-  // mostramos la tarjeta vacía igualmente para que el cajero sepa que el sistema la buscó
-  const nombre   = res.activadoNombre || res.nombre   || "—";
-  const celular  = res.activadoPor    || res.celular   || "—";
-  const email    = res.activadoEmail  || res.email     || "—";
-  const ciudad   = res.ciudadRealGeo  || res.ciudadReal || "—";
-  const esNuevo  = (res.esNuevoOakberry === "NUEVO") || res.esNuevo === true;
+  const nombre  = res.activadoNombre || res.nombre    || "—";
+  const celular = res.activadoPor    || res.celular    || "—";
+  const email   = res.activadoEmail  || res.email      || "—";
+  const ciudad  = res.ciudadRealGeo  || res.ciudadReal || "—";
+  const esNuevo = (res.esNuevoOakberry === "NUEVO") || res.esNuevo === true;
 
   document.getElementById("adcNombre").textContent  = nombre;
   document.getElementById("adcCelular").textContent = celular;
@@ -598,13 +603,8 @@ function mostrarDatosAdidas(res) {
   document.getElementById("adcCiudad").textContent  = ciudad;
 
   const badge = document.getElementById("adcBadge");
-  if (celular === "—" && email === "—") {
-    // Sin datos — bloquear el canje y mostrar QR para activar
-    card.classList.remove("show");
-    mostrarBloqueadoSinActivar();
-    return;
-  } else if (esNuevo) {
-    badge.textContent = "🆕 Nuevo en Oakberry";
+  if (esNuevo) {
+    badge.textContent = "🆕 Primera vez";
     badge.className   = "adc-badge nuevo";
     document.getElementById("adcLoopyTip").style.display = "block";
   } else {
