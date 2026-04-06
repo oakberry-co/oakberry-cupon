@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Adidas × Oakberry — Activa tu descuento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--black:#0a0a0a;--white:#fff;--purple:#5F4B8B;--gold:#F5C842;--green:#22c55e;--red:#ef4444;--muted:#888;--surface:#141414;--border:#2a2a2a;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{background:var(--black);color:var(--white);font-family:'Montserrat',sans-serif;min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+  .hero{width:100%;background:var(--white);padding:20px 24px 18px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;}
+  .hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--black) 0%,var(--purple) 50%,var(--gold) 100%);}
+  .adidas-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--black);letter-spacing:3px;line-height:1;}
+  .x-sep{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--muted);margin:0 10px;}
+  .oak-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--purple);letter-spacing:2px;}
+  .hero-badge{background:var(--black);color:var(--white);font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;padding:5px 10px;border-radius:4px;}
+  .wrap{width:100%;max-width:420px;padding:0 20px 40px;flex:1;}
+  .state{display:none;}
+  .state.active{display:block;}
+  .steps{display:flex;align-items:center;justify-content:center;margin:24px 0 28px;}
+  .step-dot{width:28px;height:28px;border-radius:50%;background:var(--border);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--muted);transition:all 0.3s;z-index:1;}
+  .step-dot.active{background:var(--purple);border-color:var(--purple);color:var(--white);box-shadow:0 0 0 4px rgba(95,75,139,0.25);}
+  .step-dot.done{background:var(--green);border-color:var(--green);color:var(--white);}
+  .step-line{flex:1;height:2px;background:var(--border);max-width:48px;transition:background 0.3s;}
+  .step-line.done{background:var(--green);}
+  .sec-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--white);margin-bottom:4px;}
+  .sec-sub{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:0.5px;margin-bottom:24px;line-height:1.5;}
+  .code-input-wrap{margin-bottom:28px;}
+  .code-label{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block;}
+  .code-input{width:100%;background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:18px 20px;font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:8px;color:var(--white);text-align:center;text-transform:uppercase;outline:none;transition:border-color 0.2s;caret-color:var(--purple);}
+  .code-input:focus{border-color:var(--purple);}
+  .code-input.err{border-color:var(--red);}
+  .code-err{display:none;color:var(--red);font-size:10px;font-weight:700;text-align:center;margin-top:6px;}
+  .code-err.show{display:block;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .field input{width:100%;background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:15px 18px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:var(--white);outline:none;transition:border-color 0.2s;}
+  .field input:focus{border-color:var(--purple);}
+  .field input.err{border-color:var(--red);}
+  .field input::placeholder{color:#444;font-weight:400;}
+  .field-err{display:none;color:var(--red);font-size:10px;font-weight:700;margin-top:5px;}
+  .field-err.show{display:block;}
+  .tyc-wrap{display:flex;gap:12px;align-items:flex-start;margin:20px 0 28px;padding:16px;background:var(--surface);border:2px solid var(--border);border-radius:12px;cursor:pointer;}
+  .tyc-wrap.err{border-color:var(--red);}
+  .tyc-check{width:20px;height:20px;min-width:20px;border-radius:6px;border:2px solid var(--border);background:var(--black);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all 0.2s;margin-top:1px;}
+  .tyc-check.checked{background:var(--purple);border-color:var(--purple);}
+  .tyc-text{font-size:10px;font-weight:700;color:#aaa;line-height:1.6;}
+  .tyc-text a{color:var(--purple);text-decoration:none;}
+  .tyc-err{display:none;color:var(--red);font-size:10px;font-weight:700;margin-top:-20px;margin-bottom:16px;}
+  .tyc-err.show{display:block;}
+  .btn-main{width:100%;padding:17px;border-radius:14px;border:none;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-main.primary{background:var(--white);color:var(--black);}
+  .btn-main.primary:active{transform:scale(0.98);opacity:0.9;}
+  .btn-main.purple{background:var(--purple);color:var(--white);}
+  .btn-main.purple:active{transform:scale(0.98);}
+  .btn-main:disabled{opacity:0.5;cursor:not-allowed;}
+  .btn-main .spin{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:var(--white);border-radius:50%;animation:spin 0.7s linear infinite;display:none;}
+  .btn-main.loading .btn-label{display:none;}
+  .btn-main.loading .spin{display:block;}
+  .loading-wrap{display:flex;flex-direction:column;align-items:center;padding:40px 0;gap:20px;}
+  .loading-ring{width:56px;height:56px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite;}
+  .loading-text{font-size:13px;font-weight:700;color:var(--muted);text-align:center;}
+  .success-header{margin:20px 0;text-align:center;}
+  .success-icon{font-size:48px;display:block;margin-bottom:12px;}
+  .user-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:100px;font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;}
+  .user-badge.nuevo{background:rgba(34,197,94,0.15);border:1.5px solid var(--green);color:var(--green);}
+  .user-badge.conocido{background:rgba(245,200,66,0.12);border:1.5px solid var(--gold);color:var(--gold);}
+  .code-ticket{background:var(--white);border-radius:20px;padding:30px 24px 24px;margin:0 0 20px;position:relative;overflow:hidden;}
+  .code-ticket::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:var(--black);}
+  .ticket-brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .ticket-adidas{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--black);letter-spacing:2px;}
+  .ticket-oak{font-size:9px;font-weight:900;color:var(--purple);letter-spacing:1px;text-transform:uppercase;}
+  .ticket-divider{border:none;border-top:1.5px dashed #ddd;margin:16px 0;}
+  .ticket-code-label{font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#999;text-align:center;margin-bottom:10px;}
+  .ticket-code{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:10px;color:var(--black);text-align:center;line-height:1;padding-left:10px;}
+  .ticket-desc{font-size:10px;font-weight:700;color:#777;text-align:center;margin-top:10px;}
+  .ticket-validity{font-size:10px;font-weight:900;color:var(--black);text-align:center;margin-top:6px;}
+  .ticket-deco{position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(95,75,139,0.08);}
+  .btn-copy{width:100%;padding:14px;border-radius:12px;border:2px solid var(--border);background:transparent;color:var(--white);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;cursor:pointer;transition:all 0.2s;margin-bottom:12px;letter-spacing:0.5px;}
+  .btn-copy:active{background:var(--surface);}
+  .info-pill{display:flex;gap:10px;align-items:flex-start;padding:13px 15px;border-radius:12px;margin-bottom:10px;font-size:11px;font-weight:700;line-height:1.5;}
+  .info-pill.purple{background:rgba(95,75,139,0.15);border:1.5px solid rgba(95,75,139,0.4);color:#c4b8e8;}
+  .info-pill.green{background:rgba(34,197,94,0.1);border:1.5px solid rgba(34,197,94,0.3);color:#86efac;}
+  .info-pill .picon{font-size:16px;line-height:1;margin-top:1px;}
+  .err-screen{text-align:center;padding:30px 0;}
+  .err-icon{font-size:48px;margin-bottom:16px;display:block;}
+  .err-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--red);letter-spacing:2px;margin-bottom:8px;}
+  .err-detail{font-size:12px;color:var(--muted);font-weight:700;line-height:1.6;margin-bottom:24px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .fade-up{animation:fadeUp 0.4s ease forwards;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div style="display:flex;align-items:center;">
+    <span class="adidas-logo">ADIDAS</span>
+    <span class="x-sep">×</span>
+    <span class="oak-logo">OAKBERRY</span>
+  </div>
+  <span class="hero-badge">DESCUENTO EXCLUSIVO</span>
+</div>
+<div class="wrap">
+  <div class="steps">
+    <div class="step-dot active" id="s1">1</div>
+    <div class="step-line" id="l1"></div>
+    <div class="step-dot" id="s2">2</div>
+    <div class="step-line" id="l2"></div>
+    <div class="step-dot" id="s3">✓</div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="state active" id="stStep1">
+    <div class="sec-title">Ingresa tu código</div>
+    <div class="sec-sub">Encuentra el código de 5 caracteres en la bolsa o recibo de tu compra Adidas.</div>
+    <div class="code-input-wrap">
+      <span class="code-label">Código Adidas</span>
+      <input class="code-input" id="inp-codigo" maxlength="5" placeholder="XXXXX" autocomplete="off" autocorrect="off" spellcheck="false" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+      <div class="code-err" id="err-codigo">⚠ Ingresa un código válido de 5 caracteres</div>
+    </div>
+    <button class="btn-main primary" onclick="irStep2()">
+      <span class="btn-label">Verificar código →</span><span class="spin"></span>
+    </button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="state" id="stStep2">
+    <div class="sec-title">Tus datos</div>
+    <div class="sec-sub">Para activar tu descuento necesitamos tus datos. Solo toma 20 segundos.</div>
+    <div class="field">
+      <label>Nombre completo</label>
+      <input type="text" id="inp-nombre" placeholder="Tu nombre" autocomplete="given-name">
+      <div class="field-err" id="err-nombre">⚠ Ingresa tu nombre</div>
+    </div>
+    <div class="field">
+      <label>Celular</label>
+      <input type="tel" id="inp-cel" placeholder="3XX XXX XXXX" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')" autocomplete="tel">
+      <div class="field-err" id="err-cel">⚠ Ingresa un número colombiano válido (10 dígitos)</div>
+    </div>
+    <div class="field">
+      <label>Correo electrónico</label>
+      <input type="email" id="inp-email" placeholder="tucorreo@email.com" autocomplete="email">
+      <div class="field-err" id="err-email">⚠ Ingresa un correo válido</div>
+    </div>
+    <div class="tyc-wrap" id="tycWrap" onclick="toggleTyc()">
+      <div class="tyc-check" id="tycCheck"></div>
+      <div class="tyc-text">Autorizo a <strong>Manel Foods S.A.S. (Oakberry Colombia)</strong> a usar mis datos personales para gestionar este descuento y enviarme comunicaciones de la marca. Acepto los <a href="/tyc" onclick="event.stopPropagation();" target="_blank">Términos y Condiciones</a>.</div>
+    </div>
+    <div class="tyc-err" id="err-tyc">⚠ Debes aceptar los términos para continuar</div>
+    <button class="btn-main purple" id="btnStep2" onclick="activar()">
+      <span class="btn-label">Activar mi descuento →</span><span class="spin"></span>
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="state" id="stLoading">
+    <div class="loading-wrap">
+      <div class="loading-ring"></div>
+      <div class="loading-text" id="loadingMsg">Verificando tu código...</div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="state" id="stSuccess">
+    <div class="success-header fade-up">
+      <span class="success-icon">🎉</span>
+      <div id="userBadge"></div>
+      <div class="sec-title">¡Descuento activado!</div>
+      <div class="sec-sub">Muéstrale este código al cajero para aplicar tu descuento.</div>
+    </div>
+    <div class="code-ticket fade-up">
+      <div class="ticket-brand">
+        <span class="ticket-adidas">ADIDAS × OAKBERRY</span>
+        <span class="ticket-oak">Descuento exclusivo</span>
+      </div>
+      <hr class="ticket-divider">
+      <div class="ticket-code-label">Tu código</div>
+      <div class="ticket-code" id="outCodigo">—</div>
+      <div class="ticket-desc">30% OFF en tu bowl · Solo en tiendas Oakberry</div>
+      <hr class="ticket-divider">
+      <div class="ticket-validity">Válido hasta el 30 de abril 2026</div>
+      <div class="ticket-deco"></div>
+    </div>
+    <button class="btn-copy" onclick="copiarCodigo()">📋 Copiar código</button>
+    <div class="info-pill purple fade-up">
+      <span class="picon">📍</span>
+      <span>Presenta este código en caja en cualquier tienda <strong>Oakberry Colombia</strong> participante.</span>
+    </div>
+    <div class="info-pill green fade-up" id="loopyPill" style="display:none;">
+      <span class="picon">⭐</span>
+      <span>¡Primera vez en Oakberry! Pídele al cajero que te inscriba en <strong>Loopy</strong> y acumula sellos para productos gratis.</span>
+    </div>
+  </div>
+
+  <!-- ERRORES -->
+  <div class="state" id="stErrCodigo">
+    <div class="err-screen fade-up">
+      <span class="err-icon">❓</span>
+      <div class="err-title">Código no encontrado</div>
+      <div class="err-detail">El código que ingresaste no existe. Verifica que lo estés escribiendo correctamente tal como aparece en tu compra Adidas.</div>
+      <button class="btn-main primary" onclick="irStep1()"><span class="btn-label">← Intentar de nuevo</span><span class="spin"></span></button>
+    </div>
+  </div>
+  <div class="state" id="stErrUsado">
+    <div class="err-screen fade-up">
+      <span class="err-icon">🔒</span>
+      <div class="err-title">Código ya canjeado</div>
+      <div class="err-detail">Este código ya fue utilizado anteriormente. Cada código Adidas es de un solo uso.</div>
+    </div>
+  </div>
+  <div class="state" id="stErrVencido">
+    <div class="err-screen fade-up">
+      <span class="err-icon">⏳</span>
+      <div class="err-title">Código vencido</div>
+      <div class="err-detail">Este código ya expiró. La campaña Adidas × Oakberry estuvo disponible hasta el 30 de abril de 2026.</div>
+    </div>
+  </div>
+  <div class="state" id="stErrGeneral">
+    <div class="err-screen fade-up">
+      <span class="err-icon">⚠️</span>
+      <div class="err-title">Error de conexión</div>
+      <div class="err-detail">Hubo un problema al conectar. Por favor intenta de nuevo.</div>
+      <button class="btn-main primary" onclick="irStep2()"><span class="btn-label">← Intentar de nuevo</span><span class="spin"></span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
+const DEV_MODE   = new URLSearchParams(window.location.search).get("dev") === "dzuluaga";
+const P = (() => { const p=new URLSearchParams(window.location.search); return { tienda:p.get("tienda")||"general", ciudad:p.get("ciudad")||"No especificada" }; })();
+let _codigoAdidas="", _tycChecked=false;
+
+function generarFingerprint(){const d=[navigator.userAgent,navigator.language,screen.width+"x"+screen.height+"x"+screen.colorDepth,new Date().getTimezoneOffset(),navigator.hardwareConcurrency||"",navigator.platform||""].join("|");let h=0;for(let i=0;i<d.length;i++){h=((h<<5)-h)+d.charCodeAt(i);h|=0;}return Math.abs(h).toString(36);}
+const DEVICE_FP=generarFingerprint();
+let _geo={ciudad:"",coordenadas:"",fuente:"desconocido"};
+(async()=>{try{const r=await fetch("https://ipapi.co/json/",{signal:AbortSignal.timeout(4000)});const d=await r.json();const c=(d.city||"").trim();if(c)_geo={ciudad:c,coordenadas:d.latitude&&d.longitude?`${d.latitude},${d.longitude}`:"",fuente:"ip"};}catch(e){}})();
+
+const STATES=["stStep1","stStep2","stLoading","stSuccess","stErrCodigo","stErrUsado","stErrVencido","stErrGeneral"];
+function show(id){STATES.forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove("active");});const t=document.getElementById(id);if(t)t.classList.add("active");}
+function setStep(n){for(let i=1;i<=3;i++){const d=document.getElementById("s"+i);if(d)d.className="step-dot"+(i<n?" done":i===n?" active":"");}for(let i=1;i<=2;i++){const l=document.getElementById("l"+i);if(l)l.className="step-line"+(i<n?" done":"");}}
+
+function toggleTyc(){_tycChecked=!_tycChecked;const ch=document.getElementById("tycCheck");ch.className="tyc-check"+(_tycChecked?" checked":"");ch.textContent=_tycChecked?"✓":"";document.getElementById("tycWrap").classList.remove("err");document.getElementById("err-tyc").classList.remove("show");}
+
+function fetchGET(params){return new Promise((resolve,reject)=>{const cb="cb_"+Math.random().toString(36).slice(2);const url=SCRIPT_URL+"?"+new URLSearchParams({...params,callback:cb});const s=document.createElement("script");let settled=false;function cleanup(){settled=true;clearTimeout(timer);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);}window[cb]=d=>{if(settled)return;cleanup();resolve(d);};s.onerror=()=>{if(settled)return;cleanup();reject(new Error("network"));};s.src=url;document.body.appendChild(s);const timer=setTimeout(()=>{if(!settled){cleanup();reject(new Error("timeout"));}},15000);});}
+
+function irStep1(){setStep(1);show("stStep1");}
+function irStep2(){const c=document.getElementById("inp-codigo").value.trim().toUpperCase();if(c.length!==5){document.getElementById("inp-codigo").classList.add("err");document.getElementById("err-codigo").classList.add("show");return;}document.getElementById("inp-codigo").classList.remove("err");document.getElementById("err-codigo").classList.remove("show");_codigoAdidas=c;setStep(2);show("stStep2");}
+
+function validarForm(){let ok=true;const n=document.getElementById("inp-nombre").value.trim();if(n.length<2){document.getElementById("inp-nombre").classList.add("err");document.getElementById("err-nombre").classList.add("show");ok=false;}else{document.getElementById("inp-nombre").classList.remove("err");document.getElementById("err-nombre").classList.remove("show");}const c=document.getElementById("inp-cel").value.replace(/\D/g,"");if(!/^3\d{9}$/.test(c)){document.getElementById("inp-cel").classList.add("err");document.getElementById("err-cel").classList.add("show");ok=false;}else{document.getElementById("inp-cel").classList.remove("err");document.getElementById("err-cel").classList.remove("show");}const e=document.getElementById("inp-email").value.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){document.getElementById("inp-email").classList.add("err");document.getElementById("err-email").classList.add("show");ok=false;}else{document.getElementById("inp-email").classList.remove("err");document.getElementById("err-email").classList.remove("show");}if(!_tycChecked){document.getElementById("tycWrap").classList.add("err");document.getElementById("err-tyc").classList.add("show");ok=false;}return ok;}
+
+async function activar(){if(!validarForm())return;const btn=document.getElementById("btnStep2");btn.classList.add("loading");btn.disabled=true;document.getElementById("loadingMsg").textContent="Activando tu descuento...";setStep(2);show("stLoading");const nombre=document.getElementById("inp-nombre").value.trim();const celular="57"+document.getElementById("inp-cel").value.replace(/\D/g,"").slice(-10);const email=document.getElementById("inp-email").value.trim().toLowerCase();const ahora=new Date();try{document.getElementById("loadingMsg").textContent="Verificando código Adidas...";const res=await fetchGET({accion:"activarCodigoAdidas",codigo:_codigoAdidas,nombre,celular,email,tienda:P.tienda,ciudad:P.ciudad,ciudadReal:_geo.ciudad,coordenadas:_geo.coordenadas,fuenteGeo:_geo.fuente,fingerprint:DEVICE_FP,fechaActivacion:ahora.toISOString(),linkActivacion:window.location.href,dev:DEV_MODE?"dzuluaga":""});btn.classList.remove("loading");btn.disabled=false;if(res.ok){mostrarExito(res);}else if(res.error==="no_existe"){setStep(1);show("stErrCodigo");}else if(res.error==="ya_canjeado"){setStep(3);show("stErrUsado");}else if(res.error==="vencido"){setStep(3);show("stErrVencido");}else{show("stErrGeneral");}}catch(e){btn.classList.remove("loading");btn.disabled=false;show("stErrGeneral");}}
+
+function mostrarExito(res){setStep(3);const badge=document.getElementById("userBadge");if(res.esNuevo){badge.innerHTML='<div class="user-badge nuevo">🆕 Nuevo en Oakberry</div>';document.getElementById("loopyPill").style.display="flex";}else{badge.innerHTML='<div class="user-badge conocido">👋 Ya nos conocías</div>';}document.getElementById("outCodigo").textContent=res.codigo||_codigoAdidas;show("stSuccess");}
+
+function copiarCodigo(){const c=document.getElementById("outCodigo").textContent;navigator.clipboard.writeText(c).then(()=>{const btn=document.querySelector(".btn-copy");const p=btn.textContent;btn.textContent="✅ ¡Copiado!";setTimeout(()=>btn.textContent=p,2200);}).catch(()=>{});}
+</script>
+</body>
+</html>
