@@ -164,6 +164,25 @@
     .err-card.type-noexiste  .err-reason { color:#444; }
     .err-card.type-noexiste  .err-action { background:#e4e4e4; color:#333; }
 
+    /* ── Bloqueo sin activar (Adidas) ── */
+    .adidas-no-activado {
+      display:none; margin-top:14px;
+      background:#fff8e1; border:2px solid #f39c12;
+      border-radius:16px; padding:20px; text-align:center;
+      animation:fadeIn 0.3s ease;
+    }
+    .adidas-no-activado.show { display:block; }
+    .adidas-no-activado-icon { font-size:36px; margin-bottom:10px; display:block; }
+    .adidas-no-activado-title { font-size:14px; font-weight:900; color:#7d3c00; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+    .adidas-no-activado-desc { font-size:11px; font-weight:700; color:#7d5a00; line-height:1.6; margin-bottom:16px; }
+    .adidas-qr-wrap { background:#fff; border-radius:12px; padding:14px; margin-bottom:14px; display:inline-block; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+    .adidas-qr-wrap img, .adidas-qr-wrap canvas { border-radius:6px; }
+    .adidas-no-activado-steps { text-align:left; margin-bottom:16px; }
+    .adidas-step { display:flex; align-items:flex-start; gap:10px; padding:6px 0; font-size:11px; font-weight:700; color:#5d3a00; }
+    .adidas-step-num { min-width:20px; height:20px; border-radius:50%; background:#f39c12; color:#fff; font-size:10px; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .adidas-retry-btn { width:100%; padding:14px; background:#0a0a0a; color:#fff; border:none; border-radius:12px; font-family:'Montserrat',sans-serif; font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:1px; cursor:pointer; transition:all 0.18s; }
+    .adidas-retry-btn:hover { background:#333; }
+
     /* ── Banner Adidas (cupón válido) ── */
     .adidas-banner { display:none; background:#000; border-radius:16px; padding:24px; margin-bottom:16px; text-align:center; }
     .adidas-banner.show { display:block; animation:adFadeIn 0.4s ease; }
@@ -294,7 +313,7 @@
       </div>
       <div class="adidas-title">Cupón válido · Campaña oficial</div>
       <div class="adidas-main">Adidas × Oakberry</div>
-      <div class="adidas-product">🫐 Bowl Especial Adidas</div>
+      <div class="adidas-product">🫐 Bowl gratis · Regalo oficial Adidas</div>
       <div class="adidas-action">✅ Entregar el bowl al cliente</div>
       <div class="adidas-valid">Código canjeado · Uso único confirmado</div>
     </div>
@@ -330,6 +349,25 @@
           ⭐ Cliente <strong>nuevo en Oakberry</strong> — invítalo a Loopy antes de que se vaya.
         </div>
       </div>
+    </div>
+
+    <!-- BLOQUEO ADIDAS SIN ACTIVAR -->
+    <div class="adidas-no-activado" id="adidasNoActivado">
+      <span class="adidas-no-activado-icon">📵</span>
+      <div class="adidas-no-activado-title">Código no activado</div>
+      <div class="adidas-no-activado-desc">
+        Este código Adidas no puede canjearse todavía.<br>
+        El cliente debe activarlo primero escaneando el QR.
+      </div>
+      <div class="adidas-qr-wrap" id="adidasQRWrap">
+        <div id="adidasQRDiv"></div>
+      </div>
+      <div class="adidas-no-activado-steps">
+        <div class="adidas-step"><span class="adidas-step-num">1</span><span>El cliente escanea el QR con su celular</span></div>
+        <div class="adidas-step"><span class="adidas-step-num">2</span><span>Ingresa nombre, celular y email</span></div>
+        <div class="adidas-step"><span class="adidas-step-num">3</span><span>Vuelve a ingresar el código aquí</span></div>
+      </div>
+      <button class="adidas-retry-btn" onclick="resetAdidas()">🔄 Reintentar validación</button>
     </div>
 
     <!-- TARJETAS DE ERROR TIPIFICADAS -->
@@ -561,10 +599,10 @@ function mostrarDatosAdidas(res) {
 
   const badge = document.getElementById("adcBadge");
   if (celular === "—" && email === "—") {
-    // Sin datos de activación — cliente no pasó por el flujo
-    badge.textContent = "⚠ Sin activar";
-    badge.className   = "adc-badge conocido";
-    document.getElementById("adcLoopyTip").style.display = "none";
+    // Sin datos — bloquear el canje y mostrar QR para activar
+    card.classList.remove("show");
+    mostrarBloqueadoSinActivar();
+    return;
   } else if (esNuevo) {
     badge.textContent = "🆕 Nuevo en Oakberry";
     badge.className   = "adc-badge nuevo";
@@ -600,12 +638,14 @@ function mostrarResultado(ok, titulo, filas) {
 }
 
 function ocultarTodosErrores() {
+  document.getElementById("adidasNoActivado")?.classList.remove("show");
   ["errCanjeado","errVencido","errCiudad","errHorario","errFormato","errNoExiste"].forEach(id => {
     document.getElementById(id).classList.remove("show");
   });
   document.getElementById("resultado").className = "result";
   document.getElementById("adidasBanner").classList.remove("show");
   document.getElementById("adidasClientCard").classList.remove("show");
+  document.getElementById("adidasNoActivado").classList.remove("show");
 }
 
 function mostrarError(mensaje) {
@@ -648,6 +688,46 @@ function resetForm() {
   ["nuevo-si","nuevo-no","loopy-si","loopy-no"].forEach(id =>
     document.getElementById(id).className = "toggle-btn"
   );
+  document.getElementById("codigo").focus();
+  document.getElementById("adidasNoActivado").classList.remove("show");
+}
+
+// ── QR generado dinámicamente para el flujo sin activar ─────
+let _adidasQRGenerado = false;
+function mostrarBloqueadoSinActivar() {
+  // Mostrar el bloqueo
+  document.getElementById("adidasNoActivado").classList.add("show");
+  document.getElementById("adidasBanner").classList.remove("show");
+  document.getElementById("formSection").classList.add("hidden");
+  document.getElementById("mainBtn").style.display = "none";
+  document.getElementById("resetBtn").style.display = "none";
+  // Generar QR una sola vez
+  if (!_adidasQRGenerado) {
+    _adidasQRGenerado = true;
+    const url = "https://oakberry-cupones.com/adidas-activar";
+    const div = document.getElementById("adidasQRDiv");
+    div.innerHTML = "";
+    // QR simple con API pública — no requiere librería
+    const img = document.createElement("img");
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(url) + "&bgcolor=ffffff&color=000000&margin=8";
+    img.width = 180; img.height = 180;
+    img.style.borderRadius = "6px";
+    img.onerror = function() {
+      // Fallback: mostrar la URL directamente si QR falla
+      div.innerHTML = '<div style="font-size:10px;font-weight:700;color:#555;padding:10px;word-break:break-all;max-width:180px;">' + url + '</div>';
+    };
+    div.appendChild(img);
+  }
+}
+
+function resetAdidas() {
+  document.getElementById("adidasNoActivado").classList.remove("show");
+  document.getElementById("adidasClientCard").classList.remove("show");
+  document.getElementById("adidasBanner").classList.remove("show");
+  document.getElementById("formSection").classList.remove("hidden");
+  document.getElementById("mainBtn").style.display = "block";
+  document.getElementById("resetBtn").style.display = "none";
+  document.getElementById("codigo").value = "";
   document.getElementById("codigo").focus();
 }
 
