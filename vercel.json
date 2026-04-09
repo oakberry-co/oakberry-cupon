@@ -11,6 +11,7 @@
     { "source": "/tiendas",        "destination": "/tiendas.html"        },
     { "source": "/dashboard",      "destination": "/dashboard.html"      },
     { "source": "/adidas-activar", "destination": "/adidas-activar.html" },
+    { "source": "/adidas-activar", "destination": "/concurso" },
     { "source": "/api/(.*)",       "destination": "/api/$1"              }
   ]
 }
