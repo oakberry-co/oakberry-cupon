@@ -540,32 +540,32 @@ async function initApp() {
 async function loadDashboard() {
   setStatus('Cargando datos...');
   try {
-    // Intentar leer hoja Dashboard pre-calculada (rápido)
-    const r = await fetchGS({ accion:'dashboardLeer' });
-    if (r.ok) {
-      _dashData = r;
-      const act = r.actualizacion
-        ? new Date(r.actualizacion).toLocaleString('es-CO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
-        : '';
-      setStatus(act ? 'Act: ' + act : 'En línea ✓');
-      return;
-    }
-    // Si no existe la hoja, calcular directo sin pre-calcular
-    // (más lento pero no falla silenciosamente)
-    const [res, rciu, rfue] = await Promise.allSettled([
-      fetchGS({ accion:'dashboardResumen' }),
-      fetchGS({ accion:'dashboardCiudades' }),
-      fetchGS({ accion:'dashboardCampanas' }),
+    // Llamar todas las funciones en paralelo — cada una devuelve datos estructurados limpios
+    const [rRes, rCiu, rRea, rSeg, rCamp] = await Promise.allSettled([
+      fetchGS({ accion: 'dashboardResumen' }),
+      fetchGS({ accion: 'dashboardCiudades' }),
+      fetchGS({ accion: 'dashboardReactivacion' }),
+      fetchGS({ accion: 'dashboardSegmentos' }),
+      fetchGS({ accion: 'dashboardCampanas' }),
     ]);
-    // Armar _dashData desde las llamadas directas
+
+    const resumen     = rRes.status==='fulfilled'  && rRes.value?.ok  ? rRes.value.resumen       : {};
+    const ciudades    = rCiu.status==='fulfilled'  && rCiu.value?.ok  ? rCiu.value.ciudades       : [];
+    const reactivacion= rRea.status==='fulfilled'  && rRea.value?.ok  ? rRea.value.reactivacion   : {};
+    const segmentos   = rSeg.status==='fulfilled'  && rSeg.value?.ok  ? rSeg.value.segmentos      : [];
+    const fuentes     = rCamp.status==='fulfilled' && rCamp.value?.ok ? rCamp.value.campanas      : [];
+
     _dashData = {
       ok: true,
-      resumen:  res.status==='fulfilled' && res.value?.ok ? res.value : {},
-      ciudades: rciu.status==='fulfilled' && rciu.value?.ciudades ? rciu.value.ciudades : [],
-      fuentes:  rfue.status==='fulfilled' && rfue.value?.campanas ? rfue.value.campanas : [],
+      resumen,
+      ciudades,
+      reactivacion,
+      segmentos,
+      fuentes,
       actualizacion: new Date().toISOString(),
     };
-    setStatus('En línea ✓ (hoja Dashboard no generada — clic en Recalcular)');
+
+    setStatus('En línea ✓');
   } catch(e) {
     setStatus('⚠ Error de conexión');
     console.error('loadDashboard:', e);
@@ -711,21 +711,20 @@ function renderResumen() {
   const d  = _dashData;
   if (!d) {
     el.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-txt">Conectando con Google Sheets...</div></div>';
-    // Reintentar en 2s por si los datos llegan después
     setTimeout(() => { if (_activeTab==='resumen') renderResumen(); }, 2000);
     return;
   }
 
   const r = d.resumen || {};
-  const tot = (r.disponibles||0)+(r.canjeados||0)+(r.vencidos||0)+(r.canjeadosRea||0)+(r.disponiblesRea||0)+(r.vencidosRea||0);
-  const totalCanj = (r.canjeados||0)+(r.canjeadosRea||0);
-  const totalVenc = (r.vencidos||0)+(r.vencidosRea||0);
-  const totalDisp = (r.disponibles||0)+(r.disponiblesRea||0);
+  // dashboardResumen devuelve: disponible, canjeado, vencido, dispRea, canjeadoRea, vencidoRea, total, n1, e1, e2, e3, e4
+  const tot       = r.total || 0;
+  const totalCanj = (r.canjeado||0) + (r.canjeadoRea||0);
+  const totalVenc = (r.vencido||0)  + (r.vencidoRea||0);
+  const totalDisp = (r.disponible||0) + (r.dispRea||0);
+  const totalRea  = (r.dispRea||0) + (r.canjeadoRea||0) + (r.vencidoRea||0);
 
-  // Calcular tiempo promedio entrega→canje si disponible
-  const tiempoPromedio = d.tiempoPromedioCanje ? d.tiempoPromedioCanje + ' días' : '—';
-
-  el.innerHTML = `
+  // Fuentes desde d.fuentes (dashboardCampanas → campanas[])
+  const fuentes = d.fuentes || [];
     <!-- KPIs principales -->
     <div class="kpi-grid">
       <div class="kpi mg">
@@ -826,11 +825,37 @@ function renderResumen() {
       ${renderFuentesBars(d.fuentes||[])}
     </div>
 
-    <!-- Momentos del día si disponible -->
-    ${d.momentos ? `
-    <div class="section-title">Momentos de canje <span class="stag">HORAS</span></div>
-    <div style="margin-bottom:24px">${renderMomentosBars(d.momentos)}</div>
-    ` : ''}
+  el.innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi mg"><div class="kpi-label">Total Cupones</div><div class="kpi-value">${fmt(tot)}</div><div class="kpi-sub">emitidos en campaña</div></div>
+      <div class="kpi gr"><div class="kpi-label">Canjeados</div><div class="kpi-value">${fmt(totalCanj)}</div><div class="kpi-sub">${pct(totalCanj,tot)} conversión</div></div>
+      <div class="kpi te"><div class="kpi-label">Disponibles</div><div class="kpi-value">${fmt(totalDisp)}</div><div class="kpi-sub">${pct(totalDisp,tot)} del total</div></div>
+      <div class="kpi pu"><div class="kpi-label">Vencidos</div><div class="kpi-value">${fmt(totalVenc)}</div><div class="kpi-sub">${pct(totalVenc,tot)} del total</div></div>
+      <div class="kpi or"><div class="kpi-label">Reactivados</div><div class="kpi-value">${fmt(totalRea)}</div><div class="kpi-sub">${fmt(r.canjeadoRea||0)} canjeados REA</div></div>
+      <div class="kpi ye"><div class="kpi-label">Tasa global</div><div class="kpi-value" style="font-size:22px">${pct(totalCanj,tot)}</div><div class="kpi-sub">sobre total emitido</div></div>
+    </div>
+
+    <div class="section-title">Desglose de estados</div>
+    <div class="estados-grid">
+      <div class="estado-card disp"><div class="estado-num estado-disp-c">${fmt(r.disponible||0)}</div><div class="estado-name">Disponibles</div><div class="estado-pct">${pct(r.disponible||0,tot)}</div></div>
+      <div class="estado-card canp"><div class="estado-num estado-can-c">${fmt(r.canjeado||0)}</div><div class="estado-name">Canjeados</div><div class="estado-pct">${pct(r.canjeado||0,tot)}</div></div>
+      <div class="estado-card venp"><div class="estado-num estado-ven-c">${fmt(r.vencido||0)}</div><div class="estado-name">Vencidos</div><div class="estado-pct">${pct(r.vencido||0,tot)}</div></div>
+      <div class="estado-card"><div class="estado-num estado-rea-c">${fmt(r.dispRea||0)}</div><div class="estado-name">Disponibles REA</div><div class="estado-pct">${pct(r.dispRea||0,tot)}</div></div>
+      <div class="estado-card canp"><div class="estado-num estado-rea-c">${fmt(r.canjeadoRea||0)}</div><div class="estado-name">Canjeados REA</div><div class="estado-pct">${pct(r.canjeadoRea||0,tot)}</div></div>
+      <div class="estado-card venp"><div class="estado-num estado-ven-c">${fmt(r.vencidoRea||0)}</div><div class="estado-name">Vencidos REA</div><div class="estado-pct">${pct(r.vencidoRea||0,tot)}</div></div>
+    </div>
+
+    <div class="section-title">Segmentos de usuario <span class="stag">LOOPY LOYALTY</span></div>
+    <div class="kpi-grid">
+      <div class="kpi gr"><div class="kpi-label">N1 — Nuevo puro</div><div class="kpi-value">${fmt(r.n1||0)}</div><div class="kpi-sub">${pct(r.n1||0,tot)} · sin historial previo</div></div>
+      <div class="kpi te"><div class="kpi-label">E1 — Ocasional</div><div class="kpi-value">${fmt(r.e1||0)}</div><div class="kpi-sub">${pct(r.e1||0,tot)} del total</div></div>
+      <div class="kpi ye"><div class="kpi-label">E2 — Regular</div><div class="kpi-value">${fmt(r.e2||0)}</div><div class="kpi-sub">${pct(r.e2||0,tot)} del total</div></div>
+      <div class="kpi or"><div class="kpi-label">E3 — Frecuente</div><div class="kpi-value">${fmt(r.e3||0)}</div><div class="kpi-sub">${pct(r.e3||0,tot)} del total</div></div>
+      ${r.e4 ? `<div class="kpi mg"><div class="kpi-label">E4 — Revalidado</div><div class="kpi-value">${fmt(r.e4)}</div><div class="kpi-sub">${pct(r.e4,tot)} · cajero corrigió</div></div>` : ''}
+    </div>
+
+    <div class="section-title">Fuentes de tráfico <span class="stag">CUPONES ENTREGADOS vs CANJEADOS</span></div>
+    <div style="margin-bottom:24px">${renderFuentesBars(fuentes)}</div>
   `;
 }
 
@@ -1118,50 +1143,79 @@ function closeModal() {
 function renderCiudades() {
   const el = document.getElementById('panel-ciudades');
   const d  = _dashData;
-  if (!d?.ciudades) { el.innerHTML = '<div class="info-box">Sin datos de ciudades.</div>'; return; }
+  if (!d?.ciudades?.length) { el.innerHTML = '<div class="info-box">Sin datos de ciudades. Clic en Recalcular.</div>'; return; }
 
-  let ciudades = d.ciudades;
-  if (_filters.ciudad) ciudades = ciudades.filter(c => (c.ciudad||'').toLowerCase() === _filters.ciudad);
-  ciudades = ciudades.filter(c => c.ciudad && c.ciudad !== '—');
+  let ciudades = [...d.ciudades];
+  if (_filters.ciudad) ciudades = ciudades.filter(c => (c.ciudad||'').toLowerCase().includes(_filters.ciudad));
 
-  const maxEnt = Math.max(...ciudades.map(c=>c.entregados||c.total||0), 1);
+  // Cruzar con Meta Ads por ciudad si hay datos
+  const metaRows = _metaData?.rows || [];
+  const metaPorCiudad = {};
+  metaRows.forEach(r => {
+    // Intentar extraer ciudad del nombre del adset (ej: "Colombia|ES|Barranquilla|Prospecting")
+    const adset = (r[1]||'').toString();
+    const match = adset.match(/\|([A-ZÁÉÍÓÚa-záéíóú]{4,})\|/);
+    if (match) {
+      const ciudad = match[1].toLowerCase();
+      if (!metaPorCiudad[ciudad]) metaPorCiudad[ciudad] = { gasto:0, impresiones:0, clics:0 };
+      metaPorCiudad[ciudad].gasto       += Number(r[8]||0);
+      metaPorCiudad[ciudad].impresiones += Number(r[2]||0);
+      metaPorCiudad[ciudad].clics       += Number(r[4]||0);
+    }
+  });
+
+  const maxEnt = Math.max(...ciudades.map(c=>c.entregados||0), 1);
 
   el.innerHTML = `
     <div class="kpi-grid">
-      <div class="kpi mg">
-        <div class="kpi-label">Ciudades activas</div>
-        <div class="kpi-value">${ciudades.length}</div>
-        <div class="kpi-sub">con cupones activos</div>
-      </div>
-      <div class="kpi gr">
-        <div class="kpi-label">Mejor ciudad</div>
-        <div class="kpi-value" style="font-size:18px">${safe(ciudades[0]?.ciudad||'—')}</div>
-        <div class="kpi-sub">${fmt(ciudades[0]?.canjeados||0)} canjes</div>
-      </div>
+      <div class="kpi mg"><div class="kpi-label">Ciudades activas</div><div class="kpi-value">${ciudades.length}</div></div>
+      <div class="kpi gr"><div class="kpi-label">Mejor ciudad</div><div class="kpi-value" style="font-size:18px">${safe(ciudades[0]?.ciudad||'—')}</div><div class="kpi-sub">${fmt(ciudades[0]?.canjeados||0)} canjes</div></div>
+      <div class="kpi or"><div class="kpi-label">Mayor tasa canje</div><div class="kpi-value" style="font-size:18px">${safe(ciudades.sort((a,b)=>((b.canjeados/Math.max(b.entregados,1))-(a.canjeados/Math.max(a.entregados,1))))[0]?.ciudad||'—')}</div><div class="kpi-sub">${ciudades.length?pct(ciudades[0]?.canjeados||0,ciudades[0]?.entregados||1):''} tasa</div></div>
     </div>
 
-    <div class="section-title">Detalle por ciudad</div>
-    <div class="city-grid">
-      ${ciudades.map(c => {
-        const ent = c.entregados||c.total||0;
-        const canj= c.canjeados||0;
-        const venc= c.vencidos||0;
-        const disp= c.disponibles||ent-canj-venc;
-        return `
-        <div class="city-card">
-          <div class="city-name">${safe(c.ciudad||'—').toUpperCase()}</div>
-          <div class="city-stat"><span class="city-stat-label">Entregados</span><span class="city-stat-val">${fmt(ent)}</span></div>
-          <div class="city-stat"><span class="city-stat-label">Canjeados</span><span class="city-stat-val" style="color:var(--green)">${fmt(canj)}</span></div>
-          <div class="city-stat"><span class="city-stat-label">Disponibles</span><span class="city-stat-val" style="color:var(--teal)">${fmt(disp)}</span></div>
-          <div class="city-stat"><span class="city-stat-label">Vencidos</span><span class="city-stat-val" style="color:var(--muted)">${fmt(venc)}</span></div>
-          <div class="city-stat"><span class="city-stat-label">Conversión</span><span class="city-stat-val" style="color:var(--mg)">${pct(canj,ent)}</span></div>
-          <div class="city-progress"><div class="city-progress-fill" style="width:${(ent/maxEnt*100).toFixed(1)}%"></div></div>
-        </div>`;
-      }).join('')}
+    <div class="section-title">Detalle por ciudad <span class="stag">${ciudades.length} CIUDADES</span></div>
+    <div class="table-wrap">
+      <table><thead><tr>
+        <th>Ciudad</th>
+        <th>Entregados</th><th>Canjeados</th><th>Disponibles</th><th>Vencidos</th>
+        <th>Conversión</th>
+        <th>Gasto Meta</th><th>Impresiones</th><th>CAC ciudad</th>
+      </tr></thead>
+      <tbody>
+        ${[...d.ciudades].filter(c=>!_filters.ciudad||(c.ciudad||'').toLowerCase().includes(_filters.ciudad)).map(c => {
+          const ent  = c.entregados||0;
+          const canj = c.canjeados||0;
+          const venc = c.vencidos||0;
+          const disp = ent - canj - venc;
+          const meta = metaPorCiudad[(c.ciudad||'').toLowerCase()] || null;
+          const cac  = meta && canj>0 ? cop(Math.round(meta.gasto/canj)) : '—';
+          return `<tr>
+            <td class="td-name">${safe(c.ciudad)}</td>
+            <td>${fmt(ent)}</td>
+            <td style="color:var(--green)">${fmt(canj)}</td>
+            <td style="color:var(--teal)">${fmt(Math.max(disp,0))}</td>
+            <td style="color:var(--muted)">${fmt(venc)}</td>
+            <td style="color:var(--mg);font-weight:700">${pct(canj,ent)}</td>
+            <td style="color:var(--or)">${meta?cop(meta.gasto):'—'}</td>
+            <td>${meta?fmt(meta.impresiones):'—'}</td>
+            <td style="color:var(--teal)">${cac}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table>
     </div>
 
-    <!-- Tabla ciudades × fuente si hay datos cruzados -->
-    ${_campUTM?.campanas ? renderCiudadFuenteTable() : ''}
+    <div class="section-title">Distribución de cupones por ciudad</div>
+    <div style="margin-bottom:24px">
+      ${[...d.ciudades].slice(0,12).map(c => `
+        <div class="bar-row">
+          <div class="bar-label">${safe(c.ciudad)}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${((c.entregados||0)/maxEnt*100).toFixed(1)}%;background:linear-gradient(90deg,var(--pu3),var(--mg))"></div></div>
+          <div class="bar-val">${fmt(c.entregados||0)}</div>
+          <div class="bar-track" style="flex:.5"><div class="bar-fill" style="width:${pct(c.canjeados||0,c.entregados||1)};background:linear-gradient(90deg,var(--or),var(--green))"></div></div>
+          <div class="bar-val" style="color:var(--green)">${pct(c.canjeados||0,c.entregados||1)}</div>
+        </div>
+      `).join('')}
+    </div>
   `;
 }
 
@@ -1255,23 +1309,47 @@ function renderCampanas() {
 function renderReactivacion() {
   const el = document.getElementById('panel-reactivacion');
   const d  = _dashData;
+  // dashboardReactivacion devuelve: reactivacion: { vencidosTotales, reactivados, canjeadosRea, dispRea, vencidosRea, tasaPrimer, tasaReactivacion, costoWA, abTest:{} }
   const r  = d?.reactivacion || {};
+  const ab = r.abTest || {};
+  const grA = ab['A-30%'] || {};
+  const grB = ab['B-40%'] || {};
+  const grC = ab['Control'] || {};
 
   el.innerHTML = `
     <div class="kpi-grid">
-      <div class="kpi or"><div class="kpi-label">Enviados REA</div><div class="kpi-value">${fmt(r.enviados||0)}</div><div class="kpi-sub">mensajes WhatsApp</div></div>
-      <div class="kpi gr"><div class="kpi-label">Canjeados REA</div><div class="kpi-value">${fmt(r.canjeados||0)}</div><div class="kpi-sub">${pct(r.canjeados||0,r.enviados||0)} tasa</div></div>
-      <div class="kpi te"><div class="kpi-label">Disponibles REA</div><div class="kpi-value">${fmt(r.disponibles||0)}</div><div class="kpi-sub">aún activos</div></div>
-      <div class="kpi pu"><div class="kpi-label">Vencidos REA</div><div class="kpi-value">${fmt(r.vencidos||0)}</div></div>
+      <div class="kpi or"><div class="kpi-label">Reactivados total</div><div class="kpi-value">${fmt(r.reactivados||0)}</div><div class="kpi-sub">cupones REA emitidos</div></div>
+      <div class="kpi gr"><div class="kpi-label">Canjeados REA</div><div class="kpi-value">${fmt(r.canjeadosRea||0)}</div><div class="kpi-sub">tasa ${r.reactivados>0?pct(r.canjeadosRea||0,r.reactivados):'0%'}</div></div>
+      <div class="kpi te"><div class="kpi-label">Disponibles REA</div><div class="kpi-value">${fmt(r.dispRea||0)}</div><div class="kpi-sub">aún activos</div></div>
+      <div class="kpi pu"><div class="kpi-label">Vencidos REA</div><div class="kpi-value">${fmt(r.vencidosRea||0)}</div><div class="kpi-sub">sin canjear</div></div>
       <div class="kpi mg"><div class="kpi-label">Costo WA</div><div class="kpi-value" style="font-size:18px">${cop(r.costoWA||0)}</div><div class="kpi-sub">@$275 COP/msg</div></div>
-      <div class="kpi ye"><div class="kpi-label">CAC Reactivación</div><div class="kpi-value" style="font-size:18px">${r.cac?cop(r.cac):'—'}</div></div>
+      <div class="kpi ye"><div class="kpi-label">CAC Reactivación</div><div class="kpi-value" style="font-size:18px">${r.canjeadosRea>0?cop(Math.round((r.costoWA||0)/(r.canjeadosRea))):'—'}</div><div class="kpi-sub">costo por canje</div></div>
+    </div>
+
+    <div class="section-title">Primer impacto vs Reactivación</div>
+    <div class="kpi-grid">
+      <div class="kpi te"><div class="kpi-label">Tasa primer impacto</div><div class="kpi-value" style="font-size:22px">${r.tasaPrimer||0}%</div><div class="kpi-sub">canjes / emitidos (no REA)</div></div>
+      <div class="kpi or"><div class="kpi-label">Tasa reactivación</div><div class="kpi-value" style="font-size:22px">${r.tasaReactivacion||0}%</div><div class="kpi-sub">canjes REA / reactivados</div></div>
+      <div class="kpi pu"><div class="kpi-label">Vencidos totales</div><div class="kpi-value">${fmt(r.vencidosTotales||0)}</div><div class="kpi-sub">base para reactivar</div></div>
     </div>
 
     <div class="section-title">A/B Test grupos <span class="stag">DESCUENTO</span></div>
     <div class="kpi-grid">
-      <div class="kpi or"><div class="kpi-label">Grupo A — 30%</div><div class="kpi-value">${fmt(r.grupoA_total||0)}</div><div class="kpi-sub">${fmt(r.grupoA_canjeados||0)} canjeados · ${pct(r.grupoA_canjeados||0,r.grupoA_total||0)}</div></div>
-      <div class="kpi mg"><div class="kpi-label">Grupo B — 40%</div><div class="kpi-value">${fmt(r.grupoB_total||0)}</div><div class="kpi-sub">${fmt(r.grupoB_canjeados||0)} canjeados · ${pct(r.grupoB_canjeados||0,r.grupoB_total||0)}</div></div>
-      <div class="kpi pu"><div class="kpi-label">Control</div><div class="kpi-value">${fmt(r.grupoCtrl_total||0)}</div><div class="kpi-sub">${fmt(r.grupoCtrl_canjeados||0)} canjeados</div></div>
+      <div class="kpi or">
+        <div class="kpi-label">Grupo A — 30%</div>
+        <div class="kpi-value">${fmt(grA.enviados||0)}</div>
+        <div class="kpi-sub">${fmt(grA.canjeados||0)} canjeados · ${grA.enviados>0?pct(grA.canjeados||0,grA.enviados):'0%'}</div>
+      </div>
+      <div class="kpi mg">
+        <div class="kpi-label">Grupo B — 40%</div>
+        <div class="kpi-value">${fmt(grB.enviados||0)}</div>
+        <div class="kpi-sub">${fmt(grB.canjeados||0)} canjeados · ${grB.enviados>0?pct(grB.canjeados||0,grB.enviados):'0%'}</div>
+      </div>
+      <div class="kpi pu">
+        <div class="kpi-label">Control</div>
+        <div class="kpi-value">${fmt(grC.enviados||0)}</div>
+        <div class="kpi-sub">${fmt(grC.canjeados||0)} canjeados</div>
+      </div>
     </div>
 
     <div class="section-title">Flujos WhatsApp</div>
@@ -1313,38 +1391,54 @@ async function renderMeta() {
   const clicTotal = Number(totales[4]||0);
   const gastoTot  = Number(totales[8]||0);
   const resTot    = Number(totales[9]||0);
-  const ctrTotal  = impTotal>0?(clicTotal/impTotal*100).toFixed(2)+'%':'—';
-  const cpaTotal  = resTot>0?cop(Math.round(gastoTot/resTot)):'—';
+  const ctrTotal  = impTotal>0 ? (clicTotal/impTotal*100).toFixed(2)+'%' : '—';
+  const cpaTotal  = resTot>0 ? cop(Math.round(gastoTot/resTot)) : '—';
+
+  // Ordenar por gasto desc
+  const sorted = [...rows].sort((a,b)=>Number(b[8]||0)-Number(a[8]||0));
 
   el.innerHTML = `
     <div class="kpi-grid">
-      <div class="kpi mg"><div class="kpi-label">Gasto total</div><div class="kpi-value" style="font-size:18px">${cop(gastoTot)}</div><div class="kpi-sub">últimos 30 días</div></div>
-      <div class="kpi te"><div class="kpi-label">Impresiones</div><div class="kpi-value">${fmt(impTotal)}</div><div class="kpi-sub">${fmt(alcTotal)} alcance</div></div>
+      <div class="kpi mg"><div class="kpi-label">Gasto total</div><div class="kpi-value" style="font-size:20px">${cop(gastoTot)}</div><div class="kpi-sub">últimos 30 días</div></div>
+      <div class="kpi te"><div class="kpi-label">Impresiones</div><div class="kpi-value">${fmt(impTotal)}</div><div class="kpi-sub">${fmt(alcTotal)} alcance único</div></div>
       <div class="kpi or"><div class="kpi-label">Clics</div><div class="kpi-value">${fmt(clicTotal)}</div><div class="kpi-sub">CTR ${ctrTotal}</div></div>
       <div class="kpi gr"><div class="kpi-label">Resultados</div><div class="kpi-value">${fmt(resTot)}</div><div class="kpi-sub">CPA ${cpaTotal}</div></div>
     </div>
 
-    <div class="section-title">Ad Sets activos</div>
+    <div class="section-title">Ad Sets — ordenados por gasto <span class="stag">${sorted.length} AD SETS</span></div>
     <div class="table-wrap">
-      <table><thead><tr>
-        <th>#</th><th>Campaña</th><th>Ad Set</th>
-        <th>Impresiones</th><th>Alcance</th><th>Clics</th>
-        <th>CTR</th><th>CPC</th><th>CPM</th><th>Gasto</th><th>Resultados</th>
+      <table style="min-width:900px"><thead><tr>
+        <th style="width:30px">#</th>
+        <th style="min-width:200px;max-width:260px">Campaña</th>
+        <th style="min-width:180px;max-width:240px">Ad Set</th>
+        <th style="width:90px;text-align:right">Impr.</th>
+        <th style="width:80px;text-align:right">Alcance</th>
+        <th style="width:70px;text-align:right">Clics</th>
+        <th style="width:60px;text-align:right">CTR</th>
+        <th style="width:70px;text-align:right">CPC</th>
+        <th style="width:100px;text-align:right">Gasto</th>
+        <th style="width:60px;text-align:right">Result.</th>
       </tr></thead>
       <tbody>
-        ${rows.map((r,i)=>`<tr>
-          <td>${i+1}</td>
-          <td class="td-name">${safe(r[0]||'—')}</td>
-          <td style="font-size:10px;color:var(--muted)">${safe(r[1]||'—')}</td>
-          <td>${fmt(r[2])}</td>
-          <td>${fmt(r[3])}</td>
-          <td>${fmt(r[4])}</td>
-          <td>${safe(r[5]||'—')}</td>
-          <td>${safe(r[6]||'—')}</td>
-          <td>${safe(r[7]||'—')}</td>
-          <td style="color:var(--mg)">${cop(Number(r[8]||0))}</td>
-          <td style="color:var(--green)">${fmt(r[9])}</td>
-        </tr>`).join('')}
+        ${sorted.map((r,i) => {
+          const camp  = (r[0]||'—').toString();
+          const adset = (r[1]||'—').toString();
+          // Truncar nombres largos
+          const campShort  = camp.length>35  ? camp.slice(0,35)+'…'  : camp;
+          const adsetShort = adset.length>30 ? adset.slice(0,30)+'…' : adset;
+          return `<tr>
+            <td style="color:var(--muted)">${i+1}</td>
+            <td style="font-size:11px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${safe(camp)}">${safe(campShort)}</td>
+            <td style="font-size:11px;color:var(--muted);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${safe(adset)}">${safe(adsetShort)}</td>
+            <td style="text-align:right">${fmt(r[2])}</td>
+            <td style="text-align:right;color:var(--muted)">${fmt(r[3])}</td>
+            <td style="text-align:right">${fmt(r[4])}</td>
+            <td style="text-align:right;color:var(--or)">${safe(r[5]||'—')}</td>
+            <td style="text-align:right">${safe(r[6]||'—')}</td>
+            <td style="text-align:right;color:var(--mg);font-weight:700">${cop(Number(r[8]||0))}</td>
+            <td style="text-align:right;color:var(--green)">${fmt(r[9]||0)}</td>
+          </tr>`;
+        }).join('')}
       </tbody></table>
     </div>
   `;
@@ -1364,51 +1458,83 @@ async function renderCAC() {
   }
   const d = _cacData;
   if (!d?.ok) {
-    el.innerHTML = '<div class="info-box">Error cargando CAC. Recalcula el dashboard.</div>';
+    el.innerHTML = '<div class="info-box">Error cargando CAC. Clic en Recalcular.</div>';
     return;
   }
 
+  // Precio base bowl y lógica de ingreso neto
+  const PRECIO = d.precio || 25400;
+  const r = _dashData?.resumen || {};
+  const tot = r.total || 0;
+
+  // Calcular valor total de cupones emitidos vs redimidos
+  // Ingreso neto = canjes × precio × (1 - descuento%)
+  // Gasto total = inversión Meta + costo WA
+  const gastoTotal = (d.gastoMeta||0) + (d.costoWA||0);
+  const ingresoTotal = (d.ingresoNetoMeta||0) + (d.ingresoNetoRea||0);
+  const roiTotal = gastoTotal > 0 ? ((ingresoTotal/gastoTotal)*100).toFixed(1)+'%' : '—';
+  const cacTotal = ((d.canjeadosMeta||0)+(d.canjeadosRea||0)) > 0
+    ? Math.round(gastoTotal / ((d.canjeadosMeta||0)+(d.canjeadosRea||0)))
+    : 0;
+
   el.innerHTML = `
-    <!-- Meta -->
+    <!-- Resumen consolidado -->
+    <div class="section-title">Inversión total consolidada</div>
+    <div class="kpi-grid">
+      <div class="kpi mg"><div class="kpi-label">Gasto total (Meta + WA)</div><div class="kpi-value" style="font-size:18px">${cop(gastoTotal)}</div><div class="kpi-sub">${cop(d.gastoMeta||0)} Meta + ${cop(d.costoWA||0)} WA</div></div>
+      <div class="kpi gr"><div class="kpi-label">Ingreso neto total</div><div class="kpi-value" style="font-size:18px">${cop(ingresoTotal)}</div><div class="kpi-sub">cupones canjeados × precio con desc.</div></div>
+      <div class="kpi or"><div class="kpi-label">ROI consolidado</div><div class="kpi-value" style="font-size:22px">${roiTotal}</div><div class="kpi-sub">ingreso neto ÷ inversión total</div></div>
+      <div class="kpi te"><div class="kpi-label">CAC consolidado</div><div class="kpi-value" style="font-size:18px">${cop(cacTotal)}</div><div class="kpi-sub">por cliente que canjeó</div></div>
+      <div class="kpi ye"><div class="kpi-label">Precio base bowl</div><div class="kpi-value" style="font-size:18px">${cop(PRECIO)}</div><div class="kpi-sub">bowl 12oz — base de cálculo</div></div>
+      <div class="kpi pu"><div class="kpi-label">Cupones × valor</div><div class="kpi-value">${fmt(tot)}</div><div class="kpi-sub">emitidos · valor potencial ${cop(tot*PRECIO)}</div></div>
+    </div>
+
+    <!-- Meta Ads -->
     <div class="section-title">CAC Meta Ads <span class="stag">ÚLTIMOS 30 DÍAS</span></div>
     <div class="kpi-grid">
-      <div class="kpi mg"><div class="kpi-label">Gasto Meta</div><div class="kpi-value" style="font-size:18px">${cop(d.gastoMeta)}</div></div>
-      <div class="kpi gr"><div class="kpi-label">CAC Meta</div><div class="kpi-value" style="font-size:18px">${cop(d.cacMeta)}</div><div class="kpi-sub">por cliente canjeado</div></div>
-      <div class="kpi ye"><div class="kpi-label">Ingreso neto</div><div class="kpi-value" style="font-size:18px">${cop(d.ingresoNetoMeta)}</div><div class="kpi-sub">${fmt(d.canjeadosMeta)} canjes</div></div>
-      <div class="kpi or"><div class="kpi-label">ROI Meta</div><div class="kpi-value" style="font-size:18px">${d.roiMeta}</div></div>
+      <div class="kpi mg"><div class="kpi-label">Gasto Meta</div><div class="kpi-value" style="font-size:18px">${cop(d.gastoMeta||0)}</div></div>
+      <div class="kpi te"><div class="kpi-label">Cupones Meta</div><div class="kpi-value">${fmt(d.totalMeta||0)}</div><div class="kpi-sub">${fmt(d.canjeadosMeta||0)} canjeados</div></div>
+      <div class="kpi gr"><div class="kpi-label">CAC Meta</div><div class="kpi-value" style="font-size:18px">${cop(d.cacMeta||0)}</div><div class="kpi-sub">por canje Meta</div></div>
+      <div class="kpi ye"><div class="kpi-label">Ingreso neto Meta</div><div class="kpi-value" style="font-size:18px">${cop(d.ingresoNetoMeta||0)}</div></div>
+      <div class="kpi or"><div class="kpi-label">ROI Meta</div><div class="kpi-value" style="font-size:22px">${d.roiMeta||'—'}</div></div>
     </div>
 
-    <!-- WA Reactivación -->
+    <!-- WhatsApp Reactivación -->
     <div class="section-title">CAC WhatsApp Reactivación</div>
     <div class="kpi-grid">
-      <div class="kpi te"><div class="kpi-label">Costo WA total</div><div class="kpi-value" style="font-size:18px">${cop(d.costoWA)}</div></div>
-      <div class="kpi gr"><div class="kpi-label">CAC Reactivación</div><div class="kpi-value" style="font-size:18px">${cop(d.cacRea)}</div></div>
-      <div class="kpi ye"><div class="kpi-label">Ingreso neto REA</div><div class="kpi-value" style="font-size:18px">${cop(d.ingresoNetoRea)}</div></div>
-      <div class="kpi or"><div class="kpi-label">ROI WhatsApp</div><div class="kpi-value" style="font-size:18px">${d.roiRea}</div></div>
+      <div class="kpi te"><div class="kpi-label">Costo WA total</div><div class="kpi-value" style="font-size:18px">${cop(d.costoWA||0)}</div><div class="kpi-sub">${fmt(d.canjeadosRea||0)} reactivados × $275</div></div>
+      <div class="kpi gr"><div class="kpi-label">CAC Reactivación</div><div class="kpi-value" style="font-size:18px">${cop(d.cacRea||0)}</div></div>
+      <div class="kpi ye"><div class="kpi-label">Ingreso neto REA</div><div class="kpi-value" style="font-size:18px">${cop(d.ingresoNetoRea||0)}</div></div>
+      <div class="kpi or"><div class="kpi-label">ROI WhatsApp</div><div class="kpi-value" style="font-size:22px">${d.roiRea||'—'}</div></div>
     </div>
 
-    <!-- Segmentos -->
-    <div class="section-title">CAC por segmento de usuario</div>
+    <!-- CAC por segmento con valor de cupón -->
+    <div class="section-title">CAC & ROI por segmento de usuario <span class="stag">N1 · E1 · E2 · E3 · E4</span></div>
     <div class="table-wrap">
       <table><thead><tr>
         <th>Segmento</th><th>Total</th><th>Canjeados</th><th>Conversión</th>
-        <th>Ingreso Neto</th><th>Desc. prom.</th><th>CAC</th><th>ROI</th>
+        <th>Desc. prom.</th><th>Ingreso/canje</th><th>Ingreso neto total</th><th>CAC est.</th><th>ROI</th>
       </tr></thead>
       <tbody>
-        ${(d.cacSegmentos||[]).map(s=>`<tr>
-          <td class="td-name">${safe(s.seg)}</td>
-          <td>${fmt(s.total)}</td>
-          <td style="color:var(--green)">${fmt(s.canjeados)}</td>
-          <td style="color:var(--mg)">${pct(s.canjeados,s.total)}</td>
-          <td style="color:var(--yellow)">${cop(s.ingresoNeto)}</td>
-          <td>${safe(s.descProm)}</td>
-          <td style="color:var(--teal)">${s.cac?cop(s.cac):'—'}</td>
-          <td style="color:${s.roi&&Number(s.roi)>100?'var(--green)':'var(--muted)'}">${s.roi||'—'}</td>
-        </tr>`).join('')}
+        ${(d.cacSegmentos||[]).map(s => {
+          const descN = parseFloat((s.descProm||'0').replace('%',''))||0;
+          const ingPorCanje = Math.round(PRECIO * (1 - descN/100));
+          return `<tr>
+            <td class="td-name">${safe(s.seg)}</td>
+            <td>${fmt(s.total)}</td>
+            <td style="color:var(--green)">${fmt(s.canjeados)}</td>
+            <td style="color:var(--mg);font-weight:700">${pct(s.canjeados,s.total)}</td>
+            <td>${safe(s.descProm||'—')}</td>
+            <td style="color:var(--yellow)">${cop(ingPorCanje)}</td>
+            <td style="color:var(--yellow)">${cop(s.ingresoNeto||0)}</td>
+            <td style="color:var(--teal)">${s.cac?cop(s.cac):'—'}</td>
+            <td style="color:${s.roi&&Number(s.roi)>100?'var(--green)':'var(--muted)'}">${s.roi?s.roi+'%':'—'}</td>
+          </tr>`;
+        }).join('')}
       </tbody></table>
     </div>
 
-    <!-- Por fuente -->
+    <!-- CAC por fuente -->
     <div class="section-title">Tasa de conversión por fuente</div>
     <div class="table-wrap">
       <table><thead><tr>
@@ -1419,7 +1545,7 @@ async function renderCAC() {
           <td class="td-name">${safe(f.fuente)}</td>
           <td>${fmt(f.total)}</td>
           <td style="color:var(--green)">${fmt(f.canjeados)}</td>
-          <td style="color:var(--mg)">${safe(f.tasa)}</td>
+          <td style="color:var(--mg);font-weight:700">${safe(f.tasa)}</td>
           <td style="color:var(--yellow)">${cop(f.ingresoNeto)}</td>
         </tr>`).join('')}
       </tbody></table>
