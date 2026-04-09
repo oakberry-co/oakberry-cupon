@@ -47,61 +47,7 @@ body::after{
   pointer-events:none;
 }
 
-/* ── LOGIN ── */
-#login-screen{
-  position:fixed;inset:0;z-index:9999;
-  display:flex;align-items:center;justify-content:center;
-  background:var(--bg);
-}
-#login-screen::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255,32,104,0.15) 0%, transparent 70%);
-}
-.login-box{
-  position:relative;z-index:1;
-  width:380px;padding:48px 40px;
-  background:rgba(26,14,46,0.9);
-  border:1px solid rgba(255,32,104,0.3);
-  border-radius:20px;
-  box-shadow:0 40px 80px rgba(0,0,0,0.6), 0 0 60px rgba(255,32,104,0.1);
-  animation:loginIn .5s cubic-bezier(0.22,1,0.36,1);
-}
-@keyframes loginIn{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
-.login-logo{text-align:center;margin-bottom:36px;}
-.login-logo-mark{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:56px;height:56px;border-radius:14px;
-  background:linear-gradient(135deg,var(--mg),var(--or));
-  margin-bottom:16px;
-  box-shadow:0 8px 24px rgba(255,32,104,0.4);
-}
-.login-logo-mark svg{width:28px;height:28px;fill:white;}
-.login-brand{font-family:var(--display);font-size:28px;letter-spacing:4px;color:var(--text);}
-.login-sub{font-size:11px;font-family:var(--mono);color:var(--muted);letter-spacing:3px;margin-top:4px;}
-.login-field{margin-bottom:16px;}
-.login-field label{display:block;font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
-.login-field input{
-  width:100%;padding:12px 16px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid var(--border);
-  border-radius:10px;color:var(--text);
-  font-family:var(--font);font-size:14px;
-  transition:border-color .2s,box-shadow .2s;
-  outline:none;
-}
-.login-field input:focus{border-color:rgba(255,32,104,0.5);box-shadow:0 0 0 3px rgba(255,32,104,0.1);}
-.login-btn{
-  width:100%;padding:14px;margin-top:8px;
-  background:linear-gradient(135deg,var(--mg),var(--or));
-  border:none;border-radius:10px;
-  color:white;font-family:var(--font);font-size:14px;font-weight:700;
-  cursor:pointer;letter-spacing:1px;
-  transition:opacity .2s,transform .1s;
-  box-shadow:0 8px 24px rgba(255,32,104,0.3);
-}
-.login-btn:hover{opacity:.9;transform:translateY(-1px);}
-.login-btn:active{transform:translateY(0);}
-.login-err{font-size:12px;font-family:var(--mono);color:var(--mg);text-align:center;margin-top:12px;min-height:18px;}
+
 
 /* ── APP ── */
 #app{display:none;position:relative;z-index:1;min-height:100vh;}
@@ -432,29 +378,6 @@ tbody td{padding:11px 14px;font-family:var(--mono);font-size:11px;white-space:no
 </head>
 <body>
 
-<!-- ═══ LOGIN ═══ -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="login-logo-mark">
-        <svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z"/></svg>
-      </div>
-      <div class="login-brand">OAKBERRY</div>
-      <div class="login-sub">CAMPAIGN INTELLIGENCE</div>
-    </div>
-    <div class="login-field">
-      <label>Usuario</label>
-      <input type="text" id="inp-user" placeholder="usuario" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <div class="login-field">
-      <label>Contraseña</label>
-      <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="login-btn" onclick="doLogin()" id="login-btn">INGRESAR</button>
-    <div class="login-err" id="login-err"></div>
-  </div>
-</div>
-
 <!-- ═══ APP ═══ -->
 <div id="app">
 
@@ -476,8 +399,6 @@ tbody td{padding:11px 14px;font-family:var(--mono);font-size:11px;white-space:no
     <div class="header-right">
       <button class="hdr-btn sync" onclick="syncMeta()" id="btn-sync-meta">↻ Sync Meta</button>
       <button class="hdr-btn" onclick="recalcular()">⟳ Recalcular</button>
-      <div class="user-pill"><span class="user-dot"></span><span id="hdr-user">—</span></div>
-      <button class="hdr-btn logout" onclick="logout()">Salir</button>
     </div>
   </header>
 
@@ -538,7 +459,6 @@ tbody td{padding:11px 14px;font-family:var(--mono);font-size:11px;white-space:no
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
 
 // ── Estado global ──
-let _session   = null;   // { usuario, rol, tienda }
 let _dashData  = null;   // datos principales
 let _metaData  = null;   // Meta Ads
 let _cacData   = null;   // CAC/ROI
@@ -598,42 +518,6 @@ function fetchGS(params) {
     s.src = url;
     document.body.appendChild(s);
   });
-}
-
-// ══════════════════════════════════════════════════════
-// AUTH
-// ══════════════════════════════════════════════════════
-async function doLogin() {
-  const user = document.getElementById('inp-user').value.trim();
-  const pass = document.getElementById('inp-pass').value.trim();
-  const err  = document.getElementById('login-err');
-  const btn  = document.getElementById('login-btn');
-  if (!user || !pass) { err.textContent = 'Ingresa usuario y contraseña'; return; }
-  btn.textContent = 'Verificando...'; btn.disabled = true; err.textContent = '';
-  try {
-    const r = await fetchGS({ accion:'login', usuario:user, pass });
-    if (r.ok) {
-      _session = r;
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      document.getElementById('hdr-user').textContent = r.usuario + (r.rol ? ' · ' + r.rol : '');
-      // Solo admin y marketing ven el dashboard completo
-      initApp();
-    } else {
-      err.textContent = r.mensaje || 'Usuario o contraseña incorrectos';
-    }
-  } catch(e) {
-    err.textContent = 'Error de conexión. Intenta de nuevo.';
-  }
-  btn.textContent = 'INGRESAR'; btn.disabled = false;
-}
-
-function logout() {
-  _session = null; _dashData = null; _metaData = null; _cacData = null; _campUTM = null;
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('inp-pass').value = '';
-  document.getElementById('login-err').textContent = '';
 }
 
 // ══════════════════════════════════════════════════════
@@ -1512,9 +1396,7 @@ async function renderCAC() {
 // ══════════════════════════════════════════════════════
 // INIT — Pantalla de login
 // ══════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('inp-user').focus();
-});
+document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
 </html>
