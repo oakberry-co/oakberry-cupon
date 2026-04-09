@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Moto · Oakberry Colombia 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   TOKENS
+══════════════════════════════════════ */
+:root {
+  --p:   #5F4B8B;
+  --pb:  #8B5CF6;
+  --g:   #F5C842;
+  --g2:  #D4A017;
+  --bg:  #080610;
+  --bg2: #0f0d1a;
+  --bg3: #181428;
+  --bg4: #201c34;
+  --wh:  #EEE8FF;
+  --gr:  #6B5F8A;
+  --tl:  #2DD4BF;
+  --gn:  #22C55E;
+  --rd:  #F43F5E;
+  --or:  #FB923C;
+
+  --r8:  8px;
+  --r12: 12px;
+  --r16: 16px;
+  --r20: 20px;
+}
+
+/* ══════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--wh);
+  font-family:'Barlow Condensed',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── grain overlay ── */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1000;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* ══════════════════════════════════════
+   NAV
+══════════════════════════════════════ */
+nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(8,6,16,.85);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(245,200,66,.1);
+  padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:56px;
+}
+.nav-brand{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:.12em;
+  background:linear-gradient(90deg,var(--g),#fff5c0,var(--g));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.nav-tabs{display:flex;gap:4px;}
+.nav-tab{
+  font-size:13px;font-weight:600;letter-spacing:.05em;
+  padding:6px 14px;border-radius:8px;
+  color:var(--gr);background:transparent;border:none;
+  cursor:pointer;transition:all .18s;
+}
+.nav-tab:hover{color:var(--wh);background:var(--bg4);}
+.nav-tab.active{color:var(--g);background:rgba(245,200,66,.1);}
+.nav-live{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;font-family:'DM Mono',monospace;color:var(--gr);
+}
+.live-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--gn);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+
+/* ══════════════════════════════════════
+   VIEWS (tab switching)
+══════════════════════════════════════ */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ══════════════════════════════════════
+   HERO
+══════════════════════════════════════ */
+.hero{
+  position:relative;z-index:2;
+  padding:48px 24px 28px;
+  text-align:center;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(95,75,139,.35),transparent);
+}
+.hero-eyebrow{
+  display:inline-block;
+  font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--g);border:1px solid rgba(245,200,66,.3);
+  background:rgba(245,200,66,.06);
+  padding:5px 16px;border-radius:100px;
+  margin-bottom:14px;
+}
+.hero-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(56px,12vw,110px);
+  line-height:.88;
+  letter-spacing:.04em;
+  background:linear-gradient(150deg,var(--g) 0%,#fff8d6 45%,var(--g2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:12px;
+}
+.hero-sub{font-size:15px;font-weight:400;color:var(--gr);letter-spacing:.03em;}
+.hero-sub strong{color:var(--wh);}
+
+/* countdown */
+.countdown{
+  display:inline-flex;align-items:center;gap:0;
+  background:var(--bg3);border:1px solid rgba(245,200,66,.15);
+  border-radius:var(--r16);padding:14px 28px;
+  margin-top:24px;gap:16px;
+}
+.cd-unit{text-align:center;}
+.cd-num{
+  font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;
+  color:var(--wh);
+}
+.cd-lbl{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gr);}
+.cd-sep{
+  font-family:'Bebas Neue',sans-serif;font-size:36px;
+  color:var(--g);opacity:.4;padding-bottom:6px;
+}
+
+/* ══════════════════════════════════════
+   GLOBAL STATS BAR
+══════════════════════════════════════ */
+.stats-row{
+  max-width:1120px;margin:0 auto 20px;padding:0 24px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
+  position:relative;z-index:2;
+}
+.stat-pill{
+  background:var(--bg3);border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--r12);padding:14px 16px;
+}
+.stat-pill-lbl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);margin-bottom:4px;font-family:'DM Mono',monospace;}
+.stat-pill-val{font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1;color:var(--wh);}
+.stat-pill-val span{color:var(--g);}
+
+/* ══════════════════════════════════════
+   SECTION HEADER
+══════════════════════════════════════ */
+.sec-header{
+  max-width:1120px;margin:0 auto 12px;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sec-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:.08em;color:var(--wh);
+}
+.sec-note{font-size:12px;color:var(--gr);}
+
+/* ══════════════════════════════════════
+   RANKING TABLE (tiendas)
+══════════════════════════════════════ */
+.ranking-wrap{
+  max-width:1120px;margin:0 auto 40px;padding:0 24px;
+  position:relative;z-index:2;
+}
+
+.th-row{
+  display:grid;
+  grid-template-columns:50px 1fr 140px 90px 90px 100px 80px 36px;
+  gap:8px;padding:8px 16px;
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gr);font-family:'DM Mono',monospace;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  margin-bottom:6px;
+}
+
+/* ── store card ── */
+.store-card{
+  background:var(--bg2);border:1px solid rgba(255,255,255,.05);
+  border-radius:var(--r16);margin-bottom:6px;
+  overflow:hidden;transition:border-color .2s;
+  cursor:pointer;
+}
+.store-card:hover{border-color:rgba(245,200,66,.2);}
+.store-card.rank-1{border-color:rgba(245,200,66,.35);background:linear-gradient(135deg,rgba(245,200,66,.06),var(--bg2));}
+.store-card.rank-2{border-color:rgba(200,200,220,.2);background:linear-gradient(135deg,rgba(180,180,220,.04),var(--bg2));}
+.store-card.rank-3{border-color:rgba(205,127,50,.25);background:linear-gradient(135deg,rgba(205,127,50,.05),var(--bg2));}
+
+.store-row-main{
+  display:grid;
+  grid-template-columns:50px 1fr 140px 90px 90px 100px 80px 36px;
+  gap:8px;padding:14px 16px;align-items:center;
+}
+
+/* rank badge */
+.rank-num{
+  width:34px;height:34px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:18px;
+}
+.rank-num.r1{background:linear-gradient(135deg,var(--g),var(--g2));color:#0e0b16;}
+.rank-num.r2{background:linear-gradient(135deg,#C0C0C0,#888);color:#0e0b16;}
+.rank-num.r3{background:linear-gradient(135deg,#CD7F32,#8B4513);color:#fff;}
+.rank-num.rn{background:var(--bg4);color:var(--gr);}
+
+.store-info .s-name{font-size:15px;font-weight:700;letter-spacing:.02em;}
+.store-info .s-city{font-size:11px;color:var(--gr);}
+
+/* score */
+.score-cell{display:flex;flex-direction:column;gap:4px;}
+.score-val{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;}
+.score-bar{height:3px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;}
+.score-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--p),var(--pb));transition:width .8s ease;}
+.rank-1 .score-fill{background:linear-gradient(90deg,var(--g2),var(--g));}
+
+/* metric mini cell */
+.m-cell{display:flex;flex-direction:column;gap:3px;align-items:flex-start;}
+.m-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;}
+.m-val.tl{color:var(--tl);}
+.m-val.gd{color:var(--g);}
+.m-val.gn{color:var(--gn);}
+.m-val.or{color:var(--or);}
+.m-bar{height:2px;width:100%;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.m-fill{height:100%;border-radius:2px;transition:width .8s ease;}
+.m-fill.tl{background:var(--tl);}
+.m-fill.gd{background:var(--g);}
+.m-fill.gn{background:var(--gn);}
+
+/* racha (streak) */
+.streak-cell{display:flex;flex-direction:column;gap:2px;align-items:center;}
+.streak-num{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--or);}
+.streak-dots{display:flex;gap:2px;}
+.s-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,255,.12);
+  transition:background .3s;
+}
+.s-dot.on{background:var(--or);}
+.s-dot.gold{background:var(--g);}
+
+/* expand toggle */
+.expand-btn{
+  width:28px;height:28px;border-radius:8px;
+  background:var(--bg4);border:none;color:var(--gr);
+  font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.store-card.open .expand-btn{background:rgba(245,200,66,.1);color:var(--g);transform:rotate(180deg);}
+
+/* ── expanded panel ── */
+.store-expanded{
+  display:none;padding:0 16px 20px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.store-card.open .store-expanded{display:block;}
+
+.exp-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-top:16px;
+}
+
+.exp-card{
+  background:var(--bg4);border-radius:var(--r12);padding:16px;
+  border:1px solid rgba(255,255,255,.06);
+}
+.exp-card-title{
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  margin-bottom:12px;font-family:'DM Mono',monospace;
+}
+.exp-card-title.tl{color:var(--tl);}
+.exp-card-title.gd{color:var(--g);}
+.exp-card-title.gn{color:var(--gn);}
+
+.exp-big{
+  font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:1;
+  margin-bottom:4px;
+}
+.exp-big.tl{color:var(--tl);}
+.exp-big.gd{color:var(--g);}
+.exp-big.gn{color:var(--gn);}
+
+.exp-sub{font-size:12px;color:var(--gr);margin-bottom:12px;}
+
+/* micro weekly bars */
+.weekly-bars{display:flex;align-items:flex-end;gap:4px;height:40px;}
+.w-bar{
+  flex:1;border-radius:3px 3px 0 0;
+  min-height:4px;background:rgba(255,255,255,.1);
+  position:relative;transition:height .5s ease;
+}
+.w-bar.on{background:var(--or);}
+.w-bar.hi{background:var(--g);}
+.w-bar.tl{background:var(--tl);}
+.w-bar.gd{background:var(--g);}
+.w-bar.gn{background:var(--gn);}
+.w-bar-lbl{font-size:9px;color:var(--gr);text-align:center;margin-top:4px;}
+
+.wk-labels{display:flex;gap:4px;margin-top:4px;}
+.wk-label{flex:1;text-align:center;font-size:8px;color:rgba(107,95,138,.6);}
+
+/* hitos */
+.hitos{display:flex;flex-direction:column;gap:6px;margin-top:12px;}
+.hito{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;padding:6px 10px;border-radius:8px;
+  background:rgba(255,255,255,.04);
+}
+.hito.achieved{background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);}
+.hito.locked{opacity:.4;}
+.hito-icon{font-size:16px;width:24px;text-align:center;}
+.hito-pts{
+  margin-left:auto;font-family:'DM Mono',monospace;
+  font-size:11px;color:var(--g);
+}
+
+/* cajeros mini table */
+.cajeros-mini{margin-top:12px;}
+.cajeros-mini-row{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);
+  font-size:13px;
+}
+.cajeros-mini-row:last-child{border:none;}
+.caj-rank{width:22px;height:22px;border-radius:6px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'DM Mono',monospace;color:var(--gr);}
+.caj-name{flex:1;font-weight:600;}
+.caj-enc{font-family:'DM Mono',monospace;font-size:12px;color:var(--g);}
+.caj-badge{font-size:10px;padding:2px 8px;border-radius:100px;}
+.caj-badge.adm{background:rgba(139,92,246,.2);color:var(--pb);}
+
+/* ══════════════════════════════════════
+   VIEW: CAJEROS
+══════════════════════════════════════ */
+.cajeros-view{max-width:1120px;margin:0 auto;padding:0 24px 60px;position:relative;z-index:2;}
+
+.cajero-search-bar{
+  display:flex;gap:8px;margin-bottom:24px;align-items:center;
+}
+.caj-input{
+  background:var(--bg3);border:1px solid rgba(255,255,255,.12);
+  border-radius:var(--r12);padding:11px 16px;
+  color:var(--wh);font-family:'DM Mono',monospace;
+  font-size:13px;letter-spacing:.1em;text-transform:uppercase;
+  width:200px;outline:none;transition:border-color .2s;
+}
+.caj-input::placeholder{color:var(--gr);text-transform:none;letter-spacing:0;}
+.caj-input:focus{border-color:var(--g);}
+.caj-search-btn{
+  background:linear-gradient(135deg,var(--p),var(--pb));
+  border:none;border-radius:var(--r12);padding:11px 20px;
+  color:#fff;font-size:13px;font-weight:700;cursor:pointer;
+  transition:opacity .2s;
+}
+.caj-search-btn:hover{opacity:.85;}
+
+/* profile card */
+.cajero-profile{
+  background:linear-gradient(135deg,rgba(139,92,246,.1),var(--bg3));
+  border:1px solid rgba(139,92,246,.3);border-radius:var(--r20);
+  padding:24px;display:none;margin-bottom:24px;
+}
+.cajero-profile.visible{display:block;}
+.cp-top{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.cp-avatar{
+  width:52px;height:52px;border-radius:14px;
+  background:linear-gradient(135deg,var(--p),var(--pb));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:26px;color:#fff;
+  flex-shrink:0;
+}
+.cp-name{font-size:20px;font-weight:700;letter-spacing:.02em;}
+.cp-meta{font-size:12px;color:var(--gr);}
+.cp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.cp-stat{
+  background:var(--bg4);border-radius:var(--r12);padding:14px;
+  text-align:center;
+}
+.cp-stat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--g);}
+.cp-stat-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);font-family:'DM Mono',monospace;}
+
+/* full cajero leaderboard */
+.cajero-board{
+  background:var(--bg2);border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--r16);overflow:hidden;
+}
+.cb-header{
+  display:grid;grid-template-columns:44px 1fr 100px 100px 110px 80px;
+  gap:8px;padding:10px 16px;
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gr);font-family:'DM Mono',monospace;
+  background:var(--bg3);border-bottom:1px solid rgba(255,255,255,.05);
+}
+.cb-row{
+  display:grid;grid-template-columns:44px 1fr 100px 100px 110px 80px;
+  gap:8px;padding:12px 16px;align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  transition:background .15s;
+}
+.cb-row:last-child{border:none;}
+.cb-row:hover{background:rgba(255,255,255,.02);}
+.cb-row.highlight{
+  background:rgba(245,200,66,.05);
+  border-left:3px solid var(--g);
+  padding-left:13px;
+}
+.cb-rank-num{
+  width:28px;height:28px;border-radius:8px;
+  background:var(--bg4);display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--gr);
+}
+.cb-rank-num.top{background:rgba(245,200,66,.15);color:var(--g);}
+.cb-name{font-size:14px;font-weight:700;}
+.cb-store{font-size:11px;color:var(--gr);}
+.cb-val{font-family:'DM Mono',monospace;font-size:14px;}
+.cb-val.enc{color:var(--g);}
+.cb-boletas{
+  display:flex;align-items:center;gap:4px;font-size:12px;
+}
+.boleta-x2{
+  background:rgba(245,200,66,.15);color:var(--g);
+  font-size:10px;padding:2px 7px;border-radius:100px;
+  font-family:'DM Mono',monospace;
+}
+
+/* streak badge en cajero board */
+.caj-streak{font-size:11px;color:var(--or);font-family:'DM Mono',monospace;}
+
+/* ══════════════════════════════════════
+   TICKET LEGEND (B+C)
+══════════════════════════════════════ */
+.ticket-legend{
+  max-width:1120px;margin:0 auto 24px;padding:0 24px;
+  position:relative;z-index:2;
+}
+.tl-box{
+  background:var(--bg3);border:1px solid rgba(251,146,60,.2);
+  border-radius:var(--r16);padding:16px 20px;
+  display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;
+}
+.tl-title{
+  font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--or);
+  margin-bottom:6px;letter-spacing:.06em;
+}
+.tl-desc{font-size:12px;color:var(--gr);line-height:1.6;max-width:400px;}
+.hito-chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px;}
+.hito-chip{
+  font-size:11px;font-family:'DM Mono',monospace;
+  padding:4px 12px;border-radius:100px;
+  border:1px solid rgba(245,200,66,.25);
+  color:var(--g);background:rgba(245,200,66,.06);
+}
+
+/* ══════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.store-card{animation:fadeUp .4s ease both;}
+.store-card:nth-child(1){animation-delay:.04s;}
+.store-card:nth-child(2){animation-delay:.08s;}
+.store-card:nth-child(3){animation-delay:.12s;}
+.store-card:nth-child(n+4){animation-delay:.16s;}
+
+@keyframes shimmer{
+  0%{left:-80%;}40%,100%{left:120%;}
+}
+.store-card.rank-1::before{
+  content:'';position:absolute;top:0;left:-80%;width:40%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(245,200,66,.04),transparent);
+  animation:shimmer 5s 1s infinite;
+  border-radius:var(--r16);
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media(max-width:900px){
+  .th-row,.store-row-main{grid-template-columns:44px 1fr 110px 80px 80px;}
+  .th-row>*:nth-child(n+6),.store-row-main>*:nth-child(n+6){display:none;}
+  .cb-header,.cb-row{grid-template-columns:44px 1fr 80px 80px;}
+  .cb-header>*:nth-child(n+5),.cb-row>*:nth-child(n+5){display:none;}
+  .exp-grid{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:repeat(3,1fr);}
+  .cp-stats{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+  .th-row,.store-row-main{grid-template-columns:44px 1fr 90px;}
+  .th-row>*:nth-child(n+4),.store-row-main>*:nth-child(n+4){display:none;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .countdown{flex-wrap:wrap;justify-content:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-brand">🏍️ LA MOTO</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchView('tiendas',this)">Tiendas</button>
+    <button class="nav-tab" onclick="switchView('cajeros',this)">Cajeros</button>
+  </div>
+  <div class="nav-live">
+    <div class="live-dot"></div>
+    <span id="nav-update">--</span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     VIEW: TIENDAS
+══════════════════════════════════════ -->
+<div class="view active" id="view-tiendas">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Concurso Nacional · Oakberry Colombia · 13 semanas</div>
+    <div class="hero-title">LA MOTO</div>
+    <div class="hero-sub"><strong>20 Abril — 20 Julio 2025</strong> · Gana la tienda que más crece vs su propio histórico</div>
+    <div class="countdown">
+      <div class="cd-unit"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl">días</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl">hrs</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl">min</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><div class="cd-num" id="cd-s">--</div><div class="cd-lbl">seg</div></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-pill">
+      <div class="stat-pill-lbl">Nuevos Oakers</div>
+      <div class="stat-pill-val" id="gs-loopy">--</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill-lbl">Encuestas</div>
+      <div class="stat-pill-val" id="gs-enc">--</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill-lbl">Tiendas activas</div>
+      <div class="stat-pill-val" id="gs-tiendas">--</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill-lbl">Semana</div>
+      <div class="stat-pill-val" id="gs-sem">-- <span>/ 13</span></div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill-lbl">Semanas en verde 🔥</div>
+      <div class="stat-pill-val" id="gs-streak">--</div>
+    </div>
+  </div>
+
+  <!-- TICKET LEGEND -->
+  <div class="ticket-legend">
+    <div class="tl-box">
+      <div>
+        <div class="tl-title">📈 Cómo funciona el Ticket (Método B+C)</div>
+        <div class="tl-desc">Cada semana que tu ticket supera el baseline histórico = +1 semana en verde 🟠. La consistencia vale más que un pico aislado. Además, cruza estos hitos y gana puntos extra instantáneos:</div>
+      </div>
+      <div>
+        <div class="hito-chips">
+          <div class="hito-chip">+5% baseline → <strong>+10 pts</strong></div>
+          <div class="hito-chip">+10% baseline → <strong>+25 pts</strong></div>
+          <div class="hito-chip">+15% baseline → <strong>+50 pts</strong></div>
+          <div class="hito-chip">5 sem. seguidas → <strong>🔥 +30 pts</strong></div>
+          <div class="hito-chip">10 sem. seguidas → <strong>⚡ +75 pts</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION HEADER -->
+  <div class="sec-header">
+    <div class="sec-title">Ranking de Tiendas</div>
+    <div class="sec-note">Clic en una tienda para ver el detalle</div>
+  </div>
+
+  <!-- TABLE HEADER -->
+  <div class="ranking-wrap">
+    <div class="th-row">
+      <div>#</div>
+      <div>Tienda</div>
+      <div>Puntaje</div>
+      <div>🎴 Loopy</div>
+      <div>📋 Encuestas</div>
+      <div>📈 Ticket</div>
+      <div>🔥 Racha</div>
+      <div></div>
+    </div>
+    <div id="ranking-list">
+      <div style="text-align:center;padding:60px;color:var(--gr);">
+        <div style="width:36px;height:36px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div>
+        Cargando ranking...
+      </div>
+    </div>
+  </div>
+
+</div><!-- /view-tiendas -->
+
+<!-- ══════════════════════════════════════
+     VIEW: CAJEROS
+══════════════════════════════════════ -->
+<div class="view" id="view-cajeros">
+  <div style="height:32px;"></div>
+  <div class="cajeros-view">
+
+    <!-- SEARCH -->
+    <div class="sec-title" style="margin-bottom:16px;">Ranking Personal de Cajeros</div>
+    <div class="cajero-search-bar">
+      <input class="caj-input" id="caj-input" placeholder="Tu código (ej: BOG-03)" maxlength="8">
+      <button class="caj-search-btn" onclick="buscarCajero()">Ver mis puntos</button>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="cajero-profile" id="cajero-profile">
+      <div class="cp-top">
+        <div class="cp-avatar" id="cp-initial">?</div>
+        <div>
+          <div class="cp-name" id="cp-name">--</div>
+          <div class="cp-meta" id="cp-meta">--</div>
+        </div>
+      </div>
+      <div class="cp-stats">
+        <div class="cp-stat">
+          <div class="cp-stat-val" id="cp-enc">--</div>
+          <div class="cp-stat-lbl">Encuestas</div>
+        </div>
+        <div class="cp-stat">
+          <div class="cp-stat-val" id="cp-rank-p">--</div>
+          <div class="cp-stat-lbl">Rank personal</div>
+        </div>
+        <div class="cp-stat">
+          <div class="cp-stat-val" id="cp-rank-t">--</div>
+          <div class="cp-stat-lbl">Rank tienda</div>
+        </div>
+        <div class="cp-stat">
+          <div class="cp-stat-val" id="cp-boletas">--</div>
+          <div class="cp-stat-lbl">Boletas rifa 🏍️</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD FULL -->
+    <div class="cajero-board">
+      <div class="cb-header">
+        <div>#</div>
+        <div>Cajero</div>
+        <div>📋 Encuestas</div>
+        <div>Tienda</div>
+        <div>Boletas rifa</div>
+        <div>Semana</div>
+      </div>
+      <div id="cajero-list">
+        <div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">
+          Cargando datos de cajeros...
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /view-cajeros -->
+
+<style>
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+
+<script>
+// ══════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════
+const SCRIPT_URL   = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
+const END_DATE     = new Date("2025-07-20T23:59:59-05:00");
+const START_DATE   = new Date("2025-04-20T00:00:00-05:00");
+const TOTAL_SEMANAS = 13;
+
+// Hitos del ticket (B+C)
+const HITOS_TICKET = [
+  { pct:  5, pts: 10,  label: "+5%",  icon: "🥉" },
+  { pct: 10, pts: 25,  label: "+10%", icon: "🥈" },
+  { pct: 15, pts: 50,  label: "+15%", icon: "🥇" },
+];
+const HITO_RACHA5  = { semanas: 5,  pts: 30,  icon: "🔥", label: "5 sem. seguidas" };
+const HITO_RACHA10 = { semanas: 10, pts: 75,  icon: "⚡", label: "10 sem. seguidas" };
+
+// ══════════════════════════════════════
+// COUNTDOWN
+// ══════════════════════════════════════
+function tick() {
+  const diff = END_DATE - new Date();
+  if (diff <= 0) { ["cd-d","cd-h","cd-m","cd-s"].forEach(id => document.getElementById(id).textContent = "0"); return; }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000)  / 60000);
+  const s = Math.floor((diff % 60000)    / 1000);
+  document.getElementById("cd-d").textContent = String(d).padStart(2,"0");
+  document.getElementById("cd-h").textContent = String(h).padStart(2,"0");
+  document.getElementById("cd-m").textContent = String(m).padStart(2,"0");
+  document.getElementById("cd-s").textContent = String(s).padStart(2,"0");
+}
+setInterval(tick, 1000); tick();
+
+// ══════════════════════════════════════
+// SEMANA ACTUAL
+// ══════════════════════════════════════
+function semanaActual() {
+  const diff = new Date() - START_DATE;
+  if (diff < 0) return 0;
+  return Math.min(TOTAL_SEMANAS, Math.floor(diff / 604800000) + 1);
+}
+
+// ══════════════════════════════════════
+// NAV / VIEWS
+// ══════════════════════════════════════
+function switchView(name, btn) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("view-"+name).classList.add("active");
+  btn.classList.add("active");
+  if (name === "cajeros" && !cajeroDataLoaded) loadCajeroData();
+}
+
+// ══════════════════════════════════════
+// DEMO DATA (mientras no hay backend)
+// ══════════════════════════════════════
+function demoData() {
+  const sem = semanaActual() || 3;
+  return {
+    stats:   { loopy: 312, encuestas: 528, tiendas: 18, semana: sem, maxStreak: 3 },
+    ranking: [
+      { nombre:"Parque La Colina",  ciudad:"Bogotá",       score:91.4, loopy:61, encuestas:97, ticketGrowth:14.2, racha:4, ticketHito:2, weeklyLoopy:[8,9,11,12,10,11,0,0,0,0,0,0,0], weeklyEnc:[14,15,18,19,17,14,0,0,0,0,0,0,0], weeklyTicket:[1,1,1,1,0,1,0,0,0,0,0,0,0], cajeros:[{n:"Valentina R.",enc:41,adm:false},{n:"Carlos M.",enc:28,adm:false},{n:"Sofía P.",enc:19,adm:false},{n:"Luis ADM",enc:9,adm:true}], prevRank:2 },
+      { nombre:"Zona T",            ciudad:"Bogotá",       score:87.1, loopy:49, encuestas:88, ticketGrowth:16.7, racha:5, ticketHito:3, weeklyLoopy:[7,8,8,9,8,9,0,0,0,0,0,0,0], weeklyEnc:[12,14,16,16,15,15,0,0,0,0,0,0,0], weeklyTicket:[1,1,1,1,1,0,0,0,0,0,0,0,0], cajeros:[{n:"Daniela G.",enc:39,adm:false},{n:"Mateo V.",enc:31,adm:false},{n:"ADM: Juan",enc:18,adm:true}], prevRank:1 },
+      { nombre:"El Tesoro",         ciudad:"Medellín",     score:79.8, loopy:43, encuestas:71, ticketGrowth:11.5, racha:3, ticketHito:1, weeklyLoopy:[6,7,7,8,8,7,0,0,0,0,0,0,0], weeklyEnc:[10,11,13,13,12,12,0,0,0,0,0,0,0], weeklyTicket:[0,1,1,1,0,0,0,0,0,0,0,0,0], cajeros:[{n:"Camila S.",enc:32,adm:false},{n:"Andrés T.",enc:22,adm:false},{n:"Paula ADM",enc:17,adm:true}], prevRank:5 },
+      { nombre:"Unicentro",         ciudad:"Bogotá",       score:73.2, loopy:38, encuestas:64, ticketGrowth: 9.8, racha:2, ticketHito:0, weeklyLoopy:[6,6,7,7,6,6,0,0,0,0,0,0,0], weeklyEnc:[10,10,11,12,11,10,0,0,0,0,0,0,0], weeklyTicket:[0,0,1,1,0,0,0,0,0,0,0,0,0], cajeros:[{n:"Miguel A.",enc:28,adm:false},{n:"Sara C.",enc:21,adm:false},{n:"ADM: Rodolfo",enc:15,adm:true}], prevRank:3 },
+      { nombre:"Andino",            ciudad:"Bogotá",       score:68.5, loopy:31, encuestas:58, ticketGrowth: 8.1, racha:2, ticketHito:0, weeklyLoopy:[5,5,6,5,5,5,0,0,0,0,0,0,0], weeklyEnc:[9,9,10,10,10,10,0,0,0,0,0,0,0], weeklyTicket:[0,1,0,1,0,0,0,0,0,0,0,0,0], cajeros:[{n:"Isabela M.",enc:24,adm:false},{n:"Tomás R.",enc:20,adm:false},{n:"Ana ADM",enc:14,adm:true}], prevRank:4 },
+      { nombre:"Buenavista",        ciudad:"Barranquilla", score:61.2, loopy:27, encuestas:49, ticketGrowth: 7.4, racha:1, ticketHito:0, weeklyLoopy:[4,4,5,5,5,4,0,0,0,0,0,0,0], weeklyEnc:[8,8,8,9,8,8,0,0,0,0,0,0,0], weeklyTicket:[0,0,0,1,0,0,0,0,0,0,0,0,0], cajeros:[{n:"Julián O.",enc:22,adm:false},{n:"Natalia P.",enc:16,adm:false},{n:"ADM: Mario",enc:11,adm:true}], prevRank:7 },
+      { nombre:"Gran Plaza",        ciudad:"Cali",         score:55.9, loopy:22, encuestas:41, ticketGrowth: 5.9, racha:1, ticketHito:0, weeklyLoopy:[3,4,4,4,4,3,0,0,0,0,0,0,0], weeklyEnc:[6,7,7,7,7,7,0,0,0,0,0,0,0], weeklyTicket:[0,0,1,0,0,0,0,0,0,0,0,0,0], cajeros:[{n:"Felipe C.",enc:18,adm:false},{n:"Gloria R.",enc:14,adm:false},{n:"ADM: Pilar",enc:9,adm:true}], prevRank:6 },
+      { nombre:"Santa Fe",          ciudad:"Bogotá",       score:50.3, loopy:19, encuestas:36, ticketGrowth: 4.2, racha:0, ticketHito:0, weeklyLoopy:[3,3,3,4,3,3,0,0,0,0,0,0,0], weeklyEnc:[5,6,6,7,6,6,0,0,0,0,0,0,0], weeklyTicket:[0,0,0,0,0,0,0,0,0,0,0,0,0], cajeros:[{n:"Marcela V.",enc:16,adm:false},{n:"Roberto G.",enc:12,adm:false},{n:"ADM: Diana",enc:8,adm:true}], prevRank:8 },
+    ]
+  };
+}
+
+// ══════════════════════════════════════
+// RENDER RANKING TIENDAS
+// ══════════════════════════════════════
+function renderRanking(data) {
+  const sem = data.stats?.semana || semanaActual();
+  document.getElementById("gs-loopy").textContent   = data.stats?.loopy    || "--";
+  document.getElementById("gs-enc").textContent     = data.stats?.encuestas|| "--";
+  document.getElementById("gs-tiendas").textContent = data.stats?.tiendas  || "--";
+  document.getElementById("gs-sem").innerHTML       = `${sem} <span>/ 13</span>`;
+  document.getElementById("gs-streak").textContent  = data.stats?.maxStreak != null ? data.stats.maxStreak : "--";
+
+  const ts  = new Date().toLocaleString("es-CO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+  document.getElementById("nav-update").textContent = ts;
+
+  const ranking = data.ranking || [];
+  const maxScore = Math.max(...ranking.map(r => r.score));
+  const maxLoopy = Math.max(...ranking.map(r => r.loopy));
+  const maxEnc   = Math.max(...ranking.map(r => r.encuestas));
+
+  document.getElementById("ranking-list").innerHTML = ranking.map((s,i) => {
+    const rank = i + 1;
+    const rankClass  = rank<=3 ? `rank-${rank}` : "";
+    const badgeClass = rank===1?"r1":rank===2?"r2":rank===3?"r3":"rn";
+    const badgeText  = rank<=3 ? ["🥇","🥈","🥉"][rank-1] : rank;
+
+    const scorePct = (s.score / maxScore * 100).toFixed(1);
+    const loopyPct = (s.loopy / (maxLoopy||1) * 100).toFixed(1);
+    const encPct   = (s.encuestas / (maxEnc||1) * 100).toFixed(1);
+
+    const tickGrowth = s.ticketGrowth || 0;
+    const tickColor  = tickGrowth >= 10 ? "gn" : tickGrowth >= 5 ? "gd" : tickGrowth >= 0 ? "or" : "rd";
+    const tickTxt    = (tickGrowth > 0 ? "+" : "") + tickGrowth.toFixed(1) + "%";
+
+    const racha = s.racha || 0;
+    const rachaDots = Array.from({length:Math.min(racha,5)}).map((_,j) =>
+      `<div class="s-dot ${j < racha ? (racha>=5?'gold':'on') : ''}"></div>`
+    ).join("");
+
+    const rankChange = s.prevRank ? s.prevRank - rank : 0;
+    const trendTag   = rankChange > 0
+      ? `<span style="color:var(--gn);font-size:10px;margin-left:4px">▲${rankChange}</span>`
+      : rankChange < 0
+      ? `<span style="color:var(--rd);font-size:10px;margin-left:4px">▼${Math.abs(rankChange)}</span>`
+      : "";
+
+    // Cajeros mini (top 3)
+    const top3Cajeros = (s.cajeros||[]).slice(0,3).map((c,ci) => `
+      <div class="cajeros-mini-row">
+        <div class="caj-rank">${ci+1}</div>
+        <div class="caj-name">${c.n}</div>
+        ${c.adm?`<span class="caj-badge adm">ADM</span>`:""}
+        <div class="caj-enc">${c.enc} enc.</div>
+      </div>`).join("");
+
+    // Hitos ticket
+    const hitosHTML = (() => {
+      const hitoLogrado = s.ticketHito || 0;
+      const rachaLograda = s.racha || 0;
+      const items = HITOS_TICKET.map((h,hi) => {
+        const done = hi < hitoLogrado;
+        return `<div class="hito ${done?"achieved":"locked"}">
+          <span class="hito-icon">${h.icon}</span>
+          <span>${h.label} ticket</span>
+          <span class="hito-pts">+${h.pts} pts${done?" ✓":""}</span>
+        </div>`;
+      });
+      if (rachaLograda >= 5) items.push(`<div class="hito achieved">
+        <span class="hito-icon">🔥</span>
+        <span>5 semanas seguidas</span>
+        <span class="hito-pts">+30 pts ✓</span>
+      </div>`);
+      else items.push(`<div class="hito locked">
+        <span class="hito-icon">🔥</span>
+        <span>5 semanas seguidas (${rachaLograda}/5)</span>
+        <span class="hito-pts">+30 pts</span>
+      </div>`);
+      return items.join("");
+    })();
+
+    // Weekly bars (ticket on/off, 13 semanas)
+    const wTicket = s.weeklyTicket || Array(13).fill(0);
+    const wLoopy  = s.weeklyLoopy  || Array(13).fill(0);
+    const wEnc    = s.weeklyEncuesta || s.weeklyEnc || Array(13).fill(0);
+    const maxWL   = Math.max(...wLoopy, 1);
+    const maxWE   = Math.max(...wEnc, 1);
+
+    const barsTicket = wTicket.map((v,wi) =>
+      `<div class="w-bar ${v>0?(racha>=5&&wi<racha?"gold":"on"):""}" style="height:${v>0?100:20}%;"></div>`
+    ).join("");
+
+    const barsLoopy = wLoopy.map((v,wi) =>
+      `<div class="w-bar tl" style="height:${(v/maxWL*100)||5}%;${v===0?"opacity:.2":""}"></div>`
+    ).join("");
+
+    const barsEnc = wEnc.map((v,wi) =>
+      `<div class="w-bar gd" style="height:${(v/maxWE*100)||5}%;${v===0?"opacity:.2":""}"></div>`
+    ).join("");
+
+    const semLabels = Array.from({length:13},(_,i)=>`<div class="wk-label">S${i+1}</div>`).join("");
+
+    return `
+    <div class="store-card ${rankClass}" style="position:relative;" id="sc-${i}">
+      <div class="store-row-main" onclick="toggleExpand(${i})">
+        <div><div class="rank-num ${badgeClass}">${badgeText}</div></div>
+        <div class="store-info">
+          <div class="s-name">${s.nombre}${trendTag}</div>
+          <div class="s-city">${s.ciudad}</div>
+        </div>
+        <div class="score-cell">
+          <div class="score-val">${s.score.toFixed(1)}</div>
+          <div class="score-bar"><div class="score-fill" style="width:${scorePct}%"></div></div>
+        </div>
+        <div class="m-cell">
+          <div class="m-val tl">${s.loopy}</div>
+          <div class="m-bar"><div class="m-fill tl" style="width:${loopyPct}%"></div></div>
+        </div>
+        <div class="m-cell">
+          <div class="m-val gd">${s.encuestas}</div>
+          <div class="m-bar"><div class="m-fill gd" style="width:${encPct}%"></div></div>
+        </div>
+        <div class="m-cell">
+          <div class="m-val ${tickColor}">${tickTxt}</div>
+          <div class="m-bar"><div class="m-fill gn" style="width:${Math.min(100,Math.max(0,(tickGrowth+5)/25*100)).toFixed(1)}%"></div></div>
+        </div>
+        <div class="streak-cell">
+          <div class="streak-num">${racha}</div>
+          <div class="streak-dots">${rachaDots}</div>
+        </div>
+        <button class="expand-btn" onclick="toggleExpand(${i});event.stopPropagation()">▼</button>
+      </div>
+
+      <div class="store-expanded">
+        <div class="exp-grid">
+
+          <!-- LOOPY -->
+          <div class="exp-card">
+            <div class="exp-card-title tl">🎴 Nuevos Oakers por semana</div>
+            <div class="exp-big tl">${s.loopy}</div>
+            <div class="exp-sub">Total acumulado · Semana actual</div>
+            <div class="weekly-bars">${barsLoopy}</div>
+            <div class="wk-labels">${semLabels}</div>
+          </div>
+
+          <!-- ENCUESTAS -->
+          <div class="exp-card">
+            <div class="exp-card-title gd">📋 Encuestas por semana</div>
+            <div class="exp-big gd">${s.encuestas}</div>
+            <div class="exp-sub">Total acumulado · Cajero con más: ${(s.cajeros||[])[0]?.n||"--"}</div>
+            <div class="weekly-bars">${barsEnc}</div>
+            <div class="wk-labels">${semLabels}</div>
+            <div class="cajeros-mini" style="margin-top:12px;">
+              <div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gr);margin-bottom:6px;font-family:'DM Mono',monospace;">Top cajeros</div>
+              ${top3Cajeros}
+            </div>
+          </div>
+
+          <!-- TICKET -->
+          <div class="exp-card">
+            <div class="exp-card-title gn">📈 Ticket · Semanas en verde</div>
+            <div class="exp-big ${tickColor}">${tickTxt}</div>
+            <div class="exp-sub">vs baseline histórico · ${racha} sem. consecutivas 🔥</div>
+            <div class="weekly-bars">${barsTicket}</div>
+            <div class="wk-labels">${semLabels}</div>
+            <div class="hitos">${hitosHTML}</div>
+          </div>
+
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function toggleExpand(i) {
+  const card = document.getElementById("sc-"+i);
+  card.classList.toggle("open");
+}
+
+// ══════════════════════════════════════
+// CAJEROS
+// ══════════════════════════════════════
+let cajeroDataLoaded = false;
+let cajeroDataCache  = null;
+
+function flatCajeros(ranking) {
+  const all = [];
+  (ranking || []).forEach(tienda => {
+    (tienda.cajeros || []).forEach(c => {
+      all.push({
+        nombre: c.n,
+        tienda: tienda.nombre,
+        ciudad: tienda.ciudad,
+        encuestas: c.enc,
+        adm: c.adm,
+        rankTienda: tienda.rank,
+        racha: tienda.racha || 0,
+      });
+    });
+  });
+  all.sort((a,b) => b.encuestas - a.encuestas);
+  return all;
+}
+
+function renderCajeroBoard(cajeros, highlightCod) {
+  document.getElementById("cajero-list").innerHTML = cajeros.map((c,i) => {
+    const rank    = i + 1;
+    const isTop   = rank <= 3;
+    const boletas = c.encuestas > 0 ? (c.encuestas >= 20 ? 2 : 1) : 0;
+    const isHL    = c._codigo === highlightCod;
+
+    return `<div class="cb-row ${isHL?"highlight":""}">
+      <div class="cb-rank-num ${isTop?"top":"}">${rank<=3?["🥇","🥈","🥉"][rank-1]:rank}</div>
+      <div>
+        <div class="cb-name">${c.nombre} ${c.adm?`<span class="caj-badge adm">ADM</span>`:""}</div>
+        <div class="cb-store">${c.tienda} · ${c.ciudad}</div>
+      </div>
+      <div class="cb-val enc">${c.encuestas}</div>
+      <div style="font-size:12px;color:var(--gr);">#${c.rankTienda || "--"} tienda</div>
+      <div class="cb-boletas">
+        ${boletas}
+        ${boletas >= 2 ? `<span class="boleta-x2">×2</span>` : ""}
+      </div>
+      <div class="caj-streak">${c.racha > 0 ? `🔥${c.racha}` : "--"}</div>
+    </div>`;
+  }).join("");
+}
+
+function loadCajeroData() {
+  if (!cajeroDataCache) {
+    const demo = demoData();
+    demo.ranking.forEach((t,i) => {
+      t.rank = i+1;
+      (t.cajeros||[]).forEach((c,ci) => { c._codigo = `COD-${i}${ci}`; });
+    });
+    cajeroDataCache = flatCajeros(demo.ranking);
+  }
+  renderCajeroBoard(cajeroDataCache, null);
+  cajeroDataLoaded = true;
+}
+
+function buscarCajero() {
+  const codigo = document.getElementById("caj-input").value.trim().toUpperCase();
+  if (!codigo || codigo.length < 4) { alert("Ingresa tu código (mín. 4 caracteres)"); return; }
+
+  // Demo: buscar en los datos cargados
+  loadCajeroData();
+  const found = cajeroDataCache.find((c,i) =>
+    c._codigo?.toUpperCase() === codigo || // real
+    `BOG-0${(i%9)+1}` === codigo // demo fallback
+  );
+
+  if (found) {
+    mostrarPerfilCajero(found, cajeroDataCache.indexOf(found)+1);
+    renderCajeroBoard(cajeroDataCache, codigo);
+    document.getElementById("cajero-profile").scrollIntoView({behavior:"smooth",block:"start"});
+  } else {
+    // En producción: fetch al backend
+    fetch(`${SCRIPT_URL}?action=getCajeroStats&codigo=${encodeURIComponent(codigo)}`)
+      .then(r=>r.json())
+      .then(d => {
+        if (d.nombre) mostrarPerfilCajero({
+          nombre:   d.nombre,
+          tienda:   d.tienda,
+          ciudad:   d.ciudad,
+          encuestas:d.encuestas,
+          adm:      false,
+        }, d.rankPersonal);
+        else alert("Código no encontrado. Verifica con tu administrador.");
+      })
+      .catch(() => alert("Error de conexión. Intenta de nuevo."));
+  }
+}
+
+function mostrarPerfilCajero(c, rankP) {
+  const initial = (c.nombre||"?")[0].toUpperCase();
+  const boletas = c.encuestas >= 20 ? 2 : c.encuestas > 0 ? 1 : 0;
+  document.getElementById("cp-initial").textContent = initial;
+  document.getElementById("cp-name").textContent    = c.nombre;
+  document.getElementById("cp-meta").textContent    = `${c.tienda} · ${c.ciudad}${c.adm?" · ADM":""}`;
+  document.getElementById("cp-enc").textContent     = c.encuestas || 0;
+  document.getElementById("cp-rank-p").textContent  = rankP ? `#${rankP}` : "--";
+  document.getElementById("cp-rank-t").textContent  = c.rankTienda ? `#${c.rankTienda}` : "--";
+  document.getElementById("cp-boletas").textContent = boletas + (boletas >= 2 ? " ×2 🎟️" : " 🎟️");
+  document.getElementById("cajero-profile").classList.add("visible");
+}
+
+document.getElementById("caj-input").addEventListener("keydown", e => { if(e.key==="Enter") buscarCajero(); });
+
+// ══════════════════════════════════════
+// FETCH & INIT
+// ══════════════════════════════════════
+async function fetchData() {
+  const sem = semanaActual();
+  try {
+    const url  = `${SCRIPT_URL}?action=getRankingConcurso&semana=${sem||1}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.ranking && data.ranking.length) {
+      renderRanking(data);
+    } else {
+      renderRanking(demoData());
+    }
+  } catch(e) {
+    renderRanking(demoData());
+  }
+}
+
+fetchData();
+setInterval(fetchData, 300000);
+</script>
+</body>
+</html>
