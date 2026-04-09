@@ -524,27 +524,51 @@ function fetchGS(params) {
 // INIT
 // ══════════════════════════════════════════════════════
 async function initApp() {
-  await loadDashboard();
-  await loadCampUTM();
-  populateFilters();
+  // Mostrar el panel inmediatamente con spinner — no bloquear
   renderTab('resumen');
+
+  // Cargar en paralelo sin esperar uno al otro
+  Promise.allSettled([
+    loadDashboard(),
+    loadCampUTM()
+  ]).then(() => {
+    populateFilters();
+    renderTab(_activeTab);
+  });
 }
 
 async function loadDashboard() {
+  setStatus('Cargando datos...');
   try {
+    // Intentar leer hoja Dashboard pre-calculada (rápido)
     const r = await fetchGS({ accion:'dashboardLeer' });
     if (r.ok) {
       _dashData = r;
-      const act = r.actualizacion ? new Date(r.actualizacion).toLocaleString('es-CO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
-      document.getElementById('hdr-update').textContent = act ? 'Act: ' + act : 'En línea';
+      const act = r.actualizacion
+        ? new Date(r.actualizacion).toLocaleString('es-CO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
+        : '';
+      setStatus(act ? 'Act: ' + act : 'En línea ✓');
+      return;
     }
+    // Si no existe la hoja, calcular directo sin pre-calcular
+    // (más lento pero no falla silenciosamente)
+    const [res, rciu, rfue] = await Promise.allSettled([
+      fetchGS({ accion:'dashboardResumen' }),
+      fetchGS({ accion:'dashboardCiudades' }),
+      fetchGS({ accion:'dashboardCampanas' }),
+    ]);
+    // Armar _dashData desde las llamadas directas
+    _dashData = {
+      ok: true,
+      resumen:  res.status==='fulfilled' && res.value?.ok ? res.value : {},
+      ciudades: rciu.status==='fulfilled' && rciu.value?.ciudades ? rciu.value.ciudades : [],
+      fuentes:  rfue.status==='fulfilled' && rfue.value?.campanas ? rfue.value.campanas : [],
+      actualizacion: new Date().toISOString(),
+    };
+    setStatus('En línea ✓ (hoja Dashboard no generada — clic en Recalcular)');
   } catch(e) {
-    try {
-      // fallback: generar hoja primero
-      await fetchGS({ accion:'dashboardHoja' });
-      const r2 = await fetchGS({ accion:'dashboardLeer' });
-      if (r2.ok) _dashData = r2;
-    } catch(e2) {}
+    setStatus('⚠ Error de conexión');
+    console.error('loadDashboard:', e);
   }
 }
 
@@ -553,6 +577,11 @@ async function loadCampUTM() {
     const r = await fetchGS({ accion:'dashboardCampanasUTM' });
     if (r.ok) _campUTM = r;
   } catch(e) {}
+}
+
+function setStatus(msg) {
+  const el = document.getElementById('hdr-update');
+  if (el) el.textContent = msg;
 }
 
 async function recalcular() {
@@ -680,7 +709,12 @@ async function renderTab(name) {
 function renderResumen() {
   const el = document.getElementById('panel-resumen');
   const d  = _dashData;
-  if (!d) { el.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-txt">Cargando...</div></div>'; return; }
+  if (!d) {
+    el.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-txt">Conectando con Google Sheets...</div></div>';
+    // Reintentar en 2s por si los datos llegan después
+    setTimeout(() => { if (_activeTab==='resumen') renderResumen(); }, 2000);
+    return;
+  }
 
   const r = d.resumen || {};
   const tot = (r.disponibles||0)+(r.canjeados||0)+(r.vencidos||0)+(r.canjeadosRea||0)+(r.disponiblesRea||0)+(r.vencidosRea||0);
