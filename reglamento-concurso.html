@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reglamento · La Moto · Oakberry Colombia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --purple: #5F4B8B;
+  --purple-bright: #7B2FBE;
+  --gold: #F5C842;
+  --dark: #0e0b16;
+  --dark2: #1a1528;
+  --white: #F8F4FF;
+  --gray: #8B7DA8;
+  --green: #2ECC71;
+  --blue: #4ECDC4;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--dark);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.7;
+}
+
+.top-bar {
+  background: linear-gradient(135deg, var(--purple), var(--purple-bright));
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.top-bar-brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+
+.top-bar-link {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+}
+.top-bar-link:hover { color: var(--gold); }
+
+.hero {
+  text-align: center;
+  padding: 48px 24px 32px;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(95,75,139,0.3), transparent);
+}
+
+.hero-tag {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(245,200,66,0.1);
+  border: 1px solid rgba(245,200,66,0.3);
+  padding: 6px 18px;
+  border-radius: 100px;
+  margin-bottom: 16px;
+}
+
+h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 10vw, 88px);
+  line-height: 0.9;
+  background: linear-gradient(135deg, var(--gold), #fff8dc, var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+.hero-meta {
+  font-size: 14px;
+  color: var(--gray);
+}
+
+.hero-meta strong { color: var(--white); }
+
+/* Resumen visual */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 780px;
+  margin: 32px auto;
+  padding: 0 24px;
+}
+
+.summary-card {
+  background: var(--dark2);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 18px;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.sum-icon { font-size: 32px; margin-bottom: 10px; }
+.sum-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.sum-label { font-size: 12px; color: var(--gray); }
+
+/* Contenido */
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+}
+
+.section {
+  margin-bottom: 36px;
+  border-left: 3px solid var(--purple);
+  padding-left: 20px;
+}
+
+.section-num {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.section h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+
+.section p { font-size: 14px; color: rgba(248,244,255,0.85); margin-bottom: 10px; }
+
+.section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.section ul li {
+  font-size: 14px;
+  color: rgba(248,244,255,0.85);
+  padding: 6px 0 6px 24px;
+  position: relative;
+}
+
+.section ul li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.highlight-box {
+  background: linear-gradient(135deg, rgba(245,200,66,0.08), rgba(123,47,190,0.08));
+  border: 1px solid rgba(245,200,66,0.2);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-size: 13px;
+  color: var(--white);
+}
+
+.highlight-box strong { color: var(--gold); }
+
+/* Tabla de puntos */
+.points-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13px;
+}
+
+.points-table th {
+  background: var(--purple);
+  color: var(--white);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.points-table th:first-child { border-radius: 10px 0 0 10px; }
+.points-table th:last-child  { border-radius: 0 10px 10px 0; }
+
+.points-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  vertical-align: top;
+}
+
+.points-table tr:last-child td { border-bottom: none; }
+.points-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+.tag-blue   { background:rgba(78,205,196,0.15);  color:var(--blue);  padding:3px 10px; border-radius:100px; font-size:11px; white-space:nowrap; }
+.tag-gold   { background:rgba(245,200,66,0.15);  color:var(--gold);  padding:3px 10px; border-radius:100px; font-size:11px; white-space:nowrap; }
+.tag-green  { background:rgba(46,204,113,0.15);  color:var(--green); padding:3px 10px; border-radius:100px; font-size:11px; white-space:nowrap; }
+
+/* Premios */
+.prize-block {
+  background: linear-gradient(135deg, rgba(245,200,66,0.06), rgba(95,75,139,0.12));
+  border: 1px solid rgba(245,200,66,0.25);
+  border-radius: 18px;
+  padding: 28px 24px;
+  margin: 20px 0;
+}
+
+.prize-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.prize-sub { font-size: 13px; color: var(--gray); }
+
+/* Calendario */
+.timeline {
+  position: relative;
+  padding-left: 32px;
+  margin: 16px 0;
+}
+
+.timeline::before {
+  content:'';
+  position: absolute;
+  left: 10px; top:0; bottom:0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--purple), transparent);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.timeline-item::before {
+  content:'';
+  position: absolute;
+  left: -26px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid var(--dark);
+}
+
+.timeline-date {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.timeline-event {
+  font-size: 14px;
+  color: var(--white);
+}
+
+.timeline-note {
+  font-size: 12px;
+  color: var(--gray);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+@media(max-width:600px) {
+  .summary-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-brand">🏍️ La Moto · Oakberry Colombia</div>
+  <a class="top-bar-link" href="/concurso">Ver ranking en vivo →</a>
+</div>
+
+<div class="hero">
+  <div class="hero-tag">Concurso Nacional · Todas las tiendas</div>
+  <h1>La Moto</h1>
+  <div class="hero-meta">
+    <strong>20 Abril — 20 Julio 2025</strong> · 13 semanas · 3 métricas · 1 motocicleta
+  </div>
+</div>
+
+<!-- RESUMEN VISUAL -->
+<div class="summary-grid">
+  <div class="summary-card">
+    <div class="sum-icon">🎴</div>
+    <div class="sum-val">40%</div>
+    <div class="sum-label">Nuevos en Loopy Loyalty</div>
+  </div>
+  <div class="summary-card">
+    <div class="sum-icon">📋</div>
+    <div class="sum-val">30%</div>
+    <div class="sum-label">Encuestas respondidas</div>
+  </div>
+  <div class="summary-card">
+    <div class="sum-icon">📈</div>
+    <div class="sum-val">30%</div>
+    <div class="sum-label">Crecimiento de ticket</div>
+  </div>
+</div>
+
+<div class="doc">
+
+  <!-- 1. QUÉ ES -->
+  <div class="section">
+    <div class="section-num">Artículo 1</div>
+    <h2>¿De qué se trata?</h2>
+    <p>El Concurso Nacional "La Moto" es una competencia entre todas las tiendas Oakberry Colombia, activa durante 13 semanas consecutivas. Cada semana se actualizará el ranking y al finalizar el concurso, la tienda con mayor puntaje acumulado gana. De ese equipo, se rifará una motocicleta entre todos los cajeros y el administrador participantes.</p>
+    <div class="highlight-box">
+      <strong>Dos ganadores, un solo concurso:</strong> gana la tienda (premio colectivo) y gana una persona del equipo de esa tienda (la moto, por rifa interna).
+    </div>
+  </div>
+
+  <!-- 2. QUIÉN PARTICIPA -->
+  <div class="section">
+    <div class="section-num">Artículo 2</div>
+    <h2>¿Quiénes participan?</h2>
+    <p>Participan todas las tiendas físicas Oakberry Colombia activas al inicio del concurso. Dentro de cada tienda, participan:</p>
+    <ul>
+      <li>Todos los cajeros activos</li>
+      <li>El administrador del punto (ADM)</li>
+    </ul>
+    <p>Todos tienen el mismo peso en la rifa final. No hay jerarquías: el ADM compite igual que cualquier cajero.</p>
+  </div>
+
+  <!-- 3. CÓMO SE PUNTÚA -->
+  <div class="section">
+    <div class="section-num">Artículo 3</div>
+    <h2>¿Cómo se puntúa?</h2>
+    <p>El puntaje de cada tienda se calcula semanalmente con tres métricas, <strong>normalizadas contra el propio histórico de cada tienda</strong> (últimas 8 semanas antes del inicio). Esto garantiza que todas las tiendas —grandes o pequeñas— tengan la misma probabilidad de ganar.</p>
+
+    <table class="points-table">
+      <tr>
+        <th>Métrica</th>
+        <th>Qué mide</th>
+        <th>Peso</th>
+        <th>Fuente</th>
+      </tr>
+      <tr>
+        <td><span class="tag-blue">🎴 Loopy</span></td>
+        <td>Clientes nuevos inscritos en Loopy Loyalty con al menos 1 compra</td>
+        <td><strong>40%</strong></td>
+        <td>API Loopy</td>
+      </tr>
+      <tr>
+        <td><span class="tag-gold">📋 Encuestas</span></td>
+        <td>Clientes que completan la encuesta de satisfacción</td>
+        <td><strong>30%</strong></td>
+        <td>Google Forms</td>
+      </tr>
+      <tr>
+        <td><span class="tag-green">📈 Ticket</span></td>
+        <td>Crecimiento del ticket promedio vs baseline histórico</td>
+        <td><strong>30%</strong></td>
+        <td>Sistema POS</td>
+      </tr>
+    </table>
+
+    <div class="highlight-box">
+      <strong>Fórmula normalizada:</strong> si tu tienda promediaba 10 nuevos Oakers/semana y esta semana hizo 15, su ratio es 150%. Una tienda grande que promediaba 50 y hace 75 también tiene 150%. Empate justo. Lo que cuenta es el porcentaje de mejora respecto a tu propia línea base, no el volumen absoluto.
+    </div>
+  </div>
+
+  <!-- 4. CÓDIGO DE CAJERO -->
+  <div class="section">
+    <div class="section-num">Artículo 4</div>
+    <h2>El código de cajero</h2>
+    <p>Cada cajero y ADM tiene un código único de 6 caracteres (ejemplo: <strong>BOG-03</strong>). Este código:</p>
+    <ul>
+      <li>Se muestra al cliente cuando le pides que llene la encuesta</li>
+      <li>El cliente lo ingresa en la encuesta y eso te da puntos individuales</li>
+      <li>Sirve para consultar tu posición personal en <strong>oakberry-cupones.com/concurso</strong></li>
+      <li>No afecta el puntaje colectivo de la tienda (que suma todas las encuestas por igual)</li>
+    </ul>
+    <div class="highlight-box">
+      <strong>¿Para qué sirve el ranking personal?</strong> Para reconocer al mejor vendedor de la tienda ganadora. Al momento de la rifa, los cajeros con más encuestas registradas tienen el doble de boletas. El resto tiene una boleta cada uno.
+    </div>
+  </div>
+
+  <!-- 5. GANADORES -->
+  <div class="section">
+    <div class="section-num">Artículo 5</div>
+    <h2>¿Cómo se define el ganador?</h2>
+
+    <div class="prize-block">
+      <div class="prize-title">🏆 Premio Colectivo — La Tienda</div>
+      <div class="prize-sub">La tienda con mayor puntaje acumulado al cierre de las 13 semanas gana el reconocimiento oficial como la mejor tienda Oakberry Colombia 2025.</div>
+    </div>
+
+    <div class="prize-block">
+      <div class="prize-title">🏍️ Premio Individual — La Moto</div>
+      <div class="prize-sub">Entre todos los cajeros y el ADM de la tienda ganadora se realiza una rifa. Los cajeros con más encuestas propias en el período tienen doble boleta. El ADM participa con una boleta. La rifa se transmite en vivo.</div>
+    </div>
+
+    <p>En caso de empate en el puntaje final, gana la tienda con mayor cantidad de nuevos Oakers inscritos, que es la métrica de mayor impacto a largo plazo para el negocio.</p>
+  </div>
+
+  <!-- 6. ANTI-TRAMPA -->
+  <div class="section">
+    <div class="section-num">Artículo 6</div>
+    <h2>Reglas de juego limpio</h2>
+    <p>El concurso está diseñado para ser verificable e incorruptible:</p>
+    <ul>
+      <li><strong>Loopy:</strong> Solo cuentan inscripciones con mínimo 1 sello (= 1 compra real). Un registro sin compra no suma.</li>
+      <li><strong>Encuestas:</strong> Los datos vienen del formulario oficial de Google Forms. No se pueden editar retroactivamente sin dejar rastro en el historial de cambios.</li>
+      <li><strong>Ticket:</strong> La fuente es el sistema POS (Toteat). Los cajeros no tienen acceso a modificarlo.</li>
+      <li><strong>Datos de ventas:</strong> No se muestran en el ranking público. Solo se muestra el % de crecimiento relativo, sin revelar cifras absolutas.</li>
+      <li>Cualquier sospecha de manipulación puede reportarse a <strong>dzuluaga@manelfoods.com</strong> con evidencia.</li>
+    </ul>
+  </div>
+
+  <!-- 7. CALENDARIO -->
+  <div class="section">
+    <div class="section-num">Artículo 7</div>
+    <h2>Calendario</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-date">Lunes 20 Abril 2025</div>
+        <div class="timeline-event">🚦 Inicio oficial del concurso — semana 1</div>
+        <div class="timeline-note">Cada cajero recibe su código. El ranking empieza a contar.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Cada Lunes 8:00am</div>
+        <div class="timeline-event">📲 Actualización del ranking semanal</div>
+        <div class="timeline-note">Mensaje de WhatsApp a todos los cajeros con su posición y tips.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Domingo 20 Julio 2025</div>
+        <div class="timeline-event">🏁 Cierre del concurso — semana 13</div>
+        <div class="timeline-note">Último día para acumular puntos.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Semana del 21 Julio 2025</div>
+        <div class="timeline-event">🏆 Anuncio del ganador</div>
+        <div class="timeline-note">Publicación oficial del ranking final.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Por definir</div>
+        <div class="timeline-event">🏍️ Rifa de la moto en vivo</div>
+        <div class="timeline-note">Entre los integrantes de la tienda ganadora. Transmisión en vivo.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. COMUNICACIONES -->
+  <div class="section">
+    <div class="section-num">Artículo 8</div>
+    <h2>Comunicaciones del concurso</h2>
+    <p>Para mantener a todos alineados, se enviarán mensajes automáticos de WhatsApp cada semana:</p>
+    <ul>
+      <li><strong>Lunes 8am:</strong> Ranking actualizado + puntaje de tu tienda + tip de la semana</li>
+      <li><strong>Miércoles:</strong> (ocasional) Motivación o alerta si una tienda está muy abajo en una métrica</li>
+      <li><strong>Viernes:</strong> (ocasional) "Sprint del viernes" — última oportunidad para sumar antes del cierre semanal</li>
+    </ul>
+    <p>El ranking en tiempo real está disponible para todo el mundo en <strong>oakberry-cupones.com/concurso</strong>. Transparencia total.</p>
+  </div>
+
+  <!-- 9. DATOS -->
+  <div class="section">
+    <div class="section-num">Artículo 9</div>
+    <h2>Datos que recopilamos</h2>
+    <p>Este concurso le da a Manel Foods S.A.S. información valiosa que nos permite mejorar como empresa. Cada acción suma datos:</p>
+    <ul>
+      <li><strong>Loopy:</strong> nombre, email, celular y comportamiento de compra de nuevos clientes</li>
+      <li><strong>Encuesta:</strong> nombre, contacto, satisfacción, fuente de adquisición, sugerencias por tienda</li>
+      <li><strong>Ticket:</strong> evolución del valor de compra promedio por tienda y período</li>
+    </ul>
+    <p>Todo el tratamiento de datos personales de clientes se rige por la política de privacidad de Oakberry Colombia y la Ley 1581 de 2012.</p>
+  </div>
+
+  <!-- 10. DISPOSICIONES FINALES -->
+  <div class="section">
+    <div class="section-num">Artículo 10</div>
+    <h2>Disposiciones finales</h2>
+    <ul>
+      <li>Manel Foods S.A.S. puede modificar las reglas con 7 días de anticipación notificados por WhatsApp.</li>
+      <li>En caso de cierre de una tienda durante el concurso, sus puntos se excluyen del ranking final.</li>
+      <li>La incorporación de nuevas tiendas después del inicio requiere al menos 4 semanas de participación para aplicar al premio.</li>
+      <li>El equipo ganador debe estar completo y activo al momento de la rifa para participar.</li>
+      <li>Dudas y disputas: <strong>dzuluaga@manelfoods.com</strong></li>
+    </ul>
+  </div>
+
+</div>
+
+<footer>
+  Oakberry Colombia · Concurso Nacional La Moto 2025 · Manel Foods S.A.S. · Ley colombiana aplicable
+</footer>
+
+</body>
+</html>
