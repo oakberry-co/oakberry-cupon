@@ -111,16 +111,15 @@ nav{
 .hero-moto-bg{
   position:absolute;
   width:420px;height:320px;
-  background:linear-gradient(135deg,rgba(95,75,139,.55) 0%,rgba(139,92,246,.35) 50%,rgba(95,75,139,.45) 100%);
+  background:#fff;
   border-radius:24px;
-  border:1px solid rgba(139,92,246,.3);
-  box-shadow:0 0 60px rgba(95,75,139,.4), inset 0 0 40px rgba(139,92,246,.1);
+  border:1px solid rgba(255,255,255,.15);
+  box-shadow:0 8px 48px rgba(0,0,0,.4);
 }
 .hero-moto img{
   position:relative;z-index:1;
   width:100%;max-width:460px;
-  mix-blend-mode:screen;
-  filter:brightness(1.2) contrast(1.05) drop-shadow(0 0 30px rgba(245,200,66,.2));
+  filter:drop-shadow(0 4px 24px rgba(0,0,0,.3));
   animation:float 4s ease-in-out infinite;
 }
 @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
@@ -274,11 +273,12 @@ nav{
 .reg-hero{text-align:center;margin-bottom:24px;}
 .reg-moto-wrap{
   display:inline-block;
-  background:linear-gradient(135deg,rgba(95,75,139,.5),rgba(139,92,246,.3));
-  border:1px solid rgba(95,75,139,.5);border-radius:20px;
+  background:#fff;
+  border:1px solid rgba(255,255,255,.2);border-radius:20px;
   padding:16px 32px;margin-bottom:12px;
+  box-shadow:0 4px 24px rgba(0,0,0,.3);
 }
-.reg-moto-wrap img{height:100px;width:auto;mix-blend-mode:screen;filter:brightness(1.2);animation:float 4s ease-in-out infinite;}
+.reg-moto-wrap img{height:100px;width:auto;filter:none;animation:float 4s ease-in-out infinite;}
 .reg-title{font-family:"Bebas Neue",sans-serif;font-size:34px;background:linear-gradient(135deg,var(--g),#fff8d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
 .reg-sub{font-size:13px;color:var(--gr);line-height:1.55;}
 .reg-form{background:rgba(15,13,26,.9);backdrop-filter:blur(16px);border:1px solid rgba(95,75,139,.35);border-radius:20px;padding:26px 22px;}
@@ -2138,7 +2138,7 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto NKD 124cc">
         <div class="hero-eyebrow">Concurso Nacional &middot; Oakberry Colombia &middot; 13 semanas</div>
         <div class="hero-title">LA MOTO</div>
         <div class="hero-sub">
-          <strong>20 Abril &mdash; 20 Julio 2025</strong><br>
+          <strong>20 Abril &mdash; 20 Julio 2026</strong><br>
           La tienda que m&aacute;s crezca en Loopy Loyalty vs su propio hist&oacute;rico gana.
         </div>
         <div class="winner-rule">
@@ -5775,28 +5775,10 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
             </select>
           </div>
         </div>
-        <div class="field">
+                <div class="field">
           <label>Tienda</label>
           <select id="f-tienda">
-            <option value="">Selecciona tu tienda...</option>
-            <option value="Parque La Colina - Bogotá">Parque La Colina - Bogotá</option>
-            <option value="Zona T - Bogotá">Zona T - Bogotá</option>
-            <option value="Unicentro - Bogotá">Unicentro - Bogotá</option>
-            <option value="Andino - Bogotá">Andino - Bogotá</option>
-            <option value="Santa Fe - Bogotá">Santa Fe - Bogotá</option>
-            <option value="Portal 80 - Bogotá">Portal 80 - Bogotá</option>
-            <option value="Gran Estación - Bogotá">Gran Estación - Bogotá</option>
-            <option value="El Tesoro - Medellín">El Tesoro - Medellín</option>
-            <option value="Oviedo - Medellín">Oviedo - Medellín</option>
-            <option value="Multiplaza - Medellín">Multiplaza - Medellín</option>
-            <option value="Chipichape - Cali">Chipichape - Cali</option>
-            <option value="Jardín Plaza - Cali">Jardín Plaza - Cali</option>
-            <option value="Único Outlet - Cali">Único Outlet - Cali</option>
-            <option value="Buenavista - Barranquilla">Buenavista - Barranquilla</option>
-            <option value="Viva Barranquilla - Barranquilla">Viva Barranquilla - Barranquilla</option>
-            <option value="Bocagrande - Cartagena">Bocagrande - Cartagena</option>
-            <option value="Cacique - Bucaramanga">Cacique - Bucaramanga</option>
-            <option value="Victoria - Manizales">Victoria - Manizales</option>
+            <option value="">Cargando tiendas...</option>
           </select>
         </div>
         <div class="field">
@@ -5845,7 +5827,7 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
   <div class="rules-view">
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:46px;background:linear-gradient(150deg,var(--g),#fff8d6,var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Reglamento Oficial</div>
-      <div style="font-size:13px;color:var(--gr);">Concurso Nacional La Moto &middot; Oakberry Colombia &middot; 20 Abril &mdash; 20 Julio 2025</div>
+      <div style="font-size:13px;color:var(--gr);">Concurso Nacional La Moto &middot; Oakberry Colombia &middot; 20 Abril &mdash; 20 Julio 2026</div>
     </div>
 
     <div class="rs"><div class="rs-num">Art&iacute;culo 1</div><h2>&iquest;De qu&eacute; se trata?</h2>
@@ -5964,8 +5946,8 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
 // CONFIG
 // ══════════════════════════════════════
 var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSuXnJD7UO-pfz4NpReERNC-el3NIQdW9O2emztGJ0iH3lVdOjQ3dfTl3mch4N22I/exec";
-var END_DATE   = new Date("2025-07-20T23:59:59-05:00");
-var START_DATE = new Date("2025-04-20T00:00:00-05:00");
+var END_DATE   = new Date("2026-07-20T23:59:59-05:00");
+var START_DATE = new Date("2026-04-20T00:00:00-05:00");
 
 // ── COUNTDOWN ──
 function tick() {
@@ -6115,6 +6097,7 @@ function renderRanking(data, sem) {
 // Refresh cada 5 min
 fetchRanking();
 setInterval(fetchRanking, 300000);
+cargarTiendasForm();
 
 // ══════════════════════════════════════
 // COLABORADORES
@@ -6189,6 +6172,28 @@ function renderAuditoria(log) {
 // ══════════════════════════════════════
 // REGISTRO
 // ══════════════════════════════════════
+function cargarTiendasForm() {
+  jsonpCall(
+    SCRIPT_URL + "?action=getTiendas",
+    "cbTiendas",
+    function(data) {
+      var sel = document.getElementById("f-tienda");
+      sel.innerHTML = '<option value="">Selecciona tu tienda...</option>';
+      (data.tiendas || []).forEach(function(t) {
+        var opt = document.createElement("option");
+        opt.value = t.nombre + (t.ciudad ? " - " + t.ciudad : "");
+        opt.textContent = t.nombre + (t.ciudad ? " · " + t.ciudad : "");
+        sel.appendChild(opt);
+      });
+    },
+    function() {
+      // Si falla, dejar opciones vacías
+      document.getElementById("f-tienda").innerHTML =
+        '<option value="">Error cargando tiendas. Recarga la página.</option>';
+    }
+  );
+}
+
 function registrar() {
   var nombre = document.getElementById("f-nombre").value.trim();
   var cel    = document.getElementById("f-cel").value.trim().replace(/\D/g,"");
