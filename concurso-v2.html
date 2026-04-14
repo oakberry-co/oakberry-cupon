@@ -5998,20 +5998,36 @@ function semanaActual() {
   return Math.min(13, Math.floor(diff/604800000)+1);
 }
 
+// ── JSONP helper ──
+function jsonpCall(url, cbName, onSuccess, onError) {
+  var script = document.createElement("script");
+  var tid = setTimeout(function(){ cleanup(); if(onError) onError(); }, 60000);
+  window[cbName] = function(data){ cleanup(); onSuccess(data); };
+  function cleanup(){ clearTimeout(tid); delete window[cbName]; if(script.parentNode) script.parentNode.removeChild(script); }
+  script.onerror = function(){ cleanup(); if(onError) onError(); };
+  script.src = url + "&callback=" + cbName;
+  document.head.appendChild(script);
+}
+
 function fetchRanking() {
   var sem = semanaActual() || 1;
-  fetch(SCRIPT_URL + "?action=getRankingConcurso&semana="+sem)
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
+  jsonpCall(
+    SCRIPT_URL + "?action=getRankingConcurso&semana="+sem,
+    "cbRanking",
+    function(data) {
       if (data && data.ranking && data.ranking.length) {
         rankingData = data;
         renderRanking(data, sem);
+      } else {
+        document.getElementById("ranking-list").innerHTML =
+          '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">Sin datos disponibles a&uacute;n.</div>';
       }
-    })
-    .catch(function() {
+    },
+    function() {
       document.getElementById("ranking-list").innerHTML =
-        '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9888;&#65039; No se pudo conectar con el servidor. Intenta en unos minutos.</div>';
-    });
+        '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9888;&#65039; No se pudo conectar. Intenta en unos minutos.</div>';
+    }
+  );
 }
 
 function renderRanking(data, sem) {
@@ -6106,16 +6122,18 @@ setInterval(fetchRanking, 300000);
 var cajerosCargados = false;
 
 function loadCajeros() {
-  fetch(SCRIPT_URL+"?action=getCajerosAll")
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
+  jsonpCall(
+    SCRIPT_URL+"?action=getCajerosAll",
+    "cbCajeros",
+    function(data) {
       cajerosCargados = true;
       renderCajeros(data.cajeros||[], data.rankingTiendas||{});
-    })
-    .catch(function(){
+    },
+    function() {
       document.getElementById("cajero-list").innerHTML =
         '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">Error de conexi&oacute;n</div>';
-    });
+    }
+  );
 }
 
 function renderCajeros(cajeros, rankingTiendas) {
@@ -6140,16 +6158,18 @@ function renderCajeros(cajeros, rankingTiendas) {
 var auditoriaCargada = false;
 
 function loadAuditoria() {
-  fetch(SCRIPT_URL+"?action=getAuditLog")
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
+  jsonpCall(
+    SCRIPT_URL+"?action=getAuditLog",
+    "cbAudit",
+    function(data) {
       auditoriaCargada = true;
       renderAuditoria(data.log||[]);
-    })
-    .catch(function(){
+    },
+    function() {
       document.getElementById("audit-list").innerHTML =
         '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">Error al cargar log</div>';
-    });
+    }
+  );
 }
 
 function renderAuditoria(log) {
@@ -6192,25 +6212,26 @@ function registrar() {
   var btn = document.getElementById("submit-btn");
   btn.textContent="ENVIANDO..."; btn.style.opacity=".6"; btn.disabled=true;
 
-  fetch(SCRIPT_URL+"?action=registrarCajero"
+  jsonpCall(
+    SCRIPT_URL+"?action=registrarCajero"
     +"&nombre="+encodeURIComponent(nombre)
     +"&celular="+encodeURIComponent(cel)
     +"&rol="+encodeURIComponent(rol)
     +"&tienda="+encodeURIComponent(tienda)
-    +"&codigo="+encodeURIComponent(codigo))
-  .then(function(r){ return r.json(); })
-  .then(function(resp) {
-    if (resp && resp.duplicado) {
-      document.getElementById("err-dup").style.display="block";
-      btn.textContent="REGISTRARME EN EL CONCURSO"; btn.style.opacity="1"; btn.disabled=false;
-    } else {
+    +"&codigo="+encodeURIComponent(codigo),
+    "cbRegistro",
+    function(resp) {
+      if (resp && resp.duplicado) {
+        document.getElementById("err-dup").style.display="block";
+        btn.textContent="REGISTRARME EN EL CONCURSO"; btn.style.opacity="1"; btn.disabled=false;
+      } else {
+        mostrarExito(codigo);
+      }
+    },
+    function() {
       mostrarExito(codigo);
     }
-  })
-  .catch(function() {
-    // Si el backend falla, mostramos éxito igual (el form ya se envió)
-    mostrarExito(codigo);
-  });
+  );
 }
 
 function mostrarExito(codigo) {
