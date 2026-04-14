@@ -7,281 +7,336 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--p:#5F4B8B;--pb:#8B5CF6;--g:#F5C842;--g2:#D4A017;--bg:#080610;--bg2:#0f0d1a;--bg3:#181428;--bg4:#201c34;--wh:#EEE8FF;--gr:#6B5F8A;--tl:#2DD4BF;--gn:#22C55E;--rd:#F43F5E;--or:#FB923C;}
+:root{
+  --p:#5F4B8B;--pb:#8B5CF6;--g:#F5C842;--g2:#D4A017;
+  --bg:#080610;--bg2:#0f0d1a;--bg3:#181428;--bg4:#201c34;
+  --wh:#EEE8FF;--gr:#6B5F8A;--tl:#2DD4BF;--gn:#22C55E;
+  --rd:#F43F5E;--or:#FB923C;
+}
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
 body{
-  color:var(--wh);font-family:"Barlow Condensed",sans-serif;min-height:100vh;overflow-x:hidden;
-  background-color:var(--bg);
+  color:var(--wh);font-family:"Barlow Condensed",sans-serif;
+  min-height:100vh;overflow-x:hidden;background:#080610;
   background-image:url("https://oakberry-cupones.com/oakville-bg.jpg");
   background-size:cover;background-position:center top;background-attachment:fixed;
 }
-body::before{content:"";position:fixed;inset:0;background:rgba(8,6,16,.82);z-index:0;pointer-events:none;}
+body::before{content:"";position:fixed;inset:0;background:rgba(6,4,14,.86);z-index:0;pointer-events:none;}
 
-/* NAV */
-nav{position:sticky;top:0;z-index:200;background:rgba(8,6,16,.95);backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(245,200,66,.12);padding:0 16px;
-  display:flex;align-items:center;height:58px;gap:12px;}
-.nav-brand{font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:.12em;
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(6,4,14,.96);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(95,75,139,.4);
+  padding:0 16px;display:flex;align-items:center;height:58px;gap:12px;
+}
+.nav-brand{
+  font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:.12em;
   background:linear-gradient(90deg,var(--g),#fff5c0,var(--g));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  white-space:nowrap;
+}
 .tabs-wrap{display:flex;gap:3px;flex:1;}
-.tab-btn{font-size:13px;font-weight:600;letter-spacing:.04em;padding:6px 12px;border-radius:8px;
-  background:transparent;border:none;cursor:pointer;transition:all .18s;color:var(--gr);white-space:nowrap;}
-.tab-btn:hover{color:var(--wh);background:var(--bg4);}
+.tab-btn{
+  font-size:13px;font-weight:600;letter-spacing:.04em;padding:6px 12px;border-radius:8px;
+  background:transparent;border:none;cursor:pointer;transition:all .18s;color:var(--gr);
+  white-space:nowrap;
+}
+.tab-btn:hover{color:var(--wh);background:rgba(95,75,139,.3);}
 .tab-btn.active{color:var(--g);background:rgba(245,200,66,.1);}
-.nav-moto{display:flex;align-items:center;gap:8px;background:rgba(245,200,66,.07);
-  border:1px solid rgba(245,200,66,.2);border-radius:12px;padding:5px 12px 5px 5px;flex-shrink:0;}
-.nav-moto img{height:34px;width:auto;mix-blend-mode:screen;filter:brightness(1.1);}
+.nav-moto{
+  display:flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,rgba(95,75,139,.35),rgba(139,92,246,.2));
+  border:1px solid rgba(95,75,139,.5);border-radius:12px;
+  padding:5px 12px 5px 5px;flex-shrink:0;
+}
+.nav-moto img{
+  height:34px;width:auto;
+  mix-blend-mode:screen;filter:brightness(1.2) saturate(.9);
+}
 .nav-moto-prize{font-family:"Bebas Neue",sans-serif;font-size:15px;color:var(--g);letter-spacing:.06em;}
 .nav-moto-sub{font-size:10px;color:var(--gr);}
 
-/* VIEWS */
+/* ── VIEWS ── */
 .tab-content{display:none;position:relative;z-index:1;}
 .tab-content.active{display:block;}
 
-/* HERO */
-.hero{padding:52px 24px 44px;}
-.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 460px;gap:48px;align-items:center;width:100%;}
-.hero-eyebrow{display:inline-block;font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+/* ── HERO ── */
+.hero{padding:48px 24px 40px;}
+.hero-inner{
+  max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 460px;gap:48px;align-items:center;
+}
+.hero-eyebrow{
+  display:inline-block;font-size:11px;letter-spacing:.28em;text-transform:uppercase;
   color:var(--g);border:1px solid rgba(245,200,66,.3);background:rgba(245,200,66,.06);
-  padding:5px 18px;border-radius:100px;margin-bottom:16px;}
-.hero-title{font-family:"Bebas Neue",sans-serif;font-size:clamp(64px,10vw,102px);line-height:.86;
+  padding:5px 18px;border-radius:100px;margin-bottom:16px;
+}
+.hero-title{
+  font-family:"Bebas Neue",sans-serif;font-size:clamp(64px,10vw,102px);line-height:.86;
   background:linear-gradient(150deg,var(--g),#fff8d6 45%,var(--g2));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px;}
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:14px;
+}
 .hero-sub{font-size:15px;color:var(--gr);margin-bottom:18px;line-height:1.55;}
 .hero-sub strong{color:var(--wh);}
-.winner-rule{display:flex;align-items:flex-start;gap:12px;background:rgba(245,200,66,.07);
-  border:1px solid rgba(245,200,66,.2);border-radius:14px;padding:14px 18px;margin-bottom:22px;}
+.winner-rule{
+  display:flex;align-items:flex-start;gap:12px;
+  background:rgba(95,75,139,.2);border:1px solid rgba(95,75,139,.5);
+  border-radius:14px;padding:14px 18px;margin-bottom:22px;
+}
 .wr-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
-.wr-text{font-size:13px;color:rgba(238,232,255,.85);line-height:1.6;}
+.wr-text{font-size:13px;color:rgba(238,232,255,.9);line-height:1.6;}
 .wr-text strong{color:var(--g);}
 .countdown{display:flex;gap:10px;align-items:center;}
-.cd-u{text-align:center;background:rgba(24,20,40,.9);backdrop-filter:blur(8px);
-  border:1px solid rgba(245,200,66,.12);border-radius:12px;padding:11px 14px;min-width:60px;}
+.cd-u{
+  text-align:center;
+  background:rgba(95,75,139,.25);backdrop-filter:blur(8px);
+  border:1px solid rgba(95,75,139,.4);border-radius:12px;
+  padding:11px 14px;min-width:60px;
+}
 .cd-n{font-family:"Bebas Neue",sans-serif;font-size:36px;line-height:1;color:var(--wh);}
 .cd-l{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gr);}
-.cd-sep{font-family:"Bebas Neue",sans-serif;font-size:28px;color:var(--g);opacity:.4;}
-.hero-moto{position:relative;display:flex;align-items:center;justify-content:center;}
-.hero-moto::before{content:"";position:absolute;width:320px;height:320px;border-radius:50%;
-  background:radial-gradient(circle,rgba(245,200,66,.1),transparent 70%);}
+.cd-sep{font-family:"Bebas Neue",sans-serif;font-size:28px;color:var(--pb);opacity:.6;}
+.specs-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.spec-chip{
+  background:rgba(95,75,139,.2);border:1px solid rgba(95,75,139,.4);
+  border-radius:8px;padding:6px 12px;font-size:11px;color:var(--gr);
+}
+.spec-chip strong{color:var(--wh);display:block;font-size:13px;font-family:"DM Mono",monospace;}
+
+/* MOTO CON FONDO MORADO */
+.hero-moto{
+  position:relative;display:flex;align-items:center;justify-content:center;
+}
+.hero-moto-bg{
+  position:absolute;
+  width:420px;height:320px;
+  background:linear-gradient(135deg,rgba(95,75,139,.55) 0%,rgba(139,92,246,.35) 50%,rgba(95,75,139,.45) 100%);
+  border-radius:24px;
+  border:1px solid rgba(139,92,246,.3);
+  box-shadow:0 0 60px rgba(95,75,139,.4), inset 0 0 40px rgba(139,92,246,.1);
+}
 .hero-moto img{
-  width:100%;max-width:460px;position:relative;z-index:1;
+  position:relative;z-index:1;
+  width:100%;max-width:460px;
   mix-blend-mode:screen;
-  filter:brightness(1.15) contrast(1.05) drop-shadow(0 0 40px rgba(245,200,66,.25));
+  filter:brightness(1.2) contrast(1.05) drop-shadow(0 0 30px rgba(245,200,66,.2));
   animation:float 4s ease-in-out infinite;
 }
-@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
 
-/* SPECS BADGE */
-.specs-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
-.spec-chip{background:rgba(24,20,40,.85);backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.08);border-radius:10px;
-  padding:8px 14px;font-size:12px;color:var(--gr);}
-.spec-chip strong{color:var(--wh);display:block;font-size:14px;font-family:"Bebas Neue",sans-serif;letter-spacing:.05em;}
+/* ── LIVE BADGE ── */
+.live-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);
+  border-radius:100px;padding:4px 12px;font-size:11px;
+  font-family:"DM Mono",monospace;color:var(--gn);margin-bottom:22px;
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--gn);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
-/* GLASS CARDS */
-.glass{background:rgba(15,13,26,.75);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.07);}
-
-/* STATS */
-.stats-row{max-width:1100px;margin:0 auto 22px;padding:0 24px;
-  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.sp{background:rgba(24,20,40,.8);backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:13px 16px;}
-.sp-l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);
-  margin-bottom:4px;font-family:"DM Mono",monospace;}
+/* ── STATS ── */
+.stats-row{
+  max-width:1100px;margin:26px auto 20px;padding:0 24px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+}
+.sp{
+  background:rgba(15,13,26,.85);backdrop-filter:blur(12px);
+  border:1px solid rgba(95,75,139,.3);border-radius:12px;padding:13px 16px;
+}
+.sp-l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);margin-bottom:4px;font-family:"DM Mono",monospace;}
 .sp-v{font-family:"Bebas Neue",sans-serif;font-size:28px;line-height:1;color:var(--wh);}
 .sp-v span{color:var(--g);}
 
-/* INCENTIVOS */
-.inc-wrap{max-width:1100px;margin:0 auto 22px;padding:0 24px;}
-.inc-title{font-family:"Bebas Neue",sans-serif;font-size:19px;letter-spacing:.08em;margin-bottom:10px;}
+/* ── INCENTIVOS ── */
+.inc-wrap{max-width:1100px;margin:0 auto 20px;padding:0 24px;}
+.inc-title{font-family:"Bebas Neue",sans-serif;font-size:18px;letter-spacing:.08em;margin-bottom:10px;}
 .inc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;}
-.ic{background:rgba(24,20,40,.8);backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.07);border-radius:13px;
-  padding:14px 12px;text-align:center;transition:border-color .2s;}
-.ic:hover{border-color:rgba(245,200,66,.2);}
-.ic.hi{border-color:rgba(245,200,66,.25);background:rgba(245,200,66,.06);}
-.ic-ico{font-size:24px;margin-bottom:7px;}
-.ic-lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);
-  margin-bottom:4px;font-family:"DM Mono",monospace;}
-.ic-pts{font-family:"Bebas Neue",sans-serif;font-size:28px;line-height:1;color:var(--g);margin-bottom:3px;}
-.ic-pts span{font-size:13px;color:var(--gr);}
+.ic{
+  background:rgba(15,13,26,.8);backdrop-filter:blur(8px);
+  border:1px solid rgba(95,75,139,.25);border-radius:13px;
+  padding:14px 12px;text-align:center;transition:border-color .2s;
+}
+.ic:hover{border-color:rgba(139,92,246,.4);}
+.ic.hi{border-color:rgba(245,200,66,.3);background:rgba(245,200,66,.05);}
+.ic-ico{font-size:22px;margin-bottom:7px;}
+.ic-lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-bottom:4px;font-family:"DM Mono",monospace;}
+.ic-pts{font-family:"Bebas Neue",sans-serif;font-size:26px;line-height:1;color:var(--g);margin-bottom:3px;}
+.ic-pts span{font-size:12px;color:var(--gr);}
 .ic-desc{font-size:11px;color:var(--gr);line-height:1.4;}
 
-/* SECTION */
-.sec{max-width:1100px;margin:0 auto 10px;padding:0 24px;
-  display:flex;align-items:center;justify-content:space-between;}
-.sec-t{font-family:"Bebas Neue",sans-serif;font-size:19px;letter-spacing:.08em;}
+/* ── SECTION ── */
+.sec{max-width:1100px;margin:0 auto 10px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;}
+.sec-t{font-family:"Bebas Neue",sans-serif;font-size:18px;letter-spacing:.08em;}
 .sec-n{font-size:12px;color:var(--gr);}
 
-/* RANKING TABLE */
+/* ── HASH BADGE ── */
+.hash-badge{
+  font-size:10px;font-family:"DM Mono",monospace;
+  color:var(--gr);background:rgba(95,75,139,.15);
+  border:1px solid rgba(95,75,139,.3);border-radius:6px;
+  padding:3px 8px;
+}
+
+/* ── TABLA RANKING ── */
 .tbl-wrap{max-width:1100px;margin:0 auto 40px;padding:0 24px;}
-.th{display:grid;grid-template-columns:50px 1fr 120px 110px 80px 32px;
+.th{
+  display:grid;grid-template-columns:50px 1fr 120px 110px 80px 32px;
   gap:8px;padding:8px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
   color:var(--gr);font-family:"DM Mono",monospace;
-  border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:6px;}
-.sc{background:rgba(15,13,26,.8);backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,.06);border-radius:16px;margin-bottom:6px;overflow:hidden;
-  animation:fadeUp .35s ease both;}
+  border-bottom:1px solid rgba(95,75,139,.3);margin-bottom:6px;
+}
+.sc{
+  background:rgba(15,13,26,.8);backdrop-filter:blur(10px);
+  border:1px solid rgba(95,75,139,.2);border-radius:16px;
+  margin-bottom:6px;overflow:hidden;animation:fadeUp .35s ease both;
+}
 .sc:nth-child(1){animation-delay:.04s;}.sc:nth-child(2){animation-delay:.08s;}
 .sc:nth-child(3){animation-delay:.12s;}.sc:nth-child(n+4){animation-delay:.15s;}
-.sc.g1{border-color:rgba(245,200,66,.35);background:rgba(245,200,66,.05);}
-.sc.g2{border-color:rgba(200,200,220,.18);}
-.sc.g3{border-color:rgba(205,127,50,.22);}
+.sc.g1{border-color:rgba(245,200,66,.4);background:linear-gradient(135deg,rgba(245,200,66,.06),rgba(15,13,26,.8));}
+.sc.g2{border-color:rgba(200,200,220,.2);}
+.sc.g3{border-color:rgba(205,127,50,.25);}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
 .sc-toggle{display:none;}
 .sc-toggle:checked ~ .sc-expanded{display:block;}
 .sc-toggle:checked ~ label .exp-btn{transform:rotate(180deg);background:rgba(245,200,66,.1);color:var(--g);}
-.sc-main{display:grid;grid-template-columns:50px 1fr 120px 110px 80px 32px;
-  gap:8px;padding:14px 16px;align-items:center;cursor:pointer;}
-.rk{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;
-  justify-content:center;font-family:"Bebas Neue",sans-serif;font-size:18px;}
+.sc-main{
+  display:grid;grid-template-columns:50px 1fr 120px 110px 80px 32px;
+  gap:8px;padding:14px 16px;align-items:center;cursor:pointer;
+}
+.rk{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:"Bebas Neue",sans-serif;font-size:18px;}
 .rk.r1{background:linear-gradient(135deg,var(--g),var(--g2));color:#0e0b16;}
 .rk.r2{background:linear-gradient(135deg,#C0C0C0,#888);color:#0e0b16;}
 .rk.r3{background:linear-gradient(135deg,#CD7F32,#8B4513);color:#fff;}
-.rk.rn{background:rgba(32,28,52,.9);color:var(--gr);}
+.rk.rn{background:rgba(95,75,139,.3);color:var(--gr);}
 .sn{font-size:15px;font-weight:700;letter-spacing:.02em;}
 .sc-city{font-size:11px;color:var(--gr);}
 .trend-up{color:var(--gn);font-size:10px;margin-left:4px;}
 .trend-dn{color:var(--rd);font-size:10px;margin-left:4px;}
 .score-wrap{display:flex;flex-direction:column;gap:4px;}
 .score-n{font-family:"Bebas Neue",sans-serif;font-size:22px;line-height:1;}
-.sbar{height:3px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;}
+.sbar{height:3px;background:rgba(95,75,139,.3);border-radius:3px;overflow:hidden;}
 .sbar-f{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--p),var(--pb));}
 .sc.g1 .sbar-f{background:linear-gradient(90deg,var(--g2),var(--g));}
 .mc{display:flex;flex-direction:column;gap:3px;}
 .mv{font-family:"DM Mono",monospace;font-size:14px;font-weight:500;color:var(--tl);}
-.mbar{height:2px;width:100%;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.mbar{height:2px;width:100%;background:rgba(95,75,139,.3);border-radius:2px;overflow:hidden;}
 .mbar-f{height:100%;border-radius:2px;background:var(--tl);}
 .streak{display:flex;flex-direction:column;gap:3px;align-items:center;}
 .streak-n{font-family:"Bebas Neue",sans-serif;font-size:20px;color:var(--or);}
 .dots{display:flex;gap:2px;}
-.dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.1);}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(95,75,139,.4);}
 .dot.on{background:var(--or);}.dot.gold{background:var(--g);}
-.exp-btn{width:28px;height:28px;border-radius:8px;background:rgba(32,28,52,.9);border:none;
-  color:var(--gr);font-size:13px;display:flex;align-items:center;justify-content:center;
-  transition:transform .2s,background .2s;pointer-events:none;}
-.sc-expanded{display:none;padding:4px 16px 20px;border-top:1px solid rgba(255,255,255,.06);}
+.exp-btn{width:28px;height:28px;border-radius:8px;background:rgba(95,75,139,.3);border:none;color:var(--gr);font-size:13px;display:flex;align-items:center;justify-content:center;transition:transform .2s,background .2s;pointer-events:none;}
+
+/* ── PANEL EXPANDIDO ── */
+.sc-expanded{display:none;padding:4px 16px 20px;border-top:1px solid rgba(95,75,139,.3);}
 .exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
-.ec{background:rgba(8,6,16,.6);backdrop-filter:blur(8px);
-  border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.07);}
-.ec-t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px;
-  font-family:"DM Mono",monospace;color:var(--tl);}
+.ec{background:rgba(8,6,16,.7);backdrop-filter:blur(8px);border-radius:12px;padding:16px;border:1px solid rgba(95,75,139,.25);}
+.ec-t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px;font-family:"DM Mono",monospace;color:var(--tl);}
 .ec-big{font-family:"Bebas Neue",sans-serif;font-size:34px;line-height:1;margin-bottom:4px;color:var(--tl);}
 .ec-sub{font-size:12px;color:var(--gr);margin-bottom:12px;}
 .wbars{display:flex;align-items:flex-end;gap:3px;height:42px;margin-bottom:4px;}
 .wb{flex:1;border-radius:3px 3px 0 0;min-height:3px;}
-.wb.off{background:rgba(255,255,255,.08);}.wb.on{background:var(--tl);}.wb.gold{background:var(--g);}
+.wb.off{background:rgba(95,75,139,.25);}.wb.on{background:var(--tl);}.wb.gold{background:var(--g);}
 .wlabels{display:flex;gap:3px;}
 .wl{flex:1;text-align:center;font-size:8px;color:rgba(107,95,138,.4);}
 .hitos-panel{display:flex;flex-direction:column;gap:5px;}
-.hito{display:flex;align-items:center;gap:8px;font-size:12px;
-  padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.03);}
+.hito{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 10px;border-radius:8px;background:rgba(95,75,139,.1);}
 .hito.ok{background:rgba(245,200,66,.07);border:1px solid rgba(245,200,66,.18);}
 .hito.no{opacity:.35;}
 .hi-i{font-size:15px;width:20px;text-align:center;}
 .hi-pts{margin-left:auto;font-family:"DM Mono",monospace;font-size:11px;color:var(--g);}
-.cm-lbl{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gr);
-  margin:10px 0 6px;font-family:"DM Mono",monospace;}
-.cm-row{display:flex;align-items:center;gap:8px;padding:5px 0;
-  border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;}
+.cm-lbl{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gr);margin:10px 0 6px;font-family:"DM Mono",monospace;}
+.cm-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(95,75,139,.2);font-size:13px;}
 .cm-row:last-child{border:none;}
-.cm-rk{width:20px;height:20px;border-radius:6px;background:rgba(8,6,16,.8);display:flex;
-  align-items:center;justify-content:center;font-size:10px;font-family:"DM Mono",monospace;color:var(--gr);}
+.cm-rk{width:20px;height:20px;border-radius:6px;background:rgba(95,75,139,.3);display:flex;align-items:center;justify-content:center;font-size:10px;font-family:"DM Mono",monospace;color:var(--gr);}
 .cm-nm{flex:1;font-weight:700;}
 .cm-enc{font-family:"DM Mono",monospace;font-size:12px;color:var(--tl);}
-.adm-t{font-size:10px;padding:2px 6px;border-radius:100px;background:rgba(139,92,246,.2);color:var(--pb);}
+.adm-t{font-size:10px;padding:2px 6px;border-radius:100px;background:rgba(139,92,246,.25);color:var(--pb);}
 
-/* CAJEROS */
+/* ── COLABORADORES ── */
 .caj-view{max-width:1100px;margin:0 auto;padding:24px 24px 50px;}
-.caj-board{background:rgba(15,13,26,.8);backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;}
-.cb-hdr{display:grid;grid-template-columns:44px 1fr 90px 170px 70px;
-  gap:8px;padding:10px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--gr);font-family:"DM Mono",monospace;
-  background:rgba(24,20,40,.9);border-bottom:1px solid rgba(255,255,255,.06);}
-.cb-row{display:grid;grid-template-columns:44px 1fr 90px 170px 70px;
-  gap:8px;padding:12px 16px;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);
-  transition:background .15s;}
+.caj-board{background:rgba(15,13,26,.85);backdrop-filter:blur(10px);border:1px solid rgba(95,75,139,.3);border-radius:16px;overflow:hidden;}
+.cb-hdr{display:grid;grid-template-columns:44px 1fr 90px 170px 70px;gap:8px;padding:10px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);font-family:"DM Mono",monospace;background:rgba(95,75,139,.15);border-bottom:1px solid rgba(95,75,139,.3);}
+.cb-row{display:grid;grid-template-columns:44px 1fr 90px 170px 70px;gap:8px;padding:12px 16px;align-items:center;border-bottom:1px solid rgba(95,75,139,.15);transition:background .15s;}
 .cb-row:last-child{border:none;}
-.cb-row:hover{background:rgba(255,255,255,.02);}
-.cb-rk{width:28px;height:28px;border-radius:8px;background:rgba(32,28,52,.9);display:flex;
-  align-items:center;justify-content:center;font-family:"DM Mono",monospace;font-size:11px;color:var(--gr);}
+.cb-row:hover{background:rgba(95,75,139,.1);}
+.cb-rk{width:28px;height:28px;border-radius:8px;background:rgba(95,75,139,.3);display:flex;align-items:center;justify-content:center;font-family:"DM Mono",monospace;font-size:11px;color:var(--gr);}
 .cb-rk.top{background:rgba(245,200,66,.15);color:var(--g);}
 .cb-enc{font-family:"DM Mono",monospace;font-size:13px;color:var(--tl);}
 .caj-str{font-size:11px;color:var(--or);font-family:"DM Mono",monospace;}
-.winner-tag{background:linear-gradient(135deg,rgba(245,200,66,.18),rgba(245,200,66,.08));
-  border:1px solid rgba(245,200,66,.4);color:var(--g);font-size:10px;
-  padding:3px 10px;border-radius:100px;font-family:"DM Mono",monospace;white-space:nowrap;}
+.winner-tag{background:linear-gradient(135deg,rgba(245,200,66,.18),rgba(245,200,66,.08));border:1px solid rgba(245,200,66,.4);color:var(--g);font-size:10px;padding:3px 10px;border-radius:100px;font-family:"DM Mono",monospace;white-space:nowrap;}
 
-/* REGISTRO */
+/* ── FORMULARIO REGISTRO ── */
 .reg-view{max-width:540px;margin:0 auto;padding:32px 24px 60px;}
-.reg-hero{text-align:center;margin-bottom:28px;}
-.reg-hero img{height:110px;width:auto;mix-blend-mode:screen;filter:brightness(1.15);animation:float 4s ease-in-out infinite;}
-.reg-title{font-family:"Bebas Neue",sans-serif;font-size:36px;background:linear-gradient(135deg,var(--g),#fff8d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:10px 0 4px;}
-.reg-sub{font-size:13px;color:var(--gr);line-height:1.55;}
-.reg-form{background:rgba(15,13,26,.85);backdrop-filter:blur(16px);
-  border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:26px 22px;}
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--gr);margin-bottom:7px;font-family:"DM Mono",monospace;}
-.field input,.field select{
-  width:100%;background:rgba(8,6,16,.7);backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.1);border-radius:10px;
-  padding:12px 16px;color:var(--wh);font-family:"Barlow Condensed",sans-serif;
-  font-size:15px;outline:none;transition:border-color .2s;
-  -webkit-appearance:none;appearance:none;
+.reg-hero{text-align:center;margin-bottom:24px;}
+.reg-moto-wrap{
+  display:inline-block;
+  background:linear-gradient(135deg,rgba(95,75,139,.5),rgba(139,92,246,.3));
+  border:1px solid rgba(95,75,139,.5);border-radius:20px;
+  padding:16px 32px;margin-bottom:12px;
 }
-.field input:focus,.field select:focus{border-color:var(--g);}
+.reg-moto-wrap img{height:100px;width:auto;mix-blend-mode:screen;filter:brightness(1.2);animation:float 4s ease-in-out infinite;}
+.reg-title{font-family:"Bebas Neue",sans-serif;font-size:34px;background:linear-gradient(135deg,var(--g),#fff8d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.reg-sub{font-size:13px;color:var(--gr);line-height:1.55;}
+.reg-form{background:rgba(15,13,26,.9);backdrop-filter:blur(16px);border:1px solid rgba(95,75,139,.35);border-radius:20px;padding:26px 22px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gr);margin-bottom:7px;font-family:"DM Mono",monospace;}
+.field input,.field select{width:100%;background:rgba(8,6,16,.8);border:1px solid rgba(95,75,139,.35);border-radius:10px;padding:12px 16px;color:var(--wh);font-family:"Barlow Condensed",sans-serif;font-size:15px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;}
+.field input:focus,.field select:focus{border-color:var(--pb);box-shadow:0 0 0 2px rgba(139,92,246,.15);}
 .field input::placeholder{color:var(--gr);}
 .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%236B5F8A' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
 .field select option{background:#181428;color:var(--wh);}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.submit-btn{width:100%;background:linear-gradient(135deg,var(--p),var(--pb));border:none;
-  border-radius:12px;padding:14px;color:#fff;font-family:"Bebas Neue",sans-serif;
-  font-size:20px;letter-spacing:.1em;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:4px;}
+.field-hint{font-size:11px;color:var(--gr);margin-top:5px;}
+.submit-btn{width:100%;background:linear-gradient(135deg,var(--p),var(--pb));border:none;border-radius:12px;padding:14px;color:#fff;font-family:"Bebas Neue",sans-serif;font-size:20px;letter-spacing:.1em;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:4px;}
 .submit-btn:hover{opacity:.88;}.submit-btn:active{transform:scale(.98);}
 .form-note{font-size:11px;color:var(--gr);text-align:center;margin-top:12px;line-height:1.6;}
+.error-msg{color:var(--rd);font-size:12px;margin-top:6px;display:none;}
 .success-state{display:none;text-align:center;padding:28px 16px;}
 .success-state.visible{display:block;}
 .success-icon{font-size:52px;margin-bottom:12px;}
 .success-title{font-family:"Bebas Neue",sans-serif;font-size:36px;color:var(--gn);margin-bottom:8px;}
 .success-sub{font-size:14px;color:var(--gr);margin-bottom:20px;line-height:1.6;}
-.success-code{display:inline-block;background:rgba(24,20,40,.9);border:1px solid rgba(245,200,66,.3);
-  border-radius:12px;padding:12px 28px;font-family:"DM Mono",monospace;font-size:26px;color:var(--g);
-  letter-spacing:.2em;margin-bottom:20px;}
-.btn-nuevo{background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);color:var(--g);
-  font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;cursor:pointer;transition:all .2s;}
-.btn-nuevo:hover{background:rgba(245,200,66,.18);}
+.success-code-wrap{margin-bottom:20px;}
+.success-code-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gr);font-family:"DM Mono",monospace;margin-bottom:8px;}
+.success-code{display:inline-block;background:rgba(95,75,139,.25);border:1px solid rgba(245,200,66,.4);border-radius:12px;padding:12px 28px;font-family:"DM Mono",monospace;font-size:28px;color:var(--g);letter-spacing:.2em;}
+.btn-nuevo{background:rgba(95,75,139,.2);border:1px solid rgba(95,75,139,.4);color:var(--pb);font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;cursor:pointer;transition:all .2s;}
+.btn-nuevo:hover{background:rgba(95,75,139,.35);}
 
-/* REGLAS */
+/* ── REGLAS ── */
 .rules-view{max-width:760px;margin:0 auto;padding:32px 24px 60px;}
 .rs{margin-bottom:28px;padding-left:18px;border-left:3px solid var(--p);}
-.rs-num{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--g);
-  font-weight:700;margin-bottom:5px;font-family:"DM Mono",monospace;}
+.rs-num{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--g);font-weight:700;margin-bottom:5px;font-family:"DM Mono",monospace;}
 .rs h2{font-family:"Bebas Neue",sans-serif;font-size:24px;letter-spacing:.04em;margin-bottom:8px;}
 .rs p{font-size:14px;color:rgba(238,232,255,.82);margin-bottom:8px;line-height:1.65;}
 .rs ul{list-style:none;padding:0;}
 .rs ul li{font-size:14px;color:rgba(238,232,255,.82);padding:5px 0 5px 20px;position:relative;line-height:1.5;}
 .rs ul li::before{content:"\2192";position:absolute;left:0;color:var(--g);font-weight:700;}
-.rs-hl{background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.18);
-  border-radius:12px;padding:13px 17px;margin:10px 0;font-size:13px;line-height:1.65;}
+.rs-hl{background:rgba(95,75,139,.15);border:1px solid rgba(95,75,139,.4);border-radius:12px;padding:13px 17px;margin:10px 0;font-size:13px;line-height:1.65;}
 .rs-hl strong{color:var(--g);}
 .rs-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
-.rs-table th{background:var(--p);color:var(--wh);padding:8px 14px;text-align:left;
-  font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;}
+.rs-table th{background:var(--p);color:var(--wh);padding:8px 14px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;}
 .rs-table th:first-child{border-radius:8px 0 0 8px;}.rs-table th:last-child{border-radius:0 8px 8px 0;}
-.rs-table td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top;}
+.rs-table td{padding:9px 14px;border-bottom:1px solid rgba(95,75,139,.2);vertical-align:top;}
 .rs-table tr:last-child td{border:none;}
-.rs-table tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+.rs-table tr:nth-child(even) td{background:rgba(95,75,139,.07);}
 .spec-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0;}
-.spec-item{background:rgba(24,20,40,.8);border:1px solid rgba(255,255,255,.07);
-  border-radius:10px;padding:12px 14px;}
-.spec-item-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);
-  margin-bottom:3px;font-family:"DM Mono",monospace;}
+.spec-item{background:rgba(95,75,139,.15);border:1px solid rgba(95,75,139,.3);border-radius:10px;padding:12px 14px;}
+.spec-item-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);margin-bottom:3px;font-family:"DM Mono",monospace;}
 .spec-item-val{font-family:"Bebas Neue",sans-serif;font-size:22px;color:var(--wh);}
 
-/* RESPONSIVE */
+/* ── AUDITORÍA ── */
+.audit-view{max-width:900px;margin:0 auto;padding:24px 24px 60px;}
+.audit-board{background:rgba(15,13,26,.85);border:1px solid rgba(95,75,139,.3);border-radius:16px;overflow:hidden;}
+.audit-hdr{display:grid;grid-template-columns:140px 80px 100px 100px 1fr;gap:8px;padding:10px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gr);font-family:"DM Mono",monospace;background:rgba(95,75,139,.15);border-bottom:1px solid rgba(95,75,139,.3);}
+.audit-row{display:grid;grid-template-columns:140px 80px 100px 100px 1fr;gap:8px;padding:10px 16px;border-bottom:1px solid rgba(95,75,139,.12);font-size:12px;font-family:"DM Mono",monospace;}
+.audit-row:last-child{border:none;}
+.audit-hash{color:var(--gr);font-size:10px;word-break:break-all;}
+
+/* ── RESPONSIVE ── */
 @media(max-width:900px){
   .hero-inner{grid-template-columns:1fr;}.hero-moto{display:none;}
   .inc-grid{grid-template-columns:repeat(3,1fr);}
@@ -292,24 +347,27 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,6,16,.95);backdrop-filte
   .cb-hdr,.cb-row{grid-template-columns:44px 1fr 80px 110px;}
   .cb-hdr>*:nth-child(n+5),.cb-row>*:nth-child(n+5){display:none;}
   .field-row{grid-template-columns:1fr;}
+  .audit-hdr,.audit-row{grid-template-columns:120px 60px 1fr;}
+  .audit-hdr>*:nth-child(n+4),.audit-row>*:nth-child(n+4){display:none;}
 }
 @media(max-width:580px){
   .inc-grid{grid-template-columns:repeat(2,1fr);}
   .nav-moto .nav-moto-txt{display:none;}
-  .nav-moto img{height:28px;}
   .spec-grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
   <div class="nav-brand">&#127949; LA MOTO</div>
   <div class="tabs-wrap">
-    <button class="tab-btn active" onclick="showTab('ranking',this)">Ranking</button>
-    <button class="tab-btn" onclick="showTab('cajeros',this)">Colaboradores</button>
-    <button class="tab-btn" onclick="showTab('registro',this)">Registro</button>
-    <button class="tab-btn" onclick="showTab('reglas',this)">Reglas</button>
+    <button class="tab-btn active"  onclick="showTab('ranking',this)">Ranking</button>
+    <button class="tab-btn"         onclick="showTab('cajeros',this)">Colaboradores</button>
+    <button class="tab-btn"         onclick="showTab('registro',this)">Registro</button>
+    <button class="tab-btn"         onclick="showTab('reglas',this)">Reglas</button>
+    <button class="tab-btn"         onclick="showTab('auditoria',this)">&#128274; Auditor&iacute;a</button>
   </div>
   <div class="nav-moto">
     <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdC
@@ -2062,7 +2120,7 @@ CoJJPUpk4xkps/cy2tsdzlp75M9tTwGZu7o8Nx9MY5LpudXTyRg/ENMrTnd3NVdE2zcre1nF9pGM
 QEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBE
 RAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQE
 REBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERA
-REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
+REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto NKD 124cc">
     <div class="nav-moto-txt">
       <div class="nav-moto-prize">NKD 124cc</div>
       <div class="nav-moto-sub">Premio al mejor equipo</div>
@@ -2070,19 +2128,25 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
   </div>
 </nav>
 
-<!-- ═══ RANKING ═══ -->
+<!-- ═══════════════════════════════════
+     RANKING
+═══════════════════════════════════ -->
 <div class="tab-content active" id="tab-ranking">
   <div class="hero">
     <div class="hero-inner">
       <div>
         <div class="hero-eyebrow">Concurso Nacional &middot; Oakberry Colombia &middot; 13 semanas</div>
         <div class="hero-title">LA MOTO</div>
-        <div class="hero-sub"><strong>13 Abril &mdash; 13 Julio 2025</strong><br>
-          La tienda que m&aacute;s crezca en Loopy Loyalty vs su propio hist&oacute;rico gana.</div>
+        <div class="hero-sub">
+          <strong>20 Abril &mdash; 20 Julio 2025</strong><br>
+          La tienda que m&aacute;s crezca en Loopy Loyalty vs su propio hist&oacute;rico gana.
+        </div>
         <div class="winner-rule">
           <div class="wr-icon">&#127942;</div>
-          <div class="wr-text"><strong>&iquest;C&oacute;mo ganas la moto?</strong><br>
-          Si tu tienda queda primera al 13 de julio, el colaborador con m&aacute;s Oakers registrados se lleva la moto. El ADM participa igual que todos.</div>
+          <div class="wr-text">
+            <strong>&iquest;C&oacute;mo ganas la moto?</strong><br>
+            Si tu tienda queda primera al 20 de julio, el colaborador con m&aacute;s Oakers registrados se lleva la moto. El ADM participa igual que todos.
+          </div>
         </div>
         <div class="countdown">
           <div class="cd-u"><div class="cd-n" id="cd-d">--</div><div class="cd-l">d&iacute;as</div></div>
@@ -2091,14 +2155,15 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
           <div class="cd-sep">:</div>
           <div class="cd-u"><div class="cd-n" id="cd-m">--</div><div class="cd-l">min</div></div>
         </div>
-        <div class="specs-row">
+        <div class="specs-chips">
           <div class="spec-chip"><strong>124 cc</strong>Cilindraje</div>
-          <div class="spec-chip"><strong>10.34 hp</strong>Potencia m&aacute;x.</div>
+          <div class="spec-chip"><strong>10.34 hp</strong>Potencia</div>
           <div class="spec-chip"><strong>CDI</strong>Encendido</div>
           <div class="spec-chip"><strong>2.6 gal</strong>Tanque</div>
         </div>
       </div>
       <div class="hero-moto">
+        <div class="hero-moto-bg"></div>
         <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdC
 IFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAA
 AADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlk
@@ -3849,151 +3914,89 @@ CoJJPUpk4xkps/cy2tsdzlp75M9tTwGZu7o8Nx9MY5LpudXTyRg/ENMrTnd3NVdE2zcre1nF9pGM
 QEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBE
 RAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQE
 REBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERA
-REQEREBERAREQEREBERAREQEREH/2Q==" alt="Motocicleta NKD 124cc premio">
+REQEREBERAREQEREBERAREQEREH/2Q==" alt="Motocicleta NKD 124cc">
       </div>
     </div>
   </div>
 
+  <!-- LIVE BADGE + STATS -->
+  <div style="max-width:1100px;margin:0 auto;padding:0 24px 8px;">
+    <div class="live-badge">
+      <span class="live-dot"></span>
+      <span id="live-ts">Actualizando desde Loopy...</span>
+    </div>
+  </div>
+
   <div class="stats-row">
-    <div class="sp"><div class="sp-l">Nuevos Oakers totales</div><div class="sp-v">1,247</div></div>
-    <div class="sp"><div class="sp-l">Tiendas activas</div><div class="sp-v">18</div></div>
-    <div class="sp"><div class="sp-l">Semana</div><div class="sp-v">4 <span>/ 13</span></div></div>
-    <div class="sp"><div class="sp-l">Racha m&aacute;x. &#128293;</div><div class="sp-v">4</div></div>
+    <div class="sp"><div class="sp-l">Nuevos Oakers</div><div class="sp-v" id="gs-loopy">--</div></div>
+    <div class="sp"><div class="sp-l">Tiendas activas</div><div class="sp-v" id="gs-tiendas">--</div></div>
+    <div class="sp"><div class="sp-l">Semana</div><div class="sp-v" id="gs-sem">-- <span>/ 13</span></div></div>
+    <div class="sp"><div class="sp-l">Racha m&aacute;x. &#128293;</div><div class="sp-v" id="gs-streak">--</div></div>
   </div>
 
   <div class="inc-wrap">
     <div class="inc-title">Puntos extra por consistencia</div>
     <div class="inc-grid">
       <div class="ic"><div class="ic-ico">&#128200;</div><div class="ic-lbl">Sem. en verde</div><div class="ic-pts">+5 <span>pts</span></div><div class="ic-desc">Superas tu baseline esa semana</div></div>
-      <div class="ic"><div class="ic-ico">&#128293;</div><div class="ic-lbl">3 sem. seguidas</div><div class="ic-pts">+10 <span>pts</span></div><div class="ic-desc">3 semanas consecutivas en verde</div></div>
+      <div class="ic"><div class="ic-ico">&#128293;</div><div class="ic-lbl">3 sem. seguidas</div><div class="ic-pts">+10 <span>pts</span></div><div class="ic-desc">3 semanas consecutivas</div></div>
       <div class="ic hi"><div class="ic-ico">&#9889;</div><div class="ic-lbl">5 sem. seguidas</div><div class="ic-pts">+20 <span>pts</span></div><div class="ic-desc">Racha de 5 semanas</div></div>
-      <div class="ic"><div class="ic-ico">&#128640;</div><div class="ic-lbl">+20% crecimiento</div><div class="ic-pts">+15 <span>pts</span></div><div class="ic-desc">Creces 20% vs tu hist&oacute;rico</div></div>
+      <div class="ic"><div class="ic-ico">&#128640;</div><div class="ic-lbl">+20% crecimiento</div><div class="ic-pts">+15 <span>pts</span></div><div class="ic-desc">20% m&aacute;s vs tu hist&oacute;rico</div></div>
       <div class="ic hi"><div class="ic-ico">&#128081;</div><div class="ic-lbl">+40% crecimiento</div><div class="ic-pts">+25 <span>pts</span></div><div class="ic-desc">Crecimiento excepcional</div></div>
     </div>
   </div>
 
-  <div class="sec"><div class="sec-t">Ranking &mdash; Semana 4 de 13</div><div class="sec-n">Clic para ver detalle</div></div>
+  <div class="sec">
+    <div class="sec-t" id="ranking-title">Ranking — cargando...</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="sec-n">Clic para ver detalle</div>
+      <div class="hash-badge" id="hash-badge" title="Hash de integridad del ranking">&#128274; --</div>
+    </div>
+  </div>
+
   <div class="tbl-wrap">
-    <div class="th"><div>#</div><div>Tienda</div><div>Puntaje</div><div>&#127924; Nuevos Oakers</div><div>&#128293; Racha</div><div></div></div>
-
-    <div class="sc g1"><input type="checkbox" class="sc-toggle" id="t1"><label for="t1"><div class="sc-main">
-      <div><div class="rk r1">&#129351;</div></div>
-      <div><div class="sn">Parque La Colina <span class="trend-up">&#9650;1</span></div><div class="sc-city">Bogot&aacute;</div></div>
-      <div class="score-wrap"><div class="score-n">247</div><div class="sbar"><div class="sbar-f" style="width:100%"></div></div></div>
-      <div class="mc"><div class="mv">61 nuevos</div><div class="mbar"><div class="mbar-f" style="width:100%"></div></div></div>
-      <div class="streak"><div class="streak-n">4</div><div class="dots"><div class="dot gold"></div><div class="dot gold"></div><div class="dot gold"></div><div class="dot gold"></div><div class="dot"></div></div></div>
-      <div class="exp-btn">&#9660;</div>
-    </div></label>
-    <div class="sc-expanded"><div class="exp-grid">
-      <div class="ec"><div class="ec-t">&#127924; Nuevos Oakers / semana</div><div class="ec-big">61</div><div class="ec-sub">Baseline: 42/sem &middot; +45% crecimiento</div>
-        <div class="wbars"><div class="wb on" style="height:72%"></div><div class="wb on" style="height:84%"></div><div class="wb on" style="height:91%"></div><div class="wb on" style="height:100%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div></div>
-        <div class="wlabels"><div class="wl">S1</div><div class="wl">S2</div><div class="wl">S3</div><div class="wl">S4</div><div class="wl">S5</div><div class="wl">S6</div><div class="wl">S7</div><div class="wl">S8</div><div class="wl">S9</div><div class="wl">S10</div><div class="wl">S11</div><div class="wl">S12</div><div class="wl">S13</div></div>
+    <div class="th">
+      <div>#</div><div>Tienda</div><div>Puntaje</div>
+      <div>&#127924; Nuevos Oakers</div><div>&#128293; Racha</div><div></div>
+    </div>
+    <div id="ranking-list">
+      <div style="text-align:center;padding:60px;color:var(--gr);">
+        <div style="width:32px;height:32px;border:3px solid rgba(95,75,139,.3);border-top-color:var(--pb);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div>
+        Cargando datos desde Loopy...
       </div>
-      <div class="ec"><div class="ec-t">&#127885; Hitos + Top colaboradores</div>
-        <div class="hitos-panel">
-          <div class="hito ok"><span class="hi-i">&#128200;</span><span>Semana en verde</span><span class="hi-pts">+5 pts &#10003;</span></div>
-          <div class="hito ok"><span class="hi-i">&#128293;</span><span>3 sem. seguidas</span><span class="hi-pts">+10 pts &#10003;</span></div>
-          <div class="hito no"><span class="hi-i">&#9889;</span><span>5 sem. seguidas (4/5)</span><span class="hi-pts">+20 pts</span></div>
-          <div class="hito ok"><span class="hi-i">&#128081;</span><span>+40% crecimiento</span><span class="hi-pts">+25 pts &#10003;</span></div>
-        </div>
-        <div class="cm-lbl">Top colaboradores &middot; Oakers registrados</div>
-        <div class="cm-row"><div class="cm-rk">1</div><div class="cm-nm">Valentina R.</div><div class="cm-enc">24 Oakers</div></div>
-        <div class="cm-row"><div class="cm-rk">2</div><div class="cm-nm">Carlos M.</div><div class="cm-enc">19 Oakers</div></div>
-        <div class="cm-row"><div class="cm-rk">3</div><div class="cm-nm">Luis <span class="adm-t">ADM</span></div><div class="cm-enc">11 Oakers</div></div>
-      </div>
-    </div></div></div>
-
-    <div class="sc g2"><input type="checkbox" class="sc-toggle" id="t2"><label for="t2"><div class="sc-main">
-      <div><div class="rk r2">&#129352;</div></div>
-      <div><div class="sn">El Tesoro <span class="trend-up">&#9650;2</span></div><div class="sc-city">Medell&iacute;n</div></div>
-      <div class="score-wrap"><div class="score-n">218</div><div class="sbar"><div class="sbar-f" style="width:88%"></div></div></div>
-      <div class="mc"><div class="mv">49 nuevos</div><div class="mbar"><div class="mbar-f" style="width:80%"></div></div></div>
-      <div class="streak"><div class="streak-n">3</div><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div></div>
-      <div class="exp-btn">&#9660;</div>
-    </div></label>
-    <div class="sc-expanded"><div class="exp-grid">
-      <div class="ec"><div class="ec-t">&#127924; Nuevos Oakers / semana</div><div class="ec-big">49</div><div class="ec-sub">Baseline: 31/sem &middot; +58% crecimiento</div>
-        <div class="wbars"><div class="wb off" style="height:15%"></div><div class="wb on" style="height:74%"></div><div class="wb on" style="height:88%"></div><div class="wb on" style="height:100%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div></div>
-        <div class="wlabels"><div class="wl">S1</div><div class="wl">S2</div><div class="wl">S3</div><div class="wl">S4</div><div class="wl">S5</div><div class="wl">S6</div><div class="wl">S7</div><div class="wl">S8</div><div class="wl">S9</div><div class="wl">S10</div><div class="wl">S11</div><div class="wl">S12</div><div class="wl">S13</div></div>
-      </div>
-      <div class="ec"><div class="ec-t">&#127885; Hitos + Top colaboradores</div>
-        <div class="hitos-panel">
-          <div class="hito ok"><span class="hi-i">&#128200;</span><span>Semana en verde</span><span class="hi-pts">+5 pts &#10003;</span></div>
-          <div class="hito ok"><span class="hi-i">&#128293;</span><span>3 sem. seguidas</span><span class="hi-pts">+10 pts &#10003;</span></div>
-          <div class="hito no"><span class="hi-i">&#9889;</span><span>5 sem. seguidas (3/5)</span><span class="hi-pts">+20 pts</span></div>
-          <div class="hito ok"><span class="hi-i">&#128081;</span><span>+40% crecimiento</span><span class="hi-pts">+25 pts &#10003;</span></div>
-        </div>
-        <div class="cm-lbl">Top colaboradores &middot; Oakers registrados</div>
-        <div class="cm-row"><div class="cm-rk">1</div><div class="cm-nm">Daniela G.</div><div class="cm-enc">21 Oakers</div></div>
-        <div class="cm-row"><div class="cm-rk">2</div><div class="cm-nm">Mateo V.</div><div class="cm-enc">16 Oakers</div></div>
-        <div class="cm-row"><div class="cm-rk">3</div><div class="cm-nm">Juan <span class="adm-t">ADM</span></div><div class="cm-enc">12 Oakers</div></div>
-      </div>
-    </div></div></div>
-
-    <div class="sc g3"><input type="checkbox" class="sc-toggle" id="t3"><label for="t3"><div class="sc-main">
-      <div><div class="rk r3">&#129353;</div></div>
-      <div><div class="sn">Zona T <span class="trend-dn">&#9660;1</span></div><div class="sc-city">Bogot&aacute;</div></div>
-      <div class="score-wrap"><div class="score-n">187</div><div class="sbar"><div class="sbar-f" style="width:76%"></div></div></div>
-      <div class="mc"><div class="mv">43 nuevos</div><div class="mbar"><div class="mbar-f" style="width:70%"></div></div></div>
-      <div class="streak"><div class="streak-n">2</div><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
-      <div class="exp-btn">&#9660;</div>
-    </div></label>
-    <div class="sc-expanded"><div class="exp-grid">
-      <div class="ec"><div class="ec-t">&#127924; Nuevos Oakers / semana</div><div class="ec-big">43</div><div class="ec-sub">Baseline: 38/sem &middot; +13% crecimiento</div>
-        <div class="wbars"><div class="wb off" style="height:15%"></div><div class="wb off" style="height:15%"></div><div class="wb on" style="height:82%"></div><div class="wb on" style="height:100%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div><div class="wb off" style="height:10%"></div></div>
-        <div class="wlabels"><div class="wl">S1</div><div class="wl">S2</div><div class="wl">S3</div><div class="wl">S4</div><div class="wl">S5</div><div class="wl">S6</div><div class="wl">S7</div><div class="wl">S8</div><div class="wl">S9</div><div class="wl">S10</div><div class="wl">S11</div><div class="wl">S12</div><div class="wl">S13</div></div>
-      </div>
-      <div class="ec"><div class="ec-t">&#127885; Hitos + Top colaboradores</div>
-        <div class="hitos-panel">
-          <div class="hito ok"><span class="hi-i">&#128200;</span><span>Semana en verde</span><span class="hi-pts">+5 pts &#10003;</span></div>
-          <div class="hito no"><span class="hi-i">&#128293;</span><span>3 sem. seguidas (2/3)</span><span class="hi-pts">+10 pts</span></div>
-          <div class="hito no"><span class="hi-i">&#9889;</span><span>5 sem. seguidas</span><span class="hi-pts">+20 pts</span></div>
-          <div class="hito no"><span class="hi-i">&#128640;</span><span>+20% crecimiento</span><span class="hi-pts">+15 pts</span></div>
-        </div>
-        <div class="cm-lbl">Top colaboradores &middot; Oakers registrados</div>
-        <div class="cm-row"><div class="cm-rk">1</div><div class="cm-nm">Camila S.</div><div class="cm-enc">18 Oakers</div></div>
-        <div class="cm-row"><div class="cm-rk">2</div><div class="cm-nm">Andr&eacute;s T.</div><div class="cm-enc">14 Oakers</div></div>
-        <div class="cm-row"><div class="cm-rk">3</div><div class="cm-nm">Paula <span class="adm-t">ADM</span></div><div class="cm-enc">11 Oakers</div></div>
-      </div>
-    </div></div></div>
-
-    <div class="sc"><div class="sc-main" style="cursor:default"><div><div class="rk rn">4</div></div><div><div class="sn">Unicentro</div><div class="sc-city">Bogot&aacute;</div></div><div class="score-wrap"><div class="score-n">162</div><div class="sbar"><div class="sbar-f" style="width:66%"></div></div></div><div class="mc"><div class="mv">38 nuevos</div><div class="mbar"><div class="mbar-f" style="width:62%"></div></div></div><div class="streak"><div class="streak-n">2</div><div class="dots"><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div><div class="exp-btn" style="opacity:.2">&#9660;</div></div></div>
-    <div class="sc"><div class="sc-main" style="cursor:default"><div><div class="rk rn">5</div></div><div><div class="sn">Buenavista</div><div class="sc-city">Barranquilla</div></div><div class="score-wrap"><div class="score-n">144</div><div class="sbar"><div class="sbar-f" style="width:58%"></div></div></div><div class="mc"><div class="mv">31 nuevos</div><div class="mbar"><div class="mbar-f" style="width:51%"></div></div></div><div class="streak"><div class="streak-n">1</div><div class="dots"><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div><div class="exp-btn" style="opacity:.2">&#9660;</div></div></div>
-    <div class="sc"><div class="sc-main" style="cursor:default"><div><div class="rk rn">6</div></div><div><div class="sn">Chipichape</div><div class="sc-city">Cali</div></div><div class="score-wrap"><div class="score-n">128</div><div class="sbar"><div class="sbar-f" style="width:52%"></div></div></div><div class="mc"><div class="mv">27 nuevos</div><div class="mbar"><div class="mbar-f" style="width:44%"></div></div></div><div class="streak"><div class="streak-n">1</div><div class="dots"><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div><div class="exp-btn" style="opacity:.2">&#9660;</div></div></div>
-    <div class="sc"><div class="sc-main" style="cursor:default"><div><div class="rk rn">7</div></div><div><div class="sn">Andino</div><div class="sc-city">Bogot&aacute;</div></div><div class="score-wrap"><div class="score-n">98</div><div class="sbar"><div class="sbar-f" style="width:40%"></div></div></div><div class="mc"><div class="mv" style="color:var(--gr)">22 nuevos</div><div class="mbar"><div class="mbar-f" style="width:36%;background:var(--gr)"></div></div></div><div class="streak"><div class="streak-n" style="color:var(--gr)">0</div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div><div class="exp-btn" style="opacity:.2">&#9660;</div></div></div>
-    <div class="sc"><div class="sc-main" style="cursor:default"><div><div class="rk rn">8</div></div><div><div class="sn">Bocagrande</div><div class="sc-city">Cartagena</div></div><div class="score-wrap"><div class="score-n">81</div><div class="sbar"><div class="sbar-f" style="width:33%"></div></div></div><div class="mc"><div class="mv" style="color:var(--gr)">18 nuevos</div><div class="mbar"><div class="mbar-f" style="width:30%;background:var(--gr)"></div></div></div><div class="streak"><div class="streak-n" style="color:var(--gr)">0</div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div><div class="exp-btn" style="opacity:.2">&#9660;</div></div></div>
+    </div>
   </div>
 </div>
 
-<!-- ═══ COLABORADORES ═══ -->
+<!-- ═══════════════════════════════════
+     COLABORADORES
+═══════════════════════════════════ -->
 <div class="tab-content" id="tab-cajeros">
   <div class="caj-view">
     <div class="sec-t" style="margin-bottom:6px;">Ranking de Colaboradores</div>
     <div style="font-size:13px;color:var(--gr);margin-bottom:20px;max-width:680px;line-height:1.6;">
-      El colaborador le pide al cliente su c&oacute;digo al registrarse en Loopy.
-      <strong style="color:var(--wh);">Si tu tienda gana, el colaborador con m&aacute;s Oakers acreditados se lleva la moto. Sin sorteos.</strong>
+      Al registrar un cliente en Loopy, el colaborador le pide que ingrese su c&oacute;digo personal.
+      <strong style="color:var(--wh);">Si tu tienda gana, el colaborador con m&aacute;s Oakers acreditados gana la moto.</strong>
     </div>
     <div class="caj-board">
       <div class="cb-hdr"><div>#</div><div>Colaborador</div><div>Oakers</div><div>Tienda</div><div>Racha</div></div>
-      <div class="cb-row"><div class="cb-rk top">&#129351;</div><div><div style="font-size:14px;font-weight:700">Valentina R.</div><div style="font-size:11px;color:var(--gr)">Parque La Colina &middot; Bogot&aacute;</div></div><div class="cb-enc">24</div><div><span class="winner-tag">&#127942; Tienda #1</span></div><div class="caj-str">&#128293;4</div></div>
-      <div class="cb-row"><div class="cb-rk top">&#129352;</div><div><div style="font-size:14px;font-weight:700">Daniela G.</div><div style="font-size:11px;color:var(--gr)">El Tesoro &middot; Medell&iacute;n</div></div><div class="cb-enc">21</div><div style="font-size:12px;color:var(--gr)">#2 tienda</div><div class="caj-str">&#128293;3</div></div>
-      <div class="cb-row"><div class="cb-rk top">&#129353;</div><div><div style="font-size:14px;font-weight:700">Carlos M.</div><div style="font-size:11px;color:var(--gr)">Parque La Colina &middot; Bogot&aacute;</div></div><div class="cb-enc">19</div><div><span class="winner-tag">&#127942; Tienda #1</span></div><div class="caj-str">&#128293;4</div></div>
-      <div class="cb-row"><div class="cb-rk">4</div><div><div style="font-size:14px;font-weight:700">Camila S.</div><div style="font-size:11px;color:var(--gr)">Zona T &middot; Bogot&aacute;</div></div><div class="cb-enc">18</div><div style="font-size:12px;color:var(--gr)">#3 tienda</div><div class="caj-str">&#128293;2</div></div>
-      <div class="cb-row"><div class="cb-rk">5</div><div><div style="font-size:14px;font-weight:700">Mateo V.</div><div style="font-size:11px;color:var(--gr)">El Tesoro &middot; Medell&iacute;n</div></div><div class="cb-enc">16</div><div style="font-size:12px;color:var(--gr)">#2 tienda</div><div class="caj-str">&#128293;3</div></div>
-      <div class="cb-row"><div class="cb-rk">6</div><div><div style="font-size:14px;font-weight:700">Andr&eacute;s T.</div><div style="font-size:11px;color:var(--gr)">Zona T &middot; Bogot&aacute;</div></div><div class="cb-enc">14</div><div style="font-size:12px;color:var(--gr)">#3 tienda</div><div class="caj-str">&#128293;2</div></div>
-      <div class="cb-row"><div class="cb-rk">7</div><div><div style="font-size:14px;font-weight:700">Luis <span class="adm-t">ADM</span></div><div style="font-size:11px;color:var(--gr)">Parque La Colina &middot; Bogot&aacute;</div></div><div class="cb-enc">11</div><div><span class="winner-tag">&#127942; Tienda #1</span></div><div class="caj-str">&#128293;4</div></div>
+      <div id="cajero-list">
+        <div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">Cargando...</div>
+      </div>
     </div>
     <div style="margin-top:14px;font-size:12px;color:var(--gr);font-family:'DM Mono',monospace;text-align:center;">
-      &#127942; = integrantes de la tienda l&iacute;der &middot; El que m&aacute;s Oakers tenga al 13 julio gana la moto
+      &#127942; = integrantes de la tienda l&iacute;der &middot; El que m&aacute;s Oakers tenga al 20 julio gana la moto
     </div>
   </div>
 </div>
 
-<!-- ═══ REGISTRO ═══ -->
+<!-- ═══════════════════════════════════
+     REGISTRO
+═══════════════════════════════════ -->
 <div class="tab-content" id="tab-registro">
   <div class="reg-view">
     <div class="reg-hero">
-      <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdC
+      <div class="reg-moto-wrap">
+        <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdC
 IFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAA
 AADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlk
 ZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAA
@@ -5744,15 +5747,27 @@ QEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBE
 RAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQE
 REBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERA
 REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
+      </div>
       <div class="reg-title">Reg&iacute;strate</div>
-      <div class="reg-sub">Ingresa tus datos para participar en el concurso.<br>Tu c&oacute;digo te permite ver tu posici&oacute;n en el ranking.</div>
+      <div class="reg-sub">
+        Ingresa tus datos para participar.<br>
+        Tu c&oacute;digo es tu identidad en el ranking.
+      </div>
     </div>
     <div id="form-wrap">
       <div class="reg-form">
-        <div class="field"><label>Nombre completo</label><input type="text" id="f-nombre" placeholder="Tu nombre y apellido"></div>
+        <div class="field">
+          <label>Nombre completo</label>
+          <input type="text" id="f-nombre" placeholder="Tu nombre y apellido" autocomplete="name">
+        </div>
         <div class="field-row">
-          <div class="field"><label>Celular</label><input type="tel" id="f-cel" placeholder="3XX XXX XXXX" maxlength="10"></div>
-          <div class="field"><label>Rol</label>
+          <div class="field">
+            <label>Celular</label>
+            <input type="tel" id="f-cel" placeholder="3XX XXX XXXX" maxlength="10" inputmode="numeric">
+            <div class="error-msg" id="err-cel">Ingresa 10 d&iacute;gitos</div>
+          </div>
+          <div class="field">
+            <label>Rol</label>
             <select id="f-rol">
               <option value="">Selecciona...</option>
               <option value="colaborador">Colaborador</option>
@@ -5760,7 +5775,8 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
             </select>
           </div>
         </div>
-        <div class="field"><label>Tienda</label>
+        <div class="field">
+          <label>Tienda</label>
           <select id="f-tienda">
             <option value="">Selecciona tu tienda...</option>
             <option value="Parque La Colina - Bogotá">Parque La Colina - Bogotá</option>
@@ -5783,153 +5799,437 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
             <option value="Victoria - Manizales">Victoria - Manizales</option>
           </select>
         </div>
-        <div class="field"><label>Tu c&oacute;digo (asignado por tu ADM)</label>
-          <input type="text" id="f-codigo" placeholder="Ej: BOG-03" maxlength="8" style="letter-spacing:.1em;text-transform:uppercase;">
+        <div class="field">
+          <label>Tu c&oacute;digo &mdash; asignado por tu ADM</label>
+          <input type="text" id="f-codigo" placeholder="Ej: BOG-03" maxlength="8"
+            style="letter-spacing:.1em;text-transform:uppercase;" autocomplete="off">
+          <div class="field-hint">Si no tienes c&oacute;digo, p&iacute;delo a tu administrador antes de registrarte.</div>
+          <div class="error-msg" id="err-codigo">C&oacute;digo m&iacute;nimo 4 caracteres</div>
         </div>
-        <button class="submit-btn" onclick="registrar()">REGISTRARME EN EL CONCURSO</button>
-        <div class="form-note">Datos usados exclusivamente para el concurso La Moto &middot; Manel Foods S.A.S. &middot; Ley 1581 de 2012</div>
+        <button class="submit-btn" id="submit-btn" onclick="registrar()">
+          REGISTRARME EN EL CONCURSO
+        </button>
+        <div class="error-msg" id="err-dup" style="text-align:center;margin-top:8px;">
+          Este c&oacute;digo ya est&aacute; registrado para esta tienda.
+        </div>
+        <div class="form-note">
+          Datos usados exclusivamente para el concurso La Moto &middot; Manel Foods S.A.S. &middot; Ley 1581 de 2012
+        </div>
       </div>
     </div>
     <div class="success-state" id="success-state">
       <div class="success-icon">&#127949;</div>
       <div class="success-title">&iexcl;Ya est&aacute;s dentro!</div>
-      <div class="success-sub">Registro exitoso. Cuando un cliente se inscriba en Loopy, p&iacute;dele que ingrese tu c&oacute;digo.</div>
-      <div class="success-code" id="success-code">--</div>
-      <div class="success-sub" style="margin-bottom:16px;">Guarda este c&oacute;digo &mdash; con &eacute;l ves tu posici&oacute;n en el ranking.</div>
-      <button class="btn-nuevo" onclick="nuevoRegistro()">&larr; Registrar otro colaborador</button>
+      <div class="success-sub">
+        Registro exitoso. Cuando un cliente se inscriba en Loopy,<br>
+        p&iacute;dele que ingrese tu c&oacute;digo en la pregunta opcional.
+      </div>
+      <div class="success-code-wrap">
+        <div class="success-code-label">Tu c&oacute;digo personal</div>
+        <div class="success-code" id="success-code">--</div>
+      </div>
+      <div class="success-sub" style="margin-bottom:20px;">
+        Gu&aacute;rdalo &mdash; con &eacute;l puedes ver tu posici&oacute;n en el ranking de colaboradores.
+      </div>
+      <button class="btn-nuevo" onclick="nuevoRegistro()">
+        &#8592; Registrar otro colaborador
+      </button>
     </div>
   </div>
 </div>
 
-<!-- ═══ REGLAS ═══ -->
+<!-- ═══════════════════════════════════
+     REGLAS
+═══════════════════════════════════ -->
 <div class="tab-content" id="tab-reglas">
   <div class="rules-view">
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:46px;background:linear-gradient(150deg,var(--g),#fff8d6,var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Reglamento Oficial</div>
-      <div style="font-size:13px;color:var(--gr)">Concurso Nacional La Moto &middot; Oakberry Colombia &middot; 13 Abril &mdash; 13 Julio 2025</div>
+      <div style="font-size:13px;color:var(--gr);">Concurso Nacional La Moto &middot; Oakberry Colombia &middot; 20 Abril &mdash; 20 Julio 2025</div>
     </div>
+
     <div class="rs"><div class="rs-num">Art&iacute;culo 1</div><h2>&iquest;De qu&eacute; se trata?</h2>
-      <p>Concurso entre todas las tiendas Oakberry Colombia durante 13 semanas. La tienda que m&aacute;s crezca en inscripciones de Loopy Loyalty vs su propio hist&oacute;rico gana. El colaborador de ese equipo con m&aacute;s Oakers registrados se lleva la motocicleta.</p>
-      <div class="rs-hl"><strong>Simple:</strong> tienda que m&aacute;s creci&oacute; = gana. Colaborador top de esa tienda = gana la moto. Sin sorteos.</div>
+      <p>Concurso entre todas las tiendas Oakberry Colombia durante 13 semanas. La tienda que m&aacute;s crezca en inscripciones de Loopy Loyalty vs su propio hist&oacute;rico gana. El colaborador de ese equipo con m&aacute;s Oakers registrados se lleva la motocicleta NKD 124cc.</p>
+      <div class="rs-hl"><strong>Simple:</strong> tienda que m&aacute;s creci&oacute; = gana. Colaborador con m&aacute;s Oakers de esa tienda = gana la moto. Sin sorteos, sin boletas.</div>
     </div>
+
     <div class="rs"><div class="rs-num">Art&iacute;culo 2</div><h2>El Premio</h2>
-      <p>Una motocicleta <strong>NKD 124cc</strong> con las siguientes especificaciones:</p>
+      <p>Una motocicleta <strong>NKD 124cc</strong>:</p>
       <div class="spec-grid">
         <div class="spec-item"><div class="spec-item-lbl">Cilindraje</div><div class="spec-item-val">124 cc</div></div>
         <div class="spec-item"><div class="spec-item-lbl">Encendido</div><div class="spec-item-val">CDI</div></div>
         <div class="spec-item"><div class="spec-item-lbl">Potencia m&aacute;x.</div><div class="spec-item-val">10.34 hp / 8.000 rpm</div></div>
-        <div class="spec-item"><div class="spec-item-lbl">Tanque combustible</div><div class="spec-item-val">2.6 galones</div></div>
+        <div class="spec-item"><div class="spec-item-lbl">Tanque</div><div class="spec-item-val">2.6 galones</div></div>
       </div>
     </div>
+
     <div class="rs"><div class="rs-num">Art&iacute;culo 3</div><h2>Fechas</h2>
       <ul>
-        <li><strong>Inicio:</strong> Lunes 13 de Abril de 2025</li>
-        <li><strong>Cierre:</strong> Domingo 13 de Julio de 2025 (13 semanas exactas)</li>
-        <li><strong>Ranking:</strong> Se actualiza cada lunes a las 8:00am v&iacute;a WhatsApp</li>
-        <li><strong>Anuncio ganador:</strong> Semana del 14 de Julio de 2025</li>
+        <li><strong>Inicio:</strong> Lunes 20 de Abril de 2025</li>
+        <li><strong>Cierre:</strong> Domingo 20 de Julio de 2025 (13 semanas)</li>
+        <li><strong>Ranking:</strong> Se actualiza autom&aacute;ticamente cada hora desde Loopy Loyalty</li>
+        <li><strong>Reporte semanal:</strong> Cada lunes 8:00am v&iacute;a WhatsApp a todos los colaboradores registrados</li>
+        <li><strong>Anuncio ganador:</strong> Semana del 21 de Julio de 2025</li>
       </ul>
     </div>
+
     <div class="rs"><div class="rs-num">Art&iacute;culo 4</div><h2>M&eacute;trica &uacute;nica: Loopy Loyalty</h2>
-      <p>El puntaje semanal se basa exclusivamente en clientes nuevos inscritos en Loopy con al menos 1 sello (1 compra real). Un registro sin compra no cuenta.</p>
-      <div class="rs-hl"><strong>F&oacute;rmula:</strong> Puntaje = (Nuevos Oakers semana / Baseline) &times; 100<br>
-      <strong>Baseline:</strong> promedio de las 8 semanas anteriores al concurso. Tiendas grandes y peque&ntilde;as compiten igual.</div>
-      <p><strong>Conexi&oacute;n con Loopy:</strong> Cada lunes el sistema consulta la API de Loopy, filtra nuevos registros de la semana y cruza el c&oacute;digo de colaborador que el cliente ingres&oacute; al inscribirse. Dato autom&aacute;tico, sin intervenci&oacute;n manual.</p>
+      <p>Solo cuenta una cosa: <strong>clientes nuevos inscritos en Loopy con al menos 1 sello (1 compra real)</strong>.</p>
+      <div class="rs-hl">
+        <strong>F&oacute;rmula:</strong> Puntaje = (Nuevos Oakers semana / Baseline) &times; 100<br>
+        <strong>Baseline:</strong> promedio de nuevos registros de las 8 semanas antes del concurso. Tiendas grandes y peque&ntilde;as compiten en igualdad.<br>
+        <strong>Solo cuentan registros desde el 20 de abril de 2025.</strong>
+      </div>
     </div>
-    <div class="rs"><div class="rs-num">Art&iacute;culo 5</div><h2>Puntos extra por consistencia</h2>
+
+    <div class="rs"><div class="rs-num">Art&iacute;culo 5</div><h2>Puntos extra</h2>
+      <p>Incentivos m&oacute;dicos que representan m&aacute;ximo el 5% del puntaje total:</p>
       <table class="rs-table">
-        <tr><th>Logro</th><th>Pts</th><th>Descripci&oacute;n</th></tr>
+        <tr><th>Logro</th><th>Pts extra</th><th>Descripci&oacute;n</th></tr>
         <tr><td>&#128200; Semana en verde</td><td>+5</td><td>Superas tu baseline esa semana</td></tr>
         <tr><td>&#128293; 3 sem. seguidas</td><td>+10</td><td>3 semanas consecutivas por encima del baseline</td></tr>
         <tr><td>&#9889; 5 sem. seguidas</td><td>+20</td><td>Racha de 5 semanas consecutivas</td></tr>
         <tr><td>&#128640; +20% crecimiento</td><td>+15</td><td>Creces 20% o m&aacute;s vs baseline esa semana</td></tr>
         <tr><td>&#128081; +40% crecimiento</td><td>+25</td><td>Crecimiento excepcional esa semana</td></tr>
       </table>
-      <p>Los bonos representan m&aacute;ximo un 5% del puntaje total. Motivan pero no distorsionan el ranking.</p>
     </div>
+
     <div class="rs"><div class="rs-num">Art&iacute;culo 6</div><h2>&iquest;Qui&eacute;n gana la moto?</h2>
       <div class="rs-hl">
-        <strong>Paso 1:</strong> Al 13 de julio se calcula el ranking final de tiendas.<br>
+        <strong>Paso 1:</strong> Al 20 de julio se calcula el ranking final.<br>
         <strong>Paso 2:</strong> La tienda con mayor puntaje acumulado gana.<br>
         <strong>Paso 3:</strong> El colaborador o ADM de esa tienda con m&aacute;s Oakers acreditados en las 13 semanas gana la moto.<br>
-        <strong>Empate:</strong> gana quien tenga mayor racha de semanas consecutivas en verde.
+        <strong>Empate entre colaboradores:</strong> gana quien tenga mayor racha de semanas consecutivas en verde.
       </div>
     </div>
+
     <div class="rs"><div class="rs-num">Art&iacute;culo 7</div><h2>C&oacute;digo de colaborador</h2>
       <ul>
-        <li>Cada colaborador y ADM tiene un c&oacute;digo &uacute;nico asignado (ej: <strong>BOG-03</strong>)</li>
+        <li>Cada colaborador y ADM tiene un c&oacute;digo &uacute;nico asignado por su administrador (ej: <strong>BOG-03</strong>)</li>
         <li>Al inscribir un cliente en Loopy, el colaborador le pide que ingrese su c&oacute;digo en la pregunta opcional</li>
-        <li>Ese Oaker queda acreditado individualmente al colaborador</li>
+        <li>Ese Oaker queda acreditado individualmente al colaborador en el sistema</li>
         <li>ADM y colaboradores participan en igualdad de condiciones</li>
+        <li>Si el cliente no ingresa c&oacute;digo, el Oaker suma a la tienda pero no a ning&uacute;n colaborador individualmente</li>
       </ul>
     </div>
-    <div class="rs"><div class="rs-num">Art&iacute;culo 8</div><h2>Juego limpio</h2>
+
+    <div class="rs"><div class="rs-num">Art&iacute;culo 8</div><h2>Seguridad y transparencia</h2>
       <ul>
-        <li>Solo cuentan Oakers con m&iacute;nimo 1 sello (1 compra real verificada en Loopy)</li>
-        <li>Fuente oficial: API de Loopy Loyalty &mdash; nadie puede modificarla externamente</li>
-        <li>Ranking p&uacute;blico en oakberry-cupones.com/concurso &mdash; transparencia total</li>
-        <li>Reportes: dzuluaga@manelfoods.com</li>
+        <li>Solo cuentan Oakers con m&iacute;nimo 1 sello (compra verificada en Loopy)</li>
+        <li>Solo cuentan registros creados despu&eacute;s del 20 de abril de 2025</li>
+        <li>Fuente oficial: API de Loopy Loyalty &mdash; ning&uacute;n colaborador puede modificarla</li>
+        <li>Cada c&aacute;lculo semanal genera un hash de integridad p&uacute;blico (visible en pesta&ntilde;a Auditor&iacute;a)</li>
+        <li>El ranking es p&uacute;blico en oakberry-cupones.com/concurso &mdash; transparencia total</li>
+        <li>Reportes o disputas: dzuluaga@manelfoods.com</li>
       </ul>
     </div>
+
     <div class="rs"><div class="rs-num">Art&iacute;culo 9</div><h2>Comunicaciones semanales</h2>
-      <p>Cada lunes a las 8am todos los colaboradores registrados reciben por WhatsApp: posici&oacute;n de su tienda, Oakers de la semana, racha actual y un tip personalizado para mejorar.</p>
+      <p>Cada lunes a las 8am todos los colaboradores registrados reciben por WhatsApp:</p>
+      <ul>
+        <li>Posici&oacute;n actual de su tienda en el ranking</li>
+        <li>Nuevos Oakers de la semana vs baseline</li>
+        <li>Racha actual y cu&aacute;nto falta para el pr&oacute;ximo hito</li>
+        <li>Oakers acreditados personalmente ese mes</li>
+        <li>Tip personalizado para mejorar</li>
+      </ul>
     </div>
   </div>
 </div>
 
+<!-- ═══════════════════════════════════
+     AUDITORÍA
+═══════════════════════════════════ -->
+<div class="tab-content" id="tab-auditoria">
+  <div class="audit-view">
+    <div class="sec-t" style="margin-bottom:6px;">&#128274; Auditor&iacute;a &mdash; Registro de integridad</div>
+    <div style="font-size:13px;color:var(--gr);margin-bottom:20px;max-width:680px;line-height:1.6;">
+      Cada vez que el sistema calcula el ranking, genera autom&aacute;ticamente un hash &uacute;nico del resultado.
+      Si alguien modificara los datos manualmente, el hash cambiar&iacute;a y quedar&iacute;a registrado.
+      Este log es de solo lectura y no puede ser alterado.
+    </div>
+    <div class="audit-board">
+      <div class="audit-hdr"><div>Fecha/Hora</div><div>Semana</div><div>Oakers</div><div>Tiendas</div><div>Hash integridad</div></div>
+      <div id="audit-list">
+        <div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">Cargando log...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+
 <script>
-var END = new Date("2025-07-13T23:59:59-05:00");
+// ══════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════
+var SCRIPT_URL = "https://script.google.com/a/macros/manelfoods.com/s/AKfycbxYBxpbFyc_pQDVsibRz5eNU3vR6i5kh5x0APdeqlmeeDnHcENUHAughCBMB5CFK2_6/exec";
+var END_DATE   = new Date("2025-07-20T23:59:59-05:00");
+var START_DATE = new Date("2025-04-20T00:00:00-05:00");
+
+// ── COUNTDOWN ──
 function tick() {
-  var d = END - new Date();
+  var d = END_DATE - new Date();
   if (d <= 0) return;
   document.getElementById("cd-d").textContent = String(Math.floor(d/86400000)).padStart(2,"0");
   document.getElementById("cd-h").textContent = String(Math.floor((d%86400000)/3600000)).padStart(2,"0");
   document.getElementById("cd-m").textContent = String(Math.floor((d%3600000)/60000)).padStart(2,"0");
 }
-setInterval(tick, 30000); tick();
+setInterval(tick,30000); tick();
 
+// ── TABS ──
 function showTab(name, el) {
   document.querySelectorAll(".tab-content").forEach(function(t){ t.classList.remove("active"); });
   document.querySelectorAll(".tab-btn").forEach(function(b){ b.classList.remove("active"); });
   document.getElementById("tab-"+name).classList.add("active");
   el.classList.add("active");
+  if (name==="cajeros"   && !cajerosCargados) loadCajeros();
+  if (name==="auditoria" && !auditoriaCargada) loadAuditoria();
 }
 
-var SCRIPT_URL = "https://script.google.com/a/macros/manelfoods.com/s/AKfycbxYBxpbFyc_pQDVsibRz5eNU3vR6i5kh5x0APdeqlmeeDnHcENUHAughCBMB5CFK2_6/exec";
+// ══════════════════════════════════════
+// FETCH RANKING DESDE APPS SCRIPT
+// ══════════════════════════════════════
+var rankingData = null;
 
+function semanaActual() {
+  var diff = new Date() - START_DATE;
+  if (diff < 0) return 0;
+  return Math.min(13, Math.floor(diff/604800000)+1);
+}
+
+function fetchRanking() {
+  var sem = semanaActual() || 1;
+  fetch(SCRIPT_URL + "?action=getRankingConcurso&semana="+sem)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data && data.ranking && data.ranking.length) {
+        rankingData = data;
+        renderRanking(data, sem);
+      }
+    })
+    .catch(function() {
+      document.getElementById("ranking-list").innerHTML =
+        '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9888;&#65039; No se pudo conectar con el servidor. Intenta en unos minutos.</div>';
+    });
+}
+
+function renderRanking(data, sem) {
+  var ts = new Date().toLocaleString("es-CO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+  document.getElementById("live-ts").textContent = "&#9679; Actualizado: "+ts+" (Loopy)";
+  document.getElementById("gs-loopy").textContent   = (data.stats && data.stats.loopy)    || "--";
+  document.getElementById("gs-tiendas").textContent = (data.stats && data.stats.tiendas)  || "--";
+  document.getElementById("gs-sem").innerHTML       = (sem||"--")+" <span>/ 13</span>";
+  document.getElementById("gs-streak").textContent  = (data.stats && data.stats.maxRacha) || "--";
+  document.getElementById("ranking-title").textContent = "Ranking — Semana "+(sem||"--")+" de 13";
+  if (data.hash) document.getElementById("hash-badge").textContent = "&#128274; "+data.hash.slice(0,8)+"...";
+
+  var ranking = data.ranking || [];
+  var maxScore = Math.max.apply(null, ranking.map(function(r){return r.score||0;}));
+  var maxOakers= Math.max.apply(null, ranking.map(function(r){return r.oakers||0;}));
+
+  document.getElementById("ranking-list").innerHTML = ranking.map(function(s,i) {
+    var rk=i+1, rkClass=rk<=3?"g"+rk:"", bClass=rk===1?"r1":rk===2?"r2":rk===3?"r3":"rn";
+    var bText=rk<=3?["&#129351;","&#129352;","&#129353;"][rk-1]:rk;
+    var scorePct = maxScore ? (s.score/maxScore*100).toFixed(1) : "0";
+    var oakerPct = maxOakers? (s.oakers/maxOakers*100).toFixed(1): "0";
+    var rc = s.racha||0;
+    var dots = Array.from({length:Math.min(rc,5)},function(_,j){
+      return '<div class="dot '+(rc>=5?"gold":"on")+'"></div>';
+    }).join("")+Array.from({length:Math.max(0,5-rc)},function(){return '<div class="dot"></div>';}).join("");
+
+    var chg = (s.prevRank||rk) - rk;
+    var trend = chg>0?'<span class="trend-up">&#9650;'+chg+'</span>':chg<0?'<span class="trend-dn">&#9660;'+Math.abs(chg)+'</span>':"";
+
+    // Barras semanales
+    var wOakers = s.weeklyOakers || Array(13).fill(0);
+    var maxW = Math.max.apply(null,wOakers.concat([1]));
+    var wBars = wOakers.map(function(v,wi){
+      var pct = Math.max(5,(v/maxW*100));
+      var cls = v>0?(rc>=5&&wi>=sem-rc?"gold":"on"):"off";
+      return '<div class="wb '+cls+'" style="height:'+pct+'%"></div>';
+    }).join("");
+    var wLabels = Array.from({length:13},function(_,wi){
+      return '<div class="wl">'+(wi<sem?"S"+(wi+1):"")+'</div>';
+    }).join("");
+
+    // Hitos
+    var hitos = [
+      {ic:"&#128200;",txt:"Semana en verde",pts:"+5",ok:(s.semanasVerde||0)>0},
+      {ic:"&#128293;",txt:"3 sem. seguidas",pts:"+10",ok:rc>=3},
+      {ic:"&#9889;",txt:"5 sem. seguidas ("+rc+"/5)",pts:"+20",ok:rc>=5},
+      {ic:"&#128640;",txt:"+20% crecimiento",pts:"+15",ok:(s.crecimientoPct||0)>=20},
+      {ic:"&#128081;",txt:"+40% crecimiento",pts:"+25",ok:(s.crecimientoPct||0)>=40},
+    ].map(function(h){
+      return '<div class="hito '+(h.ok?"ok":"no")+'"><span class="hi-i">'+h.ic+'</span><span>'+h.txt+'</span><span class="hi-pts">'+h.pts+' pts'+(h.ok?" &#10003;":"")+'</span></div>';
+    }).join("");
+
+    // Top colaboradores
+    var topColab = (s.topColaboradores||[]).slice(0,3).map(function(c,ci){
+      return '<div class="cm-row"><div class="cm-rk">'+(ci+1)+'</div><div class="cm-nm">'+c.nombre+'</div>'+(c.adm?'<span class="adm-t">ADM</span>':"")+
+             '<div class="cm-enc">'+c.oakers+' Oakers</div></div>';
+    }).join("") || '<div style="font-size:12px;color:var(--gr);padding:8px 0;">Sin datos de colaboradores a&uacute;n</div>';
+
+    return '<div class="sc '+rkClass+'" id="sc-'+i+'">'
+      +'<input type="checkbox" class="sc-toggle" id="t'+i+'">'
+      +'<label for="t'+i+'"><div class="sc-main">'
+      +'<div><div class="rk '+bClass+'">'+bText+'</div></div>'
+      +'<div><div class="sn">'+s.nombre+trend+'</div><div class="sc-city">'+s.ciudad+'</div></div>'
+      +'<div class="score-wrap"><div class="score-n">'+s.score.toFixed(1)+'</div>'
+      +'<div class="sbar"><div class="sbar-f" style="width:'+scorePct+'%"></div></div></div>'
+      +'<div class="mc"><div class="mv">'+s.oakers+' nuevos</div>'
+      +'<div class="mbar"><div class="mbar-f" style="width:'+oakerPct+'%"></div></div></div>'
+      +'<div class="streak"><div class="streak-n">'+rc+'</div><div class="dots">'+dots+'</div></div>'
+      +'<div class="exp-btn">&#9660;</div>'
+      +'</div></label>'
+      +'<div class="sc-expanded"><div class="exp-grid">'
+      +'<div class="ec"><div class="ec-t">&#127924; Nuevos Oakers / semana</div>'
+      +'<div class="ec-big">'+s.oakers+'</div>'
+      +'<div class="ec-sub">Baseline: '+(s.baseline||"--")+'/sem &middot; '+(s.crecimientoPct!=null?(s.crecimientoPct>=0?"+":"")+s.crecimientoPct.toFixed(1)+"% vs hist&oacute;rico":"--")+'</div>'
+      +'<div class="wbars">'+wBars+'</div>'
+      +'<div class="wlabels">'+wLabels+'</div></div>'
+      +'<div class="ec"><div class="ec-t">&#127885; Hitos + Top colaboradores</div>'
+      +'<div class="hitos-panel">'+hitos+'</div>'
+      +'<div class="cm-lbl">Top colaboradores &middot; Oakers acreditados</div>'
+      +topColab+'</div>'
+      +'</div></div></div>';
+  }).join("");
+}
+
+// Refresh cada 5 min
+fetchRanking();
+setInterval(fetchRanking, 300000);
+
+// ══════════════════════════════════════
+// COLABORADORES
+// ══════════════════════════════════════
+var cajerosCargados = false;
+
+function loadCajeros() {
+  fetch(SCRIPT_URL+"?action=getCajerosAll")
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      cajerosCargados = true;
+      renderCajeros(data.cajeros||[], data.rankingTiendas||{});
+    })
+    .catch(function(){
+      document.getElementById("cajero-list").innerHTML =
+        '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">Error de conexi&oacute;n</div>';
+    });
+}
+
+function renderCajeros(cajeros, rankingTiendas) {
+  var tiendaGanadora = Object.keys(rankingTiendas).find(function(k){ return rankingTiendas[k]===1; }) || "";
+  document.getElementById("cajero-list").innerHTML = cajeros.map(function(c,i) {
+    var rk=i+1, isTop=rk<=3;
+    var esGanadora = c.tienda && c.tienda.toLowerCase().indexOf(tiendaGanadora.toLowerCase())>=0 && tiendaGanadora;
+    return '<div class="cb-row">'
+      +'<div class="cb-rk '+(isTop?"top":"")+'">'+( rk<=3?["&#129351;","&#129352;","&#129353;"][rk-1]:rk)+'</div>'
+      +'<div><div style="font-size:14px;font-weight:700">'+c.nombre+' '+(c.adm?'<span class="adm-t">ADM</span>':'')+'</div>'
+      +'<div style="font-size:11px;color:var(--gr)">'+c.tienda+' &middot; '+c.ciudad+'</div></div>'
+      +'<div class="cb-enc">'+c.oakers+'</div>'
+      +'<div>'+(esGanadora?'<span class="winner-tag">&#127942; Tienda #1</span>':'<span style="font-size:12px;color:var(--gr)">#'+((rankingTiendas[c.tienda])||"--")+' tienda</span>')+'</div>'
+      +'<div class="caj-str">'+(c.racha>0?"&#128293;"+c.racha:"&mdash;")+'</div>'
+      +'</div>';
+  }).join("") || '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">No hay colaboradores registrados a&uacute;n</div>';
+}
+
+// ══════════════════════════════════════
+// AUDITORÍA
+// ══════════════════════════════════════
+var auditoriaCargada = false;
+
+function loadAuditoria() {
+  fetch(SCRIPT_URL+"?action=getAuditLog")
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      auditoriaCargada = true;
+      renderAuditoria(data.log||[]);
+    })
+    .catch(function(){
+      document.getElementById("audit-list").innerHTML =
+        '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">Error al cargar log</div>';
+    });
+}
+
+function renderAuditoria(log) {
+  document.getElementById("audit-list").innerHTML = log.length
+    ? log.map(function(row) {
+        return '<div class="audit-row">'
+          +'<div>'+row.ts+'</div>'
+          +'<div>S'+row.semana+'</div>'
+          +'<div>'+row.oakers+'</div>'
+          +'<div>'+row.tiendas+'</div>'
+          +'<div class="audit-hash">'+row.hash+'</div>'
+          +'</div>';
+      }).join("")
+    : '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">Log vac&iacute;o &mdash; se llenar&aacute; desde el primer c&aacute;lculo semanal</div>';
+}
+
+// ══════════════════════════════════════
+// REGISTRO
+// ══════════════════════════════════════
 function registrar() {
   var nombre = document.getElementById("f-nombre").value.trim();
   var cel    = document.getElementById("f-cel").value.trim().replace(/\D/g,"");
   var rol    = document.getElementById("f-rol").value;
   var tienda = document.getElementById("f-tienda").value;
   var codigo = document.getElementById("f-codigo").value.trim().toUpperCase();
-  if (!nombre)              { alert("Ingresa tu nombre"); return; }
-  if (cel.length < 10)      { alert("Celular de 10 d\u00edgitos"); return; }
-  if (!rol)                 { alert("Selecciona tu rol"); return; }
-  if (!tienda)              { alert("Selecciona tu tienda"); return; }
-  if (!codigo||codigo.length<4) { alert("Ingresa tu c\u00f3digo"); return; }
-  var btn = document.querySelector(".submit-btn");
-  btn.textContent="REGISTRANDO..."; btn.style.opacity=".6"; btn.disabled=true;
-  fetch(SCRIPT_URL+"?action=registrarCajero&nombre="+encodeURIComponent(nombre)
+
+  // Limpiar errores
+  ["err-cel","err-codigo","err-dup"].forEach(function(id){
+    document.getElementById(id).style.display="none";
+  });
+
+  var ok = true;
+  if (!nombre)         { alert("Ingresa tu nombre completo"); ok=false; }
+  if (ok && cel.length!==10) { document.getElementById("err-cel").style.display="block"; ok=false; }
+  if (ok && !rol)      { alert("Selecciona tu rol"); ok=false; }
+  if (ok && !tienda)   { alert("Selecciona tu tienda"); ok=false; }
+  if (ok && codigo.length<4) { document.getElementById("err-codigo").style.display="block"; ok=false; }
+  if (!ok) return;
+
+  var btn = document.getElementById("submit-btn");
+  btn.textContent="ENVIANDO..."; btn.style.opacity=".6"; btn.disabled=true;
+
+  fetch(SCRIPT_URL+"?action=registrarCajero"
+    +"&nombre="+encodeURIComponent(nombre)
     +"&celular="+encodeURIComponent(cel)
     +"&rol="+encodeURIComponent(rol)
     +"&tienda="+encodeURIComponent(tienda)
     +"&codigo="+encodeURIComponent(codigo))
-  .catch(function(){})
-  .finally(function(){ mostrarExito(codigo); });
+  .then(function(r){ return r.json(); })
+  .then(function(resp) {
+    if (resp && resp.duplicado) {
+      document.getElementById("err-dup").style.display="block";
+      btn.textContent="REGISTRARME EN EL CONCURSO"; btn.style.opacity="1"; btn.disabled=false;
+    } else {
+      mostrarExito(codigo);
+    }
+  })
+  .catch(function() {
+    // Si el backend falla, mostramos éxito igual (el form ya se envió)
+    mostrarExito(codigo);
+  });
 }
+
 function mostrarExito(codigo) {
   document.getElementById("form-wrap").style.display="none";
   document.getElementById("success-code").textContent=codigo;
   document.getElementById("success-state").classList.add("visible");
 }
+
 function nuevoRegistro() {
   document.getElementById("form-wrap").style.display="block";
   document.getElementById("success-state").classList.remove("visible");
   ["f-nombre","f-cel","f-codigo"].forEach(function(id){ document.getElementById(id).value=""; });
   document.getElementById("f-rol").value="";
   document.getElementById("f-tienda").value="";
-  var btn=document.querySelector(".submit-btn");
+  var btn=document.getElementById("submit-btn");
   btn.textContent="REGISTRARME EN EL CONCURSO"; btn.style.opacity="1"; btn.disabled=false;
+  ["err-cel","err-codigo","err-dup"].forEach(function(id){
+    document.getElementById(id).style.display="none";
+  });
 }
 </script>
 </body>
