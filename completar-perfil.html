@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oakberry · Completa tu perfil</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#5F4B8B;--primary-dark:#4a3a6e;
+    --yellow:#F5C842;--white:#ffffff;
+    --off-white:rgba(255,255,255,0.96);
+    --border:#eee;--gray:#999;--red:#c0392b;
+    --green:#27ae60;--coral:#e8593c;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Montserrat',sans-serif;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px 16px;
+    background:linear-gradient(rgba(95,75,139,0.58),rgba(95,75,139,0.58)),
+               url('bg.png') center/cover no-repeat fixed;
+  }
+  .card{
+    background:var(--off-white);border-radius:30px;width:100%;max-width:400px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;
+    animation:cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+  /* ── HEADER ── */
+  .card-header{background:var(--primary);padding:28px 30px 24px;text-align:center;position:relative;overflow:hidden;}
+  .card-header::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 60%);}
+  .brand{font-size:28px;font-weight:900;color:var(--white);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
+  .brand-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:16px;}
+  .premio-badge{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--yellow);border-radius:50px;padding:10px 22px;
+  }
+  .premio-badge .premio-icon{font-size:22px;line-height:1;}
+  .premio-badge .premio-txt{text-align:left;}
+  .premio-badge .premio-titulo{font-size:13px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;line-height:1.2;}
+  .premio-badge .premio-sub{font-size:10px;font-weight:700;color:rgba(95,75,139,0.7);text-transform:uppercase;letter-spacing:0.3px;margin-top:2px;}
+
+  /* ── BODY ── */
+  .card-body{padding:24px 28px 28px;}
+  .section-title{color:var(--primary);text-transform:uppercase;font-weight:900;font-size:17px;letter-spacing:0.5px;text-align:center;margin-bottom:5px;}
+  .section-sub{font-size:11px;font-weight:700;color:var(--gray);text-align:center;margin-bottom:20px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.6;}
+
+  /* ── PASO VALIDAR EMAIL ── */
+  .step{display:none;}
+  .step.show{display:block;animation:fadeIn 0.3s ease both;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ── INPUTS ── */
+  .form-group{margin-bottom:14px;position:relative;}
+  .field-label{font-size:10px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;display:block;}
+  input[type=text],input[type=tel],input[type=email],input[type=date],select{
+    width:100%;padding:14px 16px;border-radius:12px;border:2px solid var(--border);
+    font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--primary);
+    outline:none;background:#fff;transition:border-color 0.18s,box-shadow 0.18s;
+    -webkit-appearance:none;appearance:none;
+  }
+  input::placeholder{color:#bbb;font-weight:600;}
+  input[type=tel]{padding-left:52px;}
+  input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(95,75,139,0.12);}
+  input.err,select.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(192,57,43,0.1);}
+  input.ok{border-color:var(--green);}
+  .phone-prefix{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--primary);pointer-events:none;}
+  .err-msg{font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.3px;margin-top:5px;display:none;padding-left:4px;}
+  .err-msg.show{display:block;}
+
+  /* ── INFO PILL ── */
+  .info-pill{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.2px;line-height:1.5;margin-bottom:14px;text-align:left;}
+  .info-pill.purple{background:#f5f0ff;border:1.5px solid #d4c8f5;color:var(--primary);}
+  .info-pill.green{background:#f0fff4;border:1.5px solid #9ae6b4;color:#1a6b3c;}
+  .info-pill.yellow{background:#fffbea;border:1.5px solid #f0dc8c;color:#7a5c00;}
+  .info-pill .icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+
+  /* ── PERFIL ENCONTRADO ── */
+  .perfil-card{
+    background:#f5f0ff;border:2px solid #d4c8f5;border-radius:16px;
+    padding:16px 18px;margin-bottom:18px;display:flex;align-items:center;gap:14px;
+  }
+  .perfil-avatar{
+    width:44px;height:44px;border-radius:50%;background:var(--primary);
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;font-weight:900;color:#fff;flex-shrink:0;
+  }
+  .perfil-info{flex:1;min-width:0;}
+  .perfil-nombre{font-size:14px;font-weight:900;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .perfil-email{font-size:10px;font-weight:700;color:var(--gray);text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .perfil-seg{display:inline-block;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;padding:3px 8px;border-radius:50px;margin-top:4px;}
+  .seg-Perdido{background:#fde8d8;color:#7d3c00;}
+  .seg-E1{background:#fff3cd;color:#856404;}
+  .seg-E2{background:#fde8d8;color:#7d3c00;}
+  .seg-E3{background:#fcd5d5;color:#7b1d1d;}
+  .seg-Sin_Actividad{background:#e8d5f5;color:#4a235a;}
+
+  /* ── BTN ── */
+  .btn{
+    width:100%;padding:17px;background:var(--primary);color:var(--white);
+    border:none;border-radius:12px;font-family:'Montserrat',sans-serif;
+    font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px;
+    cursor:pointer;position:relative;overflow:hidden;
+    transition:background 0.18s,transform 0.12s,box-shadow 0.18s;
+    box-shadow:0 6px 20px rgba(95,75,139,0.4);
+  }
+  .btn:hover:not(:disabled){background:var(--primary-dark);transform:translateY(-1px);}
+  .btn:disabled{opacity:0.55;cursor:not-allowed;box-shadow:none;}
+  .btn-text{transition:opacity 0.18s;}
+  .btn-loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.18s;}
+  .btn.loading .btn-text{opacity:0;}
+  .btn.loading .btn-loader{opacity:1;}
+  .spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.65s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ── TÉRMINOS ── */
+  .tyc-wrap{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;cursor:pointer;}
+  .tyc-wrap input[type=checkbox]{appearance:none;-webkit-appearance:none;min-width:18px;height:18px;border:2px solid var(--border);border-radius:5px;background:#fff;cursor:pointer;transition:border-color 0.18s,background 0.18s;margin-top:1px;position:relative;}
+  .tyc-wrap input[type=checkbox]:checked{background:var(--primary);border-color:var(--primary);}
+  .tyc-wrap input[type=checkbox]:checked::after{content:'';position:absolute;left:4px;top:1px;width:6px;height:10px;border:2.5px solid #fff;border-top:none;border-left:none;transform:rotate(45deg);}
+  .tyc-wrap input[type=checkbox].err{border-color:var(--red);}
+  .tyc-label{font-size:11px;font-weight:600;color:#666;line-height:1.6;}
+  .tyc-label a{color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:2px;}
+  .tyc-err{font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.3px;margin-top:-10px;margin-bottom:10px;display:none;padding-left:4px;}
+  .tyc-err.show{display:block;}
+
+  /* ── PROGRESS LOADING ── */
+  .loading-header{background:var(--primary);padding:28px 30px 22px;text-align:center;}
+  .loading-icon{font-size:44px;display:block;margin-bottom:8px;animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.1);opacity:0.8;}}
+  .loading-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+  .loading-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:1.5px;}
+  .loading-body{padding:26px 28px 30px;}
+  .progress-wrap{background:#f0ebff;border-radius:50px;height:10px;overflow:hidden;margin-bottom:10px;}
+  .progress-bar{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));width:0%;transition:width 0.4s ease;}
+  .progress-pct{font-size:11px;font-weight:900;color:var(--primary);text-align:right;margin-bottom:18px;letter-spacing:1px;}
+  .loading-steps{display:flex;flex-direction:column;gap:10px;}
+  .loading-step{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:0.5px;transition:color 0.3s;}
+  .loading-step.done{color:var(--primary);}
+  .loading-step.active{color:var(--primary);}
+  .step-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0;}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.3s;}
+  .loading-step.done .step-check{background:var(--primary);border-color:var(--primary);}
+  .loading-step.done .step-check::after{content:'✓';font-size:10px;color:#fff;font-weight:900;}
+  .loading-step.active .step-check{border-color:var(--primary);animation:stepPulse 0.8s ease-in-out infinite;}
+  @keyframes stepPulse{0%,100%{box-shadow:0 0 0 0 rgba(95,75,139,0.4);}50%{box-shadow:0 0 0 4px rgba(95,75,139,0.1);}}
+
+  /* ── RESULTADO ── */
+  .result-header{background:var(--green);padding:28px 30px 22px;text-align:center;}
+  .result-icon{font-size:48px;display:block;margin-bottom:8px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.15s both;}
+  @keyframes popIn{from{opacity:0;transform:scale(0.3);}to{opacity:1;transform:scale(1);}}
+  .result-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+  .result-name{font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;}
+  .result-body{padding:24px 28px 28px;text-align:center;}
+
+  /* ── PREMIO RESULTADO ── */
+  .premio-result{background:var(--primary);border-radius:16px;padding:20px 22px;margin-bottom:18px;text-align:center;}
+  .premio-result-icon{font-size:36px;display:block;margin-bottom:8px;}
+  .premio-result-titulo{font-size:14px;font-weight:900;color:var(--yellow);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+  .premio-result-desc{font-size:11px;font-weight:600;color:rgba(255,255,255,0.7);line-height:1.5;}
+
+  /* ── TICKET CUPÓN (si el premio es cupón) ── */
+  .ticket{background:var(--primary);border-radius:16px;padding:20px 24px;margin-bottom:18px;}
+  .ticket-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;text-align:left;}
+  .ticket-code{font-size:36px;font-weight:900;color:#fff;letter-spacing:4px;text-align:left;line-height:1;margin-bottom:4px;}
+  .ticket-validity{font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);text-align:left;margin-bottom:4px;}
+  .ticket-product{font-size:11px;font-weight:700;color:var(--yellow);text-align:left;text-transform:uppercase;letter-spacing:0.5px;}
+  .ticket-dashed{border-top:1.5px dashed rgba(255,255,255,0.25);margin:14px -24px;position:relative;}
+  .ticket-dashed::before,.ticket-dashed::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:16px;height:16px;background:var(--off-white);border-radius:50%;}
+  .ticket-dashed::before{left:-8px;}.ticket-dashed::after{right:-8px;}
+  .ticket-bottom{display:flex;justify-content:space-between;align-items:center;}
+  .d-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;text-align:left;}
+  .d-value{font-size:18px;font-weight:900;color:var(--yellow);line-height:1;}
+  .copy-btn{background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.9);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:9px 16px;border-radius:8px;cursor:pointer;transition:background 0.18s;}
+  .copy-btn:hover{background:rgba(255,255,255,0.22);}
+
+  .terms{font-size:10px;font-weight:600;color:#bbb;text-align:center;margin-top:10px;text-transform:uppercase;letter-spacing:0.3px;line-height:1.6;}
+
+  /* ── ERROR STATE ── */
+  .error-header{background:var(--red);padding:28px 30px 22px;text-align:center;}
+  .error-icon{font-size:44px;display:block;margin-bottom:8px;}
+  .error-title{font-size:17px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+  .error-msg-txt{font-size:12px;font-weight:600;color:rgba(255,255,255,0.7);line-height:1.5;}
+  .error-body{padding:24px 28px 28px;text-align:center;}
+  .retry-btn{width:100%;padding:16px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- ══ PASO 1: VALIDAR EMAIL ══ -->
+  <div id="stateEmail" class="step show">
+    <div class="card-header">
+      <div class="brand">Oakberry</div>
+      <div class="brand-sub">Completa tu perfil · Gana tu premio</div>
+      <div class="premio-badge" id="premioBadge">
+        <span class="premio-icon">⭐</span>
+        <div class="premio-txt">
+          <div class="premio-titulo" id="premioTitulo">Sellos dobles</div>
+          <div class="premio-sub" id="premioSub">En tu próxima visita</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h2 class="section-title">¿Ya eres Oaker?</h2>
+      <p class="section-sub">Ingresa el correo de tu Oaker Card para continuar</p>
+
+      <div class="info-pill purple">
+        <span class="icon">🃏</span>
+        <span>Solo para miembros del programa de fidelización Oakberry. Completa tus datos y recibe tu premio al instante.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">Tu correo Loopy / Oaker Card</label>
+        <input type="email" id="inp-email" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
+        <div class="err-msg" id="err-email">⚠ Ingresa un email válido</div>
+      </div>
+
+      <button class="btn" id="btnValidarEmail" onclick="validarEmail()">
+        <span class="btn-text">Verificar mi cuenta →</span>
+        <span class="btn-loader"><span class="spin"></span></span>
+      </button>
+      <p class="terms">Tu correo debe estar registrado en Loopy Loyalty</p>
+    </div>
+  </div>
+
+  <!-- ══ PASO 2: COMPLETAR DATOS ══ -->
+  <div id="stateForm" class="step">
+    <div class="card-header">
+      <div class="brand">Oakberry</div>
+      <div class="brand-sub">Perfil encontrado · Completa tus datos</div>
+      <div class="premio-badge" id="premioBadge2">
+        <span class="premio-icon">⭐</span>
+        <div class="premio-txt">
+          <div class="premio-titulo" id="premioTitulo2">Sellos dobles</div>
+          <div class="premio-sub" id="premioSub2">En tu próxima visita</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- Tarjeta perfil encontrado -->
+      <div class="perfil-card" id="perfilCard">
+        <div class="perfil-avatar" id="perfilAvatar">?</div>
+        <div class="perfil-info">
+          <div class="perfil-nombre" id="perfilNombre">Cargando...</div>
+          <div class="perfil-email" id="perfilEmail"></div>
+          <span class="perfil-seg" id="perfilSeg"></span>
+        </div>
+      </div>
+
+      <h2 class="section-title">Completa tu perfil</h2>
+      <p class="section-sub" id="formSubtitle">Solo te falta esto para recibir tu premio</p>
+
+      <!-- Nombre (solo si está vacío en la base) -->
+      <div class="form-group" id="grupoNombre">
+        <label class="field-label">Tu nombre completo</label>
+        <input type="text" id="inp-nombre" placeholder="NOMBRE APELLIDO" autocomplete="name">
+        <div class="err-msg" id="err-nombre">⚠ Ingresa tu nombre</div>
+      </div>
+
+      <!-- Celular -->
+      <div class="form-group" id="grupoCelular">
+        <label class="field-label">Tu celular colombiano</label>
+        <span class="phone-prefix" style="top:calc(50% + 12px)">+57</span>
+        <input type="tel" id="inp-cel" placeholder="300 000 0000" inputmode="numeric" maxlength="10" autocomplete="tel">
+        <div class="err-msg" id="err-cel">⚠ Celular inválido — 10 dígitos, empieza en 3</div>
+      </div>
+
+      <!-- Ciudad -->
+      <div class="form-group" id="grupoCiudad">
+        <label class="field-label">Tu ciudad</label>
+        <select id="inp-ciudad">
+          <option value="">Selecciona tu ciudad...</option>
+          <option>Bogotá</option>
+          <option>Medellín</option>
+          <option>Cali</option>
+          <option>Barranquilla</option>
+          <option>Bucaramanga</option>
+          <option>Cartagena</option>
+          <option>Cúcuta</option>
+          <option>Pereira</option>
+          <option>Manizales</option>
+          <option>Santa Marta</option>
+          <option>Montería</option>
+          <option>Valledupar</option>
+          <option>Otra ciudad</option>
+        </select>
+        <div class="err-msg" id="err-ciudad">⚠ Selecciona tu ciudad</div>
+      </div>
+
+      <!-- Cumpleaños (solo si no existe) -->
+      <div class="form-group" id="grupoBirthday">
+        <label class="field-label">Fecha de nacimiento</label>
+        <input type="date" id="inp-birthday" max="">
+        <div class="err-msg" id="err-birthday">⚠ Ingresa tu fecha de nacimiento</div>
+      </div>
+
+      <label class="tyc-wrap">
+        <input type="checkbox" id="chk-wa">
+        <span class="tyc-label">Autorizo a Oakberry Colombia para contactarme por <strong>WhatsApp</strong> con beneficios, novedades y ofertas exclusivas para Oakers.</span>
+      </label>
+
+      <label class="tyc-wrap" style="margin-top:-4px;">
+        <input type="checkbox" id="chk-tyc" required>
+        <span class="tyc-label">He leído y acepto los <a href="/tyc" target="_blank">Términos y Condiciones</a> y la <a href="/tyc#privacidad" target="_blank">Política de Privacidad</a>. Autorizo el tratamiento de mis datos conforme a la Ley 1581 de 2012.</span>
+      </label>
+      <div class="tyc-err" id="err-tyc">⚠ Debes aceptar los términos para continuar</div>
+
+      <button class="btn" id="btnGuardar" onclick="guardar()">
+        <span class="btn-text" id="btnGuardarText">Recibir mi premio →</span>
+        <span class="btn-loader"><span class="spin"></span></span>
+      </button>
+      <p class="terms">Tus datos son usados solo por Oakberry Colombia · Nunca los compartimos</p>
+    </div>
+  </div>
+
+  <!-- ══ CARGA ══ -->
+  <div id="stateLoading" class="step">
+    <div class="loading-header">
+      <span class="loading-icon">🫐</span>
+      <div class="loading-title">Guardando tu perfil</div>
+      <div class="loading-sub">Esto toma unos segundos</div>
+    </div>
+    <div class="loading-body">
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-pct" id="progressPct">0%</div>
+      <div class="loading-steps">
+        <div class="loading-step" id="lstep1"><span class="step-icon">🔍</span><span style="flex:1">Verificando tu cuenta Loopy</span><span class="step-check"></span></div>
+        <div class="loading-step" id="lstep2"><span class="step-icon">💾</span><span style="flex:1">Actualizando tu perfil</span><span class="step-check"></span></div>
+        <div class="loading-step" id="lstep3"><span class="step-icon">⭐</span><span style="flex:1">Preparando tu premio</span><span class="step-check"></span></div>
+        <div class="loading-step" id="lstep4"><span class="step-icon">✅</span><span style="flex:1">¡Todo listo!</span><span class="step-check"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ÉXITO ══ -->
+  <div id="stateSuccess" class="step">
+    <div class="result-header">
+      <span class="result-icon">🎉</span>
+      <div class="result-title">¡Perfil completo!</div>
+      <div class="result-name" id="successNombre"></div>
+    </div>
+    <div class="result-body">
+
+      <!-- Premio: sellos dobles -->
+      <div id="premioSellos" class="premio-result" style="display:none;">
+        <span class="premio-result-icon">⭐</span>
+        <div class="premio-result-titulo">Sellos dobles activos</div>
+        <div class="premio-result-desc">Tu próxima visita a cualquier tienda Oakberry te da el doble de sellos. Solo dile al cajero que completaste tu perfil.</div>
+      </div>
+
+      <!-- Premio: cupón descuento -->
+      <div id="premioCupon" style="display:none;">
+        <div class="ticket">
+          <div class="ticket-label">Tu cupón de bienvenida</div>
+          <div class="ticket-code" id="outCode">—</div>
+          <div class="ticket-validity" id="outValidity"></div>
+          <div class="ticket-product" id="outProducto"></div>
+          <div class="ticket-dashed"></div>
+          <div class="ticket-bottom">
+            <div>
+              <div class="d-label">Descuento</div>
+              <div class="d-value" id="outDescuento">15% OFF</div>
+            </div>
+            <button class="copy-btn" onclick="copiar('outCode',this)">📋 Copiar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-pill green">
+        <span class="icon">🃏</span>
+        <span>Tu Oaker Card ya tiene tus datos actualizados. Seguirás recibiendo beneficios exclusivos.</span>
+      </div>
+      <div class="info-pill purple" id="infoCumple" style="display:none;">
+        <span class="icon">🎂</span>
+        <span id="txtCumple">La semana de tu cumpleaños Oakberry tiene una sorpresa especial para ti.</span>
+      </div>
+      <div class="info-pill yellow">
+        <span class="icon">📲</span>
+        <span id="infoWA">Te avisaremos por WhatsApp cuando tengas nuevos beneficios disponibles.</span>
+      </div>
+      <p class="terms">Oakberry Colombia · Solo para miembros Oaker Card</p>
+    </div>
+  </div>
+
+  <!-- ══ ERROR ══ -->
+  <div id="stateError" class="step">
+    <div class="error-header">
+      <span class="error-icon">😔</span>
+      <div class="error-title" id="errorTitulo">Cuenta no encontrada</div>
+      <div class="error-msg-txt" id="errorMsg">No encontramos una Oaker Card con ese correo.</div>
+    </div>
+    <div class="error-body">
+      <div class="info-pill purple">
+        <span class="icon">🫐</span>
+        <span>Si aún no tienes tu Oaker Card, puedes descargarla gratis en cualquier tienda Oakberry o en la app de Loopy Loyalty.</span>
+      </div>
+      <button class="retry-btn" onclick="volverAEmail()">Intentar con otro correo</button>
+      <p class="terms">¿Problemas? Escríbenos a contacto@oakberry.com.co</p>
+    </div>
+  </div>
+
+</div><!-- /card -->
+
+<script>
+// ── CONFIG — reemplazar con la URL real del script de reactivación ──
+const SCRIPT_URL = "https://script.google.com/macros/s/TU_DEPLOYMENT_ID_REACTIVACION/exec";
+
+// ── Leer parámetros URL ──────────────────────────────────────
+const P = new URLSearchParams(location.search);
+const emailParam  = (P.get("email") || "").toLowerCase().trim();
+const cidParam    = P.get("cid")   || "";
+const premioParam = P.get("premio") || "sellos_dobles"; // sellos_dobles | cupon_15
+const segParam    = P.get("seg")   || "";
+const fuenteParam = P.get("fuente") || "directo";
+
+// ── Configurar texto del premio según parámetro ──────────────
+const premioConfig = {
+  sellos_dobles: { titulo: "Sellos dobles",       sub: "En tu próxima visita" },
+  cupon_15:      { titulo: "15% de descuento",     sub: "En tu próximo bowl" },
+  cupon_30:      { titulo: "30% de descuento",     sub: "Bienvenido de vuelta" },
+  cumpleanos:    { titulo: "Sorpresa de cumpleaños", sub: "Regalo especial" },
+};
+const pc = premioConfig[premioParam] || premioConfig.sellos_dobles;
+["premioTitulo","premioTitulo2"].forEach(id => document.getElementById(id).textContent = pc.titulo);
+["premioSub","premioSub2"].forEach(id => document.getElementById(id).textContent = pc.sub);
+
+// Prefill email si viene en URL
+if (emailParam) {
+  document.getElementById("inp-email").value = emailParam;
+}
+
+// Fecha máxima para cumpleaños (hace 10 años mínimo)
+const maxDate = new Date();
+maxDate.setFullYear(maxDate.getFullYear() - 10);
+document.getElementById("inp-birthday").max = maxDate.toISOString().split("T")[0];
+
+// ── Estado global ────────────────────────────────────────────
+let _perfilData = null; // datos retornados por el backend al validar email
+
+// ── Cambiar pantalla activa ──────────────────────────────────
+function showState(id) {
+  ["stateEmail","stateForm","stateLoading","stateSuccess","stateError"]
+    .forEach(s => document.getElementById(s).classList.remove("show"));
+  document.getElementById(id).classList.add("show");
+}
+
+// ── STEP 1: Validar email contra Base_Clientes ───────────────
+async function validarEmail() {
+  const email = document.getElementById("inp-email").value.trim().toLowerCase();
+  const errEl = document.getElementById("err-email");
+  const btn   = document.getElementById("btnValidarEmail");
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById("inp-email").classList.add("err");
+    errEl.classList.add("show");
+    return;
+  }
+  document.getElementById("inp-email").classList.remove("err");
+  errEl.classList.remove("show");
+
+  btn.classList.add("loading"); btn.disabled = true;
+
+  try {
+    const data = await fetchGETSafe({
+      accion:   "buscarPerfilReactivacion",
+      email:    email,
+      fuente:   fuenteParam,
+    });
+
+    if (!data.ok) {
+      // Cuenta no encontrada
+      document.getElementById("errorTitulo").textContent = "Cuenta no encontrada";
+      document.getElementById("errorMsg").textContent    = data.mensaje || "No encontramos una Oaker Card con ese correo.";
+      showState("stateError");
+      return;
+    }
+
+    _perfilData = data.perfil;
+    renderFormulario(data.perfil);
+    showState("stateForm");
+
+  } catch(e) {
+    document.getElementById("errorTitulo").textContent = "Error de conexión";
+    document.getElementById("errorMsg").textContent    = "No pudimos conectarnos. Intenta de nuevo.";
+    showState("stateError");
+  } finally {
+    btn.classList.remove("loading"); btn.disabled = false;
+  }
+}
+
+// ── Renderizar formulario con datos del perfil ───────────────
+function renderFormulario(perfil) {
+  // Avatar con inicial
+  const inicial = (perfil.nombre || perfil.email || "?").charAt(0).toUpperCase();
+  document.getElementById("perfilAvatar").textContent = inicial;
+  document.getElementById("perfilNombre").textContent = perfil.nombre || "Oaker";
+  document.getElementById("perfilEmail").textContent  = perfil.email;
+
+  // Badge de segmento
+  const segEl = document.getElementById("perfilSeg");
+  const segLabels = { Perdido:"Perdido · Te extrañamos", E1:"Visitante ocasional", E2:"Cliente regular", E3:"Fan frecuente", Sin_Actividad:"Sin actividad aún" };
+  segEl.textContent = segLabels[perfil.segmento] || perfil.segmento;
+  segEl.className   = "perfil-seg seg-" + (perfil.segmento || "E1");
+
+  // Mostrar/ocultar campos según lo que falta
+  document.getElementById("grupoNombre").style.display   = perfil.tiene_nombre   ? "none" : "block";
+  document.getElementById("grupoCelular").style.display  = perfil.tiene_celular  ? "none" : "block";
+  document.getElementById("grupoBirthday").style.display = perfil.tiene_birthday ? "none" : "block";
+
+  // Calcular cuántos campos faltan para el subtítulo
+  const faltan = [!perfil.tiene_nombre, !perfil.tiene_celular, !perfil.tiene_birthday].filter(Boolean).length;
+  document.getElementById("formSubtitle").textContent =
+    faltan === 0 ? "Todo listo · actualiza tu ciudad" :
+    faltan === 1 ? "Solo falta 1 dato para recibir tu premio" :
+    "Completa " + faltan + " datos para recibir tu premio";
+
+  // Si ya tiene nombre, prerellenar
+  if (perfil.nombre) document.getElementById("inp-nombre").value = perfil.nombre;
+}
+
+// ── STEP 2: Guardar datos ────────────────────────────────────
+async function guardar() {
+  if (!_perfilData) return;
+  if (!validarFormulario()) return;
+
+  const btn = document.getElementById("btnGuardar");
+  btn.classList.add("loading"); btn.disabled = true;
+  showState("stateLoading");
+  animarProgreso();
+
+  const nombre   = document.getElementById("inp-nombre").value.trim() || _perfilData.nombre;
+  const cel      = document.getElementById("inp-cel").value.replace(/\D/g,"");
+  const ciudad   = document.getElementById("inp-ciudad").value;
+  const birthday = document.getElementById("inp-birthday").value;
+  const authWA   = document.getElementById("chk-wa").checked ? "si" : "no";
+
+  try {
+    const data = await fetchGETSafe({
+      accion:    "actualizarPerfilReactivacion",
+      email:     _perfilData.email,
+      nombre:    nombre,
+      celular:   cel,
+      ciudad:    ciudad,
+      birthday:  birthday,
+      auth_wa:   authWA,
+      premio:    premioParam,
+      fuente:    fuenteParam,
+      seg:       _perfilData.segmento,
+    });
+
+    clearInterval(_progressInterval);
+    setProgreso(100);
+
+    if (!data.ok) {
+      document.getElementById("errorTitulo").textContent = "Algo salió mal";
+      document.getElementById("errorMsg").textContent    = data.mensaje || "Por favor intenta de nuevo.";
+      showState("stateError");
+      return;
+    }
+
+    // Renderizar pantalla de éxito
+    renderExito(data, nombre);
+
+  } catch(e) {
+    clearInterval(_progressInterval);
+    document.getElementById("errorTitulo").textContent = "Error de conexión";
+    document.getElementById("errorMsg").textContent    = "No pudimos guardar tus datos. Intenta de nuevo.";
+    showState("stateError");
+  }
+}
+
+function renderExito(data, nombre) {
+  document.getElementById("successNombre").textContent = nombre.split(" ")[0].toUpperCase();
+
+  // Mostrar premio correcto
+  if (premioParam === "sellos_dobles" || premioParam === "cumpleanos") {
+    document.getElementById("premioSellos").style.display = "block";
+    if (premioParam === "cumpleanos") {
+      document.getElementById("premioSellos").querySelector(".premio-result-titulo").textContent = "Sorpresa de cumpleaños";
+      document.getElementById("premioSellos").querySelector(".premio-result-desc").textContent =
+        "Esta semana Oakberry celebra contigo. Visita cualquier tienda y menciona tu cumpleaños al cajero para recibir tu regalo.";
+    }
+  } else if (data.codigo) {
+    document.getElementById("premioCupon").style.display = "block";
+    document.getElementById("outCode").textContent       = data.codigo;
+    document.getElementById("outValidity").textContent   = "Válido " + (data.vigencia || "48") + " horas";
+    document.getElementById("outProducto").textContent   = data.producto || "Bowl Oakberry";
+    document.getElementById("outDescuento").textContent  = (data.descuento || "15") + "% OFF";
+  }
+
+  // Info de cumpleaños si aplica
+  const birthday = document.getElementById("inp-birthday").value;
+  if (birthday) {
+    document.getElementById("infoCumple").style.display = "flex";
+  }
+
+  // Info WA
+  const authWA = document.getElementById("chk-wa").checked;
+  document.getElementById("infoWA").textContent = authWA
+    ? "Te avisaremos por WhatsApp cuando tengas beneficios disponibles."
+    : "Puedes activar notificaciones por WhatsApp cuando quieras desde tu perfil.";
+
+  showState("stateSuccess");
+}
+
+// ── Validación del formulario ────────────────────────────────
+function validarFormulario() {
+  let ok = true;
+  const mostrarError = (inputId, errId, condicion) => {
+    const el = document.getElementById(inputId);
+    const er = document.getElementById(errId);
+    if (!el || el.closest('.form-group').style.display === 'none') return; // campo oculto = no validar
+    if (condicion) {
+      el.classList.add("err"); er.classList.add("show"); ok = false;
+    } else {
+      el.classList.remove("err"); er.classList.remove("show");
+    }
+  };
+
+  const nombre = document.getElementById("inp-nombre").value.trim();
+  mostrarError("inp-nombre","err-nombre", nombre.length < 2);
+
+  const cel = document.getElementById("inp-cel").value.replace(/\D/g,"");
+  mostrarError("inp-cel","err-cel", !/^3\d{9}$/.test(cel));
+
+  const ciudad = document.getElementById("inp-ciudad").value;
+  mostrarError("inp-ciudad","err-ciudad", !ciudad);
+
+  // TYC obligatorio
+  const tyc = document.getElementById("chk-tyc");
+  if (!tyc.checked) {
+    tyc.classList.add("err");
+    document.getElementById("err-tyc").classList.add("show");
+    ok = false;
+  } else {
+    tyc.classList.remove("err");
+    document.getElementById("err-tyc").classList.remove("show");
+  }
+  return ok;
+}
+
+// ── Barra de progreso animada ────────────────────────────────
+let _progressInterval = null;
+function animarProgreso() {
+  let v = 0;
+  const pasos = [
+    { hasta:30, msg:"Verificando tu cuenta Loopy...", step:1 },
+    { hasta:60, msg:"Actualizando tu perfil...",       step:2 },
+    { hasta:85, msg:"Preparando tu premio...",         step:3 },
+    { hasta:98, msg:"¡Casi listo!",                   step:4 },
+  ];
+  let pasoIdx = 0;
+  setLstep(1,"active");
+  _progressInterval = setInterval(() => {
+    v = Math.min(v + (Math.random() * 4 + 1), 98);
+    setProgreso(Math.round(v));
+    if (pasoIdx < pasos.length && v >= pasos[pasoIdx].hasta) {
+      setLstep(pasos[pasoIdx].step, "done");
+      pasoIdx++;
+      if (pasoIdx < pasos.length) setLstep(pasos[pasoIdx].step, "active");
+    }
+  }, 180);
+}
+function setProgreso(v) {
+  document.getElementById("progressBar").style.width = v + "%";
+  document.getElementById("progressPct").textContent  = v + "%";
+}
+function setLstep(n, estado) {
+  const el = document.getElementById("lstep"+n);
+  if (!el) return;
+  el.classList.remove("done","active");
+  if (estado) el.classList.add(estado);
+}
+
+// ── JSONP fetch (mismo patrón que adquisición) ───────────────
+function fetchGET(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = "cb_" + Math.random().toString(36).slice(2);
+    const url    = SCRIPT_URL + "?" + new URLSearchParams({...params, callback:cbName});
+    const script = document.createElement("script");
+    let settled  = false;
+    function cleanup() {
+      settled = true; clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cbName] = (data) => { if (!settled) { cleanup(); resolve(data); } };
+    script.onerror = () => { if (!settled) { cleanup(); reject(new Error("script-error")); } };
+    script.src = url;
+    document.body.appendChild(script);
+    const timer = setTimeout(() => { if (!settled) { cleanup(); reject(new Error("timeout")); } }, 12000);
+  });
+}
+async function fetchGETSafe(params) {
+  try { return await fetchGET(params); }
+  catch(e) { await new Promise(r => setTimeout(r, 400)); return await fetchGET(params); }
+}
+
+// ── Copiar código ────────────────────────────────────────────
+function copiar(id, btn) {
+  const txt = document.getElementById(id)?.textContent || "";
+  navigator.clipboard?.writeText(txt).catch(() => {});
+  btn.textContent = "✓ Copiado";
+  setTimeout(() => { btn.textContent = "📋 Copiar"; }, 2000);
+}
+
+// ── Volver al email ──────────────────────────────────────────
+function volverAEmail() {
+  _perfilData = null;
+  showState("stateEmail");
+}
+
+// Enter en el input de email
+document.getElementById("inp-email").addEventListener("keydown", e => {
+  if (e.key === "Enter") validarEmail();
+});
+</script>
+</body>
+</html>
