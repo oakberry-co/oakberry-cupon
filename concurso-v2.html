@@ -5782,11 +5782,12 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
           </select>
         </div>
         <div class="field">
-          <label>Tu c&oacute;digo &mdash; asignado por tu ADM</label>
-          <input type="text" id="f-codigo" placeholder="Ej: BOG-03" maxlength="8"
-            style="letter-spacing:.1em;text-transform:uppercase;" autocomplete="off">
-          <div class="field-hint">Si no tienes c&oacute;digo, p&iacute;delo a tu administrador antes de registrarte.</div>
-          <div class="error-msg" id="err-codigo">C&oacute;digo m&iacute;nimo 4 caracteres</div>
+          <label>Tu c&oacute;digo &mdash; solo n&uacute;meros, asignado por tu ADM</label>
+          <input type="number" id="f-codigo" placeholder="Ej: 1042" maxlength="6"
+            inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+            style="letter-spacing:.1em;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+          <div class="field-hint">Solo n&uacute;meros. Si trabajas en varias tiendas, usa el mismo c&oacute;digo en cada una.</div>
+          <div class="error-msg" id="err-codigo">El c&oacute;digo solo puede contener n&uacute;meros</div>
         </div>
         <button class="submit-btn" id="submit-btn" onclick="registrar()">
           REGISTRARME EN EL CONCURSO
@@ -6199,7 +6200,7 @@ function registrar() {
   var cel    = document.getElementById("f-cel").value.trim().replace(/\D/g,"");
   var rol    = document.getElementById("f-rol").value;
   var tienda = document.getElementById("f-tienda").value;
-  var codigo = document.getElementById("f-codigo").value.trim().toUpperCase();
+  var codigo = document.getElementById("f-codigo").value.trim().replace(/[^0-9]/g, "");
 
   // Limpiar errores
   ["err-cel","err-codigo","err-dup"].forEach(function(id){
@@ -6211,7 +6212,9 @@ function registrar() {
   if (ok && cel.length!==10) { document.getElementById("err-cel").style.display="block"; ok=false; }
   if (ok && !rol)      { alert("Selecciona tu rol"); ok=false; }
   if (ok && !tienda)   { alert("Selecciona tu tienda"); ok=false; }
-  if (ok && codigo.length<4) { document.getElementById("err-codigo").style.display="block"; ok=false; }
+  if (ok && (!/^[0-9]+$/.test(codigo) || codigo.length < 3)) {
+    document.getElementById("err-codigo").style.display="block"; ok=false;
+  }
   if (!ok) return;
 
   var btn = document.getElementById("submit-btn");
@@ -6227,6 +6230,12 @@ function registrar() {
     "cbRegistro",
     function(resp) {
       if (resp && resp.duplicado) {
+        var msg = resp.tipo === "nombre"
+          ? "Ya existe un colaborador con ese nombre en esta tienda."
+          : resp.tipo === "tienda"
+          ? "Ya est\u00e1s registrado en esta tienda con ese c\u00f3digo."
+          : "Este c\u00f3digo ya est\u00e1 en uso por otro colaborador.";
+        document.getElementById("err-dup").textContent = msg;
         document.getElementById("err-dup").style.display="block";
         btn.textContent="REGISTRARME EN EL CONCURSO"; btn.style.opacity="1"; btn.disabled=false;
       } else {
