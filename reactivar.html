@@ -437,6 +437,13 @@
         <div class="existing-label">Tu código</div>
         <div class="existing-code" id="outExistingCode">—</div>
         <div class="existing-validity" id="outExistingValidity"></div>
+        <div class="ticket-dashed"></div>
+        <div class="ticket-bottom">
+          <div>
+            <div class="d-label">Descuento</div>
+            <div class="d-value" id="outExistingDescuento">— OFF</div>
+          </div>
+        </div>
       </div>
       <button class="copy-btn-solid" onclick="copiar('outExistingCode',this)">📋 Copiar código</button>
       <div class="info-pill orange">
@@ -730,6 +737,9 @@ function mostrarExistente(data, nombre) {
   document.getElementById("usedNombre").textContent          = "Hola, " + nombre.split(" ")[0] + " 👋";
   document.getElementById("outExistingValidity").textContent = data.fechaVence
     ? "Válido hasta: " + fmt(new Date(data.fechaVence)) : "";
+  // Mostrar el descuento real del cupón activo (del backend) o el del link de campaña actual
+  const descMostrar = ((data.descuento || P.descuento || "").toString().replace(/%/g, "") || "—");
+  document.getElementById("outExistingDescuento").textContent = descMostrar !== "—" ? descMostrar + "% OFF" : "—";
 }
 
 function show(id) {
