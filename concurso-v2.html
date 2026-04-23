@@ -4004,15 +4004,26 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Motocicleta NKD 124cc">
 ═══════════════════════════════════ -->
 <div class="tab-content" id="tab-cajeros">
   <div class="caj-view">
-    <div class="sec-t" style="margin-bottom:6px;">Ranking de Colaboradores</div>
-    <div style="font-size:13px;color:var(--gr);margin-bottom:20px;max-width:680px;line-height:1.6;">
+   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px;">
+      <div class="sec-t" style="margin-bottom:0;">Ranking de Colaboradores</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="bq-source-badge" style="display:none;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;padding:3px 8px;border-radius:20px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#22c55e;">&#9679; BigQuery</span>
+        <span id="bq-total-badge" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gr);"></span>
+        <button onclick="recargarCajeros()" style="background:rgba(95,75,139,.3);border:1px solid rgba(95,75,139,.6);color:var(--wh);border-radius:8px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;">&#8635; Actualizar</button>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--gr);margin-bottom:12px;max-width:680px;line-height:1.6;">
       Al registrar un cliente en Loopy, el colaborador le pide que ingrese su c&oacute;digo personal.
       <strong style="color:var(--wh);">Si tu tienda gana, el colaborador con m&aacute;s Oakers acreditados gana la moto.</strong>
     </div>
+    <div style="margin-bottom:12px;">
+      <input id="cajero-filtro" type="text" placeholder="&#128269; Filtrar por nombre o tienda..." oninput="filtrarCajeros(this.value)"
+        style="width:100%;max-width:400px;background:rgba(255,255,255,.05);border:1px solid rgba(95,75,139,.4);border-radius:10px;padding:9px 14px;color:var(--wh);font-size:13px;font-family:'Barlow Condensed',sans-serif;outline:none;box-sizing:border-box;">
+    </div>
     <div class="caj-board">
-      <div class="cb-hdr"><div>#</div><div>Colaborador</div><div>Oakers</div><div>Tienda</div><div>Racha</div></div>
+      <div class="cb-hdr"><div>#</div><div>Colaborador</div><div>Oakers</div><div>Tienda</div><div>Estado</div></div>
       <div id="cajero-list">
-        <div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">Cargando...</div>
+        <div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">Cargando desde BigQuery...</div>
       </div>
     </div>
     <div style="margin-top:14px;font-size:12px;color:var(--gr);font-family:'DM Mono',monospace;text-align:center;">
@@ -6198,39 +6209,83 @@ cargarTiendasForm();
 // ══════════════════════════════════════
 // COLABORADORES
 // ══════════════════════════════════════
+// ══════════════════════════════════════
+// COLABORADORES — datos desde BigQuery
+// ══════════════════════════════════════
 var cajerosCargados = false;
+var cajerosData = [];
 
 function loadCajeros() {
+  document.getElementById("cajero-list").innerHTML =
+    '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9203; Consultando BigQuery...</div>';
   jsonpCall(
-    SCRIPT_URL+"?action=getCajerosAll",
+    SCRIPT_URL+"?action=getOakersXCajero",
     "cbCajeros",
     function(data) {
       cajerosCargados = true;
-      renderCajeros(data.cajeros||[], data.rankingTiendas||{});
+      cajerosData = data.cajeros || [];
+      if (data.source === "bigquery") {
+        var badge = document.getElementById("bq-source-badge");
+        if (badge) badge.style.display = "inline-flex";
+      }
+      var totalBadge = document.getElementById("bq-total-badge");
+      if (totalBadge) totalBadge.textContent = (data.total || 0) + " Oakers totales";
+      renderCajeros(cajerosData, data.rankingTiendas||{});
+      if (data.ok === false && data.error) {
+        document.getElementById("cajero-list").innerHTML =
+          '<div style="text-align:center;padding:30px;color:#f43f5e;font-size:13px;">&#9888; Error BigQuery: '+data.error+'<br><span style="color:var(--gr);font-size:11px;">Verifica que el scope bigquery.readonly est&eacute; en appsscript.json</span></div>';
+      }
     },
     function() {
       document.getElementById("cajero-list").innerHTML =
-        '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">Error de conexi&oacute;n</div>';
+        '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">Error de conexi&oacute;n con el script</div>';
     }
   );
+}
+
+function recargarCajeros() {
+  cajerosCargados = false;
+  cajerosData = [];
+  document.getElementById("cajero-filtro").value = "";
+  loadCajeros();
+}
+
+function filtrarCajeros(q) {
+  if (!cajerosData.length) return;
+  var filtrados = q
+    ? cajerosData.filter(function(c) {
+        var txt = (c.nombre+" "+c.tienda+" "+c.ciudad+" "+c.codigo).toLowerCase();
+        return txt.indexOf(q.toLowerCase()) >= 0;
+      })
+    : cajerosData;
+  renderCajeros(filtrados, {});
 }
 
 function renderCajeros(cajeros, rankingTiendas) {
   var tiendaGanadora = Object.keys(rankingTiendas).find(function(k){ return rankingTiendas[k]===1; }) || "";
   document.getElementById("cajero-list").innerHTML = cajeros.map(function(c,i) {
-    var rk=i+1, isTop=rk<=3;
-    var esGanadora = c.tienda && c.tienda.toLowerCase().indexOf(tiendaGanadora.toLowerCase())>=0 && tiendaGanadora;
+    var rk = c.rank || (i+1);
+    var isTop = rk <= 3;
+    var esGanadora = c.tienda && tiendaGanadora && c.tienda.toLowerCase().indexOf(tiendaGanadora.toLowerCase()) >= 0;
+    var rankTienda = rankingTiendas[c.tienda];
+    var estadoHtml = esGanadora
+      ? '<span class="winner-tag">&#127942; Tienda #1</span>'
+      : rankTienda
+        ? '<span style="font-size:12px;color:var(--gr)">#'+rankTienda+' tienda</span>'
+        : (c.registrado === false
+            ? '<span style="font-size:10px;color:#f59e0b;font-family:\'DM Mono\',monospace;">SIN REGISTRO</span>'
+            : '<span style="font-size:12px;color:var(--gr);">--</span>');
     return '<div class="cb-row">'
       +'<div class="cb-rk '+(isTop?"top":"")+'">'+( rk<=3?["&#129351;","&#129352;","&#129353;"][rk-1]:rk)+'</div>'
       +'<div><div style="font-size:14px;font-weight:700">'+c.nombre+' '+(c.adm?'<span class="adm-t">ADM</span>':'')+'</div>'
-      +'<div style="font-size:11px;color:var(--gr)">'+c.tienda+' &middot; '+c.ciudad+'</div></div>'
+      +'<div style="font-size:11px;color:var(--gr)">'+c.tienda+' &middot; '+c.ciudad+'</div>'
+      +'<div style="font-size:10px;color:var(--gr);font-family:\'DM Mono\',monospace;">C&oacute;d: '+c.codigo+'</div></div>'
       +'<div class="cb-enc">'+c.oakers+'</div>'
-      +'<div>'+(esGanadora?'<span class="winner-tag">&#127942; Tienda #1</span>':'<span style="font-size:12px;color:var(--gr)">#'+((rankingTiendas[c.tienda])||"--")+' tienda</span>')+'</div>'
-      +'<div class="caj-str">'+(c.racha>0?"&#128293;"+c.racha:"&mdash;")+'</div>'
+      +'<div>'+estadoHtml+'</div>'
+      +'<div class="caj-str">'+(c.racha&&c.racha>0?"&#128293;"+c.racha:"&mdash;")+'</div>'
       +'</div>';
-  }).join("") || '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">No hay colaboradores registrados a&uacute;n</div>';
+  }).join("") || '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">No hay Oakers registrados a&uacute;n desde el 20 de abril</div>';
 }
-
 // ══════════════════════════════════════
 // AUDITORÍA
 // ══════════════════════════════════════
