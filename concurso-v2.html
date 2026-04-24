@@ -6004,9 +6004,8 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Moto premio">
 // CONFIG
 // ══════════════════════════════════════
 var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSuXnJD7UO-pfz4NpReERNC-el3NIQdW9O2emztGJ0iH3lVdOjQ3dfTl3mch4N22I/exec";
+var GCS_BASE   = "https://storage.googleapis.com/oakberry-col-staging/concurso/";
 var END_DATE   = new Date("2026-07-20T23:59:59-05:00");
-var START_DATE = new Date("2026-04-20T00:00:00-05:00");
-
 // ── COUNTDOWN ──
 function tick() {
   var d = END_DATE - new Date();
@@ -6088,26 +6087,36 @@ function jsonpCall(url, cbName, onSuccess, onError) {
 }
 
 function fetchRanking() {
-  var sem = semanaActual() || 1;
-  jsonpCall(
-    SCRIPT_URL + "?action=getRankingConcurso&semana="+sem,
-    "cbRanking",
-    function(data) {
-      if (data && data.ranking && data.ranking.length) {
-        rankingData = data;
-        renderRanking(data, sem);
-      } else {
-        document.getElementById("ranking-list").innerHTML =
-          '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">Sin datos disponibles a&uacute;n.</div>';
-      }
-    },
-    function() {
+  Promise.all([
+    fetch(GCS_BASE + "ranking.json?t=" + Date.now()).then(function(r){ return r.json(); }),
+    fetch(GCS_BASE + "meta.json?t="    + Date.now()).then(function(r){ return r.json(); })
+  ]).then(function(results) {
+    var ranking = results[0] || [];
+    var meta    = results[1] || {};
+    var sem = meta.semana || semanaActual() || 1;
+    ranking.forEach(function(r) {
+      r.crecimientoPct   = r.crec_pct != null ? r.crec_pct : null;
+      r.weeklyOakers     = r.weeklyOakers || Array(13).fill(0);
+      r.topColaboradores = r.topColaboradores || [];
+      r.semanasVerde     = r.semanasVerde || 0;
+    });
+    var data = {
+      ranking: ranking,
+      stats: { loopy: meta.total_oakers || "--", tiendas: meta.tiendas_count || "--", maxRacha: "--" },
+      hash: null
+    };
+    if (data.ranking.length) {
+      rankingData = data;
+      renderRanking(data, sem);
+    } else {
       document.getElementById("ranking-list").innerHTML =
-        '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9888;&#65039; No se pudo conectar. Intenta en unos minutos.</div>';
+        '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">Sin datos disponibles a&uacute;n. El ranking se actualiza cada hora.</div>';
     }
-  );
+  }).catch(function() {
+    document.getElementById("ranking-list").innerHTML =
+      '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9888;&#65039; No se pudo conectar. Intenta en unos minutos.</div>';
+  });
 }
-
 function renderRanking(data, sem) {
   var ts = new Date().toLocaleString("es-CO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
   document.getElementById("live-ts").textContent = "&#9679; Actualizado: "+ts+" (Loopy)";
@@ -6212,35 +6221,40 @@ cargarTiendasForm();
 // ══════════════════════════════════════
 // COLABORADORES — datos desde BigQuery
 // ══════════════════════════════════════
+// ══════════════════════════════════════
+// COLABORADORES — datos desde GCS
+// ══════════════════════════════════════
 var cajerosCargados = false;
 var cajerosData = [];
+var rankingTiendasGCS = {};
 
 function loadCajeros() {
   document.getElementById("cajero-list").innerHTML =
-    '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9203; Consultando BigQuery...</div>';
-  jsonpCall(
-    SCRIPT_URL+"?action=getOakersXCajero",
-    "cbCajeros",
-    function(data) {
-      cajerosCargados = true;
-      cajerosData = data.cajeros || [];
-      if (data.source === "bigquery") {
-        var badge = document.getElementById("bq-source-badge");
-        if (badge) badge.style.display = "inline-flex";
-      }
-      var totalBadge = document.getElementById("bq-total-badge");
-      if (totalBadge) totalBadge.textContent = (data.total || 0) + " Oakers totales";
-      renderCajeros(cajerosData, data.rankingTiendas||{});
-      if (data.ok === false && data.error) {
-        document.getElementById("cajero-list").innerHTML =
-          '<div style="text-align:center;padding:30px;color:#f43f5e;font-size:13px;">&#9888; Error BigQuery: '+data.error+'<br><span style="color:var(--gr);font-size:11px;">Verifica que el scope bigquery.readonly est&eacute; en appsscript.json</span></div>';
-      }
-    },
-    function() {
-      document.getElementById("cajero-list").innerHTML =
-        '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">Error de conexi&oacute;n con el script</div>';
-    }
-  );
+    '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9203; Cargando datos...</div>';
+  Promise.all([
+    fetch(GCS_BASE + "cajeros.json?t=" + Date.now()).then(function(r){ return r.json(); }),
+    fetch(GCS_BASE + "ranking.json?t=" + Date.now()).then(function(r){ return r.json(); }),
+    fetch(GCS_BASE + "meta.json?t="    + Date.now()).then(function(r){ return r.json(); })
+  ]).then(function(results) {
+    var cajeros = results[0] || [];
+    var ranking = results[1] || [];
+    var meta    = results[2] || {};
+    cajerosCargados = true;
+    cajerosData = cajeros;
+    var badge = document.getElementById("bq-source-badge");
+    if (badge) { badge.style.display = "inline-flex"; badge.textContent = "\u25cf GCS"; }
+    var total = meta.total_oakers || cajerosData.reduce(function(s,c){ return s+(c.oakers||0); }, 0);
+    var totalBadge = document.getElementById("bq-total-badge");
+    if (totalBadge) totalBadge.textContent = total + " Oakers totales \u00b7 " + (meta.ts || "");
+    rankingTiendasGCS = {};
+    ranking.forEach(function(r){ rankingTiendasGCS[r.nombre] = r.rank; });
+    renderCajeros(cajerosData, rankingTiendasGCS);
+  }).catch(function(err) {
+    document.getElementById("cajero-list").innerHTML =
+      '<div style="text-align:center;padding:30px;color:#f43f5e;font-size:13px;">'
+      +'&#9888; Error cargando datos: '+err.message
+      +'<br><span style="color:var(--gr);font-size:11px;">Los archivos JSON se generan cada hora desde la VM.</span></div>';
+  });
 }
 
 function recargarCajeros() {
@@ -6258,7 +6272,7 @@ function filtrarCajeros(q) {
         return txt.indexOf(q.toLowerCase()) >= 0;
       })
     : cajerosData;
-  renderCajeros(filtrados, {});
+  renderCajeros(filtrados, rankingTiendasGCS);
 }
 
 function renderCajeros(cajeros, rankingTiendas) {
