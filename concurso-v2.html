@@ -6087,36 +6087,28 @@ function jsonpCall(url, cbName, onSuccess, onError) {
 }
 
 function fetchRanking() {
-  Promise.all([
-    fetch(GCS_BASE + "ranking.json?t=" + Date.now()).then(function(r){ return r.json(); }),
-    fetch(GCS_BASE + "meta.json?t="    + Date.now()).then(function(r){ return r.json(); })
-  ]).then(function(results) {
-    var ranking = results[0] || [];
-    var meta    = results[1] || {};
-    var sem = meta.semana || semanaActual() || 1;
-    ranking.forEach(function(r) {
-      r.crecimientoPct   = r.crec_pct != null ? r.crec_pct : null;
-      r.weeklyOakers     = r.weeklyOakers || Array(13).fill(0);
-      r.topColaboradores = r.topColaboradores || [];
-      r.semanasVerde     = r.semanasVerde || 0;
-    });
-    var data = {
-      ranking: ranking,
-      stats: { loopy: meta.total_oakers || "--", tiendas: meta.tiendas_count || "--", maxRacha: "--" },
-      hash: null
-    };
-    if (data.ranking.length) {
-      rankingData = data;
-      renderRanking(data, sem);
-    } else {
+  var sem = semanaActual() || 1;
+  jsonpCall(
+    SCRIPT_URL + "?action=getRankingConcurso&semana=" + sem,
+    "cbRanking",
+    function(data) {
+      var ranking = data.ranking || [];
+      var stats   = data.stats   || {};
+      var semana  = data.semana  || sem;
+      ranking.forEach(function(r) {
+        r.crecimientoPct   = r.crecimientoPct != null ? r.crecimientoPct : (r.crec_pct != null ? r.crec_pct : null);
+        r.weeklyOakers     = r.weeklyOakers     || Array(13).fill(0);
+        r.topColaboradores = r.topColaboradores || [];
+      });
+      renderRanking({ ranking: ranking, stats: stats, semana: semana, hash: data.hash });
+    },
+    function() {
       document.getElementById("ranking-list").innerHTML =
-        '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">Sin datos disponibles a&uacute;n. El ranking se actualiza cada hora.</div>';
+        '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9888;&#65039; No se pudo conectar. Intenta en unos minutos.</div>';
     }
-  }).catch(function() {
-    document.getElementById("ranking-list").innerHTML =
-      '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9888;&#65039; No se pudo conectar. Intenta en unos minutos.</div>';
-  });
+  );
 }
+
 function renderRanking(data, sem) {
   var ts = new Date().toLocaleString("es-CO",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
   document.getElementById("live-ts").textContent = "&#9679; Actualizado: "+ts+" (Loopy)";
@@ -6231,30 +6223,20 @@ var rankingTiendasGCS = {};
 function loadCajeros() {
   document.getElementById("cajero-list").innerHTML =
     '<div style="text-align:center;padding:40px;color:var(--gr);font-size:13px;">&#9203; Cargando datos...</div>';
-  Promise.all([
-    fetch(GCS_BASE + "cajeros.json?t=" + Date.now()).then(function(r){ return r.json(); }),
-    fetch(GCS_BASE + "ranking.json?t=" + Date.now()).then(function(r){ return r.json(); }),
-    fetch(GCS_BASE + "meta.json?t="    + Date.now()).then(function(r){ return r.json(); })
-  ]).then(function(results) {
-    var cajeros = results[0] || [];
-    var ranking = results[1] || [];
-    var meta    = results[2] || {};
-    cajerosCargados = true;
-    cajerosData = cajeros;
-    var badge = document.getElementById("bq-source-badge");
-    if (badge) { badge.style.display = "inline-flex"; badge.textContent = "\u25cf GCS"; }
-    var total = meta.total_oakers || cajerosData.reduce(function(s,c){ return s+(c.oakers||0); }, 0);
-    var totalBadge = document.getElementById("bq-total-badge");
-    if (totalBadge) totalBadge.textContent = total + " Oakers totales \u00b7 " + (meta.ts || "");
-    rankingTiendasGCS = {};
-    ranking.forEach(function(r){ rankingTiendasGCS[r.nombre] = r.rank; });
-    renderCajeros(cajerosData, rankingTiendasGCS);
-  }).catch(function(err) {
-    document.getElementById("cajero-list").innerHTML =
-      '<div style="text-align:center;padding:30px;color:#f43f5e;font-size:13px;">'
-      +'&#9888; Error cargando datos: '+err.message
-      +'<br><span style="color:var(--gr);font-size:11px;">Los archivos JSON se generan cada hora desde la VM.</span></div>';
-  });
+  jsonpCall(
+    SCRIPT_URL + "?action=getCajerosAll",
+    "cbCajeros",
+    function(data) {
+      cajerosCargados = true;
+      cajerosDatos    = data.cajeros        || [];
+      rankingTiendas  = data.rankingTiendas || {};
+      renderCajeros(cajerosDatos);
+    },
+    function() {
+      document.getElementById("cajero-list").innerHTML =
+        '<div style="text-align:center;padding:30px;color:var(--gr);font-size:13px;">&#9888;&#65039; Error de conexi&#243;n</div>';
+    }
+  );
 }
 
 function recargarCajeros() {
