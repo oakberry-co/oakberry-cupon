@@ -6100,7 +6100,7 @@ function fetchRanking() {
         r.weeklyOakers     = r.weeklyOakers     || Array(13).fill(0);
         r.topColaboradores = r.topColaboradores || [];
       });
-      renderRanking({ ranking: ranking, stats: stats, semana: semana, hash: data.hash });
+      renderRanking({ ranking: ranking, stats: stats, semana: semana, hash: data.hash }, semana);
     },
     function() {
       document.getElementById("ranking-list").innerHTML =
@@ -6210,15 +6210,11 @@ cargarTiendasForm();
 // ══════════════════════════════════════
 // COLABORADORES
 // ══════════════════════════════════════
-// ══════════════════════════════════════
-// COLABORADORES — datos desde BigQuery
-// ══════════════════════════════════════
-// ══════════════════════════════════════
-// COLABORADORES — datos desde GCS
-// ══════════════════════════════════════
 var cajerosCargados = false;
-var cajerosData = [];
-var rankingTiendasGCS = {};
+var cajerosDatos = [];
+var rankingTiendas = {};
+
+
 
 function loadCajeros() {
   document.getElementById("cajero-list").innerHTML =
@@ -6241,20 +6237,20 @@ function loadCajeros() {
 
 function recargarCajeros() {
   cajerosCargados = false;
-  cajerosData = [];
+  cajerosDatos = [];
   document.getElementById("cajero-filtro").value = "";
   loadCajeros();
 }
 
 function filtrarCajeros(q) {
-  if (!cajerosData.length) return;
+  if (!cajerosDatos.length) return;
   var filtrados = q
-    ? cajerosData.filter(function(c) {
+    ? cajerosDatos.filter(function(c) {
         var txt = (c.nombre+" "+c.tienda+" "+c.ciudad+" "+c.codigo).toLowerCase();
         return txt.indexOf(q.toLowerCase()) >= 0;
       })
-    : cajerosData;
-  renderCajeros(filtrados, rankingTiendasGCS);
+    : cajerosDatos;
+  renderCajeros(filtrados, rankingTiendas);
 }
 
 function renderCajeros(cajeros, rankingTiendas) {
