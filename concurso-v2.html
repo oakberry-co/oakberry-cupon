@@ -6227,7 +6227,7 @@ function loadCajeros() {
       cajerosCargados = true;
       cajerosDatos    = data.cajeros        || [];
       rankingTiendas  = data.rankingTiendas || {};
-      renderCajeros(cajerosDatos);
+      renderCajeros(cajerosDatos, rankingTiendas);
     },
     function() {
       document.getElementById("cajero-list").innerHTML =
@@ -6255,7 +6255,7 @@ function filtrarCajeros(q) {
 }
 
 function renderCajeros(cajeros, rankingTiendas) {
-  var tiendaGanadora = Object.keys(rankingTiendas).find(function(k){ return rankingTiendas[k]===1; }) || "";
+  var tiendaGanadora = Object.keys(rankingTiendas||{}).find(function(k){ return rankingTiendas[k]===1; }) || "";
   document.getElementById("cajero-list").innerHTML = cajeros.map(function(c,i) {
     var rk = c.rank || (i+1);
     var isTop = rk <= 3;
