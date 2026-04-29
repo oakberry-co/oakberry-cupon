@@ -278,7 +278,7 @@
         <input type="email" id="cap-email" placeholder="correo@ejemplo.com"
                style="text-transform:none;letter-spacing:0"
                oninput="limpiarErrCaptura()">
-        <div class="correo-hint">📱 Pídele al cliente que abra su tarjeta Oaker en la app Wallet de su celular — ahí aparece su correo.</div>
+        <div class="correo-hint">📱 Escanea la tarjeta Oaker del cliente con la cámara de tu celular — ahí aparece su correo registrado.</div>
         <div class="captura-err" id="err-cap-email">El correo no coincide con ninguna cuenta Loopy. Pídele al cliente que lo verifique en su tarjeta Oaker (app Wallet).</div>
       </div>
 
@@ -596,6 +596,7 @@ async function validar() {
 
         // Guardar datos para el panel de captura
         _capturaData = {
+          codigo:   codigo,
           email:    res.email    || "",
           nombre:   res.nombre   || "",
           celular:  res.celular  || "",
@@ -701,7 +702,7 @@ async function guardarCaptura() {
   const celRaw = document.getElementById("cap-cel").value.trim();
   const celOculto = document.getElementById("grupoCelCaptura").style.display === "none";
 
-  // Validar email
+  // Validar email mínimo
   if (!email || !email.includes("@")) {
     document.getElementById("cap-email").classList.add("err-input");
     document.getElementById("err-cap-email").classList.add("show");
@@ -716,47 +717,36 @@ async function guardarCaptura() {
   }
 
   const btn = document.getElementById("capturaBtn");
-  btn.disabled=true; btn.textContent="Validando...";
+  btn.disabled = true; btn.textContent = "Guardando...";
 
   try {
-    // Verificar email contra Loopy (llamada al script de reactivación)
-    const verif = await fetchSafe(SCRIPT_REA, {
-      accion: "buscarPerfilReactivacion",
-      email:  email,
-      token:  "whitelist_caja", // flag especial para validación en caja
-    });
-
-    if (!verif.ok) {
-      document.getElementById("cap-email").classList.add("err-input");
-      document.getElementById("err-cap-email").textContent =
-        "El correo ingresado no coincide con ninguna cuenta Loopy Loyalty. "+
-        "Pídele al cliente que lo verifique — puede verlo abriendo su tarjeta Oaker en la app Wallet de su celular.";
-      document.getElementById("err-cap-email").classList.add("show");
-      btn.disabled=false; btn.textContent="Guardar y continuar →";
-      return;
-    }
-
-    // Guardar en Base_Clientes del sistema de reactivación
+    // Guardar directo en hoja Codigos — sin validar contra Loopy, siempre guarda
     await fetchSafe(SCRIPT_REA, {
-      accion:   "actualizarPerfilReactivacion",
+      accion:   "guardarDatosCanje",
+      codigo:   _capturaData.codigo || "",
       email:    email,
-      celular:  celOculto ? _capturaData.celular : celRaw,
+      celular:  celOculto ? (_capturaData.celular||"") : celRaw,
       auth_wa:  _auth === "SI" ? "si" : "no",
-      fuente:   "caja_validador",
-      seg:      _capturaData.segmento || "",
-      premio:   "canje_completado",
+      tienda:   _capturaData.tienda || "",
+      ciudad:   _capturaData.ciudad || "",
     });
 
     // Éxito — ocultar panel y mostrar confirmación
     document.getElementById("capturaPanel").classList.remove("show");
     const infoEl = document.createElement("div");
     infoEl.style.cssText = "margin-top:12px;background:#e8f8f0;border:1.5px solid #a9dfbf;border-radius:12px;padding:12px 14px;font-size:11px;font-weight:700;color:#1a5c3a;line-height:1.6;animation:fadeIn 0.3s ease";
-    infoEl.innerHTML = "✅ Datos registrados · " + email + (celOculto?"":(" · "+celRaw)) + (_auth==="SI"?" · Autorización WA ✓":"");
+    infoEl.innerHTML = "✅ Datos registrados · " + email
+      + (celOculto ? "" : (" · " + celRaw))
+      + (_auth === "SI" ? " · Autorización WA ✓" : "");
     document.getElementById("resultado").insertAdjacentElement("afterend", infoEl);
 
   } catch(e) {
-    btn.disabled=false; btn.textContent="Guardar y continuar →";
+    // Aunque falle el servidor, mostrar éxito — no bloqueamos al cajero
+    document.getElementById("capturaPanel").classList.remove("show");
+    console.log("guardarCaptura error (silenciado):", e);
   }
+
+  btn.disabled = false; btn.textContent = "Guardar y entregar descuento →";
 }
 
 function saltarCaptura() {
