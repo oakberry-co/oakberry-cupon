@@ -8,7 +8,44 @@
   <style>
     :root { --primary:#5F4B8B; --pd:#4a3a6e; --yellow:#F5C842; --red:#e74c3c; --green:#27ae60; --orange:#e67e22; }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Montserrat',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:linear-gradient(rgba(20,10,40,0.5),rgba(20,10,40,0.6)),url('oakville-bg.jpg') center/cover no-repeat fixed}
+    body{font-family:'Montserrat',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:linear-gradient(rgba(20,10,40,0.5),rgba(20,10,40,0.6)),url('oakville-bg.jpg') center/cover no-repeat fixed;transition:background 0.5s ease}
+
+    /* ── MODO REACTIVACIÓN — body y card cambian ── */
+    body.modo-react{background:linear-gradient(rgba(180,90,0,0.7),rgba(140,60,0,0.8)),url('oakville-bg.jpg') center/cover no-repeat fixed}
+    body.modo-react .card-header{background:linear-gradient(135deg,#e67e22,#d35400)}
+    body.modo-react .btn{background:#e67e22;box-shadow:0 6px 20px rgba(230,126,34,0.4)}
+    body.modo-react .btn:hover:not(:disabled){background:#d35400}
+    body.modo-react input:focus,body.modo-react select:focus{border-color:#e67e22}
+
+    /* ── BANNER SEGMENTO (aparece arriba del resultado) ── */
+    .seg-banner{display:none;border-radius:14px;padding:14px 18px;margin-bottom:14px;animation:fadeIn 0.4s ease}
+    .seg-banner.show{display:block}
+    .seg-banner-icon{font-size:28px;display:block;margin-bottom:6px}
+    .seg-banner-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;opacity:0.8}
+    .seg-banner-title{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+    .seg-banner-msg{font-size:11px;font-weight:700;line-height:1.6}
+    .seg-banner-sellos{display:inline-block;margin-top:8px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px}
+
+    /* Variantes por segmento */
+    .seg-banner.valioso{background:linear-gradient(135deg,#fff3e0,#ffe0b2);border:2px solid #ff8f00}
+    .seg-banner.valioso .seg-banner-title{color:#e65100}
+    .seg-banner.valioso .seg-banner-msg{color:#bf360c}
+    .seg-banner.valioso .seg-banner-sellos{background:#ff8f00;color:#fff}
+
+    .seg-banner.regular{background:linear-gradient(135deg,#f3e5f5,#e1bee7);border:2px solid #8e24aa}
+    .seg-banner.regular .seg-banner-title{color:#6a1b9a}
+    .seg-banner.regular .seg-banner-msg{color:#4a148c}
+    .seg-banner.regular .seg-banner-sellos{background:#8e24aa;color:#fff}
+
+    .seg-banner.ligero{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border:2px solid #2e7d32}
+    .seg-banner.ligero .seg-banner-title{color:#1b5e20}
+    .seg-banner.ligero .seg-banner-msg{color:#2e7d32}
+    .seg-banner.ligero .seg-banner-sellos{background:#2e7d32;color:#fff}
+
+    .seg-banner.sin-actividad{background:linear-gradient(135deg,#e3f2fd,#bbdefb);border:2px solid #1565c0}
+    .seg-banner.sin-actividad .seg-banner-title{color:#0d47a1}
+    .seg-banner.sin-actividad .seg-banner-msg{color:#1565c0}
+    .seg-banner.sin-actividad .seg-banner-sellos{background:#1565c0;color:#fff}
     .card{background:rgba(255,255,255,0.97);border-radius:28px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden}
     .card-header{background:var(--primary);padding:28px 30px 22px;text-align:center}
     .brand{font-size:26px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:2px}
@@ -161,14 +198,14 @@
 <div class="card">
   <div class="card-header">
     <div class="brand">Oakberry</div>
-    <div class="brand-sub">Validador de cupones · Cajero</div>
+    <div class="brand-sub" id="headerSub">Validador de cupones · Cajero</div>
   </div>
   <div class="card-body">
 
     <div class="form-section" id="formSection">
       <div class="field">
         <label>Código del cupón</label>
-        <input type="text" id="codigo" placeholder="XXXXX" maxlength="5">
+        <input type="text" id="codigo" placeholder="XXXXX·6" maxlength="6">
       </div>
       <div class="field">
         <label>Ciudad</label>
@@ -213,6 +250,15 @@
       <span class="btn-text">Validar cupón</span>
       <span class="btn-loader"><span class="spin"></span></span>
     </button>
+
+    <!-- BANNER SEGMENTO (contexto del cliente para el cajero) -->
+    <div class="seg-banner" id="segBanner">
+      <span class="seg-banner-icon" id="segIcon"></span>
+      <div class="seg-banner-tag">Usuario reactivación</div>
+      <div class="seg-banner-title" id="segTitle"></div>
+      <div class="seg-banner-msg" id="segMsg"></div>
+      <span class="seg-banner-sellos" id="segSellos"></span>
+    </div>
 
     <!-- RESULTADO NORMAL -->
     <div class="result" id="resultado">
@@ -322,7 +368,7 @@
     <div class="err-card type-formato" id="errFormato">
       <span class="err-icon">🔤</span>
       <div class="err-reason">Código inválido</div>
-      <div class="err-detail">El código debe ser 5 caracteres.</div>
+      <div class="err-detail">El código debe ser 5 caracteres (adquisición) o 6 caracteres (reactivación).</div>
       <div class="err-action-label">Qué hacer</div>
       <div class="err-action">Pídele al cliente que muestre el código en pantalla y vuelve a digitarlo.</div>
     </div>
@@ -457,8 +503,8 @@ async function validar() {
   btn.classList.add("loading"); btn.disabled=true;
 
   try {
-    // Detectar si es código de reactivación (empieza en R + 4 chars)
-    const esReact = /^R[A-Z0-9]{4}$/.test(codigo);
+    // Detectar si es código de reactivación por longitud 6 (adquisición = 5)
+    const esReact = codigo.length === 6;
 
     let res;
     if (esReact) {
@@ -500,6 +546,9 @@ async function validar() {
         }
 
       } else if (res.esReact) {
+        // ── Activar modo reactivación visual ──────────────────
+        activarModoReact(res.segmento, res.sellos_totales);
+
         // Cupón de reactivación — mostrar resultado y luego panel de captura
         const lineas = res.mensaje.split("\n").map(l=>
           l.replace(/([\d.]+)\s+en\s+/g,(m,n)=>formatearDescuento(n)+" en "));
@@ -546,6 +595,56 @@ async function validar() {
   }
 
   btn.classList.remove("loading"); btn.disabled=false;
+}
+
+// ── MODO REACTIVACIÓN VISUAL ──────────────────────────────────
+function activarModoReact(segmento, sellos) {
+  document.body.classList.add("modo-react");
+  document.getElementById("headerSub").textContent = "⚡ Usuario Reactivación · Cajero";
+
+  const banner = document.getElementById("segBanner");
+  const configs = {
+    "Perdido_Valioso": {
+      cls:"valioso", icon:"🏆",
+      title:"Cliente frecuente — trátalo especial",
+      msg:"Este cliente era uno de tus mejores. Dejó de venir pero volvió. Bienvenida VIP, cuéntale las novedades y recuérdale sus beneficios Loopy.",
+    },
+    "Perdido_Regular": {
+      cls:"regular", icon:"⭐",
+      title:"Cliente regular que regresa",
+      msg:"Visitaba con cierta frecuencia y volvió con este cupón. Bienvenida cálida y recuérdale que acumula sellos con cada visita.",
+    },
+    "Perdido_Ligero": {
+      cls:"ligero", icon:"👋",
+      title:"Cliente ocasional de regreso",
+      msg:"Visitaba de vez en cuando. Esta es su oportunidad de volver a enganchar. Invítalo a conocer el programa Loopy si aún no lo tiene activo.",
+    },
+    "Sin_Actividad": {
+      cls:"sin-actividad", icon:"🆕",
+      title:"Primera visita con tarjeta Oaker",
+      msg:"Tiene la tarjeta pero nunca la había usado. Asegúrate de registrarle el sello HOY y explicarle que con 10 sellos gana un bowl gratis.",
+    },
+  };
+
+  const cfg = configs[segmento] || configs["Perdido_Ligero"];
+  banner.className = "seg-banner show " + cfg.cls;
+  document.getElementById("segIcon").textContent  = cfg.icon;
+  document.getElementById("segTitle").textContent = cfg.title;
+  document.getElementById("segMsg").textContent   = cfg.msg;
+
+  const sellosEl = document.getElementById("segSellos");
+  if (sellos && parseInt(sellos) > 0) {
+    sellosEl.textContent = parseInt(sellos) + " sellos históricos";
+    sellosEl.style.display = "inline-block";
+  } else {
+    sellosEl.style.display = "none";
+  }
+}
+
+function desactivarModoReact() {
+  document.body.classList.remove("modo-react");
+  document.getElementById("headerSub").textContent = "Validador de cupones · Cajero";
+  document.getElementById("segBanner").className = "seg-banner";
 }
 
 // ── CAPTURA EN CAJA ───────────────────────────────────────────
@@ -671,6 +770,7 @@ function mostrarError(mensaje) {
 function resetForm() {
   document.getElementById("codigo").value = "";
   ocultarTodo();
+  desactivarModoReact();
   document.getElementById("loopyBanner").classList.remove("show");
   document.getElementById("formSection").classList.remove("hidden");
   document.getElementById("mainBtn").style.display="block";
