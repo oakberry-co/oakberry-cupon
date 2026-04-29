@@ -563,10 +563,10 @@ async function validar() {
           tienda, ciudad,
         };
 
-        // Mostrar panel de captura si falta celular
+        // Mostrar panel de captura
         if (!res.celular || res.celular.length < 10) {
           document.getElementById("capturaSubtitulo").textContent =
-            "Este cliente no tiene celular registrado. Pregúntale para completar su perfil y darle mejores beneficios.";
+            "Pídele al cliente su correo de Loopy y su celular para completar el registro.";
           document.getElementById("grupoCelCaptura").style.display = "block";
         } else {
           document.getElementById("capturaSubtitulo").textContent =
