@@ -226,14 +226,16 @@
     <div class="captura-panel" id="capturaPanel">
       <div class="captura-title">📋 Completar datos del cliente</div>
       <div class="captura-sub" id="capturaSubtitulo">Ingresa el correo y celular del cliente para registrar el canje.</div>
+
       <div class="captura-field">
-        <label>Correo del cliente (el mismo de su Loopy)</label>
+        <label>Correo del cliente (el mismo de su tarjeta Loopy)</label>
         <input type="email" id="cap-email" placeholder="correo@ejemplo.com"
                style="text-transform:none;letter-spacing:0"
                oninput="limpiarErrCaptura()">
-        <div class="correo-hint">💡 El cliente puede ver su correo abriendo su tarjeta Oaker en la app Wallet de su celular.</div>
-        <div class="captura-err" id="err-cap-email">El correo ingresado no coincide con ninguna cuenta Loopy Loyalty. Pídele al cliente que lo verifique — debe ser el mismo con el que se registró en la app Wallet.</div>
+        <div class="correo-hint">📱 Pídele al cliente que abra su tarjeta Oaker en la app Wallet de su celular — ahí aparece su correo.</div>
+        <div class="captura-err" id="err-cap-email">El correo no coincide con ninguna cuenta Loopy. Pídele al cliente que lo verifique en su tarjeta Oaker (app Wallet).</div>
       </div>
+
       <div class="captura-field" id="grupoCelCaptura">
         <label>Celular del cliente</label>
         <input type="tel" id="cap-cel" placeholder="3001234567" maxlength="10"
@@ -241,15 +243,29 @@
                oninput="this.value=this.value.replace(/\D/g,'');limpiarErrCaptura()">
         <div class="captura-err" id="err-cap-cel">Ingresa un celular colombiano válido (10 dígitos, empieza en 3)</div>
       </div>
-      <div class="auth-box">
-        <div class="auth-pregunta">¿Autorizas a Oakberry usar tus datos para enviarte beneficios exclusivos?</div>
+
+      <!-- Alerta roja de autorización — instrucción clara para el cajero -->
+      <div style="background:#c0392b;border-radius:12px;padding:14px 16px;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">
+          🔴 PREGÚNTALE AL CLIENTE ANTES DE CONTINUAR
+        </div>
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:12px;line-height:1.5">
+          Dile: <em>"¿Nos autorizas a usar tus datos para enviarte beneficios exclusivos de Oakberry?"</em>
+        </div>
         <div class="auth-btns">
-          <button class="auth-btn" id="auth-si" onclick="setAuth('SI')">✅ Sí, autorizo</button>
-          <button class="auth-btn" id="auth-no" onclick="setAuth('NO')">No por ahora</button>
+          <button class="auth-btn" id="auth-si" onclick="setAuth('SI')"
+                  style="background:#27ae60;border-color:#27ae60;color:#fff;font-weight:900">
+            ✅ SÍ autorizó
+          </button>
+          <button class="auth-btn" id="auth-no" onclick="setAuth('NO')"
+                  style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4);color:#fff">
+            ❌ No autorizó
+          </button>
         </div>
       </div>
+
       <button class="captura-btn" id="capturaBtn" onclick="guardarCaptura()">
-        Guardar y continuar →
+        Guardar y entregar descuento →
       </button>
       <button style="width:100%;padding:10px;margin-top:8px;background:transparent;border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#aaa;cursor:pointer;text-transform:uppercase;letter-spacing:1px"
               onclick="saltarCaptura()">
