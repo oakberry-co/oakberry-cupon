@@ -298,16 +298,27 @@
         <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:12px;line-height:1.5">
           Dile: <em>"¿Nos autorizas a usar tus datos para enviarte beneficios exclusivos de Oakberry?"</em>
         </div>
-        <div class="auth-btns">
-          <button class="auth-btn" id="auth-si" onclick="setAuth('SI')"
-                  style="background:#27ae60;border-color:#27ae60;color:#fff;font-weight:900">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button id="auth-si" onclick="setAuth('SI')" style="
+            padding:14px 8px;border-radius:10px;
+            border:3px solid rgba(255,255,255,0.3);
+            background:rgba(255,255,255,0.15);
+            font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;
+            color:rgba(255,255,255,0.7);cursor:pointer;
+            text-transform:uppercase;letter-spacing:0.5px;transition:all 0.15s">
             ✅ SÍ autorizó
           </button>
-          <button class="auth-btn" id="auth-no" onclick="setAuth('NO')"
-                  style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4);color:#fff">
+          <button id="auth-no" onclick="setAuth('NO')" style="
+            padding:14px 8px;border-radius:10px;
+            border:3px solid rgba(255,255,255,0.3);
+            background:rgba(255,255,255,0.15);
+            font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;
+            color:rgba(255,255,255,0.7);cursor:pointer;
+            text-transform:uppercase;letter-spacing:0.5px;transition:all 0.15s">
             ❌ No autorizó
           </button>
         </div>
+        <div id="auth-confirmacion" style="display:none;margin-top:10px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:900;text-align:center;text-transform:uppercase;letter-spacing:0.5px"></div>
       </div>
 
       <button class="captura-btn" id="capturaBtn" onclick="guardarCaptura()">
@@ -412,8 +423,37 @@ function setLoopy(v) {
 }
 function setAuth(v) {
   _auth = v;
-  document.getElementById("auth-si").className = "auth-btn"+(v==="SI"?" sel-si":"");
-  document.getElementById("auth-no").className = "auth-btn"+(v==="NO"?" sel-no":"");
+  const btnSi = document.getElementById("auth-si");
+  const btnNo = document.getElementById("auth-no");
+  const conf  = document.getElementById("auth-confirmacion");
+
+  // Resetear ambos
+  [btnSi, btnNo].forEach(b => {
+    b.style.background    = "rgba(255,255,255,0.15)";
+    b.style.border        = "3px solid rgba(255,255,255,0.3)";
+    b.style.color         = "rgba(255,255,255,0.7)";
+    b.style.transform     = "scale(1)";
+  });
+
+  if (v === "SI") {
+    btnSi.style.background = "#27ae60";
+    btnSi.style.border     = "3px solid #1e8449";
+    btnSi.style.color      = "#fff";
+    btnSi.style.transform  = "scale(1.04)";
+    conf.style.display     = "block";
+    conf.style.background  = "#27ae60";
+    conf.style.color       = "#fff";
+    conf.textContent       = "✅ AUTORIZACIÓN REGISTRADA";
+  } else {
+    btnNo.style.background = "rgba(0,0,0,0.3)";
+    btnNo.style.border     = "3px solid rgba(0,0,0,0.4)";
+    btnNo.style.color      = "#fff";
+    btnNo.style.transform  = "scale(1.04)";
+    conf.style.display     = "block";
+    conf.style.background  = "rgba(0,0,0,0.3)";
+    conf.style.color       = "rgba(255,255,255,0.8)";
+    conf.textContent       = "❌ SIN AUTORIZACIÓN — datos no se guardan";
+  }
 }
 
 function formatearDescuento(str) {
@@ -778,8 +818,14 @@ function resetForm() {
   _nuevo=""; _loopy=""; _auth=""; _capturaData=null;
   ["nuevo-si","nuevo-no","loopy-si","loopy-no"].forEach(id=>
     document.getElementById(id).className="toggle-btn");
-  document.getElementById("auth-si").className="auth-btn";
-  document.getElementById("auth-no").className="auth-btn";
+  document.getElementById("auth-si").style.background = "rgba(255,255,255,0.15)";
+  document.getElementById("auth-si").style.border     = "3px solid rgba(255,255,255,0.3)";
+  document.getElementById("auth-si").style.color      = "rgba(255,255,255,0.7)";
+  document.getElementById("auth-no").style.background = "rgba(255,255,255,0.15)";
+  document.getElementById("auth-no").style.border     = "3px solid rgba(255,255,255,0.3)";
+  document.getElementById("auth-no").style.color      = "rgba(255,255,255,0.7)";
+  const conf = document.getElementById("auth-confirmacion");
+  if (conf) conf.style.display = "none";
   document.getElementById("cap-email").value="";
   document.getElementById("cap-cel").value="";
   limpiarErrCaptura();
