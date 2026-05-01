@@ -736,6 +736,9 @@ async function solicitar() {
       anuncio:     P.anuncio,
       placement:   P.placement,
       fbclid:      P.fbclid,            // Facebook Click ID — mejora atribución CAPI
+      // ── Parámetros CAPI avanzados — mejoran calidad de coincidencia ──
+      userAgent:   navigator.userAgent, // Agente de usuario — +59% calidad Meta
+      fbp:         (document.cookie.match(/(?:^|;)\s*_fbp=([^;]*)/) || [])[1] || "", // Cookie Meta fbp — +49%
     });
 
     completarProgreso(() => {
