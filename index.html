@@ -337,8 +337,9 @@ const P = (() => {
     anuncio:     p.get("anuncio")     || p.get("utm_term")     || "",
     placement:   p.get("placement")   || "",
     // ── Facebook Click ID — mejora atribución CAPI de 4.6 a 8+/10 ──
-    // Meta lo agrega automáticamente en la URL cuando alguien llega desde un anuncio
-    fbclid:      p.get("fbclid")      || "",
+    // Se captura con regex directamente desde la URL raw para evitar problemas
+    // con URLs malformadas que tienen parámetros duplicados o anidados
+    fbclid: (window.location.href.match(/[?&]fbclid=([^&]+)/) || [])[1] || p.get("fbclid") || "",
   };
 })();
 
