@@ -15,8 +15,12 @@
       font-family:'Montserrat',sans-serif;min-height:100vh;
       display:flex;align-items:flex-start;justify-content:center;
       padding:28px 16px 60px;
-      background:linear-gradient(var(--bg),rgba(20,10,40,.72)),
-                 url('oakville-bg.jpg') center/cover no-repeat fixed;
+      background-color:#2a1a4a;
+      background-image:linear-gradient(var(--bg),rgba(20,10,40,.72)),url('oakville-bg.jpg');
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      background-attachment:fixed;
     }
     .card{background:rgba(255,255,255,.97);border-radius:28px;width:100%;max-width:520px;
           box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden}
@@ -161,52 +165,52 @@
     @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
     .fade-up{animation:fadeUp .28s ease}
 
-    /* ── MOBILE FIRST ───────────────────────── */
+    /* ── MOBILE ───────────────────────────────── */
     @media(max-width:600px){
       body{padding:0;align-items:stretch;background-attachment:scroll}
       .card{border-radius:0;min-height:100vh;max-width:100%;box-shadow:none;
-            display:flex;flex-direction:column}
+            background:rgba(255,255,255,.97);display:flex;flex-direction:column}
       .card-header{padding:18px 20px 14px;flex-shrink:0}
       .brand{font-size:20px;letter-spacing:1.5px}
-      .card-body{padding:18px 18px 80px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-      .role-btn{padding:13px 14px;gap:11px}
+      .card-body{padding:18px 18px 100px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+      .role-btn{padding:13px 14px;gap:11px;-webkit-tap-highlight-color:transparent}
       .role-icon{font-size:20px}
       .role-name{font-size:12px}
       .field{margin-bottom:11px}
       label{font-size:9px;letter-spacing:1px}
-      input[type=password],input[type=text],select,textarea{
-        padding:12px 13px;font-size:13px;border-radius:10px}
-      textarea{min-height:80px;font-size:13px}
-      .btn{padding:15px;font-size:12px;border-radius:10px}
-      .nav-back{padding:15px 15px;font-size:12px}
+      input[type=password],input[type=text],select,textarea{padding:13px;font-size:16px;border-radius:10px}
+      textarea{min-height:80px;font-size:16px}
       .mod-hdr{padding:11px 14px;border-radius:11px}
       .mod-title{font-size:13px}
-      .q-text{font-size:12px}
-      .opt{padding:12px 12px;font-size:11px;border-radius:9px}
-      .scl{min-width:26px;font-size:11px;padding:10px 2px;border-radius:8px}
+      .q-text{font-size:13px}
+      .opt{padding:13px 12px;font-size:12px;border-radius:9px;-webkit-tap-highlight-color:transparent}
+      .scl{min-width:26px;font-size:12px;padding:12px 2px;border-radius:8px;-webkit-tap-highlight-color:transparent}
       .qblock{margin-bottom:20px}
       .steps-row{gap:5px;margin-bottom:14px}
       .step-dot{width:7px;height:7px}
       .prog-txt,.prog-cnt{font-size:9px}
       .success-icon{font-size:46px}
       .success-title{font-size:14px}
-      /* sticky nav on mobile */
-      .nav-row{
+      /* Nav fijo SOLO en la pantalla de encuesta */
+      #sc-survey .nav-row{
         position:fixed;bottom:0;left:0;right:0;
-        padding:12px 18px 20px;
-        background:rgba(255,255,255,.97);
-        backdrop-filter:blur(8px);
-        -webkit-backdrop-filter:blur(8px);
-        border-top:1px solid #eee;
-        margin-top:0;
-        z-index:100;
+        padding:12px 18px max(16px,env(safe-area-inset-bottom));
+        background:rgba(255,255,255,.98);border-top:1px solid #eee;
+        margin-top:0;z-index:100;gap:10px;display:flex;
       }
-      #sc-meta .nav-row,
-      #sc-role .btn{position:static;padding:16px 0 0;background:none;border:none;backdrop-filter:none}
+      /* Role y meta: flujo normal, sin sticky */
+      #sc-role .btn{position:static !important}
+      #sc-meta .nav-row{position:static !important;background:transparent !important;
+        border:none !important;padding:14px 0 0 !important;box-shadow:none !important}
+      #sc-meta .nav-row .btn{
+        background:var(--p) !important;padding:15px !important;
+        margin-top:0 !important;box-shadow:0 6px 20px rgba(95,75,139,.3) !important}
+      #sc-meta .nav-row .nav-back{
+        border:2px solid #ddd !important;background:transparent !important;padding:15px !important}
     }
     @media(max-width:360px){
-      .scl{min-width:22px;font-size:10px;padding:9px 1px}
-      .card-body{padding:14px 14px 80px}
+      .scl{min-width:22px;font-size:10px;padding:10px 1px}
+      .card-body{padding:14px 14px 100px}
     }
   </style>
 </head>
