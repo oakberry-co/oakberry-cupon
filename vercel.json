@@ -14,6 +14,7 @@
     { "source": "/concurso",       "destination": "/concurso-v2.html"         },
     { "source": "/reglamento",     "destination": "/reglamento-concurso.html" },
     { "source": "/react",          "destination": "/react.html"               },
+    { "source": "/encuesta",       "destination": "/encuesta.html"            },
     { "source": "/api/(.*)",       "destination": "/api/$1"                   }
   ]
 }
