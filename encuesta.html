@@ -3,426 +3,283 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OakBerry · Encuesta 360</title>
+  <title>OakBerry · Encuesta 360°</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary: #5F4B8B;
-      --pd: #4a3a6e;
-      --pl: #7B65A8;
-      --pll: #ede8f5;
-      --yellow: #F5C842;
-      --green: #27ae60;
-      --red: #e74c3c;
-      --orange: #e67e22;
-      --blue: #2980b9;
-      --teal: #1abc9c;
-      --bg-dark: rgba(20,10,40,0.55);
+    :root{
+      --p:#5F4B8B; --pd:#4a3a6e; --pl:#7B65A8; --pll:#ede8f5;
+      --yellow:#F5C842; --green:#27ae60; --red:#e74c3c; --bg:rgba(20,10,40,0.58);
     }
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Montserrat',sans-serif;min-height:100vh;
+      display:flex;align-items:flex-start;justify-content:center;
+      padding:28px 16px 60px;
+      background:linear-gradient(var(--bg),rgba(20,10,40,.72)),
+                 url('oakville-bg.jpg') center/cover no-repeat fixed;
+    }
+    .card{background:rgba(255,255,255,.97);border-radius:28px;width:100%;max-width:520px;
+          box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden}
+    .card-header{background:var(--p);padding:26px 30px 20px;text-align:center}
+    .brand{font-size:25px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:2px}
+    .brand-sub{font-size:10px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:2px;margin-top:3px}
+    .card-body{padding:24px 26px 36px}
 
-    body {
-      font-family: 'Montserrat', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 28px 16px 48px;
-      background:
-        linear-gradient(rgba(20,10,40,0.58), rgba(20,10,40,0.68)),
-        url('oakville-bg.jpg') center/cover no-repeat fixed;
-    }
+    /* screens */
+    .screen{display:none}.screen.active{display:block}
 
-    /* ── CARD ── */
-    .card {
-      background: rgba(255,255,255,0.97);
-      border-radius: 28px;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-      overflow: hidden;
-    }
-    .card-header {
-      background: var(--primary);
-      padding: 28px 30px 22px;
-      text-align: center;
-    }
-    .brand      { font-size:26px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:2px; }
-    .brand-sub  { font-size:10px; font-weight:700; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:2px; margin-top:4px; }
-    .card-body  { padding: 24px 26px 32px; }
+    /* role */
+    .role-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--p);text-align:center;margin-bottom:5px}
+    .role-sub{font-size:11px;font-weight:600;color:#999;text-align:center;margin-bottom:20px;line-height:1.6}
+    .roles-grid{display:grid;gap:10px;margin-bottom:14px}
+    .role-btn{padding:15px 16px;border-radius:14px;border:2px solid #e8e8e8;background:#fafafa;
+              font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#555;
+              cursor:pointer;text-align:left;transition:all .18s;display:flex;align-items:center;gap:13px}
+    .role-btn:hover{border-color:var(--p);color:var(--p);background:var(--pll)}
+    .role-btn.selected{border-color:var(--p);background:var(--pll);color:var(--p)}
+    .role-icon{font-size:22px;flex-shrink:0}
+    .role-name{font-size:13px;font-weight:800}
+    .role-desc{font-size:10px;font-weight:600;color:#999;margin-top:1px}
 
-    /* ── SCREENS ── */
-    .screen { display:none; }
-    .screen.active { display:block; }
+    /* fields */
+    .field{margin-bottom:13px}
+    label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#999;margin-bottom:5px}
+    input[type=password],input[type=text],input[type=tel],select,textarea{
+      width:100%;padding:13px 15px;border-radius:12px;border:2px solid #eee;
+      font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--p);
+      outline:none;background:#fff;transition:border-color .18s;-webkit-appearance:none}
+    textarea{font-size:12px;font-weight:600;resize:vertical;min-height:88px;line-height:1.65}
+    input:focus,select:focus,textarea:focus{border-color:var(--p)}
+    .pin-error{font-size:11px;font-weight:700;color:var(--red);margin-top:5px;display:none}
+    .pin-error.show{display:block}
+    .pin-wrap{display:none;margin-top:14px}.pin-wrap.show{display:block}
+    .req{color:var(--red);margin-left:1px}
 
-    /* ── ROLE SELECTOR ── */
-    .role-title {
-      font-size:13px; font-weight:800; text-transform:uppercase;
-      letter-spacing:1.5px; color:var(--primary); text-align:center;
-      margin-bottom:6px;
-    }
-    .role-sub {
-      font-size:11px; font-weight:600; color:#999; text-align:center;
-      margin-bottom:22px; line-height:1.6;
-    }
-    .roles-grid { display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:16px; }
-    .role-btn {
-      padding:16px 18px; border-radius:14px;
-      border:2px solid #e8e8e8; background:#fafafa;
-      font-family:'Montserrat',sans-serif;
-      font-size:13px; font-weight:700; color:#555;
-      cursor:pointer; text-align:left;
-      transition:all 0.18s; display:flex; align-items:center; gap:14px;
-    }
-    .role-btn:hover { border-color:var(--primary); color:var(--primary); background:var(--pll); }
-    .role-btn.selected { border-color:var(--primary); background:var(--pll); color:var(--primary); }
-    .role-icon { font-size:22px; flex-shrink:0; }
-    .role-info { flex:1; }
-    .role-name { font-size:13px; font-weight:800; }
-    .role-desc { font-size:10px; font-weight:600; color:#999; margin-top:2px; letter-spacing:0.3px; }
+    /* buttons */
+    .btn{width:100%;padding:16px;background:var(--p);color:#fff;border:none;border-radius:12px;
+         font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;
+         letter-spacing:1px;cursor:pointer;margin-top:6px;transition:background .18s,transform .12s;
+         box-shadow:0 6px 20px rgba(95,75,139,.3);position:relative;overflow:hidden}
+    .btn:hover:not(:disabled){background:var(--pd);transform:translateY(-1px)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-text{transition:opacity .18s}
+    .btn-loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .18s}
+    .btn.loading .btn-text{opacity:0}.btn.loading .btn-loader{opacity:1}
+    .spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .nav-row{display:flex;gap:10px;margin-top:18px}
+    .nav-row .btn{margin-top:0}
+    .nav-back{flex:0 0 auto;padding:16px 18px;background:transparent;color:var(--p);
+               border:2px solid #ddd;border-radius:12px;font-family:'Montserrat',sans-serif;
+               font-size:13px;font-weight:800;cursor:pointer;transition:all .15s}
+    .nav-back:hover{border-color:var(--p);background:var(--pll)}
 
-    /* ── PIN ── */
-    .pin-wrap { display:none; margin-top:16px; }
-    .pin-wrap.show { display:block; }
-    .field { margin-bottom:14px; }
-    label {
-      display:block; font-size:10px; font-weight:700;
-      text-transform:uppercase; letter-spacing:1.5px; color:#999; margin-bottom:6px;
-    }
-    input[type=password], input[type=text], input[type=tel], select, textarea {
-      width:100%; padding:13px 16px; border-radius:12px;
-      border:2px solid #eee; font-family:'Montserrat',sans-serif;
-      font-size:13px; font-weight:700; color:var(--primary);
-      outline:none; background:#fff; transition:border-color 0.18s;
-      -webkit-appearance:none;
-    }
-    textarea { font-size:12px; font-weight:600; resize:vertical; min-height:80px; line-height:1.6; }
-    input:focus, select:focus, textarea:focus { border-color:var(--primary); }
-    .pin-error { font-size:11px; font-weight:700; color:var(--red); margin-top:6px; display:none; }
-    .pin-error.show { display:block; }
+    /* progress */
+    .progress-wrap{margin-bottom:18px}
+    .progress-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+    .prog-txt{font-size:10px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:1px}
+    .prog-cnt{font-size:10px;font-weight:700;color:#bbb}
+    .prog-track{height:5px;background:#eee;border-radius:3px;overflow:hidden}
+    .prog-fill{height:100%;background:var(--p);border-radius:3px;transition:width .4s ease}
 
-    /* ── BUTTON ── */
-    .btn {
-      width:100%; padding:16px; background:var(--primary); color:#fff;
-      border:none; border-radius:12px; font-family:'Montserrat',sans-serif;
-      font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:1px;
-      cursor:pointer; margin-top:6px; transition:background 0.18s, transform 0.12s;
-      box-shadow:0 6px 20px rgba(95,75,139,0.3);
-      position:relative; overflow:hidden;
-    }
-    .btn:hover:not(:disabled) { background:var(--pd); transform:translateY(-1px); }
-    .btn:disabled { opacity:0.5; cursor:not-allowed; }
-    .btn-text { transition:opacity 0.18s; }
-    .btn-loader { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.18s; }
-    .btn.loading .btn-text { opacity:0; }
-    .btn.loading .btn-loader { opacity:1; }
-    .spin { width:20px; height:20px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.65s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg); } }
+    /* steps */
+    .steps-row{display:flex;justify-content:center;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+    .step-dot{width:8px;height:8px;border-radius:50%;background:#ddd;transition:all .2s;cursor:default}
+    .step-dot.active{background:var(--p);transform:scale(1.35)}
+    .step-dot.done{background:var(--pl)}
 
-    .btn-outline {
-      width:100%; padding:13px; background:transparent; color:var(--primary);
-      border:2px solid var(--primary); border-radius:12px; font-family:'Montserrat',sans-serif;
-      font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.8px;
-      cursor:pointer; margin-top:8px; transition:all 0.18s;
-    }
-    .btn-outline:hover { background:var(--pll); }
+    /* module header */
+    .mod-hdr{background:linear-gradient(135deg,var(--p),var(--pd));border-radius:14px;padding:13px 17px;margin-bottom:16px}
+    .mod-code{font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:3px}
+    .mod-title{font-size:14px;font-weight:900;color:#fff}
+    .mod-sub{font-size:10px;font-weight:600;color:rgba(255,255,255,.65);margin-top:2px}
 
-    /* ── SECTION SEP ── */
-    .section-sep {
-      font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:2px;
-      color:#bbb; margin:20px 0 14px; display:flex; align-items:center; gap:8px;
-    }
-    .section-sep::before, .section-sep::after { content:''; flex:1; height:1px; background:#eee; }
+    /* question */
+    .qblock{margin-bottom:22px}
+    .q-meta{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
+    .q-id{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p)}
+    .q-lens{font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.5px}
+    .lens-oferta  {background:#EAF3DE;color:#27500A}
+    .lens-flujo   {background:#E6F1FB;color:#0C447C}
+    .lens-mensaje {background:#FAEEDA;color:#633806}
+    .lens-certeza {background:#FBEAF0;color:#72243E}
+    .lens-tribu   {background:#EEEDFE;color:#3C3489}
+    .lens-atencion{background:#E1F5EE;color:#085041}
+    .why-btn{font-size:9px;font-weight:700;color:#bbb;cursor:pointer;padding:2px 7px;
+             border-radius:6px;border:1px solid #eee;background:#f9f9f9;transition:all .15s;
+             text-transform:uppercase;letter-spacing:.5px}
+    .why-btn:hover{color:var(--p);border-color:var(--p)}
+    .q-text{font-size:12px;font-weight:700;color:#333;line-height:1.65;margin-bottom:9px}
+    .q-why{font-size:10px;font-weight:600;color:#aaa;line-height:1.6;padding:7px 11px;
+           background:#f9f9f9;border-radius:8px;border-left:3px solid #ddd;
+           margin-bottom:9px;display:none}
+    .q-why.show{display:block}
+    .char-count{font-size:9px;font-weight:700;color:#bbb;text-align:right;margin-top:3px}
 
-    /* ── PROGRESS BAR ── */
-    .progress-wrap { margin-bottom:20px; }
-    .progress-label {
-      display:flex; justify-content:space-between; align-items:center;
-      margin-bottom:8px;
-    }
-    .progress-text { font-size:10px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; }
-    .progress-count { font-size:10px; font-weight:700; color:#bbb; }
-    .progress-track { height:5px; background:#eee; border-radius:3px; overflow:hidden; }
-    .progress-fill { height:100%; background:var(--primary); border-radius:3px; transition:width 0.4s ease; }
+    /* options */
+    .opts{display:flex;flex-direction:column;gap:7px}
+    .opt{padding:11px 13px;border-radius:10px;border:2px solid #eee;background:#fafafa;
+         font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#555;
+         cursor:pointer;text-align:left;line-height:1.4;transition:all .15s;user-select:none}
+    .opt:hover{border-color:var(--pl);color:var(--p)}
+    .opt.sel{background:var(--pll);border-color:var(--p);color:var(--p)}
+    .opt.multi.sel{background:#e8f5e9;border-color:var(--green);color:#1a7a40}
 
-    /* ── MODULE HEADER ── */
-    .module-header {
-      background:linear-gradient(135deg, var(--primary), var(--pd));
-      border-radius:14px; padding:14px 18px; margin-bottom:18px;
-    }
-    .module-code { font-size:9px; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,0.6); text-transform:uppercase; margin-bottom:4px; }
-    .module-title { font-size:15px; font-weight:900; color:#fff; }
-    .module-sub { font-size:10px; font-weight:600; color:rgba(255,255,255,0.65); margin-top:3px; }
+    /* scale */
+    .scale-wrap{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px}
+    .scl{flex:1;min-width:34px;padding:10px 3px;border-radius:10px;border:2px solid #eee;
+         background:#fafafa;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;
+         color:#aaa;cursor:pointer;text-align:center;transition:all .15s}
+    .scl:hover{border-color:var(--pl);color:var(--p)}
+    .scl.sel{background:var(--p);border-color:var(--p);color:#fff}
+    .scale-lbl{display:flex;justify-content:space-between;font-size:9px;font-weight:700;
+               color:#bbb;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
 
-    /* ── QUESTION ── */
-    .question-block { margin-bottom:22px; }
-    .q-num {
-      font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
-      color:var(--primary); margin-bottom:6px; display:flex; align-items:center; gap:8px;
-    }
-    .q-lens {
-      font-size:9px; font-weight:700; padding:2px 8px; border-radius:8px;
-      text-transform:uppercase; letter-spacing:0.5px;
-    }
-    .lens-oferta   { background:#EAF3DE; color:#27500A; }
-    .lens-flujo    { background:#E6F1FB; color:#0C447C; }
-    .lens-mensaje  { background:#FAEEDA; color:#633806; }
-    .lens-certeza  { background:#FBEAF0; color:#72243E; }
-    .lens-tribu    { background:#EEEDFE; color:#3C3489; }
-    .lens-atencion { background:#E1F5EE; color:#085041; }
+    /* section sep */
+    .sep{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;
+         color:#bbb;margin:20px 0 14px;display:flex;align-items:center;gap:8px}
+    .sep::before,.sep::after{content:'';flex:1;height:1px;background:#eee}
 
-    .q-text {
-      font-size:12px; font-weight:700; color:#333; line-height:1.65; margin-bottom:10px;
-    }
-    .q-why {
-      font-size:10px; font-weight:600; color:#aaa; line-height:1.6;
-      padding:8px 12px; background:#f9f9f9; border-radius:8px;
-      border-left:3px solid #ddd; margin-bottom:10px; display:none;
-    }
-    .q-why.show { display:block; }
+    /* success */
+    .success{text-align:center;padding:8px 0}
+    .success-icon{font-size:54px;margin-bottom:12px;display:block}
+    .success-title{font-size:16px;font-weight:900;color:var(--p);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+    .success-sub{font-size:12px;font-weight:600;color:#888;line-height:1.7}
+    .success-badge{display:inline-block;margin-top:16px;padding:8px 20px;
+                   background:linear-gradient(135deg,var(--p),var(--pd));border-radius:30px;
+                   font-size:11px;font-weight:800;color:#fff;letter-spacing:1px;text-transform:uppercase}
 
-    /* ── OPTIONS ── */
-    .options-list { display:flex; flex-direction:column; gap:7px; }
-    .opt-btn {
-      padding:11px 14px; border-radius:10px;
-      border:2px solid #eee; background:#fafafa;
-      font-family:'Montserrat',sans-serif;
-      font-size:11px; font-weight:700; color:#555;
-      cursor:pointer; text-align:left; line-height:1.4;
-      transition:all 0.15s; user-select:none;
-    }
-    .opt-btn:hover { border-color:var(--pl); color:var(--primary); }
-    .opt-btn.selected { background:var(--pll); border-color:var(--primary); color:var(--primary); }
-    .opt-btn.multi.selected { background:#e8f5e9; border-color:var(--green); color:#1a7a40; }
+    /* intro box */
+    .intro-box{background:var(--pll);border:2px solid #d0c4f0;border-radius:13px;
+               padding:14px 17px;margin-bottom:16px}
+    .intro-box b{display:block;font-size:11px;font-weight:800;color:var(--p);
+                 text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+    .intro-line{font-size:11px;font-weight:600;color:#555;line-height:1.7;
+                padding:3px 0;border-bottom:1px solid #ddd}
+    .intro-line:last-child{border-bottom:none}
 
-    /* ── SCALE ── */
-    .scale-wrap { display:flex; gap:5px; flex-wrap:wrap; margin-top:4px; }
-    .scale-btn {
-      flex:1; min-width:36px; padding:10px 4px; border-radius:10px;
-      border:2px solid #eee; background:#fafafa;
-      font-family:'Montserrat',sans-serif;
-      font-size:12px; font-weight:800; color:#aaa;
-      cursor:pointer; text-align:center;
-      transition:all 0.15s;
-    }
-    .scale-btn:hover { border-color:var(--pl); color:var(--primary); }
-    .scale-btn.selected { background:var(--primary); border-color:var(--primary); color:#fff; }
-    .scale-labels {
-      display:flex; justify-content:space-between;
-      font-size:9px; font-weight:700; color:#bbb;
-      margin-top:5px; text-transform:uppercase; letter-spacing:0.5px;
-    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .fade-up{animation:fadeUp .28s ease}
 
-    /* ── NAV ── */
-    .nav-row { display:flex; gap:10px; margin-top:20px; }
-    .nav-row .btn { margin-top:0; }
-    .nav-back {
-      flex:0 0 auto; padding:16px 18px; background:transparent; color:var(--primary);
-      border:2px solid #ddd; border-radius:12px; font-family:'Montserrat',sans-serif;
-      font-size:13px; font-weight:800; cursor:pointer; transition:all 0.15s;
-    }
-    .nav-back:hover { border-color:var(--primary); background:var(--pll); }
-
-    /* ── STEP INDICATOR ── */
-    .steps-row {
-      display:flex; justify-content:center; gap:6px; margin-bottom:20px;
-    }
-    .step-dot {
-      width:8px; height:8px; border-radius:50%; background:#ddd;
-      transition:all 0.2s; cursor:pointer;
-    }
-    .step-dot.active { background:var(--primary); transform:scale(1.3); }
-    .step-dot.done   { background:var(--pl); }
-
-    /* ── INTRO BOX ── */
-    .intro-box {
-      background:var(--pll); border:2px solid #d0c4f0;
-      border-radius:14px; padding:16px 18px; margin-bottom:18px;
-    }
-    .intro-box-title { font-size:11px; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
-    .intro-box-line { font-size:11px; font-weight:600; color:#555; line-height:1.7; padding:3px 0; border-bottom:1px solid #ddd; }
-    .intro-box-line:last-child { border-bottom:none; }
-
-    /* ── SUCCESS ── */
-    .success-wrap { text-align:center; padding:10px 0; }
-    .success-icon { font-size:56px; margin-bottom:14px; display:block; }
-    .success-title { font-size:17px; font-weight:900; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
-    .success-sub { font-size:12px; font-weight:600; color:#888; line-height:1.7; }
-    .success-badge {
-      display:inline-block; margin-top:16px; padding:8px 20px;
-      background:linear-gradient(135deg, var(--primary), var(--pd));
-      border-radius:30px; font-size:11px; font-weight:800;
-      color:#fff; letter-spacing:1px; text-transform:uppercase;
-    }
-
-    /* ── REQUIRED MARKER ── */
-    .req { color:var(--red); margin-left:2px; }
-
-    /* ── ANIMATIONS ── */
-    @keyframes fadeUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
-    .fade-up { animation:fadeUp 0.3s ease; }
-
-    /* ── TOOLTIP WHY btn ── */
-    .why-toggle {
-      font-size:9px; font-weight:700; color:#bbb; cursor:pointer;
-      padding:2px 7px; border-radius:6px; border:1px solid #eee;
-      background:#f9f9f9; transition:all 0.15s; margin-left:6px;
-      text-transform:uppercase; letter-spacing:0.5px;
-    }
-    .why-toggle:hover { color:var(--primary); border-color:var(--primary); }
-
-    /* ── CHAR COUNT ── */
-    .char-count { font-size:9px; font-weight:700; color:#bbb; text-align:right; margin-top:4px; }
-
-    @media(max-width:400px) {
-      .scale-btn { min-width:28px; font-size:11px; padding:9px 2px; }
-      .card-body { padding:20px 18px 28px; }
+    @media(max-width:400px){
+      .scl{min-width:27px;font-size:11px;padding:9px 2px}
+      .card-body{padding:18px 16px 28px}
     }
   </style>
 </head>
 <body>
-
 <div class="card">
   <div class="card-header">
     <div class="brand">OakBerry</div>
-    <div class="brand-sub">Encuesta Interna 360°</div>
+    <div class="brand-sub">Diagnóstico Estratégico 360°</div>
   </div>
   <div class="card-body">
 
-    <!-- ══════════════════════════════════════════════
-         SCREEN 0 — ROLE + PIN
-    ══════════════════════════════════════════════ -->
-    <div class="screen active" id="screen-role">
+    <!-- ══ SCREEN: ROLE ══════════════════════════════════════════ -->
+    <div class="screen active" id="sc-role">
       <div class="role-title">¿Cuál es tu rol?</div>
-      <div class="role-sub">Selecciona tu perfil para acceder a la encuesta correcta</div>
+      <div class="role-sub">Selecciona tu perfil para ver la encuesta correcta</div>
       <div class="roles-grid">
-        <div class="role-btn" onclick="selectRole('colaborador')" id="role-colaborador">
+        <div class="role-btn" id="rb-colaborador" onclick="pickRole('colaborador')">
           <div class="role-icon">🏪</div>
-          <div class="role-info">
+          <div>
             <div class="role-name">Colaborador de tienda</div>
-            <div class="role-desc">Líderes y equipo de punto de venta</div>
+            <div class="role-desc">Líderes y equipo de punto de venta · Clave: 6789</div>
           </div>
         </div>
-        <div class="role-btn" onclick="selectRole('franquiciado')" id="role-franquiciado">
+        <div class="role-btn" id="rb-franquiciado" onclick="pickRole('franquiciado')">
           <div class="role-icon">🤝</div>
-          <div class="role-info">
+          <div>
             <div class="role-name">Franquiciado</div>
-            <div class="role-desc">Dueños de punto(s) OakBerry</div>
+            <div class="role-desc">Dueños de punto(s) OakBerry · Clave: 12345</div>
           </div>
         </div>
-        <div class="role-btn" onclick="selectRole('administrativo')" id="role-administrativo">
+        <div class="role-btn" id="rb-administrativo" onclick="pickRole('administrativo')">
           <div class="role-icon">💼</div>
-          <div class="role-info">
+          <div>
             <div class="role-name">Equipo Administrativo</div>
-            <div class="role-desc">Mercadeo, Finanzas, Operaciones</div>
+            <div class="role-desc">Mercadeo · Finanzas · Operaciones · Clave: 12345</div>
           </div>
         </div>
       </div>
-
       <div class="pin-wrap" id="pin-wrap">
         <div class="field">
           <label>Clave de acceso <span class="req">*</span></label>
-          <input type="password" id="pin-input" placeholder="••••••"
-            maxlength="10" onkeydown="if(event.key==='Enter')verifyPin()">
-          <div class="pin-error" id="pin-error">Clave incorrecta. Intenta de nuevo.</div>
+          <input type="password" id="pin-input" placeholder="••••••" maxlength="10"
+            onkeydown="if(event.key==='Enter')doEnter()">
+          <div class="pin-error" id="pin-err">Clave incorrecta. Intenta de nuevo.</div>
         </div>
       </div>
-
-      <button class="btn" id="btn-enter" onclick="enterSurvey()" style="margin-top:14px" disabled>
-        <span class="btn-text">Entrar a la encuesta</span>
+      <button class="btn" id="btn-enter" onclick="doEnter()" disabled>
+        <span class="btn-text">Continuar →</span>
         <div class="btn-loader"><div class="spin"></div></div>
       </button>
     </div>
 
-    <!-- ══════════════════════════════════════════════
-         SCREEN 1 — META (datos iniciales)
-    ══════════════════════════════════════════════ -->
-    <div class="screen" id="screen-meta">
-      <div class="module-header">
-        <div class="module-code">Datos iniciales</div>
-        <div class="module-title" id="meta-title">Cuéntanos un poco sobre ti</div>
-        <div class="module-sub">Esta información ayuda a segmentar las respuestas</div>
+    <!-- ══ SCREEN: META ══════════════════════════════════════════ -->
+    <div class="screen" id="sc-meta">
+      <div class="mod-hdr">
+        <div class="mod-code">Antes de empezar</div>
+        <div class="mod-title" id="meta-title">Cuéntanos sobre ti</div>
+        <div class="mod-sub">Esta información segmenta las respuestas por ciudad y perfil</div>
       </div>
 
-      <!-- Colaborador meta -->
-      <div id="meta-colaborador" style="display:none">
-        <div class="field">
-          <label>Ciudad <span class="req">*</span></label>
-          <select id="c-ciudad">
+      <div id="meta-colab" style="display:none">
+        <div class="field"><label>Tu nombre completo <span class="req">*</span></label>
+          <input type="text" id="c-nombre" placeholder="Ej: Laura Martínez"></div>
+        <div class="field"><label>Ciudad <span class="req">*</span></label>
+          <select id="c-ciudad" onchange="fillTiendas('c-ciudad','c-tienda')">
             <option value="">Seleccionar...</option>
-            <option>Bogotá</option><option>Medellín</option>
-            <option>Cali</option><option>Barranquilla</option><option>Otra</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Nombre o código de la tienda <span class="req">*</span></label>
-          <input type="text" id="c-tienda" placeholder="Ej: OakBerry Andino">
-        </div>
-        <div class="field">
-          <label>¿Cuánto tiempo llevas en OakBerry? <span class="req">*</span></label>
-          <select id="c-tiempo">
-            <option value="">Seleccionar...</option>
-            <option>Menos de 6 meses</option>
-            <option>Entre 6 meses y 1 año</option>
-            <option>Más de 1 año</option>
-          </select>
-        </div>
+            <option>Barranquilla</option><option>Bogota</option><option>Bucaramanga</option>
+            <option>Cali</option><option>Cartagena</option><option>Cucuta</option>
+            <option>Medellin</option><option>Monteria</option><option>Pereira</option>
+            <option>Santa Marta</option><option>Valledupar</option></select></div>
+        <div class="field"><label>Punto de venta <span class="req">*</span></label>
+          <select id="c-tienda"><option value="">Selecciona ciudad primero...</option></select></div>
+        <div class="field"><label>¿Cuánto tiempo llevas en OakBerry? <span class="req">*</span></label>
+          <select id="c-tiempo"><option value="">Seleccionar...</option>
+            <option>Menos de 6 meses</option><option>Entre 6 meses y 1 año</option>
+            <option>Más de 1 año</option></select></div>
       </div>
 
-      <!-- Franquiciado meta -->
-      <div id="meta-franquiciado" style="display:none">
-        <div class="field">
-          <label>Ciudad principal <span class="req">*</span></label>
-          <select id="f-ciudad">
+      <div id="meta-franq" style="display:none">
+        <div class="field"><label>Tu nombre completo <span class="req">*</span></label>
+          <input type="text" id="f-nombre" placeholder="Ej: Carlos Pérez"></div>
+        <div class="field"><label>Ciudad principal <span class="req">*</span></label>
+          <select id="f-ciudad" onchange="fillTiendas('f-ciudad','f-tienda')">
             <option value="">Seleccionar...</option>
-            <option>Bogotá</option><option>Medellín</option>
-            <option>Cali</option><option>Barranquilla</option><option>Otra</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Nombre de tu(s) punto(s) <span class="req">*</span></label>
-          <input type="text" id="f-puntos" placeholder="Ej: OakBerry Unicentro, OakBerry Titan">
-        </div>
-        <div class="field">
-          <label>¿Cuántos puntos operas? <span class="req">*</span></label>
-          <select id="f-numpuntos">
-            <option value="">Seleccionar...</option>
-            <option>1 punto</option><option>2 puntos</option><option>3 o más</option>
-          </select>
-        </div>
+            <option>Barranquilla</option><option>Bogota</option><option>Bucaramanga</option>
+            <option>Cali</option><option>Cartagena</option><option>Cucuta</option>
+            <option>Medellin</option><option>Monteria</option><option>Pereira</option>
+            <option>Santa Marta</option><option>Valledupar</option></select></div>
+        <div class="field"><label>Punto(s) de venta <span class="req">*</span></label>
+          <select id="f-tienda"><option value="">Selecciona ciudad primero...</option></select></div>
+        <div class="field"><label>¿Cuántos puntos operas? <span class="req">*</span></label>
+          <select id="f-num"><option value="">Seleccionar...</option>
+            <option>1 punto</option><option>2 puntos</option><option>3 o más</option></select></div>
       </div>
 
-      <!-- Administrativo meta -->
-      <div id="meta-administrativo" style="display:none">
-        <div class="field">
-          <label>Área <span class="req">*</span></label>
-          <select id="a-area">
-            <option value="">Seleccionar...</option>
+      <div id="meta-admin" style="display:none">
+        <div class="field"><label>Tu nombre completo <span class="req">*</span></label>
+          <input type="text" id="a-nombre" placeholder="Ej: Andrés Gómez"></div>
+        <div class="field"><label>Área <span class="req">*</span></label>
+          <select id="a-area"><option value="">Seleccionar...</option>
             <option>Mercadeo</option><option>Finanzas</option>
-            <option>Operaciones</option><option>Otra</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Ciudad <span class="req">*</span></label>
-          <select id="a-ciudad">
-            <option value="">Seleccionar...</option>
-            <option>Bogotá</option><option>Medellín</option>
-            <option>Cali</option><option>Barranquilla</option><option>Otra</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Tiempo en la empresa <span class="req">*</span></label>
-          <select id="a-tiempo">
-            <option value="">Seleccionar...</option>
-            <option>Menos de 6 meses</option>
-            <option>Entre 6 meses y 2 años</option>
-            <option>Más de 2 años</option>
-          </select>
-        </div>
+            <option>Operaciones</option><option>Otra</option></select></div>
+        <div class="field"><label>Ciudad <span class="req">*</span></label>
+          <select id="a-ciudad"><option value="">Seleccionar...</option>
+            <option>Barranquilla</option><option>Bogota</option><option>Bucaramanga</option>
+            <option>Cali</option><option>Cartagena</option><option>Cucuta</option>
+            <option>Medellin</option><option>Monteria</option><option>Pereira</option>
+            <option>Santa Marta</option><option>Valledupar</option></select></div>
+        <div class="field"><label>Tiempo en la empresa <span class="req">*</span></label>
+          <select id="a-tiempo"><option value="">Seleccionar...</option>
+            <option>Menos de 6 meses</option><option>Entre 6 meses y 2 años</option>
+            <option>Más de 2 años</option></select></div>
       </div>
 
       <div class="nav-row">
-        <button class="nav-back" onclick="goTo('screen-role')">←</button>
+        <button class="nav-back" onclick="goTo('sc-role')">←</button>
         <button class="btn" onclick="startSurvey()">
           <span class="btn-text">Comenzar encuesta →</span>
           <div class="btn-loader"><div class="spin"></div></div>
@@ -430,639 +287,544 @@
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════
-         SCREEN 2 — SURVEY (dynamic)
-    ══════════════════════════════════════════════ -->
-    <div class="screen" id="screen-survey">
+    <!-- ══ SCREEN: SURVEY ════════════════════════════════════════ -->
+    <div class="screen" id="sc-survey">
       <div class="progress-wrap">
         <div class="progress-label">
-          <span class="progress-text" id="prog-label">Módulo 1</span>
-          <span class="progress-count" id="prog-count">0 / 0</span>
+          <span class="prog-txt" id="prog-lbl">Módulo 1</span>
+          <span class="prog-cnt" id="prog-cnt">1 / 1</span>
         </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="prog-fill" style="width:0%"></div>
-        </div>
+        <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
       </div>
       <div class="steps-row" id="steps-row"></div>
-      <div id="module-content" class="fade-up"></div>
+      <div id="mod-content" class="fade-up"></div>
       <div class="nav-row">
-        <button class="nav-back" id="btn-prev" onclick="prevModule()">←</button>
-        <button class="btn" id="btn-next" onclick="nextModule()">
-          <span class="btn-text" id="btn-next-text">Siguiente →</span>
+        <button class="nav-back" id="btn-prev" onclick="prevMod()" style="display:none">←</button>
+        <button class="btn" id="btn-next" onclick="nextMod()">
+          <span class="btn-text" id="btn-next-txt">Siguiente →</span>
           <div class="btn-loader"><div class="spin"></div></div>
         </button>
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════
-         SCREEN 3 — SUCCESS
-    ══════════════════════════════════════════════ -->
-    <div class="screen" id="screen-success">
-      <div class="success-wrap fade-up">
+    <!-- ══ SCREEN: SUCCESS ═══════════════════════════════════════ -->
+    <div class="screen" id="sc-success">
+      <div class="success fade-up">
         <span class="success-icon">🎉</span>
         <div class="success-title">¡Gracias por tu tiempo!</div>
-        <div class="success-sub">
-          Tus respuestas han sido registradas exitosamente.<br>
-          Esta información es clave para construir un OakBerry Colombia más fuerte.
-        </div>
-        <div class="success-badge">OakBerry 360° — 2025</div>
+        <div class="success-sub">Tus respuestas quedaron registradas.<br>Esta información es clave para construir<br>un OakBerry Colombia más fuerte.</div>
+        <div class="success-badge">OakBerry 360° · 2025</div>
       </div>
     </div>
 
-  </div><!-- card-body -->
-</div><!-- card -->
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
-// CONFIG
+// CONFIG — reemplazar SCRIPT_URL después de desplegar Apps Script
 // ═══════════════════════════════════════════════════════════════════════════
-const SHEET_ID = '1ItlStjhm0nor6RUfgKEWh4uV0iRVPiVCRW7jmMfwNMs';
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-15YeOl2CwIZopVVGYfK-N5vnXHLnDjxrrBYzCxDPYQHknXU4ByvNeAqU2p6TZbvl/exec'; // Ver instrucciones abajo
-
-const PINS = { colaborador: '6789', franquiciado: '12345', administrativo: '12345' };
-const ROLES_WITH_PIN = ['franquiciado', 'administrativo'];
+const SCRIPT_URL = 'REEMPLAZAR_CON_URL_APPS_SCRIPT';
+const PINS = { colaborador:'6789', franquiciado:'12345', administrativo:'12345' };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SURVEY DATA
+// SURVEYS — preguntas exactas de los documentos Word
 // ═══════════════════════════════════════════════════════════════════════════
 const SURVEYS = {
 
-  // ── COLABORADOR ──────────────────────────────────────────────────────────
-  colaborador: [
-    {
-      code:'S1', title:'Experiencia en tienda',
-      sub:'Lo que pasa realmente cuando llega un cliente',
-      questions:[
-        {id:'c01',lens:'certeza',type:'textarea',
-         text:'¿Cuál es el momento más frecuente en que un cliente se ve confundido o frustrado en la tienda? Describe qué pasa y por qué.',
-         why:'El gap entre la experiencia diseñada y la real se manifiesta siempre en los mismos 2-3 momentos.'},
-        {id:'c02',lens:'mensaje',type:'single',
-         text:'¿Cuál es la pregunta que más hacen los clientes que entran por primera vez?',
-         options:['¿Qué es el acai?','¿Qué tiene de saludable?','¿Por qué es tan caro?','¿Cuánto demora el pedido?','¿Tienen opciones sin azúcar / veganas?','Otra']},
-        {id:'c03',lens:'certeza',type:'single',
-         text:'Cuando un cliente ve el precio del menú por primera vez, ¿cuál es la reacción más frecuente?',
-         options:['Lo acepta sin comentario y pide','Pregunta qué incluye antes de decidir','Hace un comentario sobre el precio','Compara con otra opción en voz alta','Se va sin comprar']},
-        {id:'c04',lens:'flujo',type:'single',
-         text:'¿Con qué frecuencia le pides al cliente que se registre en Loopy o que deje sus datos?',
-         options:['Siempre, con todos los clientes','La mayoría de las veces','Solo cuando el cliente pregunta','Casi nunca','No sé bien cómo promoverlo']},
-        {id:'c05',lens:'flujo',type:'textarea',
-         text:'¿Hay algo que podrías hacer para mejorar la experiencia del cliente pero que no haces porque no está en el protocolo o no tienes tiempo?',
-         why:'Las mejoras más baratas suelen ser las que el equipo ya sabe y nadie ha formalizado.'},
-      ]
-    },
-    {
-      code:'S2', title:'Producto y menú',
-      sub:'Lo que el cliente pide, no pide y pregunta',
-      questions:[
-        {id:'c06',lens:'oferta',type:'textarea',
-         text:'¿Cuál es el producto o combinación que piden con más frecuencia los clientes frecuentes? ¿Y cuál es el que casi nadie pide?',
-         why:'Los favoritos identifican los activos reales de la marca.'},
-        {id:'c07',lens:'oferta',type:'textarea',
-         text:'¿Hay algo del menú que los clientes preguntan que no existe — un sabor, tamaño o combinación — que escuchas frecuentemente?',
-         why:'Las peticiones repetidas de producto son inteligencia de mercado gratuita.'},
-        {id:'c08',lens:'mensaje',type:'multi',
-         text:'¿Cuáles de estos materiales de comunicación tiene tu tienda actualmente?',
-         options:['Menú físico actualizado','Menú en pantalla digital','Carteles de promociones vigentes','Material de Loopy visible','QR de redes sociales','Ninguno de los anteriores']},
-      ]
-    },
-    {
-      code:'S3', title:'Tú y la marca',
-      sub:'Cómo vives OakBerry desde adentro',
-      questions:[
-        {id:'c09',lens:'certeza',type:'scale',
-         text:'Del 1 al 10, ¿qué tan fácil te resulta explicarle a un cliente por qué OakBerry vale más que una opción más barata?',
-         why:'Un colaborador que no puede justificar el precio transfiere inseguridad al cliente.'},
-        {id:'c10',lens:'tribu',type:'textarea',
-         text:'¿Qué es lo que más orgullo te genera de trabajar en OakBerry?'},
-        {id:'c11',lens:'tribu',type:'textarea',
-         text:'¿Qué es lo que más te frustra o incomoda en tu trabajo del día a día en la tienda?'},
-        {id:'c12',lens:'certeza',type:'single',
-         text:'¿Recomendarías OakBerry a alguien cercano como lugar para trabajar?',
-         options:['Sí, sin dudarlo','Sí, con algunas reservas','No estoy seguro','Probablemente no']},
-      ]
-    },
-    {
-      code:'S4', title:'Tu zona y lo que escuchas',
-      sub:'Inteligencia local de primera mano',
-      questions:[
-        {id:'c13',lens:'tribu',type:'textarea',
-         text:'¿Qué otras marcas o lugares mencionan los clientes cuando comparan con OakBerry? ¿Qué dicen de ellos?',
-         why:'Los clientes comparan en voz alta más de lo que parece. Eso es benchmarking en tiempo real.'},
-        {id:'c14',lens:'atencion',type:'textarea',
-         text:'¿Hay algo en tu zona o cerca de la tienda que sea una oportunidad para atraer más clientes y que el equipo central probablemente no conoce?'},
-        {id:'c15',lens:'flujo',type:'single',
-         text:'¿Con qué frecuencia llegan clientes nuevos porque vieron algo en redes sociales o internet?',
-         options:['Muy seguido — es una fuente clara','Ocasionalmente','Rara vez','No lo sé — nunca les pregunto']},
-      ]
-    },
-    {
-      code:'S5', title:'Para cerrar',
-      sub:'Lo más importante que quieres decir',
-      questions:[
-        {id:'c16',lens:'mensaje',type:'textarea',
-         text:'¿Qué cambio en la tienda — en producto, comunicación o protocolo — haría mayor diferencia para ti y los clientes en los próximos 30 días?',
-         why:'Las mejoras más rápidas y baratas siempre las conoce el equipo de tienda primero.'},
-        {id:'c17',lens:'oferta',type:'textarea',
-         text:'¿Hay algo más que quieras decirle al equipo de OakBerry — sobre lo que ves, escuchas o sientes — que sientas que nadie te ha preguntado?',
-         why:'La pregunta abierta final siempre es la más reveladora.'},
-      ]
-    },
-  ],
+/* ─────────────────────────────────────────────────────────────────────────
+   COLABORADORES DE TIENDA  (18 preguntas / 5 secciones)
+───────────────────────────────────────────────────────────────────────── */
+colaborador:[
+  {
+    code:'Sección 1', title:'Experiencia en tienda',
+    sub:'Lo que pasa realmente cuando llega un cliente',
+    questions:[
+      {id:'P01',lens:'certeza',type:'textarea',
+       text:'¿Cuál es el momento más frecuente en que un cliente se ve confundido o frustrado en la tienda? Describe qué pasa y por qué.',
+       why:'Las fricciones repetidas en tienda son señales de problemas de comunicación o de proceso que el equipo central no siempre ve.'},
+      {id:'P02',lens:'mensaje',type:'single',
+       text:'¿Cuál es la pregunta que más hacen los clientes que entran por primera vez?',
+       opts:['¿Qué es el acai?','¿Qué tiene de saludable?','¿Por qué es tan caro?','¿Cuánto demora el pedido?','¿Tienen opciones sin azúcar / veganas?','Otra']},
+      {id:'P03',lens:'certeza',type:'textarea',
+       text:'¿Qué hace la mayoría de los clientes cuando ven el precio del menú por primera vez?',
+       why:'La reacción espontánea al precio es el indicador más honesto de la percepción de valor en el punto de venta.'},
+      {id:'P04',lens:'flujo',type:'single',
+       text:'¿Con qué frecuencia le pides al cliente que se registre en Loopy o que deje sus datos?',
+       opts:['Siempre, con todos los clientes','La mayoría de las veces','Solo cuando el cliente pregunta','Casi nunca — no está en mi protocolo','No sé bien cómo promoverlo']},
+      {id:'P05',lens:'certeza',type:'textarea',
+       text:'¿Hay algo que podrías hacer para mejorar la experiencia del cliente pero que no haces porque no está en ningún protocolo o no tienes tiempo?'},
+    ]
+  },
+  {
+    code:'Sección 2', title:'Producto y menú',
+    sub:'Lo que el cliente pide, lo que no pide y lo que pregunta',
+    questions:[
+      {id:'P06',lens:'oferta',type:'textarea',
+       text:'¿Cuál es el producto o combinación que piden con más frecuencia los clientes frecuentes? ¿Y cuál es el que casi nadie pide?'},
+      {id:'P07',lens:'oferta',type:'textarea',
+       text:'¿Hay algo del menú que los clientes preguntan que no existe — un sabor, un tamaño, una combinación — que escuchas frecuentemente?',
+       why:'Las peticiones repetidas de producto son inteligencia de mercado gratuita.'},
+      {id:'P08',lens:'mensaje',type:'multi',
+       text:'¿Cuáles de estos materiales de comunicación tiene tu tienda actualmente?',
+       opts:['Menú físico actualizado','Menú en pantalla digital','Carteles de promociones vigentes','Material de Loopy visible','QR de redes sociales','Ninguno de los anteriores']},
+    ]
+  },
+  {
+    code:'Sección 3', title:'Tú y la marca',
+    sub:'Cómo vives OakBerry desde adentro',
+    questions:[
+      {id:'P09',lens:'certeza',type:'scale',
+       text:'Del 1 al 10, ¿qué tan fácil te resulta explicarle a un cliente por qué OakBerry vale más que una opción más barata?',
+       why:'Un equipo que no puede justificar el precio transfiere esa inseguridad al cliente en el momento de compra.'},
+      {id:'P10',lens:'tribu',type:'textarea',
+       text:'¿Qué es lo que más orgullo te genera de trabajar en OakBerry?'},
+      {id:'P11',lens:'tribu',type:'textarea',
+       text:'¿Qué es lo que más te frustra o incomoda en tu trabajo del día a día en la tienda?'},
+      {id:'P12',lens:'certeza',type:'single',
+       text:'¿Recomendarías OakBerry a alguien cercano como lugar para trabajar?',
+       opts:['Sí, sin dudarlo','Sí, con algunas reservas','No estoy seguro','Probablemente no']},
+      {id:'P13',lens:'tribu',type:'multi',
+       text:'¿Sigues a OakBerry en redes sociales personalmente?',
+       opts:['Sí, en Instagram','Sí, en TikTok','En las dos','No sigo las cuentas','No tengo redes sociales']},
+    ]
+  },
+  {
+    code:'Sección 4', title:'Tu zona y lo que escuchas',
+    sub:'Inteligencia local de primera mano',
+    questions:[
+      {id:'P14',lens:'tribu',type:'textarea',
+       text:'¿Qué otras marcas o lugares mencionan los clientes cuando comparan con OakBerry? ¿Qué dicen de ellos?',
+       why:'Los clientes comparan en voz alta. Registrar esas comparaciones es más valioso que cualquier estudio de mercado formal.'},
+      {id:'P15',lens:'atencion',type:'textarea',
+       text:'¿Hay algo que pasa en tu zona o en las cercanías de la tienda que sea una oportunidad para atraer más clientes y que el equipo central probablemente no conoce?'},
+      {id:'P16',lens:'flujo',type:'single',
+       text:'¿Con qué frecuencia llegan clientes nuevos a la tienda porque vieron algo en redes sociales o en internet?',
+       opts:['Muy seguido — es una fuente clara de clientes nuevos','Ocasionalmente','Rara vez — la mayoría llega por otras razones','No lo sé — nunca les pregunto cómo llegaron']},
+    ]
+  },
+  {
+    code:'Sección 5', title:'Para cerrar',
+    sub:'Lo más importante que quieres decir',
+    questions:[
+      {id:'P17',lens:'mensaje',type:'textarea',
+       text:'¿Qué cambio en la tienda — en el producto, en la comunicación, en el protocolo o en cualquier cosa — haría mayor diferencia para ti y para los clientes en los próximos 30 días?',
+       why:'Las mejoras más rápidas y baratas suelen ser las que ya conoce el equipo de tienda. Este es el espacio para decirlas.'},
+      {id:'P18',lens:'oferta',type:'textarea',
+       text:'¿Hay algo más que quieras decirle al equipo de OakBerry — sobre lo que ves, lo que escuchas o lo que sientes — que sientas que nadie te ha preguntado?',
+       why:'La pregunta abierta final siempre es la más reveladora.'},
+    ]
+  },
+],
 
-  // ── FRANQUICIADO ─────────────────────────────────────────────────────────
-  franquiciado: [
-    {
-      code:'F1', title:'Tu negocio como inversión',
-      sub:'Rentabilidad, retorno y sostenibilidad del punto',
-      questions:[
-        {id:'f01',lens:'oferta',type:'textarea',
-         text:'¿Cómo describirías la salud financiera de tu punto hoy? ¿Estás en el retorno que esperabas cuando entraste a la franquicia?',
-         why:'La percepción del franquiciado sobre su retorno define su nivel de compromiso con el plan de crecimiento.'},
-        {id:'f02',lens:'oferta',type:'textarea',
-         text:'¿Cuáles son los 2 o 3 costos que más presionan tu margen y que sientes que están fuera de tu control?',
-         why:'Los costos incontrolables son la fuente principal de fricción con el modelo.'},
-        {id:'f03',lens:'flujo',type:'multi',
-         text:'¿En qué momento del día o semana tu punto genera más ventas?',
-         options:['Mañanas entre semana','Mediodías entre semana','Tardes entre semana','Fines de semana','Es muy parejo','Hay momentos muertos que me preocupan']},
-        {id:'f04',lens:'oferta',type:'textarea',
-         text:'¿Cuántos clientes aproximados atiende tu punto por día entre semana? ¿Ha subido, bajado o se mantuvo en los últimos 3 meses?',
-         why:'El tráfico por punto es el dato más honesto sobre la salud del negocio local.'},
-        {id:'f05',lens:'oferta',type:'textarea',
-         text:'¿Qué necesitarías del equipo central — marketing, operaciones o producto — para mejorar la rentabilidad de tu punto en los próximos 6 meses?'},
-      ]
-    },
-    {
-      code:'F2', title:'El cliente de tu punto',
-      sub:'Lo que ves tú que el equipo central no ve',
-      questions:[
-        {id:'f06',lens:'tribu',type:'textarea',
-         text:'Describe al cliente típico de tu punto. ¿Quién es, a qué hora viene, qué pide, cómo llega? ¿Es diferente al cliente que imaginas que OakBerry quiere atraer?',
-         why:'El cliente real de cada punto puede diferir del cliente ideal de la marca.'},
-        {id:'f07',lens:'certeza',type:'textarea',
-         text:'¿Cuáles son las 2 o 3 razones más frecuentes por las que un cliente no vuelve después de su primera visita, según lo que has observado?'},
-        {id:'f08',lens:'certeza',type:'single',
-         text:'¿Qué tan seguido reconoces a clientes frecuentes por cara o nombre en tu punto?',
-         options:['Reconozco a la mayoría','Reconozco a algunos','Muy poco — hay mucha rotación','Casi no hay clientes que vuelvan regularmente']},
-        {id:'f09',lens:'oferta',type:'textarea',
-         text:'¿Qué objeción sobre el precio escuchas más seguido? ¿Cómo la manejas hoy? ¿Sientes que tienes las herramientas para responderla bien?',
-         why:'El argumento de precio en cada punto es la primera línea de defensa del valor de la marca.'},
-        {id:'f10',lens:'flujo',type:'textarea',
-         text:'¿Usas Loopy activamente en tu punto? ¿Qué porcentaje de tus clientes lo usa? ¿Qué lo frena?'},
-      ]
-    },
-    {
-      code:'F3', title:'Tu zona y competencia local',
-      sub:'El mercado que tú conoces mejor que nadie',
-      questions:[
-        {id:'f11',lens:'tribu',type:'textarea',
-         text:'¿Quiénes son tus competidores más directos en la zona — no la competencia nacional, sino los que están cerca y se llevan tus clientes?',
-         why:'La competencia local puede ser muy diferente a la competencia de marca.'},
-        {id:'f12',lens:'atencion',type:'textarea',
-         text:'¿Hay algo que hace la competencia en tu zona que funciona y que OakBerry no está haciendo a nivel local?',
-         why:'Los franquiciados son los mejores ojos de la marca en el territorio.'},
-        {id:'f13',lens:'mensaje',type:'textarea',
-         text:'¿Qué pasa en tu zona que sea una oportunidad para OakBerry y que el equipo central probablemente no conoce?'},
-        {id:'f14',lens:'atencion',type:'single',
-         text:'¿Con qué frecuencia recibes apoyo de marketing del equipo central para activar tu zona?',
-         options:['Regularmente y es útil','Ocasionalmente, quisiera más','Muy esporádicamente','Casi nunca','Recibo materiales pero no son adecuados para mi zona']},
-      ]
-    },
-    {
-      code:'F4', title:'Relación con la marca y el modelo',
-      sub:'Lo que funciona, lo que falta y lo que te genera fricción',
-      questions:[
-        {id:'f15',lens:'mensaje',type:'textarea',
-         text:'¿Qué es lo que más valoras del modelo OakBerry como franquicia? ¿Qué podría mejorar para hacerte más fácil operar?'},
-        {id:'f16',lens:'certeza',type:'textarea',
-         text:'¿Sientes que el equipo central entiende la realidad de operar un punto de venta día a día? ¿En qué momentos lo sientes y en cuáles no?',
-         why:'La brecha de percepción entre franquiciador y franquiciado es la fuente más común de fricción operativa.'},
-        {id:'f17',lens:'flujo',type:'textarea',
-         text:'¿Qué herramientas o materiales de marketing te han servido para activar tu punto? ¿Qué te falta que deberían darte?'},
-        {id:'f18',lens:'oferta',type:'scale',
-         text:'Del 1 al 10, ¿qué tan orgulloso estás de la marca OakBerry cuando la presentas en tu comunidad? ¿Qué aumentaría ese número?',
-         why:'El orgullo del franquiciado es el primer indicador de si será un embajador activo de la marca.'},
-        {id:'f19',lens:'tribu',type:'textarea',
-         text:'Si pudieras enviarle un mensaje directo al equipo que define la estrategia de marketing, ¿qué le dirías? ¿Qué necesitas que sepan?',
-         why:'Las respuestas aquí suelen ser las más accionables de todo el cuestionario.'},
-        {id:'f20',lens:'mensaje',type:'textarea',
-         text:'¿Qué cambio — operativo, de producto, de precio o de marketing — tendría el mayor impacto en tu punto en los próximos 90 días?'},
-      ]
-    },
-  ],
+/* ─────────────────────────────────────────────────────────────────────────
+   FRANQUICIADOS  (20 preguntas / 4 módulos)
+───────────────────────────────────────────────────────────────────────── */
+franquiciado:[
+  {
+    code:'F1', title:'Tu negocio como inversión',
+    sub:'Rentabilidad, retorno y sostenibilidad del punto',
+    questions:[
+      {id:'F01',lens:'oferta',type:'textarea',
+       text:'¿Cómo describirías la salud financiera de tu punto hoy? ¿Estás en el retorno que esperabas cuando decidiste entrar a la franquicia?',
+       why:'La percepción del franquiciado sobre su retorno define su nivel de compromiso con la marca y con el plan de crecimiento.'},
+      {id:'F02',lens:'oferta',type:'textarea',
+       text:'¿Cuáles son los 2 o 3 costos que más presionan tu margen y que sientes que están fuera de tu control?',
+       why:'Los costos que el franquiciado no puede controlar son los que generan más fricción con el modelo.'},
+      {id:'F03',lens:'flujo',type:'multi',
+       text:'¿En qué momento del día o de la semana tu punto genera más ventas? (Selecciona todos los que apliquen)',
+       opts:['Mañanas entre semana','Mediodías entre semana','Tardes entre semana','Fines de semana','Es muy parejo durante la semana','Hay momentos muertos que me preocupan']},
+      {id:'F04',lens:'oferta',type:'textarea',
+       text:'¿Cuántos clientes aproximados atiende tu punto por día entre semana? ¿Y en fin de semana? ¿Ha subido, bajado o se ha mantenido en los últimos 3 meses?',
+       why:'El tráfico por punto es el dato más honesto sobre la salud del negocio local.'},
+      {id:'F05',lens:'oferta',type:'textarea',
+       text:'¿Qué necesitarías — del franquiciador, del equipo de marketing o de operaciones — para mejorar la rentabilidad de tu punto en los próximos 6 meses?',
+       why:'Las necesidades no atendidas del franquiciado terminan afectando la experiencia del cliente.'},
+    ]
+  },
+  {
+    code:'F2', title:'El cliente de tu punto específico',
+    sub:'Lo que ves tú que el equipo central no ve',
+    questions:[
+      {id:'F06',lens:'tribu',type:'textarea',
+       text:'Describe al cliente típico de tu punto. ¿Quién es, a qué hora viene, qué pide, cómo llega? ¿Es diferente al cliente que imaginas que OakBerry quiere atraer?',
+       why:'El cliente real de cada punto puede diferir del cliente ideal de la marca. Conocer esa brecha es el primer paso para cerrarla.'},
+      {id:'F07',lens:'certeza',type:'textarea',
+       text:'¿Cuáles son las 2 o 3 razones más frecuentes por las que un cliente no vuelve después de su primera visita, según lo que has observado en tu punto?',
+       why:'El franquiciado que opera directamente tiene acceso a señales de deserción que ningún sistema de métricas puede capturar.'},
+      {id:'F08',lens:'certeza',type:'single',
+       text:'¿Qué tan seguido reconoces a clientes frecuentes por cara o por nombre en tu punto?',
+       opts:['Reconozco a la mayoría de mis clientes frecuentes','Reconozco a algunos pero no a todos','Muy poco — hay mucha rotación de clientes','Casi no tengo clientes que vuelvan regularmente']},
+      {id:'F09',lens:'oferta',type:'textarea',
+       text:'¿Qué objeción sobre el precio escuchas más seguido en tu punto? ¿Cómo la manejas hoy? ¿Sientes que tienes las herramientas para responderla bien?',
+       why:'El argumento de precio en cada punto es la primera línea de defensa del valor de la marca.'},
+      {id:'F10',lens:'flujo',type:'textarea',
+       text:'¿Usas Loopy u otro mecanismo de fidelización activamente en tu punto? ¿Qué porcentaje de tus clientes lo usa? ¿Qué lo frena?',
+       why:'Entender qué frena la adopción de Loopy en cada punto revela barreras operativas concretas.'},
+    ]
+  },
+  {
+    code:'F3', title:'Tu zona y tu competencia inmediata',
+    sub:'El mercado que tú conoces mejor que nadie',
+    questions:[
+      {id:'F11',lens:'tribu',type:'textarea',
+       text:'¿Quiénes son tus competidores más directos en la zona — no la competencia nacional, sino los que están cerca y se llevan a tus clientes?',
+       why:'La competencia local puede ser muy diferente a la competencia de marca global.'},
+      {id:'F12',lens:'atencion',type:'textarea',
+       text:'¿Hay algo que haga la competencia en tu zona que funcione y que OakBerry no esté haciendo a nivel local? Piensa en promociones, horarios, presencia física, activaciones.',
+       why:'Los franquiciados son los mejores ojos de la marca en el territorio.'},
+      {id:'F13',lens:'mensaje',type:'textarea',
+       text:'¿Qué pasa en tu zona específica que sea una oportunidad para OakBerry y que el equipo central probablemente no conoce? (Evento, comunidad, tendencia, espacio, audiencia.)',
+       why:'El conocimiento local del franquiciado es un activo estratégico subutilizado.'},
+      {id:'F14',lens:'atencion',type:'single',
+       text:'¿Con qué frecuencia recibes apoyo de marketing o comunicación del equipo central para activar tu zona o tu punto?',
+       opts:['Regularmente y es útil','Ocasionalmente, pero quisiera más','Muy esporádicamente','Casi nunca recibo apoyo de marketing','Recibo materiales pero no son adecuados para mi zona']},
+    ]
+  },
+  {
+    code:'F4', title:'Tu relación con la marca y el modelo',
+    sub:'Lo que funciona, lo que falta y lo que te genera fricción',
+    questions:[
+      {id:'F15',lens:'mensaje',type:'textarea',
+       text:'¿Qué es lo que más valoras del modelo OakBerry como franquicia? ¿Qué sientes que el modelo podría mejorar para hacerte más fácil operar?',
+       why:'La satisfacción del franquiciado con el modelo determina la calidad con la que opera el punto.'},
+      {id:'F16',lens:'certeza',type:'textarea',
+       text:'¿Sientes que el equipo central entiende la realidad de operar un punto de venta día a día? ¿En qué momentos lo sientes y en qué momentos no?',
+       why:'La brecha de percepción entre franquiciador y franquiciado es la fuente más común de fricción.'},
+      {id:'F17',lens:'flujo',type:'textarea',
+       text:'¿Qué herramientas, materiales o información del equipo de marketing te han servido para activar tu punto? ¿Qué te falta que deberían darte?',
+       why:'Si el franquiciado no tiene materiales que pueda ejecutar con autonomía, el marketing central no llega al punto.'},
+      {id:'F18',lens:'oferta',type:'scale',
+       text:'Del 1 al 10, ¿qué tan orgulloso estás de la marca OakBerry cuando la presentas en tu comunidad o zona? ¿Qué aumentaría ese número?',
+       why:'El orgullo del franquiciado es el primer indicador de si será un embajador activo o un operador pasivo.'},
+      {id:'F19',lens:'tribu',type:'textarea',
+       text:'Si pudieras enviarle un mensaje directo al equipo que define la estrategia de marketing de OakBerry Colombia, ¿qué le dirías? ¿Qué necesitas que sepan que probablemente no saben?',
+       why:'Las respuestas aquí suelen ser las más accionables de todo el cuestionario.'},
+      {id:'F20',lens:'mensaje',type:'textarea',
+       text:'¿Qué cambio — operativo, de producto, de precio o de marketing — tendría el mayor impacto en tu punto en los próximos 90 días?',
+       why:'Los franquiciados con 1–2 puntos sienten los cambios de forma inmediata.'},
+    ]
+  },
+],
 
-  // ── ADMINISTRATIVO ───────────────────────────────────────────────────────
-  administrativo: [
-    {
-      code:'E1', title:'Tu área: diagnóstico interno',
-      sub:'Lo que funciona, lo que frena y lo que falta',
-      questions:[
-        {id:'a01',lens:'oferta',type:'textarea',
-         text:'¿Cuál es el objetivo más importante que tiene tu área para los próximos 12 meses? ¿Tienes los recursos, la información y el mandato para lograrlo?',
-         why:'Si el objetivo no tiene recursos ni mandato claro, no es un objetivo — es un deseo asignado.'},
-        {id:'a02',lens:'flujo',type:'textarea',
-         text:'¿Cuál es el cuello de botella más grande dentro de tu área hoy — el que más limita la velocidad o calidad de lo que produces?',
-         why:'Los cuellos de botella que no se nombran no se resuelven.'},
-        {id:'a03',lens:'mensaje',type:'textarea',
-         text:'¿Qué decisión importante de tu área ha estado pendiente más tiempo del que debería? ¿Qué la ha frenado?',
-         why:'Las decisiones aplazadas acumulan costo invisible.'},
-        {id:'a04',lens:'certeza',type:'scale',
-         text:'Del 1 al 10, ¿qué tan alineada está tu área con la dirección estratégica del negocio tal como la entiendes hoy?',
-         why:'Si cada área da un número muy distinto, hay un problema de claridad en la dirección.'},
-        {id:'a05',lens:'oferta',type:'textarea',
-         text:'¿Qué métrica o dato que hoy no tienes cambiaría significativamente cómo tomas decisiones en tu área?',
-         why:'Las métricas que faltan revelan los puntos ciegos del sistema.'},
-      ]
-    },
-    {
-      code:'E2', title:'Intersección entre áreas',
-      sub:'Dónde se conectan, dónde se friccionan',
-      questions:[
-        {id:'a06',lens:'flujo',type:'textarea',
-         text:'¿Con qué área tienes más dependencia para cumplir tus objetivos? ¿Esa dependencia funciona bien hoy o genera fricciones frecuentes?',
-         why:'Las dependencias entre áreas son los puntos de mayor riesgo operativo.'},
-        {id:'a07',lens:'flujo',type:'textarea',
-         text:'¿Hay alguna decisión que debería tomarse entre dos o más áreas y que nadie está tomando porque no está claro a quién le corresponde?',
-         why:'Las decisiones huérfanas son las más costosas — viven en el limbo y generan fricción crónica.'},
-        {id:'a08',lens:'mensaje',type:'textarea',
-         text:'¿Qué información produce tu área que otras áreas no están usando bien? ¿Y qué necesitas de otras áreas que no llega como debería?',
-         why:'Los huecos en los flujos de información producen decisiones con datos incompletos.'},
-        {id:'a09',lens:'certeza',type:'single',
-         text:'¿Cómo describirías la comunicación entre áreas hoy?',
-         options:['Fluida y proactiva','Funcional pero reactiva','Hay silos — cada área trabaja por su lado','Hay fricciones frecuentes entre algunas áreas','Depende de las personas, no hay sistema claro']},
-        {id:'a10',lens:'tribu',type:'textarea',
-         text:'¿Qué podría hacer tu área para facilitar el trabajo de otra área que hoy no está haciendo?'},
-      ]
-    },
-    {
-      code:'E3', title:'Visión de marketing desde tu área',
-      sub:'Cómo ve el negocio la función de marketing',
-      questions:[
-        {id:'a11',lens:'atencion',type:'textarea',
-         text:'¿Cómo describirías el rol del marketing en OakBerry Colombia hoy? ¿Es estratégico, operativo o reactivo? ¿Cómo debería ser?',
-         why:'La percepción del marketing desde otras áreas revela si está siendo visto como generador de valor.'},
-        {id:'a12',lens:'oferta',type:'textarea',
-         text:'¿Qué acción de marketing — que hoy no se está haciendo — tendría mayor impacto en el negocio desde la perspectiva de tu área?',
-         why:'Marketing visto desde finanzas y operaciones produce ideas más accionables.'},
-        {id:'a13',lens:'mensaje',type:'textarea',
-         text:'¿Hay algo que marketing comunica hacia afuera que genera compromisos que operaciones o finanzas no puede cumplir consistentemente?',
-         why:'La brecha entre lo que marketing promete y lo que la operación entrega destruye la experiencia de marca.'},
-        {id:'a14',lens:'flujo',type:'textarea',
-         text:'¿Cómo se toman hoy las decisiones de inversión en marketing? ¿Finanzas y operaciones tienen visibilidad y voz en esas decisiones?'},
-        {id:'a15',lens:'certeza',type:'scale',
-         text:'Del 1 al 10, ¿qué tan bien entiende el equipo de marketing la realidad operativa y financiera del negocio?',
-         why:'Un equipo de marketing desconectado de los números diseña estrategias que no sobreviven la ejecución.'},
-      ]
-    },
-    {
-      code:'E4', title:'El cliente y el mercado',
-      sub:'Qué ve cada área que las otras no ven',
-      questions:[
-        {id:'a16',lens:'tribu',type:'textarea',
-         text:'¿Qué sabes sobre el cliente de OakBerry desde la perspectiva de tu área que probablemente las otras áreas no conocen?',
-         why:'Finanzas, operaciones y marketing ven al cliente desde ángulos distintos. Juntos forman la imagen completa.'},
-        {id:'a17',lens:'oferta',type:'textarea',
-         text:'¿Hay alguna señal de mercado — en ventas, operación o datos — que nadie está atendiendo y que podría ser una oportunidad o amenaza?',
-         why:'Las señales débiles que cada área capta pero no comunica son las alertas más valiosas del sistema.'},
-        {id:'a18',lens:'mensaje',type:'textarea',
-         text:'¿Cómo describirías el posicionamiento real de OakBerry Colombia hoy — no el deseado, sino el real desde lo que ves en tu área?'},
-        {id:'a19',lens:'flujo',type:'textarea',
-         text:'¿Qué cambio en el modelo de negocio tendría mayor impacto en los resultados en los próximos 12 meses?'},
-      ]
-    },
-    {
-      code:'E5', title:'Perspectiva de cierre',
-      sub:'Las preguntas que importan más allá del área',
-      questions:[
-        {id:'a20',lens:'certeza',type:'textarea',
-         text:'¿Qué decisión estratégica crees que OakBerry Colombia debería tomar en los próximos 90 días y que todavía no se ha tomado? ¿Qué la está frenando?',
-         why:'Las decisiones que todos conocen pero nadie dice son las que más costo le generan al negocio.'},
-        {id:'a21',lens:'tribu',type:'textarea',
-         text:'¿Qué pregunta sobre el negocio te genera más incertidumbre hoy? La que más te ocupa cuando piensas en el futuro de OakBerry.',
-         why:'Nombrar las incertidumbres es el primer paso para resolverlas colectivamente.'},
-        {id:'a22',lens:'mensaje',type:'textarea',
-         text:'Si tuvieras que describir la cultura interna de OakBerry Colombia en 3 palabras hoy — no la aspiracional, sino la real — ¿cuáles serían? ¿Y cómo debería ser?',
-         why:'La cultura real vs la deseada revela la brecha de liderazgo más importante.'},
-      ]
-    },
-  ],
-};
+/* ─────────────────────────────────────────────────────────────────────────
+   EJECUTIVOS 360°  (22 preguntas / 5 módulos)
+───────────────────────────────────────────────────────────────────────── */
+administrativo:[
+  {
+    code:'E1', title:'Tu área: diagnóstico interno',
+    sub:'Lo que funciona, lo que frena y lo que falta',
+    questions:[
+      {id:'E01',lens:'oferta',type:'textarea',
+       text:'¿Cuál es el objetivo más importante que tiene tu área para los próximos 12 meses? ¿Tienes los recursos, la información y el mandato para lograrlo?',
+       why:'Si el objetivo de área no tiene recursos ni mandato claro, no es un objetivo — es un deseo asignado.'},
+      {id:'E02',lens:'flujo',type:'textarea',
+       text:'¿Cuál es el cuello de botella más grande dentro de tu área hoy — el que más limita la velocidad o la calidad de lo que produces?',
+       why:'Los cuellos de botella que no se nombran no se resuelven.'},
+      {id:'E03',lens:'mensaje',type:'textarea',
+       text:'¿Qué decisión importante de tu área ha estado pendiente por más tiempo del que debería? ¿Qué la ha frenado?',
+       why:'Las decisiones aplazadas acumulan costo invisible.'},
+      {id:'E04',lens:'certeza',type:'scale',
+       text:'Del 1 al 10, ¿qué tan alineada está tu área con la dirección estratégica del negocio tal como la entiendes hoy? ¿Qué haría que esa alineación fuera un 10?',
+       why:'Si cada área da un número muy distinto, hay un problema de claridad en la dirección.'},
+      {id:'E05',lens:'oferta',type:'textarea',
+       text:'¿Qué métrica o dato que hoy no tienes cambiaría significativamente cómo tomas decisiones en tu área?',
+       why:'Las métricas que faltan revelan los puntos ciegos del sistema de información.'},
+    ]
+  },
+  {
+    code:'E2', title:'Intersección entre áreas',
+    sub:'Dónde se conectan, dónde se friccionan',
+    questions:[
+      {id:'E06',lens:'flujo',type:'textarea',
+       text:'¿Con qué área tienes más dependencia para cumplir tus objetivos? ¿Esa dependencia funciona bien hoy o genera fricciones frecuentes?',
+       why:'Las dependencias entre áreas son los puntos de mayor riesgo operativo.'},
+      {id:'E07',lens:'flujo',type:'textarea',
+       text:'¿Hay alguna decisión que debería tomarse entre dos o más áreas y que nadie está tomando porque no está claro a quién le corresponde?',
+       why:'Las decisiones huérfanas viven en el limbo y generan fricción crónica.'},
+      {id:'E08',lens:'mensaje',type:'textarea',
+       text:'¿Qué información produce tu área que otras áreas no están usando bien o no reciben a tiempo? ¿Y qué información necesitas de otras áreas que no llega como debería?',
+       why:'Los huecos en los flujos de información producen decisiones con datos incompletos.'},
+      {id:'E09',lens:'certeza',type:'single',
+       text:'¿Cómo describirías la comunicación entre áreas hoy?',
+       opts:['Fluida y proactiva — nos avisamos antes de que sea urgente','Funcional pero reactiva — nos comunicamos cuando ya hay un problema','Hay silos claros — cada área trabaja por su lado','Hay fricciones frecuentes entre algunas áreas','Depende mucho de las personas, no hay un sistema claro']},
+      {id:'E10',lens:'tribu',type:'textarea',
+       text:'¿Qué podría hacer tu área para facilitar el trabajo de otra área que hoy no está haciendo? ¿Y qué podrías pedirle a otra área que cambiaría significativamente tu trabajo?',
+       why:'Las mejoras más rápidas entre áreas son las que ya conocen quienes están adentro.'},
+    ]
+  },
+  {
+    code:'E3', title:'Visión de marketing desde tu área',
+    sub:'Cómo ve el negocio la función de marketing',
+    questions:[
+      {id:'E11',lens:'atencion',type:'textarea',
+       text:'¿Cómo describirías el rol del marketing en OakBerry Colombia hoy? ¿Es estratégico, operativo o reactivo? ¿Cómo debería ser?',
+       why:'La percepción del marketing desde otras áreas revela si está siendo visto como generador de valor.'},
+      {id:'E12',lens:'oferta',type:'textarea',
+       text:'¿Qué acción de marketing — que hoy no se está haciendo — tendría el mayor impacto en el negocio desde la perspectiva de tu área?',
+       why:'Marketing visto desde finanzas y operaciones produce ideas más accionables.'},
+      {id:'E13',lens:'mensaje',type:'textarea',
+       text:'¿Hay algo que marketing comunica hacia afuera (a clientes) que genera compromisos que operaciones o finanzas no puede cumplir consistentemente?',
+       why:'La brecha entre lo que marketing promete y lo que la operación entrega destruye la experiencia de marca.'},
+      {id:'E14',lens:'flujo',type:'textarea',
+       text:'¿Cómo se toman hoy las decisiones de inversión en marketing? ¿Las áreas de finanzas y operaciones tienen visibilidad y voz en esas decisiones?',
+       why:'Las decisiones de marketing desconectadas de finanzas y operaciones producen campañas que el negocio no puede sostener.'},
+      {id:'E15',lens:'certeza',type:'scale',
+       text:'Del 1 al 10, ¿qué tan bien entiende el equipo de marketing la realidad operativa y financiera del negocio? ¿Qué cambiaría si ese número fuera un 10?',
+       why:'Un equipo de marketing que no entiende los números diseña estrategias que no sobreviven la ejecución.'},
+    ]
+  },
+  {
+    code:'E4', title:'El cliente y el mercado desde tu área',
+    sub:'Qué ve cada área que las otras no ven',
+    questions:[
+      {id:'E16',lens:'tribu',type:'textarea',
+       text:'¿Qué sabes sobre el cliente de OakBerry desde la perspectiva de tu área que probablemente las otras áreas no conocen?',
+       why:'Finanzas ve al cliente como ticket y frecuencia. Operaciones como flujo. Marketing como audiencia. Los tres juntos forman la imagen completa.'},
+      {id:'E17',lens:'oferta',type:'textarea',
+       text:'¿Hay alguna señal de mercado — en ventas, en operación o en datos — que nadie está atendiendo y que podría ser una oportunidad o una amenaza?',
+       why:'Las señales débiles que cada área capta pero no comunica son las alertas más valiosas del sistema.'},
+      {id:'E18',lens:'mensaje',type:'textarea',
+       text:'¿Cómo describirías el posicionamiento real de OakBerry Colombia en el mercado hoy — no el deseado, sino el real desde lo que ves en tu área?',
+       why:'Las tres perspectivas juntas revelan la realidad del posicionamiento.'},
+      {id:'E19',lens:'flujo',type:'textarea',
+       text:'¿Qué cambio en el modelo de negocio — de producto, precio, canal o experiencia — crees que tendría mayor impacto en los resultados en los próximos 12 meses?',
+       why:'Las mejores ideas de innovación de negocio vienen de quienes ven los números y la operación.'},
+    ]
+  },
+  {
+    code:'E5', title:'Perspectiva de cierre',
+    sub:'Las preguntas que importan más allá del área',
+    questions:[
+      {id:'E20',lens:'certeza',type:'textarea',
+       text:'¿Qué decisión estratégica crees que OakBerry Colombia debería tomar en los próximos 90 días y que todavía no se ha tomado? ¿Qué la está frenando?',
+       why:'Las decisiones que todos conocen pero nadie dice son las que más costo le generan al negocio.'},
+      {id:'E21',lens:'tribu',type:'textarea',
+       text:'¿Qué pregunta sobre el negocio te genera más incertidumbre hoy — la que más te ocupa cuando piensas en el futuro de OakBerry Colombia?',
+       why:'Nombrar las incertidumbres es el primer paso para resolverlas colectivamente.'},
+      {id:'E22',lens:'mensaje',type:'textarea',
+       text:'Si tuvieras que describir la cultura interna de OakBerry Colombia en 3 palabras hoy — no la aspiracional, sino la real — ¿cuáles serían? ¿Y cómo debería ser?',
+       why:'La cultura real vs la deseada revela la brecha de liderazgo más importante.'},
+    ]
+  },
+],
+}; // end SURVEYS
 
 // ═══════════════════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════════════════
-let currentRole = null;
-let currentModuleIdx = 0;
-let answers = {};
-let metaData = {};
+let role=null, modIdx=0, answers={}, meta={};
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ROLE SELECTION
+// ROLE SCREEN
 // ═══════════════════════════════════════════════════════════════════════════
-function selectRole(role) {
-  currentRole = role;
-  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('role-' + role).classList.add('selected');
-
-  const pinWrap = document.getElementById('pin-wrap');
-  const btnEnter = document.getElementById('btn-enter');
-
-  if (ROLES_WITH_PIN.includes(role)) {
-    pinWrap.classList.add('show');
-    document.getElementById('pin-input').value = '';
-    document.getElementById('pin-error').classList.remove('show');
-    btnEnter.disabled = false;
-  } else {
-    pinWrap.classList.remove('show');
-    btnEnter.disabled = false;
-  }
+function pickRole(r){
+  role=r;
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('rb-'+r).classList.add('selected');
+  document.getElementById('pin-wrap').classList.add('show');
+  document.getElementById('pin-err').classList.remove('show');
+  document.getElementById('pin-input').value='';
+  document.getElementById('btn-enter').disabled=false;
+  setTimeout(()=>document.getElementById('pin-input').focus(),100);
+}
+function doEnter(){
+  if(!role)return;
+  const pin=document.getElementById('pin-input').value.trim();
+  if(pin!==PINS[role]){document.getElementById('pin-err').classList.add('show');return;}
+  document.getElementById('pin-err').classList.remove('show');
+  ['colab','franq','admin'].forEach(k=>document.getElementById('meta-'+k).style.display='none');
+  const map={colaborador:'colab',franquiciado:'franq',administrativo:'admin'};
+  document.getElementById('meta-'+map[role]).style.display='block';
+  const titles={colaborador:'Cuéntanos sobre ti y tu tienda',franquiciado:'Cuéntanos sobre ti y tu punto',administrativo:'Cuéntanos sobre ti y tu área'};
+  document.getElementById('meta-title').textContent=titles[role];
+  goTo('sc-meta');
 }
 
-function enterSurvey() {
-  if (!currentRole) return;
+// ═══════════════════════════════════════════════════════════════════════════
+// TIENDAS POR CIUDAD
+// ═══════════════════════════════════════════════════════════════════════════
+const TIENDAS = {
+  'Barranquilla': ['Viva Centro Comercial','Barranquilla 76','Plaza del Parque Centro Comercial'],
+  'Bogota':       ['Andino Centro Comercial','Calle 109','Parque Colina Centro Comercial',
+                   'Unicentro Centro Comercial','Zona G','Zona T','Plaza Claro','Salvio 93',
+                   'Gran Estacion Centro Comercial','Titan Plaza','Maloka'],
+  'Bucaramanga':  ['Bucaramanga','Centro Comercial Cañaveral'],
+  'Cali':         ['Ciudad Jardin','Club Campestre de Cali','Granada',
+                   'Jardin Plaza Centro Comercial','Centro Comercial Chipichape',
+                   'Mall Plaza Centro Comercial'],
+  'Cartagena':    ['Bocagrande'],
+  'Cucuta':       ['Los Caobos'],
+  'Medellin':     ['Oviedo Centro Comercial','Aeropuerto Jose Maria Cordoba',
+                   'El Tesoro Centro Comercial','Laureles',
+                   'Viva Envigado Centro Comercial','Llano Grande'],
+  'Monteria':     ['Monteria'],
+  'Pereira':      ['Pereira'],
+  'Santa Marta':  ['Santa Marta'],
+  'Valledupar':   ['Valledupar'],
+};
 
-  if (ROLES_WITH_PIN.includes(currentRole)) {
-    const pin = document.getElementById('pin-input').value.trim();
-    if (pin !== PINS[currentRole]) {
-      document.getElementById('pin-error').classList.add('show');
-      document.getElementById('pin-input').focus();
-      return;
+function fillTiendas(ciudadId, tiendaId){
+  const ciudad = document.getElementById(ciudadId).value;
+  const sel    = document.getElementById(tiendaId);
+  sel.innerHTML = '<option value="">Seleccionar tienda...</option>';
+  (TIENDAS[ciudad]||[]).forEach(t=>{
+    const o=document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// META SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+function gv(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+function startSurvey(){
+  if(role==='colaborador'){
+    if(!gv('c-nombre')||!gv('c-ciudad')||!gv('c-tienda')||!gv('c-tiempo')){alert('Por favor completa todos los campos.');return;}
+    meta={nombre:gv('c-nombre'),ciudad:gv('c-ciudad'),tienda:gv('c-tienda'),tiempo:gv('c-tiempo')};
+  } else if(role==='franquiciado'){
+    if(!gv('f-nombre')||!gv('f-ciudad')||!gv('f-tienda')||!gv('f-num')){alert('Por favor completa todos los campos.');return;}
+    meta={nombre:gv('f-nombre'),ciudad:gv('f-ciudad'),puntos:gv('f-tienda'),num_puntos:gv('f-num')};
+  } else {
+    if(!gv('a-nombre')||!gv('a-area')||!gv('a-ciudad')||!gv('a-tiempo')){alert('Por favor completa todos los campos.');return;}
+    meta={nombre:gv('a-nombre'),area:gv('a-area'),ciudad:gv('a-ciudad'),tiempo:gv('a-tiempo')};
+  }
+  modIdx=0; answers={};
+  renderMod();
+  goTo('sc-survey');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SURVEY RENDER
+// ═══════════════════════════════════════════════════════════════════════════
+const LENS_LABELS={oferta:'Oferta',flujo:'Flujo',mensaje:'Mensaje',certeza:'Certeza',tribu:'Tribu',atencion:'Atención'};
+
+function renderMod(){
+  const mods=SURVEYS[role];
+  const mod=mods[modIdx];
+  const total=mods.length;
+  const pct=Math.round((modIdx/total)*100);
+
+  document.getElementById('prog-lbl').textContent=`${mod.code} — ${mod.title}`;
+  document.getElementById('prog-cnt').textContent=`${modIdx+1} / ${total}`;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('btn-next-txt').textContent=modIdx===total-1?'Enviar encuesta ✓':'Siguiente →';
+  document.getElementById('btn-prev').style.display=modIdx===0?'none':'block';
+
+  // steps
+  document.getElementById('steps-row').innerHTML=mods.map((_,i)=>
+    `<div class="step-dot ${i<modIdx?'done':i===modIdx?'active':''}"></div>`
+  ).join('');
+
+  // build HTML
+  let html=`<div class="mod-hdr"><div class="mod-code">${mod.code}</div>
+    <div class="mod-title">${mod.title}</div><div class="mod-sub">${mod.sub}</div></div>`;
+
+  mod.questions.forEach(q=>{
+    const saved=answers[q.id]||'';
+    const whyBtn=q.why?`<span class="why-btn" onclick="toggleWhy('w-${q.id}')">¿Por qué?</span>`:'';
+    const whyBox=q.why?`<div class="q-why" id="w-${q.id}">${q.why}</div>`:'';
+
+    let input='';
+    if(q.type==='single'){
+      input=`<div class="opts">${(q.opts||[]).map(o=>`
+        <div class="opt${saved===o?' sel':''}" onclick="selOpt('${q.id}',this,'${esc(o)}',false)">${o}</div>
+      `).join('')}</div>`;
+    } else if(q.type==='multi'){
+      const sv=saved?saved.split('|||'):[];
+      input=`<div class="opts">${(q.opts||[]).map(o=>`
+        <div class="opt multi${sv.includes(o)?' sel':''}" onclick="selOpt('${q.id}',this,'${esc(o)}',true)">${o}</div>
+      `).join('')}</div>`;
+    } else if(q.type==='scale'){
+      input=`<div class="scale-wrap">${[1,2,3,4,5,6,7,8,9,10].map(n=>
+        `<div class="scl${saved==n?' sel':''}" onclick="selScale('${q.id}',this,${n})">${n}</div>`
+      ).join('')}</div><div class="scale-lbl"><span>Bajo</span><span>Alto</span></div>`;
+    } else {
+      input=`<textarea id="ta-${q.id}" placeholder="Escribe tu respuesta aquí..."
+        oninput="answers['${q.id}']=this.value;document.getElementById('cc-${q.id}').textContent=this.value.length+' car.'"
+        >${saved}</textarea><div class="char-count" id="cc-${q.id}">${saved.length} car.</div>`;
     }
-  }
-  document.getElementById('pin-error').classList.remove('show');
 
-  // Show meta screen
-  ['colaborador','franquiciado','administrativo'].forEach(r => {
-    document.getElementById('meta-' + r).style.display = r === currentRole ? 'block' : 'none';
-  });
-
-  const titles = {
-    colaborador: 'Cuéntanos sobre ti y tu tienda',
-    franquiciado: 'Cuéntanos sobre ti y tu punto',
-    administrativo: 'Cuéntanos sobre ti y tu área'
-  };
-  document.getElementById('meta-title').textContent = titles[currentRole];
-  goTo('screen-meta');
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// META / START
-// ═══════════════════════════════════════════════════════════════════════════
-function startSurvey() {
-  // Validate meta
-  if (currentRole === 'colaborador') {
-    if (!v('c-ciudad') || !v('c-tienda') || !v('c-tiempo')) { alert('Por favor completa todos los campos.'); return; }
-    metaData = { ciudad: v('c-ciudad'), tienda: v('c-tienda'), tiempo: v('c-tiempo') };
-  } else if (currentRole === 'franquiciado') {
-    if (!v('f-ciudad') || !v('f-puntos') || !v('f-numpuntos')) { alert('Por favor completa todos los campos.'); return; }
-    metaData = { ciudad: v('f-ciudad'), puntos: v('f-puntos'), num_puntos: v('f-numpuntos') };
-  } else {
-    if (!v('a-area') || !v('a-ciudad') || !v('a-tiempo')) { alert('Por favor completa todos los campos.'); return; }
-    metaData = { area: v('a-area'), ciudad: v('a-ciudad'), tiempo: v('a-tiempo') };
-  }
-
-  currentModuleIdx = 0;
-  answers = {};
-  renderModule();
-  goTo('screen-survey');
-}
-
-function v(id) {
-  const el = document.getElementById(id);
-  return el ? el.value.trim() : '';
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MODULE RENDER
-// ═══════════════════════════════════════════════════════════════════════════
-function renderModule() {
-  const modules = SURVEYS[currentRole];
-  const mod = modules[currentModuleIdx];
-  const total = modules.length;
-  const pct = Math.round(((currentModuleIdx) / total) * 100);
-
-  // Progress
-  document.getElementById('prog-label').textContent = `Módulo ${currentModuleIdx + 1} de ${total}`;
-  document.getElementById('prog-count').textContent = `${currentModuleIdx + 1} / ${total}`;
-  document.getElementById('prog-fill').style.width = pct + '%';
-
-  // Steps
-  const stepsEl = document.getElementById('steps-row');
-  stepsEl.innerHTML = modules.map((m, i) => `
-    <div class="step-dot ${i < currentModuleIdx ? 'done' : i === currentModuleIdx ? 'active' : ''}"
-         title="${m.title}"></div>
-  `).join('');
-
-  // Next button
-  const isLast = currentModuleIdx === total - 1;
-  document.getElementById('btn-next-text').textContent = isLast ? 'Enviar encuesta ✓' : 'Siguiente →';
-  document.getElementById('btn-prev').style.display = currentModuleIdx === 0 ? 'none' : 'block';
-
-  // Build questions HTML
-  let html = `
-    <div class="module-header">
-      <div class="module-code">${mod.code}</div>
-      <div class="module-title">${mod.title}</div>
-      <div class="module-sub">${mod.sub}</div>
-    </div>
-  `;
-
-  mod.questions.forEach(q => {
-    const savedVal = answers[q.id];
-    html += buildQuestion(q, savedVal);
-  });
-
-  const content = document.getElementById('module-content');
-  content.innerHTML = html;
-  content.classList.remove('fade-up');
-  void content.offsetWidth;
-  content.classList.add('fade-up');
-
-  // Attach textarea char counts
-  mod.questions.forEach(q => {
-    if (q.type === 'textarea') {
-      const ta = document.getElementById('input-' + q.id);
-      const cc = document.getElementById('cc-' + q.id);
-      if (ta && cc) {
-        if (savedVal) ta.value = savedVal;
-        ta.addEventListener('input', () => {
-          answers[q.id] = ta.value;
-          cc.textContent = ta.value.length + ' caracteres';
-        });
-      }
-    }
-  });
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function buildQuestion(q, savedVal) {
-  const lensClass = 'lens-' + q.lens;
-  const lensLabels = {
-    oferta:'Oferta', flujo:'Flujo', mensaje:'Mensaje',
-    certeza:'Certeza', tribu:'Tribu', atencion:'Atención'
-  };
-
-  let inputHTML = '';
-
-  if (q.type === 'single') {
-    inputHTML = `<div class="options-list">` +
-      q.options.map(opt => `
-        <div class="opt-btn ${savedVal === opt ? 'selected' : ''}"
-             onclick="selectOption('${q.id}', this, '${escQ(opt)}', false)">
-          ${opt}
-        </div>`).join('') + `</div>`;
-  } else if (q.type === 'multi') {
-    const saved = savedVal ? savedVal.split('|||') : [];
-    inputHTML = `<div class="options-list">` +
-      q.options.map(opt => `
-        <div class="opt-btn multi ${saved.includes(opt) ? 'selected' : ''}"
-             onclick="selectOption('${q.id}', this, '${escQ(opt)}', true)">
-          ${opt}
-        </div>`).join('') + `</div>`;
-  } else if (q.type === 'scale') {
-    inputHTML = `<div class="scale-wrap">` +
-      [1,2,3,4,5,6,7,8,9,10].map(n => `
-        <div class="scale-btn ${savedVal == n ? 'selected' : ''}"
-             onclick="selectScale('${q.id}', this, ${n})">${n}</div>
-      `).join('') + `</div>
-      <div class="scale-labels"><span>Bajo</span><span>Alto</span></div>`;
-  } else {
-    // textarea
-    inputHTML = `
-      <textarea id="input-${q.id}" placeholder="Escribe tu respuesta aquí..."
-        oninput="answers['${q.id}']=this.value;document.getElementById('cc-${q.id}').textContent=this.value.length+' caracteres'"
-      >${savedVal || ''}</textarea>
-      <div class="char-count" id="cc-${q.id}">${savedVal ? savedVal.length + ' caracteres' : '0 caracteres'}</div>`;
-  }
-
-  const whyBtn = q.why ? `<span class="why-toggle" onclick="toggleWhy('why-${q.id}')">¿Por qué?</span>` : '';
-  const whyBox = q.why ? `<div class="q-why" id="why-${q.id}">${q.why}</div>` : '';
-
-  return `
-    <div class="question-block">
-      <div class="q-num">
-        <span>${q.id.toUpperCase()}</span>
-        <span class="q-lens ${lensClass}">${lensLabels[q.lens]}</span>
+    html+=`<div class="qblock">
+      <div class="q-meta">
+        <span class="q-id">${q.id}</span>
+        <span class="q-lens lens-${q.lens}">${LENS_LABELS[q.lens]}</span>
         ${whyBtn}
       </div>
       <div class="q-text">${q.text}</div>
       ${whyBox}
-      ${inputHTML}
+      ${input}
     </div>`;
+  });
+
+  const el=document.getElementById('mod-content');
+  el.innerHTML=html; el.classList.remove('fade-up'); void el.offsetWidth; el.classList.add('fade-up');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function escQ(s) { return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
-
-function toggleWhy(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.toggle('show');
-}
-
-function selectOption(qid, el, value, isMulti) {
-  if (!isMulti) {
-    el.closest('.options-list').querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected');
-    answers[qid] = value;
+function esc(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+function toggleWhy(id){const e=document.getElementById(id);if(e)e.classList.toggle('show');}
+function selOpt(qid,el,val,multi){
+  if(!multi){
+    el.closest('.opts').querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));
+    el.classList.add('sel'); answers[qid]=val;
   } else {
-    el.classList.toggle('selected');
-    const selected = Array.from(el.closest('.options-list').querySelectorAll('.opt-btn.selected'))
-      .map(b => b.textContent.trim());
-    answers[qid] = selected.join('|||');
+    el.classList.toggle('sel');
+    answers[qid]=Array.from(el.closest('.opts').querySelectorAll('.opt.sel')).map(b=>b.textContent.trim()).join('|||');
   }
 }
-
-function selectScale(qid, el, value) {
-  el.closest('.scale-wrap').querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  answers[qid] = value;
+function selScale(qid,el,v){
+  el.closest('.scale-wrap').querySelectorAll('.scl').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel'); answers[qid]=v;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════════════════════
-function prevModule() {
-  saveCurrentAnswers();
-  if (currentModuleIdx > 0) {
-    currentModuleIdx--;
-    renderModule();
-  }
-}
-
-function nextModule() {
-  saveCurrentAnswers();
-  const modules = SURVEYS[currentRole];
-  const isLast = currentModuleIdx === modules.length - 1;
-
-  if (isLast) {
-    submitSurvey();
-  } else {
-    currentModuleIdx++;
-    renderModule();
-  }
-}
-
-function saveCurrentAnswers() {
-  const modules = SURVEYS[currentRole];
-  const mod = modules[currentModuleIdx];
-  mod.questions.forEach(q => {
-    if (q.type === 'textarea') {
-      const ta = document.getElementById('input-' + q.id);
-      if (ta) answers[q.id] = ta.value;
-    }
+function saveTA(){
+  const mods=SURVEYS[role];
+  mods[modIdx].questions.forEach(q=>{
+    if(q.type==='textarea'){const ta=document.getElementById('ta-'+q.id);if(ta)answers[q.id]=ta.value;}
   });
 }
-
-function goTo(screenId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
+function prevMod(){saveTA();if(modIdx>0){modIdx--;renderMod();}}
+function nextMod(){
+  saveTA();
+  const mods=SURVEYS[role];
+  if(modIdx===mods.length-1){submitSurvey();}
+  else{modIdx++;renderMod();}
 }
+function goTo(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SUBMIT
 // ═══════════════════════════════════════════════════════════════════════════
-function submitSurvey() {
-  const btn = document.getElementById('btn-next');
-  btn.classList.add('loading');
-  btn.disabled = true;
+function submitSurvey(){
+  const btn=document.getElementById('btn-next');
+  btn.classList.add('loading');btn.disabled=true;
 
-  const payload = {
-    accion: 'guardarEncuesta',
-    rol: currentRole,
-    timestamp: new Date().toISOString(),
-    ...metaData,
-    ...flattenAnswers(),
-  };
+  const payload={accion:'guardarEncuesta',rol:role,timestamp:new Date().toISOString(),...meta};
+  Object.entries(answers).forEach(([k,v])=>{ payload['ans_'+k]=v||''; });
 
-  // Send via JSONP
-  const cb = 'cb_' + Date.now();
-  window[cb] = function(res) {
-    btn.classList.remove('loading');
-    btn.disabled = false;
-    if (res && res.ok) {
-      goTo('screen-success');
-    } else {
-      alert('Hubo un error al guardar. Por favor intenta de nuevo.\n' + (res ? res.mensaje : ''));
-    }
+  const cb='cb_'+Date.now();
+  window[cb]=function(res){
+    btn.classList.remove('loading');btn.disabled=false;
+    if(res&&res.ok){goTo('sc-success');}
+    else{alert('Hubo un error al guardar. Intenta de nuevo.\n'+(res?res.mensaje:''));}
     delete window[cb];
   };
-
-  const params = new URLSearchParams({ ...payload, callback: cb });
-  const s = document.createElement('script');
-  s.src = SCRIPT_URL + '?' + params.toString();
-  s.onerror = () => {
-    btn.classList.remove('loading');
-    btn.disabled = false;
-    alert('Error de conexión. Verifica tu internet e intenta de nuevo.');
-    delete window[cb];
-  };
+  const s=document.createElement('script');
+  s.src=SCRIPT_URL+'?'+new URLSearchParams({...payload,callback:cb}).toString();
+  s.onerror=()=>{btn.classList.remove('loading');btn.disabled=false;alert('Error de conexión. Intenta de nuevo.');delete window[cb];};
   document.head.appendChild(s);
 }
 
-function flattenAnswers() {
-  const flat = {};
-  Object.entries(answers).forEach(([k, v]) => { flat['ans_' + k] = v || ''; });
-  return flat;
-}
+// warmup
+(function(){
+  const s=document.createElement('script');
+  s.src=SCRIPT_URL+'?accion=ping&callback=_warmup';
+  window._warmup=()=>{};s.onerror=()=>{};
+  document.head.appendChild(s);
+})();
 </script>
 </body>
 </html>
