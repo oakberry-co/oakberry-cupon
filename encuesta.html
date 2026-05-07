@@ -65,7 +65,7 @@
          letter-spacing:1px;cursor:pointer;margin-top:6px;transition:background .18s,transform .12s;
          box-shadow:0 6px 20px rgba(95,75,139,.3);position:relative;overflow:hidden}
     .btn:hover:not(:disabled){background:var(--pd);transform:translateY(-1px)}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
     .btn-text{transition:opacity .18s}
     .btn-loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .18s}
     .btn.loading .btn-text{opacity:0}.btn.loading .btn-loader{opacity:1}
@@ -227,21 +227,21 @@
       <div class="role-title">¿Cuál es tu rol?</div>
       <div class="role-sub">Selecciona tu perfil para ver la encuesta correcta</div>
       <div class="roles-grid">
-        <div class="role-btn" id="rb-colaborador" onclick="pickRole('colaborador')">
+        <div class="role-btn" id="rb-colaborador" onclick="pickRole('colaborador')" ontouchstart="">
           <div class="role-icon">🏪</div>
           <div>
             <div class="role-name">Colaborador de tienda</div>
             <div class="role-desc">Líderes y equipo de punto de venta</div>
           </div>
         </div>
-        <div class="role-btn" id="rb-franquiciado" onclick="pickRole('franquiciado')">
+        <div class="role-btn" id="rb-franquiciado" onclick="pickRole('franquiciado')" ontouchstart="">
           <div class="role-icon">🤝</div>
           <div>
             <div class="role-name">Franquiciado</div>
             <div class="role-desc">Dueños de punto(s) OakBerry</div>
           </div>
         </div>
-        <div class="role-btn" id="rb-administrativo" onclick="pickRole('administrativo')">
+        <div class="role-btn" id="rb-administrativo" onclick="pickRole('administrativo')" ontouchstart="">
           <div class="role-icon">💼</div>
           <div>
             <div class="role-name">Equipo Administrativo</div>
@@ -257,7 +257,7 @@
           <div class="pin-error" id="pin-err">Clave incorrecta. Intenta de nuevo.</div>
         </div>
       </div>
-      <button class="btn" id="btn-enter" onclick="doEnter()" disabled>
+      <button class="btn" id="btn-enter" onclick="doEnter()" ontouchstart="">
         <span class="btn-text">Continuar →</span>
         <div class="btn-loader"><div class="spin"></div></div>
       </button>
@@ -673,12 +673,20 @@ function pickRole(r){
   document.getElementById('pin-err').classList.remove('show');
   document.getElementById('pin-input').value='';
   document.getElementById('btn-enter').disabled=false;
-  setTimeout(()=>document.getElementById('pin-input').focus(),100);
+  document.getElementById('btn-enter').style.opacity='1';
 }
 function doEnter(){
-  if(!role)return;
+  if(!role){
+    document.getElementById('pin-err').textContent='Selecciona un rol primero.';
+    document.getElementById('pin-err').classList.add('show');
+    return;
+  }
   const pin=document.getElementById('pin-input').value.trim();
-  if(pin!==PINS[role]){document.getElementById('pin-err').classList.add('show');return;}
+  if(pin!==PINS[role]){
+    document.getElementById('pin-err').textContent='Clave incorrecta. Intenta de nuevo.';
+    document.getElementById('pin-err').classList.add('show');
+    return;
+  }
   document.getElementById('pin-err').classList.remove('show');
   ['colab','franq','admin'].forEach(k=>document.getElementById('meta-'+k).style.display='none');
   const map={colaborador:'colab',franquiciado:'franq',administrativo:'admin'};
