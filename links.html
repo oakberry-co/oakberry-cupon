@@ -752,6 +752,7 @@ function actualizarMetaUrl() {
     campaign_id: "{{campaign.id}}", anuncio: "{{ad.name}}",
     placement: placement === "{{placement}}" ? "{{placement}}" : placement,
     fuente: "{{site_source_name}}",
+    fbclid: "{{fbclid}}",  // ← garantiza que Meta siempre inyecte el click ID
   };
   const estaticos = { ciudad, tienda, descuento, producto, momentos, vigencia };
 
