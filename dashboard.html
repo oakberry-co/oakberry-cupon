@@ -1258,8 +1258,7 @@ body.light {
 <div class="toast" id="toast"></div>
 
 <script>
-const SCRIPT_J1 = "TU_URL_SCRIPT_J1_AQUI";
-const SCRIPT_REA = "TU_URL_SCRIPT_REA_AQUI";
+const API_URL = "https://oakberry-api-664413392517.us-central1.run.app";
 
 // ── NAVEGACIÓN ──────────────────────────────────────────────
 function showPanel(id) {
@@ -1305,13 +1304,25 @@ async function cargar() {
   dot.classList.add('loading');
   txt.textContent = 'Actualizando...';
 
-  // Usar datos demo mientras el backend no está conectado
-  const stats = _demoStats();
-  renderStats(stats);
-
-  dot.classList.remove('loading');
-  txt.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CO');
-  document.getElementById('fecha-sync').textContent = 'Último sync: ' + new Date().toLocaleDateString('es-CO');
+  try {
+    const res = await fetch(API_URL + '/stats');
+    const data = await res.json();
+    if (data.ok) {
+      renderStats(data);
+      dot.classList.remove('loading');
+      txt.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CO');
+      document.getElementById('fecha-sync').textContent = 'Sync BQ: ' + (data.sync || '—');
+    } else {
+      throw new Error(data.error || 'Error desconocido');
+    }
+  } catch(e) {
+    // Fallback a datos demo si la API falla
+    console.warn('API no disponible, usando datos demo:', e.message);
+    renderStats(_demoStats());
+    dot.classList.remove('loading');
+    txt.textContent = 'Demo — API no disponible';
+    document.getElementById('fecha-sync').textContent = 'Sin conexión a BigQuery';
+  }
 }
 
 function renderStats(s) {
