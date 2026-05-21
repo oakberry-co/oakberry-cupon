@@ -9,11 +9,12 @@
   :root{--primary:#5F4B8B;--pd:#4a3a6e;--yellow:#F5C842;--white:#fff;--off:#rgba(255,255,255,0.97);--border:#eee;--gray:#999;--green:#27ae60;--red:#c0392b;}
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Montserrat',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;
-    background:linear-gradient(rgba(95,75,139,0.6),rgba(95,75,139,0.6)),url('oakville-bg.jpg') center/cover no-repeat fixed;}
+    background:linear-gradient(rgba(95,75,139,0.6),rgba(95,75,139,0.6)),url('/oakville-bg.jpg') center/cover no-repeat fixed;}
   body.preview-mode{background:#0c0b08;display:block;padding:0;}
 
   .card{background:rgba(255,255,255,0.97);border-radius:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;animation:cardIn .5s cubic-bezier(0.22,1,0.36,1) both;}
   @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
 
   .card-header{background:var(--primary);padding:28px 30px 24px;text-align:center;}
   .brand{font-size:28px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
@@ -399,7 +400,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     preguntas = SURVEYS[segKey] || SURVEYS["ocasional"];
 
     // Actualizar header
-    document.getElementById("hdr-sub").textContent = `Tu opinión · ${CIUDAD}`;
+    document.getElementById("hdr-sub").innerHTML = `Responde 5 preguntas · <span style="color:var(--yellow);">${CIUDAD}</span>`;
 
     // Construir dots
     const dots = document.getElementById("prog-dots");
@@ -423,8 +424,8 @@ function renderStep(idx) {
 
   const body = document.getElementById("survey-body");
   const esUltima = idx === preguntas.length - 1;
-  const btnTxt = esUltima ? "Reclamar mi bowl gratis 🫐" : "Siguiente →";
-  const btnReady = q.tipo === "abierta" ? "ready" : ""; // abiertas siempre tienen ready (son opcionales)
+  const btnTxt = esUltima ? "Quiero mi bowl 🫐" : "Siguiente →";
+  const btnReady = q.tipo === "abierta" ? "ready" : ""; // cerradas requieren selección
 
   if (q.tipo === "cerrada") {
     body.innerHTML = `
@@ -598,7 +599,7 @@ function fechaVence(){
   return d.toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"});
 }
 // ── LLAVE MAESTRA ─────────────────────────────────────────────
-const MASTER_PWD = "Oakberry123";
+const MASTER_PWD = "oak2026";
 const MASTER_KEY = "uet_master_auth";
 
 const DEMO_TOKENS = [
