@@ -654,6 +654,10 @@ body.light {
       <div class="tab-dot" style="background:var(--purple)"></div>
       Logs
     </div>
+    <div class="tab" onclick="showPanel('uet')">
+      <div class="tab-dot" style="background:#4ade80"></div>
+      UET
+    </div>
     <div class="tab" onclick="showPanel('control')">
       <div class="tab-dot" style="background:var(--green)"></div>
       Control
@@ -1166,6 +1170,95 @@ body.light {
     </div>
   </div>
 
+  <!-- ════ UET ════ -->
+  <div class="panel" id="panel-uet">
+    <div class="section-hd">
+      <div class="section-hd-left">
+        <span class="section-hd-title">UET · User Experience Test</span>
+        <span class="section-hd-sub">Encuestas de reactivación · Pereira · Ocasionales churneados</span>
+      </div>
+      <button class="btn" onclick="cargarUET()">↺ Actualizar</button>
+    </div>
+
+    <!-- KPIs UET -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="uet-kpis">
+      <div class="card">
+        <div class="card-body" style="padding:16px 18px">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Enviados</div>
+          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--blue)" id="uet-enviados">—</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">WA + Push</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px 18px">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Respondieron</div>
+          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green)" id="uet-completados">—</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px" id="uet-tasa-lbl">0% tasa respuesta</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px 18px">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Cupones generados</div>
+          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--amber)" id="uet-cupones">—</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px" id="uet-canjeados-lbl">0 canjeados</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px 18px">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Abiertos</div>
+          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--purple)" id="uet-abiertos">—</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px" id="uet-apertura-lbl">0% tasa apertura</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla por segmento x ciudad -->
+    <div class="two-col" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Por segmento · ciudad</span></div>
+        <div class="card-body" style="padding:0">
+          <table class="log-table" id="uet-tabla">
+            <thead>
+              <tr>
+                <th>Segmento</th>
+                <th>Ciudad</th>
+                <th>Enviados</th>
+                <th>Abiertos</th>
+                <th>Completados</th>
+                <th>Tasa</th>
+                <th>Cupones</th>
+                <th>Canjeados</th>
+              </tr>
+            </thead>
+            <tbody id="uet-tbody">
+              <tr><td colspan="8" class="empty">Cargando datos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Insight P3: competidor real -->
+      <div class="card">
+        <div class="card-hd"><span class="card-title">P3 · ¿Qué comes en su lugar?</span><span class="card-sub">El competidor real</span></div>
+        <div class="card-body">
+          <div id="uet-p3" style="display:flex;flex-direction:column;gap:8px">
+            <div class="empty">Sin datos aún</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen ejecutivo automático -->
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Resumen ejecutivo</span><span class="card-sub">Generado automáticamente con los insights de la encuesta</span></div>
+      <div class="card-body">
+        <div id="uet-resumen" style="font-size:12px;color:var(--text2);line-height:1.8">
+          Sin datos suficientes aún. Los insights aparecerán cuando al menos 5 clientes completen la encuesta.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ════ CONTROL ════ -->
   <div class="panel" id="panel-control">
     <div class="section-hd">
@@ -1265,6 +1358,139 @@ function set(id, val) {
 const API_URL = "https://oakberry-api-664413392517.us-central1.run.app";
 
 // ── NAVEGACIÓN ──────────────────────────────────────────────
+// ── UET DATA ──────────────────────────────────────────────────
+const API_URL = "https://oakberry-api-664413392517.us-central1.run.app";
+
+async function cargarUET() {
+  try {
+    const res = await fetch(`${API_URL}/uet/stats`);
+    const data = await res.json();
+    if (!data.ok) return;
+
+    // KPIs agregados
+    const resumen = data.resumen || [];
+    const totEnv  = resumen.reduce((s,r) => s + (r.enviados||0), 0);
+    const totAb   = resumen.reduce((s,r) => s + (r.abiertos||0), 0);
+    const totComp = resumen.reduce((s,r) => s + (r.completados||0), 0);
+    const totCup  = resumen.reduce((s,r) => s + (r.cupones_generados||0), 0);
+    const totCanj = resumen.reduce((s,r) => s + (r.cupones_canjeados||0), 0);
+    const tasaResp = totEnv > 0 ? ((totComp/totEnv)*100).toFixed(1) : 0;
+    const tasaAp   = totEnv > 0 ? ((totAb/totEnv)*100).toFixed(1)   : 0;
+
+    document.getElementById('uet-enviados').textContent    = totEnv;
+    document.getElementById('uet-completados').textContent = totComp;
+    document.getElementById('uet-tasa-lbl').textContent    = `${tasaResp}% tasa respuesta`;
+    document.getElementById('uet-cupones').textContent     = totCup;
+    document.getElementById('uet-canjeados-lbl').textContent = `${totCanj} canjeados`;
+    document.getElementById('uet-abiertos').textContent    = totAb;
+    document.getElementById('uet-apertura-lbl').textContent = `${tasaAp}% tasa apertura`;
+
+    // Tabla segmento x ciudad
+    const tbody = document.getElementById('uet-tbody');
+    if (resumen.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty">Sin envíos aún</td></tr>';
+    } else {
+      tbody.innerHTML = resumen.map(r => {
+        const tasa = r.enviados > 0 ? ((r.completados/r.enviados)*100).toFixed(1) : 0;
+        const color = tasa >= 50 ? 'var(--green)' : tasa >= 20 ? 'var(--amber)' : 'var(--red)';
+        return `<tr>
+          <td>${r.segmento}</td>
+          <td>${r.ciudad}</td>
+          <td>${r.enviados}</td>
+          <td>${r.abiertos}</td>
+          <td>${r.completados}</td>
+          <td style="color:${color};font-weight:700">${tasa}%</td>
+          <td>${r.cupones_generados}</td>
+          <td>${r.cupones_canjeados}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // P3 — competidor real
+    const p3 = data.top_competidor || {};
+    const p3El = document.getElementById('uet-p3');
+    const LABELS = {
+      'otra_marca':   '🏪 Otra marca saludable',
+      'casero':       '🏠 Comida casera',
+      'rapida':       '🍔 Comida rápida',
+      'nada_parecido':'🤷 Nada parecido',
+    };
+    const COLORS = {
+      'otra_marca':'var(--red)',
+      'casero':'var(--amber)',
+      'rapida':'var(--blue)',
+      'nada_parecido':'var(--text3)',
+    };
+
+    // Consolidar todos los segmentos
+    const totalesP3 = {};
+    Object.values(p3).forEach(arr => {
+      arr.forEach(item => {
+        totalesP3[item.valor] = (totalesP3[item.valor]||0) + item.n;
+      });
+    });
+
+    const totalP3 = Object.values(totalesP3).reduce((s,n) => s+n, 0);
+    if (totalP3 === 0) {
+      p3El.innerHTML = '<div class="empty">Sin respuestas aún</div>';
+    } else {
+      const sorted = Object.entries(totalesP3).sort((a,b) => b[1]-a[1]);
+      p3El.innerHTML = sorted.map(([val, n]) => {
+        const pct = ((n/totalP3)*100).toFixed(0);
+        const label = LABELS[val] || val;
+        const color = COLORS[val] || 'var(--text2)';
+        return `<div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:var(--text2);width:160px">${label}</span>
+          <div style="flex:1;background:var(--bg3);border-radius:2px;height:6px;overflow:hidden">
+            <div style="width:${pct}%;height:6px;background:${color};border-radius:2px"></div>
+          </div>
+          <span style="font-family:'Space Mono',monospace;font-size:10px;color:${color};width:36px;text-align:right">${pct}%</span>
+        </div>`;
+      }).join('');
+    }
+
+    // Resumen ejecutivo
+    const resEl = document.getElementById('uet-resumen');
+    if (totComp < 5) {
+      resEl.textContent = `Sin datos suficientes aún. Faltan ${5-totComp} respuestas para activar los insights automáticos.`;
+    } else {
+      const topComp = Object.entries(totalesP3).sort((a,b)=>b[1]-a[1])[0];
+      const topLabel = LABELS[topComp?.[0]] || topComp?.[0] || '—';
+      resEl.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div style="background:var(--bg3);border-radius:6px;padding:14px;border-left:2px solid var(--green)">
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Tasa de respuesta</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.6">
+              ${totComp} de ${totEnv} clientes completaron la encuesta (${tasaResp}%).
+              ${totComp >= 10 ? 'Muestra estadísticamente relevante.' : 'Muestra preliminar.'}
+            </div>
+          </div>
+          <div style="background:var(--bg3);border-radius:6px;padding:14px;border-left:2px solid var(--red)">
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Competidor principal</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.6">
+              El ${((totalesP3[topComp?.[0]]||0)/totalP3*100).toFixed(0)}% de los churneados reemplazó Oakberry con <strong style="color:var(--text)">${topLabel}</strong>.
+            </div>
+          </div>
+          <div style="background:var(--bg3);border-radius:6px;padding:14px;border-left:2px solid var(--amber)">
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Cupones generados</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.6">
+              ${totCup} clientes reclamaron su bowl gratis.
+              Tasa de canje: ${totCup > 0 ? ((totCanj/totCup)*100).toFixed(0) : 0}%.
+            </div>
+          </div>
+          <div style="background:var(--bg3);border-radius:6px;padding:14px;border-left:2px solid var(--purple)">
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Siguiente acción</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.6">
+              ${totCanj > 0 ? `${totCanj} clientes volvieron a la tienda. Monitorear si generan segundo stamp.` : 'Ningún cupón canjeado aún. Activar seguimiento.'}
+            </div>
+          </div>
+        </div>`;
+    }
+  } catch(e) {
+    console.error('Error cargando UET:', e);
+  }
+}
+
 function showPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
