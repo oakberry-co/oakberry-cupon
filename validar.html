@@ -436,6 +436,7 @@
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
+const CRM_API   = "https://oakberry-api-664413392517.us-central1.run.app"; // Cloud Run — cupones UET
 
 let _nuevo = "";
 let _loopy = "";
@@ -573,6 +574,29 @@ async function validar() {
       if (res.esAdidas && res.noActivado) {
         document.getElementById("codigo").value = "";
         mostrarBloqueadoSinActivar();
+      } else if (res.mensaje && res.mensaje.includes("no existe")) {
+        // ── Fallback: buscar en cupones UET (BigQuery via Cloud Run) ──
+        try {
+          const uetRes = await fetch(
+            `${CRM_API}/uet/validar?codigo=${encodeURIComponent(codigo)}&tienda=${encodeURIComponent(tienda)}&ciudad=${encodeURIComponent(ciudad)}`
+          ).then(r => r.json());
+
+          if (uetRes.ok) {
+            document.getElementById("codigo").value = "";
+            mostrarResultado(true,
+              "✅ Cupón UET válido",
+              [
+                "👤 " + (uetRes.nombre || ""),
+                "🎁 " + (uetRes.producto || "Bowl 7oz sin toppings extra"),
+                "📍 " + tienda,
+              ].filter(l => l.trim() !== "👤" && l.trim() !== "🎁")
+            );
+          } else {
+            mostrarError(uetRes.mensaje || res.mensaje);
+          }
+        } catch(uetErr) {
+          mostrarError(res.mensaje);
+        }
       } else {
         mostrarError(res.mensaje);
       }
