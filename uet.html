@@ -3,202 +3,316 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oakberry · UET</title>
+<title>Oakberry · Tu bowl te espera</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  :root{--primary:#5F4B8B;--pd:#4a3a6e;--yellow:#F5C842;--white:#fff;--off:#rgba(255,255,255,0.97);--border:#eee;--gray:#999;--green:#27ae60;--red:#c0392b;}
-  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Montserrat',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;
-    background:linear-gradient(rgba(95,75,139,0.6),rgba(95,75,139,0.6)),url('/oakville-bg.jpg') center/cover no-repeat fixed;}
-  body.preview-mode{background:#0c0b08;display:block;padding:0;}
+:root{
+  --primary:#5F4B8B;--pd:#4a3a6e;--yellow:#F5C842;
+  --white:#fff;--off:rgba(255,255,255,0.97);
+  --border:#eee;--gray:#999;--green:#27ae60;--red:#c0392b;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Montserrat',sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:24px 16px;
+  background:linear-gradient(rgba(95,75,139,0.6),rgba(95,75,139,0.6)),
+    url('/oakville-bg.jpg') center/cover no-repeat fixed;
+}
+body.preview-mode{background:#0c0b08;display:block;padding:0;align-items:unset;justify-content:unset;}
 
-  .card{background:rgba(255,255,255,0.97);border-radius:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;animation:cardIn .5s cubic-bezier(0.22,1,0.36,1) both;}
-  @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
-  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+/* CARD */
+.card{
+  background:var(--off);border-radius:30px;width:100%;max-width:400px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;
+  animation:cardIn .5s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
 
-  .card-header{background:var(--primary);padding:28px 30px 24px;text-align:center;}
-  .brand{font-size:28px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
-  .brand-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:14px;}
-  .bowl-badge{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);border-radius:50px;padding:10px 22px;}
-  .bowl-badge .icon{font-size:26px;}
-  .bowl-badge .txt{font-size:12px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;text-align:left;line-height:1.5;}
+/* HERO HEADER */
+.hero{position:relative;width:100%;height:200px;overflow:hidden;flex-shrink:0;}
+.hero img{width:100%;height:100%;object-fit:cover;object-position:center 25%;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(95,75,139,.1) 0%,rgba(95,75,139,.9) 100%);}
+.hero-content{position:absolute;bottom:14px;left:20px;right:20px;}
+.hero-title{font-size:22px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin-bottom:2px;}
+.hero-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1.5px;}
+.timer-badge{
+  position:absolute;top:12px;right:12px;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.2);border-radius:20px;
+  padding:5px 10px;display:flex;align-items:center;gap:5px;
+}
+.timer-dot{width:5px;height:5px;border-radius:50%;background:#f87171;animation:blink 1s infinite;}
+.timer-txt{font-size:10px;font-weight:700;color:#fff;letter-spacing:.04em;}
+.brand-badge{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:4px 10px;}
+.brand-badge span{font-size:11px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1.5px;}
 
-  /* PROGRESS */
-  .prog-wrap{padding:20px 28px 0;}
-  .prog-top{display:flex;justify-content:space-between;margin-bottom:8px;}
-  .prog-lbl{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;}
-  .prog-pct{font-size:10px;font-weight:900;color:var(--primary);}
-  .prog-bar{background:#f0ebff;border-radius:50px;height:8px;overflow:hidden;margin-bottom:12px;}
-  .prog-fill{height:8px;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));transition:width .5s cubic-bezier(.22,1,.36,1);}
-  .prog-dots{display:flex;justify-content:center;gap:8px;}
-  .dot{width:8px;height:8px;border-radius:50%;background:#e8e0f5;transition:all .3s;}
-  .dot.active{background:var(--primary);transform:scale(1.2);}
-  .dot.done{background:var(--green);}
+/* PRECIO ANCLA */
+.precio-wrap{background:var(--primary);padding:12px 20px 16px;text-align:center;}
+.precio-badge{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);border-radius:50px;padding:8px 20px;margin-bottom:6px;}
+.precio-old{font-size:11px;font-weight:600;color:var(--primary);text-decoration:line-through;opacity:.65;}
+.precio-new{font-size:15px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;}
+.precio-prod{font-size:10px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:1.5px;}
+.precio-prod span{color:var(--yellow);}
 
-  /* BODY */
-  .card-body{padding:22px 28px 28px;}
-  .q-num{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
-  .q-text{font-size:15px;font-weight:900;color:var(--primary);line-height:1.4;margin-bottom:16px;}
+/* PROGRESS */
+.prog-wrap{padding:18px 26px 0;}
+.prog-top{display:flex;justify-content:space-between;margin-bottom:7px;}
+.prog-lbl{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;}
+.prog-pct{font-size:10px;font-weight:900;color:var(--primary);}
+.prog-bar{background:#f0ebff;border-radius:50px;height:7px;overflow:hidden;margin-bottom:10px;}
+.prog-fill{height:7px;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));transition:width .5s cubic-bezier(.22,1,.36,1);}
+.prog-dots{display:flex;justify-content:center;gap:7px;}
+.dot{width:7px;height:7px;border-radius:50%;background:#e8e0f5;transition:all .3s;}
+.dot.active{background:var(--primary);transform:scale(1.2);}
+.dot.done{background:var(--green);}
 
-  /* OPCIONES CERRADAS */
-  .opts{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
-  .opt{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:14px;border:2px solid var(--border);background:#fff;cursor:pointer;transition:all .18s;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#555;width:100%;text-align:left;}
-  .opt:hover{border-color:var(--primary);background:#f5f0ff;}
-  .opt.sel{border-color:var(--primary);background:#f0ebff;color:var(--primary);}
-  .opt-radio{min-width:20px;height:20px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
-  .opt.sel .opt-radio{background:var(--primary);border-color:var(--primary);}
-  .opt.sel .opt-radio::after{content:'';width:7px;height:7px;border-radius:50%;background:#fff;}
-  .opt-em{font-size:17px;flex-shrink:0;}
+/* BODY */
+.card-body{padding:18px 26px 26px;}
+.q-num{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;}
+.q-text{font-size:15px;font-weight:900;color:var(--primary);line-height:1.4;margin-bottom:14px;}
 
-  /* CAMPO ABIERTO */
-  .open-field{width:100%;padding:14px 16px;border-radius:12px;border:2px solid var(--border);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:var(--primary);outline:none;resize:none;transition:border-color .18s;margin-bottom:18px;min-height:80px;}
-  .open-field::placeholder{color:#bbb;font-weight:600;}
-  .open-field:focus{border-color:var(--primary);}
-  .open-hint{font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;margin-top:-14px;margin-bottom:18px;}
+/* OPCIONES */
+.opts{display:flex;flex-direction:column;gap:7px;margin-bottom:16px;}
+.opt{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 15px;border-radius:13px;border:2px solid var(--border);
+  background:#fff;cursor:pointer;transition:all .18s;
+  font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;
+  color:#555;width:100%;text-align:left;
+}
+.opt:hover{border-color:var(--primary);background:#f5f0ff;}
+.opt.sel{border-color:var(--primary);background:#f0ebff;color:var(--primary);}
+.opt-radio{min-width:19px;height:19px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
+.opt.sel .opt-radio{background:var(--primary);border-color:var(--primary);}
+.opt.sel .opt-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff;}
+.opt-em{font-size:16px;flex-shrink:0;}
 
-  /* BTN */
-  .btn{width:100%;padding:17px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .18s;box-shadow:0 6px 20px rgba(95,75,139,.4);opacity:.4;pointer-events:none;position:relative;overflow:hidden;}
-  .btn.ready{opacity:1;pointer-events:all;}
-  .btn.ready:hover{background:var(--pd);transform:translateY(-1px);}
-  .btn .btn-txt{transition:opacity .18s;}
-  .btn .btn-spin{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;}
-  .btn.loading .btn-txt{opacity:0;}
-  .btn.loading .btn-spin{opacity:1;}
-  .spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;}
-  @keyframes spin{to{transform:rotate(360deg);}}
+/* CAMPO ABIERTO */
+.open-field{
+  width:100%;padding:13px 15px;border-radius:12px;border:2px solid var(--border);
+  font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:var(--primary);
+  outline:none;resize:none;transition:border-color .18s;margin-bottom:6px;min-height:76px;
+}
+.open-field::placeholder{color:#bbb;font-weight:600;}
+.open-field:focus{border-color:var(--primary);}
+.open-hint{font-size:9px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;}
 
-  /* STEP */
-  .step{display:none;animation:fadeUp .3s cubic-bezier(.22,1,.36,1);}
-  .step.active{display:block;}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+/* BTN */
+.btn{
+  width:100%;padding:16px;background:var(--primary);color:#fff;border:none;border-radius:12px;
+  font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;
+  letter-spacing:1px;cursor:pointer;transition:all .18s;
+  box-shadow:0 6px 20px rgba(95,75,139,.4);
+  opacity:.35;pointer-events:none;position:relative;overflow:hidden;
+}
+.btn.ready{opacity:1;pointer-events:all;}
+.btn.ready:hover{background:var(--pd);transform:translateY(-1px);}
+.btn .btn-txt{transition:opacity .18s;}
+.btn .btn-spin{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;}
+.btn.loading .btn-txt{opacity:0;}
+.btn.loading .btn-spin{opacity:1;}
+.spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-  /* LOADING */
-  .loading-header{background:var(--primary);padding:28px 30px 24px;text-align:center;}
-  .l-icon{font-size:44px;display:block;margin-bottom:8px;animation:pulse 1.4s ease-in-out infinite;}
-  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
-  .l-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
-  .l-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:1.5px;}
-  .l-body{padding:28px 28px 32px;}
-  .l-bar{background:#f0ebff;border-radius:50px;height:10px;overflow:hidden;margin-bottom:10px;}
-  .l-fill{height:10px;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));width:0%;transition:width .4s ease;}
-  .l-msg{font-size:12px;font-weight:700;color:#666;text-align:center;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;min-height:36px;}
-  .l-steps{display:flex;flex-direction:column;gap:10px;}
-  .l-step{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;transition:color .3s;}
-  .l-step.active,.l-step.done{color:var(--primary);}
-  .l-step-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0;}
-  .l-check{width:18px;height:18px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .3s;}
-  .l-step.done .l-check{background:var(--primary);border-color:var(--primary);}
-  .l-step.done .l-check::after{content:'✓';font-size:10px;color:#fff;font-weight:900;}
+/* STEP */
+.step{display:none;animation:fadeUp .3s cubic-bezier(.22,1,.36,1);}
+.step.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
-  /* CUPÓN */
-  .r-header{background:var(--primary);padding:28px 30px 22px;text-align:center;}
-  .r-icon{font-size:44px;display:block;margin-bottom:8px;animation:popIn .5s cubic-bezier(0.34,1.56,0.64,1) .15s both;}
-  @keyframes popIn{from{opacity:0;transform:scale(.3);}to{opacity:1;transform:scale(1);}}
-  .r-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
-  .r-sub{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;}
-  .r-body{padding:24px 28px 30px;}
-  .ticket{background:var(--primary);border-radius:16px;padding:20px 24px;margin-bottom:16px;}
-  .t-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
-  .t-code{font-size:36px;font-weight:900;color:#fff;letter-spacing:4px;line-height:1;margin-bottom:4px;}
-  .t-prod{font-size:11px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
-  .t-dash{border-top:1.5px dashed rgba(255,255,255,.2);margin:14px -24px;position:relative;}
-  .t-dash::before,.t-dash::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:16px;height:16px;background:rgba(255,255,255,.97);border-radius:50%;}
-  .t-dash::before{left:-8px;}.t-dash::after{right:-8px;}
-  .t-bottom{display:flex;justify-content:space-between;align-items:center;}
-  .t-vence{font-size:11px;font-weight:600;color:rgba(255,255,255,.45);}
-  .copy-btn{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:9px 16px;border-radius:8px;cursor:pointer;transition:background .18s;}
-  .copy-btn:hover{background:rgba(255,255,255,.22);}
-  .info-pill{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.2px;line-height:1.5;margin-bottom:8px;}
-  .pill-p{background:#f5f0ff;border:1.5px solid #d4c8f5;color:var(--primary);}
-  .pill-y{background:#fffbea;border:1.5px solid #f0dc8c;color:#7a5c00;}
-  .pill-icon{font-size:16px;flex-shrink:0;}
+/* LOADING */
+.l-header{background:var(--primary);padding:28px 30px 24px;text-align:center;}
+.l-icon{font-size:44px;display:block;margin-bottom:8px;animation:pulse 1.4s ease-in-out infinite;}
+.l-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.l-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:1.5px;}
+.l-body{padding:28px 28px 32px;}
+.l-bar{background:#f0ebff;border-radius:50px;height:10px;overflow:hidden;margin-bottom:10px;}
+.l-fill{height:10px;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));width:0%;transition:width .4s ease;}
+.l-msg{font-size:12px;font-weight:700;color:#666;text-align:center;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;min-height:36px;}
+.l-steps{display:flex;flex-direction:column;gap:10px;}
+.l-step{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;transition:color .3s;}
+.l-step.active,.l-step.done{color:var(--primary);}
+.l-step-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0;}
+.l-check{width:18px;height:18px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .3s;}
+.l-step.done .l-check{background:var(--primary);border-color:var(--primary);}
+.l-step.done .l-check::after{content:'✓';font-size:10px;color:#fff;font-weight:900;}
 
-  /* ERROR */
-  .err-wrap{padding:40px 28px;text-align:center;}
-  .err-icon{font-size:44px;margin-bottom:12px;}
-  .err-title{font-size:16px;font-weight:900;color:var(--primary);margin-bottom:8px;}
-  .err-sub{font-size:12px;font-weight:600;color:var(--gray);line-height:1.6;}
+/* CUPÓN RESULTADO */
+.r-header{background:var(--primary);padding:28px 30px 22px;text-align:center;}
+.r-icon{font-size:44px;display:block;margin-bottom:8px;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) .15s both;}
+@keyframes popIn{from{opacity:0;transform:scale(.3);}to{opacity:1;transform:scale(1);}}
+.r-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.r-sub{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;}
+.r-body{padding:22px 26px 28px;}
+.ticket{background:var(--primary);border-radius:16px;padding:18px 22px;margin-bottom:14px;}
+.t-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:7px;}
+.t-code{font-size:34px;font-weight:900;color:#fff;letter-spacing:4px;line-height:1;margin-bottom:4px;}
+.t-prod{font-size:11px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.t-dash{border-top:1.5px dashed rgba(255,255,255,.2);margin:12px -22px;position:relative;}
+.t-dash::before,.t-dash::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:16px;height:16px;background:var(--off);border-radius:50%;}
+.t-dash::before{left:-8px;}.t-dash::after{right:-8px;}
+.t-bottom{display:flex;justify-content:space-between;align-items:center;}
+.t-vence{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);}
+.t-vence span{color:var(--yellow);font-weight:700;}
+.copy-btn{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 14px;border-radius:8px;cursor:pointer;transition:background .18s;}
+.copy-btn:hover{background:rgba(255,255,255,.22);}
+.info-pill{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.2px;line-height:1.5;margin-bottom:8px;}
+.pill-p{background:#f5f0ff;border:1.5px solid #d4c8f5;color:var(--primary);}
+.pill-y{background:#fffbea;border:1.5px solid #f0dc8c;color:#7a5c00;}
+.pill-icon{font-size:15px;flex-shrink:0;}
 
-  /* STATES */
-  [id^="state"]{display:none;}
-  [id^="state"].show{display:block;}
-  #stateLoading.show{display:block;animation:cardIn .4s cubic-bezier(.22,1,.36,1) both;}
-  #stateCupon.show{display:block;animation:cardIn .4s cubic-bezier(.22,1,.36,1) both;}
-  #stateError.show{display:block;}
+/* ERROR */
+.err-wrap{padding:40px 26px;text-align:center;}
+.err-icon{font-size:44px;margin-bottom:12px;}
+.err-title{font-size:16px;font-weight:900;color:var(--primary);margin-bottom:8px;}
+.err-sub{font-size:12px;font-weight:600;color:var(--gray);line-height:1.6;}
+
+/* STATES */
+[id^="state"]{display:none;}
+[id^="state"].show{display:block;}
+#stateLoading.show{display:block;animation:cardIn .4s cubic-bezier(.22,1,.36,1) both;}
+#stateCupon.show{display:block;animation:cardIn .4s cubic-bezier(.22,1,.36,1) both;}
+
+/* MASTER MODAL */
+.master-overlay{display:none;position:fixed;inset:0;background:rgba(12,11,8,.95);z-index:9999;align-items:center;justify-content:center;padding:20px;}
+.master-overlay.show{display:flex;}
+.master-card{background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:36px;width:100%;max-width:340px;text-align:center;font-family:'Montserrat',sans-serif;}
+.master-brand{font-size:20px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#f0ede4;margin-bottom:4px;}
+.master-sub{font-size:9px;color:#4a4840;text-transform:uppercase;letter-spacing:.12em;margin-bottom:24px;}
+.master-input{width:100%;padding:13px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#f0ede4;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;outline:none;text-align:center;letter-spacing:.1em;margin-bottom:10px;}
+.master-input::placeholder{color:#4a4840;font-weight:600;}
+.master-input:focus{border-color:#5F4B8B;}
+.master-btn{width:100%;padding:13px;background:#5F4B8B;border:none;border-radius:10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:background .18s;}
+.master-btn:hover{background:#4a3a6e;}
+.master-err{font-size:10px;color:#f87171;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:10px;display:none;}
+.master-err.show{display:block;}
+.master-cancel{font-size:10px;color:#4a4840;margin-top:14px;cursor:pointer;text-decoration:underline;display:none;}
+.master-cancel.show{display:block;}
+
+/* PREVIEW PANEL */
+#previewPanel{display:none;padding:28px 20px;max-width:960px;margin:0 auto;font-family:'Montserrat',sans-serif;}
+#previewPanel.show{display:block;}
+.pv-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08);}
+.pv-brand{font-size:14px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#f0ede4;}
+.pv-tag{font-size:9px;color:#4a4840;text-transform:uppercase;letter-spacing:.1em;margin-top:3px;}
+.pv-actions{display:flex;gap:8px;align-items:center;}
+.pv-pill{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:20px;padding:5px 12px;font-size:9px;font-weight:700;color:#4ade80;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:5px;}
+.pv-pill-dot{width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;}
+.pv-btn{background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.4);font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:5px 12px;cursor:pointer;transition:all .15s;}
+.pv-btn:hover{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);}
+.pv-section{font-size:9px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.pv-section::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06);display:inline-block;}
+.pv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-bottom:28px;}
+.pv-card{background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:12px;overflow:hidden;transition:border-color .15s;}
+.pv-card:hover{border-color:#5F4B8B;}
+.pv-card-body{padding:16px 18px 0;}
+.pv-tag-seg{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;}
+.pv-card-name{font-size:14px;font-weight:900;color:#f0ede4;margin-bottom:4px;}
+.pv-card-desc{font-size:10px;color:#8a877e;line-height:1.5;margin-bottom:14px;}
+.pv-card-btns{padding:0 18px 16px;display:flex;gap:8px;}
+.pv-card-btn{flex:1;padding:9px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;transition:all .15s;}
+.pv-card-btn.outline{border:1px solid rgba(255,255,255,.1);background:transparent;color:#8a877e;}
+.pv-card-btn.outline:hover{border-color:#5F4B8B;color:#f0ede4;}
+.pv-card-btn.solid{border:none;background:#5F4B8B;color:#fff;}
+.pv-card-btn.solid:hover{background:#4a3a6e;}
+.pv-tokens{background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.pv-tokens table{width:100%;border-collapse:collapse;font-size:10px;}
+.pv-tokens th{padding:10px 16px;text-align:left;font-size:8px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);}
+.pv-tokens td{padding:10px 16px;border-bottom:.5px solid rgba(255,255,255,.04);color:#8a877e;}
+.pv-tokens tr:last-child td{border-bottom:none;}
+.pv-link{font-family:'Courier New',monospace;font-size:9px;color:#5F4B8B;text-decoration:none;padding:3px 8px;border:1px solid rgba(95,75,139,.3);border-radius:4px;}
+.pv-nota{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.12);border-radius:10px;padding:12px 16px;font-size:10px;color:#fbbf24;line-height:1.7;}
+
+/* LIGHT MODE */
+body.light-mode{background:#f5f4f0 !important;}
+body.light-mode #previewPanel{color:#0c0b08;}
+body.light-mode .pv-topbar{border-color:rgba(0,0,0,.08);}
+body.light-mode .pv-brand{color:#0c0b08;}
+body.light-mode .pv-card{background:#fff;border-color:rgba(0,0,0,.1);}
+body.light-mode .pv-card-name{color:#0c0b08;}
+body.light-mode .pv-tokens{background:#fff;border-color:rgba(0,0,0,.1);}
+body.light-mode .pv-tokens td{color:#555;}
+body.light-mode .master-card{background:#fff;border-color:rgba(0,0,0,.1);}
+body.light-mode .master-brand{color:#0c0b08;}
+body.light-mode .master-input{background:#f5f4f0;border-color:rgba(0,0,0,.1);color:#0c0b08;}
+body.light-mode .pv-btn{color:rgba(0,0,0,.4);border-color:rgba(0,0,0,.1);}
+body.light-mode .pv-section{color:#888;}
+body.light-mode .pv-section::after{background:rgba(0,0,0,.08);}
 </style>
 </head>
 <body>
 
-<!-- ── LLAVE MAESTRA ── -->
-<div id="masterWrap" style="display:none;position:fixed;inset:0;background:rgba(12,11,8,.95);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:36px;width:100%;max-width:340px;text-align:center;font-family:'Montserrat',sans-serif;">
-    <div style="font-size:20px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#f0ede4;margin-bottom:4px;">Oakberry</div>
-    <div style="font-size:9px;color:#4a4840;text-transform:uppercase;letter-spacing:.12em;margin-bottom:24px;">Llave maestra · UET</div>
-    <input id="masterPwd" type="password" placeholder="Código de acceso"
-      style="width:100%;padding:13px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#f0ede4;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;outline:none;text-align:center;letter-spacing:.1em;margin-bottom:10px;"
+<!-- ══ MASTER MODAL ══ -->
+<div class="master-overlay" id="masterOverlay">
+  <div class="master-card">
+    <div class="master-brand">Oakberry</div>
+    <div class="master-sub">Llave maestra · UET</div>
+    <input class="master-input" type="password" id="masterPwd" placeholder="Código de acceso"
       onkeydown="if(event.key==='Enter')checkMaster()">
-    <button onclick="checkMaster()"
-      style="width:100%;padding:13px;background:#5F4B8B;border:none;border-radius:10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;">
-      Acceder →
-    </button>
-    <div id="masterErr" style="font-size:10px;color:#f87171;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:10px;display:none;">Código incorrecto</div>
-    <div id="masterClose" style="font-size:10px;color:#4a4840;margin-top:14px;cursor:pointer;text-decoration:underline;display:none;" onclick="closeMaster()">Cancelar — ver encuesta normal</div>
+    <button class="master-btn" onclick="checkMaster()">Acceder →</button>
+    <div class="master-err" id="masterErr">Código incorrecto</div>
+    <div class="master-cancel" id="masterCancel" onclick="closeMaster()">Cancelar</div>
   </div>
 </div>
 
-<!-- ── PANEL PREVIEW (solo visible con llave) ── -->
-<div id="previewPanel" style="display:none;font-family:'Montserrat',sans-serif;padding:28px 20px;max-width:960px;margin:0 auto;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08);">
+<!-- ══ PREVIEW PANEL ══ -->
+<div id="previewPanel">
+  <div class="pv-topbar">
     <div>
-      <div style="font-size:14px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#f0ede4;">Oakberry · UET Preview</div>
-      <div style="font-size:9px;color:#4a4840;text-transform:uppercase;letter-spacing:.1em;margin-top:3px;">User Experience Test · Panel de control</div>
+      <div class="pv-brand">Oakberry · UET Preview</div>
+      <div class="pv-tag">User Experience Test · Panel de control</div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <div style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:20px;padding:5px 12px;font-size:9px;font-weight:700;color:#4ade80;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:5px;">
-        <div style="width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;"></div>Modo preview
-      </div>
-      <button onclick="closeMaster()" style="background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.4);font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:5px 12px;cursor:pointer;">Salir</button>
+    <div class="pv-actions">
+      <div class="pv-pill"><div class="pv-pill-dot"></div>Modo preview</div>
+      <button class="pv-btn" id="themeBtn" onclick="toggleTheme()">☀ Light</button>
+      <button class="pv-btn" onclick="salirPreview()">Salir</button>
     </div>
   </div>
-
-  <div style="font-size:9px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;display:flex;align-items:center;gap:8px;">Segmentos <span style="flex:1;height:1px;background:rgba(255,255,255,.06);display:inline-block;"></span></div>
-
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:28px;" id="previewGrid"></div>
-
-  <div style="font-size:9px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;display:flex;align-items:center;gap:8px;">Tokens de prueba <span style="flex:1;height:1px;background:rgba(255,255,255,.06);display:inline-block;"></span></div>
-
-  <div class="light-card" style="background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:12px;overflow:hidden;margin-bottom:20px;">
-    <table style="width:100%;border-collapse:collapse;font-size:10px;" id="tokensTable">
-      <thead>
-        <tr style="background:rgba(255,255,255,.02);">
-          <th style="padding:10px 16px;text-align:left;font-size:8px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06);">Token</th>
-          <th style="padding:10px 16px;text-align:left;font-size:8px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06);">Segmento</th>
-          <th style="padding:10px 16px;text-align:left;font-size:8px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06);">Ciudad</th>
-          <th style="padding:10px 16px;text-align:left;font-size:8px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06);">Link directo</th>
-        </tr>
-      </thead>
-      <tbody id="tokensBody"></tbody>
+  <div class="pv-section">Segmentos</div>
+  <div class="pv-grid" id="pvGrid"></div>
+  <div class="pv-section">Tokens de prueba</div>
+  <div class="pv-tokens">
+    <table>
+      <thead><tr><th>Token</th><th>Segmento</th><th>Ciudad</th><th>Link directo</th></tr></thead>
+      <tbody id="pvTokens"></tbody>
     </table>
   </div>
-
-  <div style="background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.12);border-radius:10px;padding:12px 16px;font-size:10px;color:#fbbf24;line-height:1.7;">
+  <div class="pv-nota">
     <strong>Modo demo:</strong> Los tokens de prueba no guardan nada en BigQuery ni generan cupones reales. Para probar el flujo real usa un token generado desde Cloud Run.
   </div>
 </div>
 
-<div class="card" id="mainCard">
+<!-- ══ ENCUESTA ══ -->
+<div class="card" id="mainCard" style="display:none;">
 
-  <!-- ── ENCUESTA ── -->
+  <!-- ENCUESTA STATE -->
   <div id="stateEncuesta" class="show">
-    <div class="card-header">
-      <div class="brand">Oakberry</div>
-      <div class="brand-sub" id="hdr-sub">Tu opinión · Reactivación</div>
-      <div class="bowl-badge">
-        <span class="icon">🫐</span>
-        <span class="txt">Bowl 7oz gratis<br><span style="font-size:10px;font-weight:600;">sin toppings · al responder</span></span>
+    <!-- HERO -->
+    <div class="hero">
+      <img src="/bowl-hero.jpg" alt="Oakberry bowl"
+        onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg,#5F4B8B,#3a2a5e)';">
+      <div class="hero-overlay"></div>
+      <div class="brand-badge"><span>Oakberry</span></div>
+      <div class="timer-badge">
+        <div class="timer-dot"></div>
+        <span class="timer-txt">Solo 72h para canjear</span>
+      </div>
+      <div class="hero-content">
+        <div class="hero-title">Tu bowl gratis<br>te espera 🫐</div>
+        <div class="hero-sub" id="hdr-sub">Responde · Pereira</div>
       </div>
     </div>
-
+    <!-- PRECIO ANCLA -->
+    <div class="precio-wrap">
+      <div class="precio-badge">
+        <span class="precio-old">$19.500</span>
+        <span class="precio-new">🫐 Gratis para ti</span>
+      </div>
+      <div class="precio-prod">Bowl 7oz sin toppings · <span id="ciudad-lbl">Pereira</span></div>
+    </div>
+    <!-- PROGRESS -->
     <div class="prog-wrap">
       <div class="prog-top">
         <span class="prog-lbl" id="prog-lbl">Pregunta 1 de 5</span>
@@ -207,15 +321,13 @@
       <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:20%"></div></div>
       <div class="prog-dots" id="prog-dots"></div>
     </div>
-
-    <div class="card-body" id="survey-body">
-      <!-- Se construye dinámicamente según segmento -->
-    </div>
+    <!-- PREGUNTAS -->
+    <div class="card-body" id="survey-body"></div>
   </div>
 
-  <!-- ── LOADING ── -->
+  <!-- LOADING STATE -->
   <div id="stateLoading">
-    <div class="loading-header">
+    <div class="l-header">
       <span class="l-icon">🫐</span>
       <div class="l-title">Generando tu cupón</div>
       <div class="l-sub">Solo unos segundos</div>
@@ -232,7 +344,7 @@
     </div>
   </div>
 
-  <!-- ── CUPÓN FINAL ── -->
+  <!-- CUPÓN STATE -->
   <div id="stateCupon">
     <div class="r-header">
       <span class="r-icon">🎉</span>
@@ -243,10 +355,10 @@
       <div class="ticket">
         <div class="t-label">Tu código · Bowl 7oz gratis</div>
         <div class="t-code" id="r-code">——</div>
-        <div class="t-prod">🫐 Bowl The One 7oz · Sin toppings</div>
+        <div class="t-prod">🫐 Bowl The One 7oz · Sin toppings · Valor $19.500</div>
         <div class="t-dash"></div>
         <div class="t-bottom">
-          <div class="t-vence" id="r-vence">Válido 7 días</div>
+          <div class="t-vence">Vence: <span id="r-vence">—</span></div>
           <button class="copy-btn" onclick="copiar()">📋 Copiar</button>
         </div>
       </div>
@@ -256,14 +368,16 @@
       </div>
       <div class="info-pill pill-y">
         <span class="pill-icon">⚠️</span>
-        <span>Bowl sin toppings adicionales · Uso único · Intransferible · Aplican T&C</span>
+        <span>Bowl sin toppings · Uso único · Intransferible · Aplican T&C · 72h para canjear</span>
       </div>
     </div>
   </div>
 
-  <!-- ── ERROR ── -->
+  <!-- ERROR STATE -->
   <div id="stateError">
-    <div class="card-header"></div>
+    <div style="background:var(--primary);padding:28px 30px 24px;text-align:center;">
+      <div style="font-size:28px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:2px;">Oakberry</div>
+    </div>
     <div class="err-wrap">
       <div class="err-icon">😕</div>
       <div class="err-title">Este link no es válido</div>
@@ -271,104 +385,120 @@
     </div>
   </div>
 
-</div>
+</div><!-- /mainCard -->
 
 <script>
 const API = "https://oakberry-api-664413392517.us-central1.run.app";
-const TOKEN = new URLSearchParams(window.location.search).get("t") || "";
-const DEMO  = new URLSearchParams(window.location.search).get("demo") === "1";
+const MASTER_PWD = "oak2026uet"; // ← Línea 585 aprox — cambia aquí la contraseña
+const MASTER_KEY = "uet_master_v2";
 
-// Datos demo por token de preview
+const urlP  = new URLSearchParams(window.location.search);
+const TOKEN = urlP.get("t") || "";
+const DEMO  = urlP.get("demo") === "1";
+
+// Datos demo por segmento
 const DEMO_DATA = {
-  "DEMO_OT01": {ok:true, nombre:"Carlos Demo",   segmento:"One-time",  ciudad:"Pereira",  tienda:"Oakberry Pereira", ya_respondio:false},
-  "DEMO_OC01": {ok:true, nombre:"María Demo",    segmento:"Ocasional", ciudad:"Pereira",  tienda:"Oakberry Pereira", ya_respondio:false},
-  "DEMO_RE01": {ok:true, nombre:"Juan Demo",     segmento:"Regular",   ciudad:"Bogotá",   tienda:"Oakberry Zona T",  ya_respondio:false},
-  "DEMO_FR01": {ok:true, nombre:"Ana Demo",      segmento:"Frecuente", ciudad:"Medellín", tienda:"Oakberry Oviedo",  ya_respondio:false},
-  "DEMO_VP01": {ok:true, nombre:"Daniel Demo",   segmento:"VIP",       ciudad:"Cali",     tienda:"Oakberry Granada", ya_respondio:false},
+  "DEMO_OT01":{ok:true,nombre:"Carlos Demo",  segmento:"One-time", ciudad:"Pereira", tienda:"Oakberry Pereira",ya_respondio:false},
+  "DEMO_OC01":{ok:true,nombre:"María Demo",   segmento:"Ocasional",ciudad:"Pereira", tienda:"Oakberry Pereira",ya_respondio:false},
+  "DEMO_RE01":{ok:true,nombre:"Juan Demo",    segmento:"Regular",  ciudad:"Bogotá",  tienda:"Oakberry Zona T", ya_respondio:false},
+  "DEMO_FR01":{ok:true,nombre:"Ana Demo",     segmento:"Frecuente",ciudad:"Medellín",tienda:"Oakberry Oviedo", ya_respondio:false},
+  "DEMO_VP01":{ok:true,nombre:"Daniel Demo",  segmento:"VIP",      ciudad:"Cali",    tienda:"Oakberry Granada",ya_respondio:false},
+};
+
+const DEMO_TOKENS = [
+  {token:"DEMO_OT01",seg:"one_time", label:"One-timer", ciudad:"Pereira",  color:"rgba(248,113,113,.15)",tc:"#f87171"},
+  {token:"DEMO_OC01",seg:"ocasional",label:"Ocasional", ciudad:"Pereira",  color:"rgba(251,191,36,.15)", tc:"#fbbf24"},
+  {token:"DEMO_RE01",seg:"regular",  label:"Regular",   ciudad:"Bogotá",   color:"rgba(255,255,255,.08)",tc:"#8a877e"},
+  {token:"DEMO_FR01",seg:"frecuente",label:"Frecuente", ciudad:"Medellín", color:"rgba(74,222,128,.15)", tc:"#4ade80"},
+  {token:"DEMO_VP01",seg:"vip",      label:"VIP",       ciudad:"Cali",     color:"rgba(167,139,250,.15)",tc:"#a78bfa"},
+];
+
+const SEG_DESCS = {
+  one_time: "Primera impresión y barrera de hábito",
+  ocasional:"Momento de quiebre y condición de retorno",
+  regular:  "Cambios percibidos y frecuencia perdida",
+  frecuente:"Gradual vs incidente puntual",
+  vip:      "Espacio abierto — qué pasó exactamente",
 };
 
 // ── PREGUNTAS POR SEGMENTO ────────────────────────────────────
 const SURVEYS = {
-  one_time: [
-    { tipo:"cerrada", id:"p1", num:"P1", titulo:"¿Qué pediste en tu visita a Oakberry?",
+  one_time:[
+    {tipo:"cerrada",id:"p1",num:"P1",cat:"Contexto",titulo:"¿Qué pediste en tu visita a Oakberry?",
       opts:[{v:"bowl_pequeno",em:"🫐",txt:"Bowl pequeño"},{v:"bowl_mediano",em:"🥣",txt:"Bowl mediano"},{v:"bowl_grande",em:"🍲",txt:"Bowl grande"},{v:"no_recuerdo",em:"🤷",txt:"No recuerdo bien"}]},
-    { tipo:"abierta", id:"p2", num:"P2", titulo:"¿Hubo algo que esperabas encontrar y no encontraste?", hint:"Cuéntanos en una línea (opcional)"},
-    { tipo:"cerrada", id:"p3", num:"P3", titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
-      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada_parecido",em:"🤷",txt:"Nada parecido"}]},
-    { tipo:"cerrada", id:"p4", num:"P4", titulo:"¿Qué tan fácil sería para ti volver esta semana?",
+    {tipo:"abierta",id:"p2",num:"P2",cat:"Abierta",titulo:"¿Hubo algo que esperabas encontrar y no encontraste?",hint:"Cuéntanos en una línea (opcional)"},
+    {tipo:"cerrada",id:"p3",num:"P3",cat:"Competencia",titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
+      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada",em:"🤷",txt:"Nada parecido"}]},
+    {tipo:"cerrada",id:"p4",num:"P4",cat:"Retorno",titulo:"¿Qué tan fácil sería para ti volver esta semana?",
       opts:[{v:"muy_facil",em:"✅",txt:"Muy fácil"},{v:"facil",em:"👍",txt:"Fácil"},{v:"esfuerzo",em:"😅",txt:"Me tocaría esforzarme"},{v:"dificil",em:"😬",txt:"Difícil"}]},
-    { tipo:"abierta", id:"p5", num:"P5", titulo:"¿Qué tendría que pasar para que Oakberry se vuelva parte de tu rutina?", hint:"Tu respuesta nos ayuda mucho (opcional)"},
+    {tipo:"abierta",id:"p5",num:"P5",cat:"Abierta",titulo:"¿Qué tendría que pasar para que Oakberry se vuelva parte de tu rutina?",hint:"Tu respuesta nos ayuda mucho (opcional)"},
   ],
-  ocasional: [
-    { tipo:"cerrada", id:"p1", num:"P1", titulo:"¿Hubo algo puntual que te hizo parar de venir, o simplemente se fue dando solo?",
-      opts:[{v:"algo_puntual",em:"⚡",txt:"Algo puntual pasó"},{v:"se_fue_dando",em:"🌊",txt:"Se fue dando solo"},{v:"precio",em:"💸",txt:"El precio subió"},{v:"distancia",em:"📍",txt:"Me quedó lejos"}]},
-    { tipo:"abierta", id:"p2", num:"P2", titulo:"Si fue algo puntual, ¿qué fue? Si no, cuéntanos en una línea qué pasó.", hint:"Campo libre (opcional)"},
-    { tipo:"cerrada", id:"p3", num:"P3", titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
-      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada_parecido",em:"🤷",txt:"Nada parecido"}]},
-    { tipo:"cerrada", id:"p4", num:"P4", titulo:"¿Qué tan probable es que vuelvas en el próximo mes?",
+  ocasional:[
+    {tipo:"cerrada",id:"p1",num:"P1",cat:"Contexto",titulo:"¿Qué te hizo parar de venir?",
+      opts:[{v:"algo_puntual",em:"⚡",txt:"Algo puntual pasó"},{v:"se_fue_dando",em:"🌊",txt:"Se fue dando solo"},{v:"precio",em:"💸",txt:"El precio me frenó"},{v:"distancia",em:"📍",txt:"Me quedó lejos"}]},
+    {tipo:"abierta",id:"p2",num:"P2",cat:"Abierta",titulo:"Si fue algo puntual, ¿qué fue? Si no, cuéntanos en una línea.",hint:"Campo libre (opcional)"},
+    {tipo:"cerrada",id:"p3",num:"P3",cat:"Competencia",titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
+      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada",em:"🤷",txt:"Nada parecido"}]},
+    {tipo:"cerrada",id:"p4",num:"P4",cat:"Retorno",titulo:"¿Qué tan probable es que vuelvas en el próximo mes?",
       opts:[{v:"muy_probable",em:"🔥",txt:"Muy probable"},{v:"probable",em:"👍",txt:"Probable"},{v:"poco_probable",em:"😐",txt:"Poco probable"},{v:"no_pensado",em:"💭",txt:"No lo había pensado"}]},
-    { tipo:"abierta", id:"p5", num:"P5", titulo:"Si Oakberry te ofreciera algo para volver esta semana, ¿qué tendría que ser?", hint:"Tu respuesta define nuestra oferta (opcional)"},
+    {tipo:"abierta",id:"p5",num:"P5",cat:"Abierta",titulo:"Si Oakberry te ofreciera algo para volver esta semana, ¿qué tendría que ser?",hint:"Tu respuesta define nuestra oferta (opcional)"},
   ],
-  regular: [
-    { tipo:"cerrada", id:"p1", num:"P1", titulo:"¿Qué tan seguido ibas en tu mejor momento?",
+  regular:[
+    {tipo:"cerrada",id:"p1",num:"P1",cat:"Frecuencia",titulo:"¿Qué tan seguido ibas en tu mejor momento?",
       opts:[{v:"varias_semana",em:"🔥",txt:"Varias veces/semana"},{v:"una_semana",em:"📅",txt:"Una vez/semana"},{v:"quincenal",em:"🗓️",txt:"Cada 2 semanas"},{v:"mensual",em:"📆",txt:"Una vez/mes"}]},
-    { tipo:"abierta", id:"p2", num:"P2", titulo:"¿Hubo algo que cambió en Oakberry — precios, producto, servicio — que notaste?", hint:"Tu percepción importa (opcional)"},
-    { tipo:"cerrada", id:"p3", num:"P3", titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
-      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada_parecido",em:"🤷",txt:"Nada parecido"}]},
-    { tipo:"cerrada", id:"p4", num:"P4", titulo:"¿Qué tendría que estar diferente para que volvieras con regularidad?",
+    {tipo:"abierta",id:"p2",num:"P2",cat:"Abierta",titulo:"¿Hubo algo que cambió en Oakberry — precios, producto, servicio — que notaste?",hint:"Tu percepción importa (opcional)"},
+    {tipo:"cerrada",id:"p3",num:"P3",cat:"Competencia",titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
+      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada",em:"🤷",txt:"Nada parecido"}]},
+    {tipo:"cerrada",id:"p4",num:"P4",cat:"Retorno",titulo:"¿Qué tendría que estar diferente para que volvieras con regularidad?",
       opts:[{v:"mejor_precio",em:"🏷️",txt:"Mejor precio"},{v:"algo_nuevo",em:"🌟",txt:"Algo nuevo en el menú"},{v:"mejor_servicio",em:"⭐",txt:"Mejor servicio"},{v:"ya_volvere",em:"😊",txt:"Nada, ya voy a volver"}]},
-    { tipo:"abierta", id:"p5", num:"P5", titulo:"¿Hay algo más que quieras que Oakberry sepa?", hint:"Totalmente libre (opcional)"},
+    {tipo:"abierta",id:"p5",num:"P5",cat:"Abierta",titulo:"¿Hay algo más que quieras que Oakberry sepa?",hint:"Totalmente libre (opcional)"},
   ],
-  frecuente: [
-    { tipo:"cerrada", id:"p1", num:"P1", titulo:"¿Qué tan seguido ibas en tu mejor momento?",
+  frecuente:[
+    {tipo:"cerrada",id:"p1",num:"P1",cat:"Frecuencia",titulo:"¿Qué tan seguido ibas en tu mejor momento?",
       opts:[{v:"varias_semana",em:"🔥",txt:"Varias veces/semana"},{v:"una_semana",em:"📅",txt:"Una vez/semana"},{v:"quincenal",em:"🗓️",txt:"Cada 2 semanas"},{v:"mensual",em:"📆",txt:"Una vez/mes"}]},
-    { tipo:"abierta", id:"p2", num:"P2", titulo:"¿Hubo algo específico que te hizo dejar de venir, o fue gradual?", hint:"Tu versión importa (opcional)"},
-    { tipo:"cerrada", id:"p3", num:"P3", titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
-      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada_parecido",em:"🤷",txt:"Nada parecido"}]},
-    { tipo:"cerrada", id:"p4", num:"P4", titulo:"¿Qué tendría que estar diferente para que volvieras con regularidad?",
+    {tipo:"abierta",id:"p2",num:"P2",cat:"Abierta",titulo:"¿Hubo algo específico que te hizo dejar de venir, o fue gradual?",hint:"Tu versión importa (opcional)"},
+    {tipo:"cerrada",id:"p3",num:"P3",cat:"Competencia",titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
+      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada",em:"🤷",txt:"Nada parecido"}]},
+    {tipo:"cerrada",id:"p4",num:"P4",cat:"Retorno",titulo:"¿Qué tendría que estar diferente para que volvieras con regularidad?",
       opts:[{v:"mejor_precio",em:"🏷️",txt:"Mejor precio"},{v:"algo_nuevo",em:"🌟",txt:"Algo nuevo en el menú"},{v:"mejor_servicio",em:"⭐",txt:"Mejor servicio"},{v:"ya_volvere",em:"😊",txt:"Nada, ya voy a volver"}]},
-    { tipo:"abierta", id:"p5", num:"P5", titulo:"¿Hay algo más que quieras que Oakberry sepa?", hint:"Totalmente libre (opcional)"},
+    {tipo:"abierta",id:"p5",num:"P5",cat:"Abierta",titulo:"¿Hay algo más que quieras que Oakberry sepa?",hint:"Totalmente libre (opcional)"},
   ],
-  vip: [
-    { tipo:"cerrada", id:"p1", num:"P1", titulo:"¿Sigues recomendando Oakberry aunque no vayas actualmente?",
+  vip:[
+    {tipo:"cerrada",id:"p1",num:"P1",cat:"Lealtad",titulo:"¿Sigues recomendando Oakberry aunque no vayas actualmente?",
       opts:[{v:"siempre",em:"❤️",txt:"Sí, siempre"},{v:"a_veces",em:"👍",txt:"A veces"},{v:"ya_no",em:"😐",txt:"Ya no tanto"},{v:"no",em:"👎",txt:"No"}]},
-    { tipo:"abierta", id:"p2", num:"P2", titulo:"¿Qué pasó? Eras un cliente muy frecuente — queremos saberlo directamente.", hint:"Sin filtros (opcional)"},
-    { tipo:"cerrada", id:"p3", num:"P3", titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
-      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada_parecido",em:"🤷",txt:"Nada parecido"}]},
-    { tipo:"cerrada", id:"p4", num:"P4", titulo:"¿Qué tendría que hacer Oakberry para recuperarte como cliente frecuente?",
+    {tipo:"abierta",id:"p2",num:"P2",cat:"Abierta",titulo:"¿Qué pasó? Eras un cliente muy frecuente — queremos saberlo directamente.",hint:"Sin filtros (opcional)"},
+    {tipo:"cerrada",id:"p3",num:"P3",cat:"Competencia",titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
+      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada",em:"🤷",txt:"Nada parecido"}]},
+    {tipo:"cerrada",id:"p4",num:"P4",cat:"Recuperación",titulo:"¿Qué tendría que hacer Oakberry para recuperarte como cliente frecuente?",
       opts:[{v:"mejor_precio",em:"🏷️",txt:"Mejorar el precio"},{v:"mejor_producto",em:"🫐",txt:"Mejorar el producto"},{v:"mejor_servicio",em:"⭐",txt:"Mejorar el servicio"},{v:"ya_volvere",em:"😊",txt:"Ya tenía planeado volver"}]},
-    { tipo:"abierta", id:"p5", num:"P5", titulo:"¿Estarías dispuesto a que alguien de Oakberry te contacte 5 minutos para escucharte?", hint:"Si sí, deja tu número o simplemente escribe 'sí' (opcional)"},
+    {tipo:"abierta",id:"p5",num:"P5",cat:"Abierta",titulo:"¿Estarías dispuesto a que alguien de Oakberry te contacte 5 minutos para escucharte?",hint:"Si sí, escribe 'sí' o deja tu número (opcional)"},
   ],
 };
 
-// ── ESTADO ────────────────────────────────────────────────────
-let SEG = "", NOMBRE = "", CIUDAD = "", TIENDA = "";
-let preguntas = [];
-let stepActual = 0;
-let respuestas = {};
+// ── ESTADO ENCUESTA ───────────────────────────────────────────
+let SEG="",NOMBRE="",CIUDAD="",TIENDA="";
+let preguntas=[],stepActual=0,respuestas={};
 
 // ── INIT ──────────────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded", async () => {
-  const urlP = new URLSearchParams(window.location.search);
-
-  // ── Sin token → modo master o error ─────────────────────────
+  // Sin token → preview o error
   if (!TOKEN) {
-    // Auto-auth si ya tiene sesión
     if (localStorage.getItem(MASTER_KEY) === MASTER_PWD) {
       showPreview(); return;
     }
-    // ?master=1 abre el modal
     if (urlP.get("master") === "1") {
       openMaster(); return;
     }
-    showState("stateError"); return;
+    // Sin token y sin master → mostrar error
+    document.getElementById("mainCard").style.display = "block";
+    showState("stateError");
+    return;
   }
 
-  // ── Con token → modo encuesta (real o demo) ──────────────────
-  // NUNCA mostrar preview aunque haya sesión guardada
+  // Con token → encuesta (nunca preview)
+  document.getElementById("mainCard").style.display = "block";
 
   try {
-    // Modo demo — no llama a la API
     let data;
     if (DEMO && DEMO_DATA[TOKEN]) {
       data = DEMO_DATA[TOKEN];
@@ -379,34 +509,30 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     if (!data.ok) { showState("stateError"); return; }
 
-    // Si ya respondió — mostrar cupón directamente
     if (data.ya_respondio && data.cupon) {
       document.getElementById("r-code").textContent  = data.cupon.codigo;
-      document.getElementById("r-vence").textContent = "Válido hasta: " + data.cupon.vence;
-      document.getElementById("r-nombre").textContent = "Hola, " + (data.nombre||"Oaker").split(" ")[0] + " 🫐";
-      document.getElementById("r-tienda").textContent = `Muéstrale este código al cajero en ${data.tienda || "Oakberry"} antes de pagar.`;
-      showState("stateCupon");
-      return;
+      document.getElementById("r-vence").textContent = data.cupon.vence;
+      document.getElementById("r-nombre").textContent= "Hola, "+(data.nombre||"Oaker").split(" ")[0]+" 🫐";
+      document.getElementById("r-tienda").textContent= `Muéstrale este código al cajero en ${data.tienda||"Oakberry"}.`;
+      showState("stateCupon"); return;
     }
 
-    SEG    = data.segmento || "ocasional";
-    NOMBRE = data.nombre  || "";
-    CIUDAD = data.ciudad  || "";
-    TIENDA = data.tienda  || "Oakberry";
+    SEG    = data.segmento || "Ocasional";
+    NOMBRE = data.nombre   || "";
+    CIUDAD = data.ciudad   || "";
+    TIENDA = data.tienda   || "Oakberry";
 
-    // Normalizar segmento
     const segMap = {"One-time":"one_time","Ocasional":"ocasional","Regular":"regular","Frecuente":"frecuente","VIP":"vip"};
-    const segKey = segMap[SEG] || SEG.toLowerCase().replace("-","_") || "ocasional";
+    const segKey = segMap[SEG] || "ocasional";
     preguntas = SURVEYS[segKey] || SURVEYS["ocasional"];
 
-    // Actualizar header
-    document.getElementById("hdr-sub").innerHTML = `Responde 5 preguntas · <span style="color:var(--yellow);">${CIUDAD}</span>`;
+    document.getElementById("hdr-sub").innerHTML   = `Responde · <strong>${CIUDAD}</strong>`;
+    document.getElementById("ciudad-lbl").textContent = CIUDAD;
 
-    // Construir dots
     const dots = document.getElementById("prog-dots");
-    dots.innerHTML = preguntas.map((_,i) => `<div class="dot${i===0?" active":""}" id="dot-${i}"></div>`).join("");
+    dots.innerHTML = preguntas.map((_,i)=>`<div class="dot${i===0?" active":""}" id="dot-${i}"></div>`).join("");
 
-    // Render primera pregunta
+    showState("stateEncuesta");
     renderStep(0);
 
   } catch(e) {
@@ -422,18 +548,20 @@ function renderStep(idx) {
   document.getElementById("prog-pct").textContent  = pct+"%";
   document.getElementById("prog-lbl").textContent  = `Pregunta ${idx+1} de ${preguntas.length}`;
 
+  const esUltima = idx === preguntas.length-1;
+  const btnTxt   = esUltima ? "Quiero mi bowl 🫐" : "Siguiente →";
+  // Abiertas: siempre ready (son opcionales). Cerradas: bloqueadas hasta seleccionar.
+  const btnReady = q.tipo === "abierta" ? "ready" : "";
+
   const body = document.getElementById("survey-body");
-  const esUltima = idx === preguntas.length - 1;
-  const btnTxt = esUltima ? "Quiero mi bowl 🫐" : "Siguiente →";
-  const btnReady = q.tipo === "abierta" ? "ready" : ""; // cerradas requieren selección
 
   if (q.tipo === "cerrada") {
     body.innerHTML = `
       <div class="step active" id="step-${idx}">
-        <div class="q-num">${q.num} · ${idx===0?"Contexto":idx===2?"Competencia":idx===3?"Retorno":"Insights"}</div>
+        <div class="q-num">${q.num} · ${q.cat}</div>
         <div class="q-text">${q.titulo}</div>
         <div class="opts">
-          ${q.opts.map(o => `
+          ${q.opts.map(o=>`
             <button class="opt" onclick="selOpt(${idx},'${o.v}',this)">
               <div class="opt-radio"></div>
               <span class="opt-em">${o.em}</span>
@@ -448,10 +576,10 @@ function renderStep(idx) {
   } else {
     body.innerHTML = `
       <div class="step active" id="step-${idx}">
-        <div class="q-num">${q.num} · Abierta</div>
+        <div class="q-num">${q.num} · ${q.cat}</div>
         <div class="q-text">${q.titulo}</div>
         <textarea class="open-field" id="open-${idx}" placeholder="Escribe aquí..." rows="3"
-          oninput="onOpenInput(${idx})"></textarea>
+          oninput="respuestas['${q.id}']=this.value"></textarea>
         <div class="open-hint">${q.hint||""}</div>
         <button class="btn ready" id="btn-${idx}" onclick="avanzar(${idx})">
           <span class="btn-txt">${btnTxt}</span>
@@ -462,32 +590,23 @@ function renderStep(idx) {
 }
 
 function selOpt(step, val, btn) {
-  document.querySelectorAll(`#step-${step} .opt`).forEach(o => o.classList.remove("sel"));
+  document.querySelectorAll(`#step-${step} .opt`).forEach(o=>o.classList.remove("sel"));
   btn.classList.add("sel");
   respuestas[preguntas[step].id] = val;
   document.getElementById("btn-"+step).classList.add("ready");
 }
 
-function onOpenInput(step) {
-  const val = document.getElementById("open-"+step)?.value || "";
-  respuestas[preguntas[step].id] = val;
-}
-
 function avanzar(idx) {
-  // Guardar valor abierto si aplica
   const q = preguntas[idx];
-  if (q.tipo === "abierta") {
-    respuestas[q.id] = document.getElementById("open-"+idx)?.value || "";
-  }
+  if (q.tipo === "cerrada" && !respuestas[q.id]) return;
+  if (q.tipo === "abierta") respuestas[q.id] = document.getElementById("open-"+idx)?.value||"";
 
-  // Marcar dot como done
   document.getElementById("dot-"+idx)?.classList.replace("active","done");
-
-  const siguiente = idx + 1;
-  if (siguiente < preguntas.length) {
-    stepActual = siguiente;
-    document.getElementById("dot-"+siguiente)?.classList.add("active");
-    renderStep(siguiente);
+  const sig = idx+1;
+  if (sig < preguntas.length) {
+    stepActual = sig;
+    document.getElementById("dot-"+sig)?.classList.add("active");
+    renderStep(sig);
     window.scrollTo({top:0,behavior:"smooth"});
   } else {
     finalizar();
@@ -500,35 +619,30 @@ async function finalizar() {
   iniciarCarga();
 
   const body = {
-    token:    TOKEN,
-    p1_tipo:  preguntas[0]?.tipo || "cerrada",
-    p1_valor: respuestas["p1"] || "",
-    p2_texto: respuestas["p2"] || "",
-    p3_valor: respuestas["p3"] || "",
-    p4_valor: respuestas["p4"] || "",
-    p5_texto: respuestas["p5"] || "",
+    token:TOKEN,
+    p1_tipo:preguntas[0]?.tipo||"cerrada",
+    p1_valor:respuestas["p1"]||"",
+    p2_texto:respuestas["p2"]||"",
+    p3_valor:respuestas["p3"]||"",
+    p4_valor:respuestas["p4"]||"",
+    p5_texto:respuestas["p5"]||"",
   };
 
   try {
-    // Modo demo — genera cupón fake sin guardar nada
     let data;
     if (DEMO) {
-      await new Promise(r => setTimeout(r, 1500));
-      data = {ok:true, codigo:"RDEMO1", vence:"31 de diciembre de 2026"};
+      await new Promise(r=>setTimeout(r,1800));
+      data = {ok:true, codigo:"RDEMO1", vence:fechaVence(), nombre:NOMBRE, tienda:TIENDA};
     } else {
-      const res  = await fetch(`${API}/uet/responder`, {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(body)
-      });
+      const res = await fetch(`${API}/uet/responder`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
       data = await res.json();
     }
 
-    completarCarga(() => {
+    completarCarga(()=>{
       if (data.ok) {
         document.getElementById("r-code").textContent   = data.codigo;
-        document.getElementById("r-vence").textContent  = "Válido hasta: " + (data.vence || fechaVence());
-        document.getElementById("r-nombre").textContent = "Gracias, " + (NOMBRE||"Oaker").split(" ")[0] + " 🫐";
+        document.getElementById("r-vence").textContent  = data.vence || fechaVence();
+        document.getElementById("r-nombre").textContent = "Gracias, "+(NOMBRE||"Oaker").split(" ")[0]+" 🫐";
         document.getElementById("r-tienda").textContent = `Muéstrale este código al cajero en ${TIENDA} antes de pagar.`;
         showState("stateCupon");
       } else {
@@ -537,198 +651,113 @@ async function finalizar() {
       }
     });
   } catch(e) {
-    completarCarga(() => {
-      // Fallback demo si la API falla
+    completarCarga(()=>{
       document.getElementById("r-code").textContent   = genCod();
-      document.getElementById("r-vence").textContent  = "Válido hasta: " + fechaVence();
-      document.getElementById("r-nombre").textContent = "Gracias, " + (NOMBRE||"Oaker").split(" ")[0] + " 🫐";
-      document.getElementById("r-tienda").textContent = `Muéstrale este código al cajero en ${TIENDA} antes de pagar.`;
+      document.getElementById("r-vence").textContent  = fechaVence();
+      document.getElementById("r-nombre").textContent = "Gracias, "+(NOMBRE||"Oaker").split(" ")[0]+" 🫐";
+      document.getElementById("r-tienda").textContent = `Muéstrale este código al cajero en ${TIENDA}.`;
       showState("stateCupon");
     });
   }
 }
 
 // ── LOADING ───────────────────────────────────────────────────
-let _lt = null;
-function iniciarCarga() {
-  const pasos = [
-    {pct:25,delay:500,msg:"Guardando respuestas...",ls:1},
-    {pct:55,delay:1000,msg:"Generando código único...",ls:2},
-    {pct:80,delay:1400,msg:"Registrando cupón...",ls:3},
-  ];
+let _lt=null;
+function iniciarCarga(){
+  const pasos=[{pct:25,delay:500,msg:"Guardando respuestas...",ls:1},{pct:55,delay:1000,msg:"Generando código único...",ls:2},{pct:80,delay:1400,msg:"Registrando cupón...",ls:3}];
   let i=0;
-  function tick(){
-    if(i>=pasos.length)return;
-    const p=pasos[i++];
-    _lt=setTimeout(()=>{
-      setLS(p.ls,"active");
-      if(p.ls>1)setLS(p.ls-1,"done");
-      setL(p.pct,p.msg);tick();
-    },p.delay);
-  }
+  function tick(){if(i>=pasos.length)return;const p=pasos[i++];_lt=setTimeout(()=>{setLS(p.ls,"active");if(p.ls>1)setLS(p.ls-1,"done");setL(p.pct,p.msg);tick();},p.delay);}
   tick();
 }
-function completarCarga(cb){
-  clearTimeout(_lt);
-  setLS(3,"done");setLS(4,"active");
-  setL(95,"¡Casi listo!");
-  setTimeout(()=>{setL(100,"¡Cupón generado!");setLS(4,"done");setTimeout(cb,400);},350);
+function completarCarga(cb){clearTimeout(_lt);setLS(3,"done");setLS(4,"active");setL(95,"¡Casi listo!");setTimeout(()=>{setL(100,"¡Cupón generado!");setLS(4,"done");setTimeout(cb,400);},350);}
+function setL(pct,msg){document.getElementById("l-fill").style.width=pct+"%";document.getElementById("l-msg").textContent=msg;}
+function setLS(n,cls){const el=document.getElementById("ls"+n);if(el)el.className="l-step "+cls;}
+
+// ── MASTER ────────────────────────────────────────────────────
+function openMaster(){
+  document.getElementById("masterOverlay").classList.add("show");
+  const cancel = document.getElementById("masterCancel");
+  if (TOKEN) cancel.classList.add("show"); else cancel.classList.remove("show");
+  setTimeout(()=>document.getElementById("masterPwd")?.focus(),100);
 }
-function setL(pct,msg){
-  document.getElementById("l-fill").style.width=pct+"%";
-  document.getElementById("l-msg").textContent=msg;
+function closeMaster(){document.getElementById("masterOverlay").classList.remove("show");}
+function checkMaster(){
+  const val = document.getElementById("masterPwd").value;
+  if (val===MASTER_PWD){
+    localStorage.setItem(MASTER_KEY,MASTER_PWD);
+    closeMaster();
+    showPreview();
+  } else {
+    const err=document.getElementById("masterErr");
+    err.classList.add("show");setTimeout(()=>err.classList.remove("show"),2000);
+  }
 }
-function setLS(n,cls){
-  const el=document.getElementById("ls"+n);
-  if(el) el.className="l-step "+cls;
+function salirPreview(){
+  localStorage.removeItem(MASTER_KEY);
+  document.getElementById("previewPanel").classList.remove("show");
+  document.getElementById("mainCard").style.display="block";
+  document.body.classList.remove("preview-mode","light-mode");
+  showState("stateError");
+}
+
+// ── PREVIEW ───────────────────────────────────────────────────
+function showPreview(){
+  document.body.classList.add("preview-mode");
+  document.getElementById("mainCard").style.display="none";
+  document.getElementById("previewPanel").classList.add("show");
+  renderPvGrid();renderPvTokens();
+  if(localStorage.getItem("uet_theme")==="light"){document.body.classList.add("light-mode");document.getElementById("themeBtn").textContent="🌙 Dark";}
+}
+function renderPvGrid(){
+  document.getElementById("pvGrid").innerHTML = DEMO_TOKENS.map(t=>`
+    <div class="pv-card">
+      <div class="pv-card-body">
+        <span class="pv-tag-seg" style="background:${t.color};color:${t.tc};">${t.label}</span>
+        <div class="pv-card-name">${t.label} churneado</div>
+        <div class="pv-card-desc">${SEG_DESCS[t.seg]}</div>
+      </div>
+      <div class="pv-card-btns">
+        <button class="pv-card-btn outline" onclick="pvCopy('${t.token}')">📋 Copiar</button>
+        <button class="pv-card-btn solid"   onclick="pvOpen('${t.token}')">Ver →</button>
+      </div>
+    </div>`).join("");
+}
+function renderPvTokens(){
+  const LABELS={one_time:"One-timer",ocasional:"Ocasional",regular:"Regular",frecuente:"Frecuente",vip:"VIP"};
+  document.getElementById("pvTokens").innerHTML = DEMO_TOKENS.map(t=>`
+    <tr>
+      <td style="font-family:'Courier New',monospace;color:#f0ede4;">${t.token}</td>
+      <td><span style="font-size:8px;font-weight:700;color:${t.tc};text-transform:uppercase;letter-spacing:.06em;">${LABELS[t.seg]}</span></td>
+      <td>${t.ciudad}</td>
+      <td><a class="pv-link" href="javascript:void(0)" onclick="pvOpen('${t.token}')">Abrir →</a></td>
+    </tr>`).join("");
+}
+function pvOpen(token){window.open(window.location.protocol+"//"+window.location.host+"/uet?t="+token+"&demo=1","_blank");}
+function pvCopy(token){const u=window.location.protocol+"//"+window.location.host+"/uet?t="+token+"&demo=1";navigator.clipboard?.writeText(u).then(()=>alert("Link copiado:\n"+u));}
+
+// ── DARK / LIGHT ──────────────────────────────────────────────
+function toggleTheme(){
+  const isLight = document.body.classList.toggle("light-mode");
+  document.getElementById("themeBtn").textContent = isLight ? "🌙 Dark" : "☀ Light";
+  localStorage.setItem("uet_theme", isLight ? "light" : "dark");
 }
 
 // ── UTILS ─────────────────────────────────────────────────────
 function showState(id){
   ["stateEncuesta","stateLoading","stateCupon","stateError"].forEach(s=>{
-    const el=document.getElementById(s);
-    if(el) el.classList.toggle("show",s===id);
+    const el=document.getElementById(s);if(el)el.classList.toggle("show",s===id);
   });
 }
-function genCod(){
-  const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let r="R";for(let i=0;i<5;i++)r+=c[Math.floor(Math.random()*c.length)];return r;
-}
+function genCod(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let r="R";for(let i=0;i<5;i++)r+=c[Math.floor(Math.random()*c.length)];return r;}
 function fechaVence(){
-  const d=new Date();d.setDate(d.getDate()+7);
-  return d.toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"});
+  const d=new Date();d.setHours(d.getHours()+72);
+  return d.toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"});
 }
-// ── LLAVE MAESTRA ─────────────────────────────────────────────
-const MASTER_PWD = "oak2026";
-const MASTER_KEY = "uet_master_auth";
-
-const DEMO_TOKENS = [
-  {token:"DEMO_OT01",seg:"one_time", label:"One-timer",  ciudad:"Pereira",  color:"rgba(248,113,113,.1)",tc:"#f87171"},
-  {token:"DEMO_OC01",seg:"ocasional",label:"Ocasional",  ciudad:"Pereira",  color:"rgba(251,191,36,.1)", tc:"#fbbf24"},
-  {token:"DEMO_RE01",seg:"regular",  label:"Regular",    ciudad:"Bogotá",   color:"rgba(255,255,255,.07)",tc:"#8a877e"},
-  {token:"DEMO_FR01",seg:"frecuente",label:"Frecuente",  ciudad:"Medellín", color:"rgba(74,222,128,.1)", tc:"#4ade80"},
-  {token:"DEMO_VP01",seg:"vip",      label:"VIP",        ciudad:"Cali",     color:"rgba(167,139,250,.1)",tc:"#a78bfa"},
-];
-
-// master init handled in main DOMContentLoaded
-
-function openMaster() {
-  const wrap = document.getElementById("masterWrap");
-  wrap.style.display = "flex";
-  document.getElementById("masterClose").style.display = TOKEN ? "block" : "none";
-  setTimeout(() => document.getElementById("masterPwd")?.focus(), 100);
-}
-
-function closeMaster() {
-  document.getElementById("masterWrap").style.display = "none";
-}
-
-function checkMaster() {
-  const val = document.getElementById("masterPwd").value;
-  if (val === MASTER_PWD) {
-    localStorage.setItem(MASTER_KEY, MASTER_PWD);
-    document.getElementById("masterWrap").style.display = "none";
-    showPreview();
-  } else {
-    const err = document.getElementById("masterErr");
-    err.style.display = "block";
-    setTimeout(() => err.style.display = "none", 2000);
-  }
-}
-
-function showPreview() {
-  document.body.classList.add("preview-mode");
-  document.getElementById("mainCard").style.display = "none";
-  document.getElementById("previewPanel").style.display = "block";
-  renderPreviewGrid();
-  renderTokensTable();
-  // Restaurar tema guardado
-  const saved = localStorage.getItem('uet_theme');
-  if (saved === 'light') { isDark = false; }
-  applyTheme();
-}
-
-// ── DARK / LIGHT MODE ─────────────────────────────────────────
-let isDark = true;
-function applyTheme() {
-  const btn = document.getElementById('themeToggle');
-  const panel = document.getElementById('previewPanel');
-  if (!panel) return;
-  if (isDark) {
-    document.body.style.background = '#0c0b08';
-    document.body.style.color = '#f0ede4';
-    panel.querySelectorAll('.light-card').forEach(el => {
-      el.style.background = '#151410';
-      el.style.color = '#f0ede4';
-      el.style.border = '1px solid rgba(255,255,255,.14)';
-    });
-    if(btn) btn.textContent = '☀ Light';
-  } else {
-    document.body.style.background = '#f5f4f0';
-    document.body.style.color = '#0c0b08';
-    panel.querySelectorAll('.light-card').forEach(el => {
-      el.style.background = '#ffffff';
-      el.style.color = '#0c0b08';
-      el.style.border = '1px solid rgba(0,0,0,.1)';
-    });
-    if(btn) btn.textContent = '🌙 Dark';
-  }
-  localStorage.setItem('uet_theme', isDark ? 'dark' : 'light');
-}
-function toggleTheme() { isDark = !isDark; applyTheme(); }
-
-function getBase() {
-  return window.location.protocol + '//' + window.location.host;
-}
-
-function renderPreviewGrid() {
-  const grid = document.getElementById("previewGrid");
-  const DESCS = {
-    one_time:  "Primera impresión y barrera de hábito",
-    ocasional: "Momento de quiebre y condición de retorno",
-    regular:   "Cambios percibidos y frecuencia perdida",
-    frecuente: "Gradual vs incidente puntual",
-    vip:       "Espacio abierto — qué pasó exactamente",
-  };
-  grid.innerHTML = DEMO_TOKENS.map(t => `
-    <div class="light-card" style="background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:12px;overflow:hidden;">
-      <div style="padding:16px 18px 0;">
-        <span style="background:${t.color};color:${t.tc};font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;">${t.label}</span>
-        <div style="font-size:14px;font-weight:900;color:#f0ede4;margin-bottom:4px;">${t.label} churneado</div>
-        <div style="font-size:10px;color:#8a877e;line-height:1.5;margin-bottom:14px;">${DESCS[t.seg]}</div>
-      </div>
-      <div style="padding:0 18px 16px;display:flex;gap:8px;">
-        <button onclick="(function(){var u=getBase()+'/uet?t=${t.token}&demo=1';navigator.clipboard.writeText(u).then(()=>alert('Link copiado: '+u));})()"
-          style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#8a877e;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;">
-          📋 Copiar
-        </button>
-        <button onclick="window.open(getBase()+'/uet?t=${t.token}&demo=1','_blank')"
-          style="flex:1;padding:9px;border-radius:8px;border:none;background:#5F4B8B;color:#fff;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;">
-          Ver →
-        </button>
-      </div>
-    </div>`).join("");
-}
-
-function renderTokensTable() {
-  const tbody = document.getElementById("tokensBody");
-  const LABELS = {one_time:"One-timer",ocasional:"Ocasional",regular:"Regular",frecuente:"Frecuente",vip:"VIP"};
-  const COLORS = {one_time:"#f87171",ocasional:"#fbbf24",regular:"#8a877e",frecuente:"#4ade80",vip:"#a78bfa"};
-  tbody.innerHTML = DEMO_TOKENS.map(t => `
-    <tr style="border-bottom:.5px solid rgba(255,255,255,.04);">
-      <td style="padding:10px 16px;font-family:'Courier New',monospace;font-size:10px;color:#f0ede4;">${t.token}</td>
-      <td style="padding:10px 16px;"><span style="font-size:8px;font-weight:700;color:${COLORS[t.seg]};text-transform:uppercase;letter-spacing:.06em;">${LABELS[t.seg]}</span></td>
-      <td style="padding:10px 16px;color:#8a877e;font-size:10px;">${t.ciudad}</td>
-      <td style="padding:10px 16px;"><a href="javascript:void(0)" onclick="window.open(getBase()+'/uet?t=${t.token}&demo=1','_blank')"  style="font-family:'Courier New',monospace;font-size:9px;color:#5F4B8B;text-decoration:none;padding:3px 8px;border:1px solid rgba(95,75,139,.3);border-radius:4px;">Abrir →</a></td>
-    </tr>`).join("");
-}
-
 function copiar(){
   const code=document.getElementById("r-code").textContent;
   navigator.clipboard?.writeText(code).then(()=>{
     const btn=document.querySelector(".copy-btn");
-    const prev=btn.textContent;
-    btn.textContent="✅ ¡Copiado!";
+    const prev=btn.textContent;btn.textContent="✅ ¡Copiado!";
     setTimeout(()=>btn.textContent=prev,2200);
   });
 }
