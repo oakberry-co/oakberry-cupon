@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oakberry · Tu bowl te espera</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--primary:#5F4B8B;--pd:#4a3a6e;--yellow:#F5C842;--white:#fff;--off-white:rgba(255,255,255,0.97);--border:#eee;--gray:#999;--green:#27ae60;--red:#c0392b;}
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Montserrat',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:linear-gradient(rgba(95,75,139,0.6),rgba(95,75,139,0.6)),url('oakville-bg.jpg') center/cover no-repeat fixed;}
+
+  .card{background:var(--off-white);border-radius:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;animation:cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;}
+  @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+  /* HEADER */
+  .card-header{background:var(--primary);padding:28px 30px 24px;text-align:center;}
+  .brand{font-size:28px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
+  .brand-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:14px;}
+  .bowl-badge{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);border-radius:50px;padding:10px 22px;}
+  .bowl-badge .icon{font-size:26px;}
+  .bowl-badge .txt{font-size:13px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;text-align:left;line-height:1.4;}
+
+  /* PROGRESS */
+  .prog-wrap{padding:20px 28px 0;}
+  .prog-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .prog-label{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;}
+  .prog-pct{font-size:10px;font-weight:900;color:var(--primary);}
+  .prog-bar{background:#f0ebff;border-radius:50px;height:8px;overflow:hidden;margin-bottom:12px;}
+  .prog-fill{height:8px;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));transition:width .5s cubic-bezier(0.22,1,0.36,1);}
+  .prog-dots{display:flex;justify-content:center;gap:8px;}
+  .prog-dot{width:8px;height:8px;border-radius:50%;background:#e8e0f5;transition:all .3s;}
+  .prog-dot.active{background:var(--primary);transform:scale(1.2);}
+  .prog-dot.done{background:var(--green);}
+
+  /* BODY */
+  .card-body{padding:22px 28px 28px;}
+
+  /* PREGUNTA */
+  .q-num{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
+  .q-text{font-size:16px;font-weight:900;color:var(--primary);line-height:1.4;margin-bottom:18px;}
+
+  /* OPCIONES */
+  .opts{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+  .opt{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:14px;border:2px solid var(--border);background:#fff;cursor:pointer;transition:all .18s;text-align:left;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#555;width:100%;}
+  .opt:hover{border-color:var(--primary);background:#f5f0ff;}
+  .opt.selected{border-color:var(--primary);background:#f0ebff;color:var(--primary);}
+  .opt-radio{min-width:20px;height:20px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
+  .opt.selected .opt-radio{background:var(--primary);border-color:var(--primary);}
+  .opt.selected .opt-radio::after{content:'';width:7px;height:7px;border-radius:50%;background:#fff;}
+  .opt-em{font-size:18px;flex-shrink:0;}
+
+  /* BTN */
+  .btn{width:100%;padding:17px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .18s;box-shadow:0 6px 20px rgba(95,75,139,0.4);opacity:.45;pointer-events:none;position:relative;overflow:hidden;}
+  .btn.ready{opacity:1;pointer-events:all;}
+  .btn.ready:hover{background:var(--pd);transform:translateY(-1px);}
+  .btn .btn-text{transition:opacity .18s;}
+  .btn .btn-loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .18s;}
+  .btn.loading .btn-text{opacity:0;}
+  .btn.loading .btn-loader{opacity:1;}
+  .spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* STEP */
+  .step{display:none;animation:fadeUp .3s cubic-bezier(0.22,1,0.36,1);}
+  .step.active{display:block;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  /* LOADING */
+  #stateLoading{display:none;}
+  #stateLoading.show{display:block;}
+  .loading-header{background:var(--primary);padding:28px 30px 24px;text-align:center;}
+  .loading-icon{font-size:44px;display:block;margin-bottom:8px;animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+  .loading-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+  .loading-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:1.5px;}
+  .loading-body{padding:28px 28px 32px;}
+  .prog-bar2{background:#f0ebff;border-radius:50px;height:10px;overflow:hidden;margin-bottom:10px;}
+  .prog-fill2{height:10px;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));width:0%;transition:width .4s ease;}
+  .loading-msg{font-size:12px;font-weight:700;color:#666;text-align:center;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;min-height:36px;}
+  .loading-steps{display:flex;flex-direction:column;gap:10px;}
+  .loading-step{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;transition:color .3s;}
+  .loading-step.active,.loading-step.done{color:var(--primary);}
+  .step-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0;}
+  .step-check{width:18px;height:18px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .3s;}
+  .loading-step.done .step-check{background:var(--primary);border-color:var(--primary);}
+  .loading-step.done .step-check::after{content:'✓';font-size:10px;color:#fff;font-weight:900;}
+
+  /* CUPÓN RESULTADO */
+  #stateCupon{display:none;}
+  #stateCupon.show{display:block;animation:cardIn .4s cubic-bezier(0.22,1,0.36,1) both;}
+  .result-header{background:var(--primary);padding:28px 30px 22px;text-align:center;}
+  .result-icon{font-size:44px;display:block;margin-bottom:8px;animation:popIn .5s cubic-bezier(0.34,1.56,0.64,1) .15s both;}
+  @keyframes popIn{from{opacity:0;transform:scale(0.3);}to{opacity:1;transform:scale(1);}}
+  .result-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+  .result-sub{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;}
+  .result-body{padding:24px 28px 30px;}
+
+  .ticket{background:var(--primary);border-radius:16px;padding:20px 24px;margin-bottom:16px;position:relative;overflow:hidden;}
+  .ticket-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
+  .ticket-code{font-size:36px;font-weight:900;color:#fff;letter-spacing:4px;line-height:1;margin-bottom:4px;}
+  .ticket-product{font-size:12px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
+  .ticket-dashed{border-top:1.5px dashed rgba(255,255,255,.2);margin:14px -24px;position:relative;}
+  .ticket-dashed::before,.ticket-dashed::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:16px;height:16px;background:var(--off-white);border-radius:50%;}
+  .ticket-dashed::before{left:-8px;}.ticket-dashed::after{right:-8px;}
+  .ticket-bottom{display:flex;justify-content:space-between;align-items:center;}
+  .ticket-validity{font-size:11px;font-weight:600;color:rgba(255,255,255,.45);}
+  .copy-btn{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:9px 16px;border-radius:8px;cursor:pointer;transition:background .18s;}
+  .copy-btn:hover{background:rgba(255,255,255,.22);}
+
+  .info-pill{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.2px;line-height:1.5;margin-bottom:8px;}
+  .info-pill.purple{background:#f5f0ff;border:1.5px solid #d4c8f5;color:var(--primary);}
+  .info-pill.yellow{background:#fffbea;border:1.5px solid #f0dc8c;color:#7a5c00;}
+  .info-pill .icon{font-size:16px;flex-shrink:0;}
+
+  /* ENCUESTA */
+  #stateEncuesta{display:none;}
+  #stateEncuesta.show{display:block;}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- ENCUESTA -->
+  <div id="stateEncuesta" class="show">
+    <div class="card-header">
+      <div class="brand">Oakberry</div>
+      <div class="brand-sub">Tu opinión · Reactivación</div>
+      <div class="bowl-badge">
+        <span class="icon">🫐</span>
+        <span class="txt">Bowl 7oz gratis<br><span style="font-size:10px;font-weight:600;">sin toppings · al responder</span></span>
+      </div>
+    </div>
+
+    <div class="prog-wrap">
+      <div class="prog-header">
+        <span class="prog-label" id="prog-label">Pregunta 1 de 4</span>
+        <span class="prog-pct" id="prog-pct">25%</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:25%"></div></div>
+      <div class="prog-dots">
+        <div class="prog-dot active" id="dot-0"></div>
+        <div class="prog-dot" id="dot-1"></div>
+        <div class="prog-dot" id="dot-2"></div>
+        <div class="prog-dot" id="dot-3"></div>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <!-- P1 -->
+      <div class="step active" id="step-0">
+        <div class="q-num">Pregunta 1 · Frecuencia</div>
+        <div class="q-text">¿Con qué frecuencia visitabas Oakberry cuando eras cliente activo?</div>
+        <div class="opts">
+          <button class="opt" onclick="sel(0,'mas_1x_semana',this)"><div class="opt-radio"></div><span class="opt-em">🔥</span>Más de una vez por semana</button>
+          <button class="opt" onclick="sel(0,'1x_semana',this)"><div class="opt-radio"></div><span class="opt-em">📅</span>Una vez por semana</button>
+          <button class="opt" onclick="sel(0,'1_2x_mes',this)"><div class="opt-radio"></div><span class="opt-em">🗓️</span>1-2 veces al mes</button>
+          <button class="opt" onclick="sel(0,'ocasional',this)"><div class="opt-radio"></div><span class="opt-em">👋</span>De vez en cuando</button>
+        </div>
+        <button class="btn" id="btn-0" onclick="next(0)"><span class="btn-text">Siguiente →</span><span class="btn-loader"><span class="spin"></span></span></button>
+      </div>
+
+      <!-- P2 -->
+      <div class="step" id="step-1">
+        <div class="q-num">Pregunta 2 · Razón principal</div>
+        <div class="q-text">¿Por qué dejaste de visitar Oakberry?</div>
+        <div class="opts">
+          <button class="opt" onclick="sel(1,'precio',this)"><div class="opt-radio"></div><span class="opt-em">💸</span>El precio me pareció alto</button>
+          <button class="opt" onclick="sel(1,'distancia',this)"><div class="opt-radio"></div><span class="opt-em">📍</span>Me queda lejos o incómodo ir</button>
+          <button class="opt" onclick="sel(1,'alternativas',this)"><div class="opt-radio"></div><span class="opt-em">🍽️</span>Encontré otras opciones que prefiero</button>
+          <button class="opt" onclick="sel(1,'olvido',this)"><div class="opt-radio"></div><span class="opt-em">😅</span>Se me olvidó el hábito</button>
+          <button class="opt" onclick="sel(1,'mala_exp',this)"><div class="opt-radio"></div><span class="opt-em">😕</span>Tuve una mala experiencia</button>
+        </div>
+        <button class="btn" id="btn-1" onclick="next(1)"><span class="btn-text">Siguiente →</span><span class="btn-loader"><span class="spin"></span></span></button>
+      </div>
+
+      <!-- P3 -->
+      <div class="step" id="step-2">
+        <div class="q-num">Pregunta 3 · Lo que recuerdas</div>
+        <div class="q-text">¿Qué es lo que más recuerdas o extrañas de Oakberry?</div>
+        <div class="opts">
+          <button class="opt" onclick="sel(2,'sabor',this)"><div class="opt-radio"></div><span class="opt-em">🫐</span>El sabor del açaí</button>
+          <button class="opt" onclick="sel(2,'saludable',this)"><div class="opt-radio"></div><span class="opt-em">💪</span>Que es una opción saludable</button>
+          <button class="opt" onclick="sel(2,'ambiente',this)"><div class="opt-radio"></div><span class="opt-em">✨</span>El ambiente y la experiencia</button>
+          <button class="opt" onclick="sel(2,'nada',this)"><div class="opt-radio"></div><span class="opt-em">🤷</span>Honestamente, nada en particular</button>
+        </div>
+        <button class="btn" id="btn-2" onclick="next(2)"><span class="btn-text">Siguiente →</span><span class="btn-loader"><span class="spin"></span></span></button>
+      </div>
+
+      <!-- P4 -->
+      <div class="step" id="step-3">
+        <div class="q-num">Pregunta 4 · Lo que te haría volver</div>
+        <div class="q-text">¿Qué te haría volver a Oakberry más seguido?</div>
+        <div class="opts">
+          <button class="opt" onclick="sel(3,'precio_menor',this)"><div class="opt-radio"></div><span class="opt-em">🏷️</span>Precios más accesibles</button>
+          <button class="opt" onclick="sel(3,'promociones',this)"><div class="opt-radio"></div><span class="opt-em">🎁</span>Más promociones y descuentos</button>
+          <button class="opt" onclick="sel(3,'nuevos_sabores',this)"><div class="opt-radio"></div><span class="opt-em">🌟</span>Nuevos sabores o combos</button>
+          <button class="opt" onclick="sel(3,'recordatorio',this)"><div class="opt-radio"></div><span class="opt-em">📲</span>Un recordatorio de vez en cuando</button>
+          <button class="opt" onclick="sel(3,'ya_volvere',this)"><div class="opt-radio"></div><span class="opt-em">😊</span>Ya tenía planeado volver</button>
+        </div>
+        <button class="btn ready" id="btn-3" onclick="finalizar()">
+          <span class="btn-text">Reclamar mi bowl gratis 🫐</span>
+          <span class="btn-loader"><span class="spin"></span></span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="stateLoading">
+    <div class="loading-header">
+      <span class="loading-icon">🫐</span>
+      <div class="loading-title">Generando tu cupón</div>
+      <div class="loading-sub">Solo unos segundos</div>
+    </div>
+    <div class="loading-body">
+      <div class="prog-bar2"><div class="prog-fill2" id="prog2"></div></div>
+      <div class="loading-msg" id="load-msg">Procesando respuestas...</div>
+      <div class="loading-steps">
+        <div class="loading-step" id="ls1"><span class="step-icon">📋</span><span style="flex:1">Guardando respuestas</span><span class="step-check"></span></div>
+        <div class="loading-step" id="ls2"><span class="step-icon">🎟</span><span style="flex:1">Generando código único</span><span class="step-check"></span></div>
+        <div class="loading-step" id="ls3"><span class="step-icon">💾</span><span style="flex:1">Registrando cupón</span><span class="step-check"></span></div>
+        <div class="loading-step" id="ls4"><span class="step-icon">✅</span><span style="flex:1">¡Listo para canjear!</span><span class="step-check"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUPÓN FINAL -->
+  <div id="stateCupon">
+    <div class="result-header">
+      <span class="result-icon">🎉</span>
+      <div class="result-title">¡Tu bowl está listo!</div>
+      <div class="result-sub" id="res-nombre">Gracias por tu respuesta</div>
+    </div>
+    <div class="result-body">
+      <div class="ticket">
+        <div class="ticket-label">Tu código · Bowl 7oz gratis</div>
+        <div class="ticket-code" id="out-code">——</div>
+        <div class="ticket-product">🫐 Bowl The One 7oz · Sin toppings · Pereira</div>
+        <div class="ticket-dashed"></div>
+        <div class="ticket-bottom">
+          <div class="ticket-validity" id="out-vence">Válido 7 días</div>
+          <button class="copy-btn" onclick="copiar()">📋 Copiar</button>
+        </div>
+      </div>
+      <div class="info-pill purple">
+        <span class="icon">📍</span>
+        <span>Muestra este código al cajero en Oakberry Pereira antes de pagar.</span>
+      </div>
+      <div class="info-pill yellow">
+        <span class="icon">⚠️</span>
+        <span>Bowl sin toppings adicionales · Uso único · Solo Oakberry Pereira · Aplican T&C</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIGURACIÓN ─────────────────────────────────────────────
+const SCRIPT_URL = "TU_URL_APPS_SCRIPT_AQUI";
+
+// Leer parámetros del link (vienen del WA)
+const P = new URLSearchParams(window.location.search);
+const CLI_EMAIL  = P.get('e') || '';
+const CLI_CID    = P.get('c') || '';
+const CLI_NOMBRE = decodeURIComponent(P.get('n') || '');
+
+// ── ESTADO ────────────────────────────────────────────────────
+const R = {}; // respuestas
+
+function sel(step, val, btn) {
+  document.querySelectorAll(`#step-${step} .opt`).forEach(o => o.classList.remove('selected'));
+  btn.classList.add('selected');
+  R['p'+(step+1)] = val;
+  if (step < 3) document.getElementById('btn-'+step).classList.add('ready');
+}
+
+function next(step) {
+  if (!R['p'+(step+1)]) return;
+  document.getElementById('dot-'+step).className = 'prog-dot done';
+  document.getElementById('step-'+step).classList.remove('active');
+  const ns = step + 1;
+  document.getElementById('step-'+ns).classList.add('active');
+  document.getElementById('dot-'+ns).className = 'prog-dot active';
+  const pct = Math.round(((ns+1)/4)*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-label').textContent = `Pregunta ${ns+1} de 4`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── FINALIZAR → generar cupón ─────────────────────────────────
+function finalizar() {
+  document.getElementById('dot-3').className = 'prog-dot done';
+  show('stateLoading');
+  iniciarProgreso();
+
+  const demo = SCRIPT_URL === 'TU_URL_APPS_SCRIPT_AQUI';
+  if (demo) {
+    setTimeout(() => mostrarCupon({ok:true, codigo:genCod(), vence:fechaVence()}), 2200);
+    return;
+  }
+
+  const params = {
+    accion: 'generarCuponReactivacion',
+    email: CLI_EMAIL, cid: CLI_CID, nombre: CLI_NOMBRE,
+    ciudad: 'Pereira', tienda: 'Oakberry Pereira',
+    segmento: 'Ocasional_Churn',
+    p1: R.p1, p2: R.p2, p3: R.p3, p4: R.p4,
+    callback: '_rcv'
+  };
+
+  const qs = new URLSearchParams(params).toString();
+  const s = document.createElement('script');
+  window._rcv = d => { completarProgreso(() => mostrarCupon(d)); };
+  s.onerror = () => mostrarCupon({ok:true, codigo:genCod(), vence:fechaVence()});
+  s.src = SCRIPT_URL + '?' + qs;
+  document.body.appendChild(s);
+  setTimeout(() => mostrarCupon({ok:true, codigo:genCod(), vence:fechaVence()}), 15000);
+}
+
+function mostrarCupon(d) {
+  show('stateCupon');
+  const nombre = CLI_NOMBRE || 'Oaker';
+  document.getElementById('res-nombre').textContent = 'Gracias, ' + nombre.split(' ')[0] + ' 🫐';
+  document.getElementById('out-code').textContent = d.codigo || genCod();
+  document.getElementById('out-vence').textContent = 'Válido hasta: ' + (d.vence || fechaVence());
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+  document.getElementById('prog-label').textContent = '¡Completado!';
+}
+
+// ── LOADING ANIMADO ───────────────────────────────────────────
+let _pt = null;
+function iniciarProgreso() {
+  const pasos = [
+    {pct:25, delay:500,  msg:'Guardando tus respuestas...', ls:1},
+    {pct:55, delay:1000, msg:'Generando código único...',   ls:2},
+    {pct:80, delay:1400, msg:'Registrando cupón...',        ls:3},
+  ];
+  let i = 0;
+  function tick() {
+    if (i >= pasos.length) return;
+    const p = pasos[i++];
+    _pt = setTimeout(() => {
+      setLS(p.ls, 'active');
+      if (p.ls > 1) setLS(p.ls-1, 'done');
+      setP2(p.pct, p.msg);
+      tick();
+    }, p.delay);
+  }
+  tick();
+}
+function completarProgreso(cb) {
+  clearTimeout(_pt);
+  setLS(3,'done'); setLS(4,'active');
+  setP2(95,'¡Casi listo!');
+  setTimeout(() => { setP2(100,'¡Cupón generado!'); setLS(4,'done'); setTimeout(cb,400); }, 350);
+}
+function setP2(pct, msg) {
+  document.getElementById('prog2').style.width = pct+'%';
+  document.getElementById('load-msg').textContent = msg;
+}
+function setLS(n, cls) {
+  const el = document.getElementById('ls'+n);
+  if (el) el.className = 'loading-step ' + cls;
+}
+
+// ── UTILIDADES ────────────────────────────────────────────────
+function show(id) {
+  ['stateEncuesta','stateLoading','stateCupon'].forEach(s => {
+    const el = document.getElementById(s);
+    if (!el) return;
+    if (s === 'stateLoading') { el.style.display = id===s?'block':'none'; return; }
+    el.classList.toggle('show', s === id);
+  });
+}
+function genCod() {
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r='R';
+  for(let i=0;i<5;i++) r+=c[Math.floor(Math.random()*c.length)];
+  return r;
+}
+function fechaVence() {
+  const d = new Date(); d.setDate(d.getDate()+7);
+  return d.toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'});
+}
+function copiar() {
+  const code = document.getElementById('out-code').textContent;
+  navigator.clipboard?.writeText(code).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    const prev = btn.textContent;
+    btn.textContent = '✅ ¡Copiado!';
+    setTimeout(() => btn.textContent = prev, 2200);
+  });
+}
+</script>
+</body>
+</html>
