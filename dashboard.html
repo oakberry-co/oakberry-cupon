@@ -1311,7 +1311,7 @@ async function cargar() {
       renderStats(data);
       dot.classList.remove('loading');
       txt.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CO');
-      document.getElementById('fecha-sync').textContent = 'Sync BQ: ' + (data.sync || '—');
+      set('fecha-sync', 'Sync BQ: ' + (data.sync || '—'));
     } else {
       throw new Error(data.error || 'Error desconocido');
     }
@@ -1321,47 +1321,50 @@ async function cargar() {
     renderStats(_demoStats());
     dot.classList.remove('loading');
     txt.textContent = 'Demo — API no disponible';
-    document.getElementById('fecha-sync').textContent = 'Sin conexión a BigQuery';
+    set('fecha-sync', 'Sin conexión a BigQuery');
   }
 }
 
 function renderStats(s) {
+  if (!s) return;
   const total = s.total || 37656;
+  // Helper para evitar errores si el elemento no existe
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
 
   // Sidebar
-  document.getElementById('sb-total').textContent = fmt(total);
-  document.getElementById('sb-j1-activos').textContent = fmt(s.j1_activos || 0);
-  document.getElementById('sb-logs').textContent = fmt(s.logs_hoy || 0);
-  document.getElementById('sb-sync').textContent = 'Hoy 2am';
+  set('sb-total', fmt(total));
+  set('sb-j1-activos', fmt(s.j1_activos || 0));
+  set('sb-logs', fmt(s.logs_hoy || 0));
+  set('sb-sync', 'Hoy 2am');
 
   // KPIs overview
-  document.getElementById('kpi-total').textContent = fmt(total);
-  document.getElementById('kpi-j1').textContent = fmt(s.j1_activos || 0);
-  document.getElementById('kpi-conv').textContent = fmt(s.convertidos || 0);
-  document.getElementById('kpi-conv-pct').textContent = pct(s.convertidos||0, s.j1_total||1) + ' tasa';
-  document.getElementById('kpi-msg').textContent = fmt(s.mensajes_hoy || 0);
-  document.getElementById('kpi-inv').textContent = fmtCOP(s.inversion_total || 0);
+  set('kpi-total', fmt(total));
+  set('kpi-j1', fmt(s.j1_activos || 0));
+  set('kpi-conv', fmt(s.convertidos || 0));
+  set('kpi-conv-pct', pct(s.convertidos||0, s.j1_total||1) + ' tasa');
+  set('kpi-msg', fmt(s.mensajes_hoy || 0));
+  set('kpi-inv', fmtCOP(s.inversion_total || 0));
 
   // Segmentos
-  document.getElementById('seg-onetime').textContent = fmt(s.one_time || 5589);
-  document.getElementById('seg-onetime-pct').textContent = pct(s.one_time||5589, total) + ' del base';
-  document.getElementById('seg-ocasional').textContent = fmt(s.ocasional || 6736);
-  document.getElementById('seg-ocasional-pct').textContent = pct(s.ocasional||6736, total) + ' del base';
-  document.getElementById('seg-regular').textContent = fmt(s.regular || 5782);
-  document.getElementById('seg-regular-pct').textContent = pct(s.regular||5782, total) + ' del base';
-  document.getElementById('seg-frecuente').textContent = fmt(s.frecuente || 6169);
-  document.getElementById('seg-frecuente-pct').textContent = pct(s.frecuente||6169, total) + ' del base';
-  document.getElementById('seg-vip').textContent = fmt(s.vip || 6245);
-  document.getElementById('seg-vip-pct').textContent = pct(s.vip||6245, total) + ' del base';
+  set('seg-onetime', fmt(s.one_time || 5589));
+  set('seg-onetime-pct', pct(s.one_time||5589, total) + ' del base');
+  set('seg-ocasional', fmt(s.ocasional || 6736));
+  set('seg-ocasional-pct', pct(s.ocasional||6736, total) + ' del base');
+  set('seg-regular', fmt(s.regular || 5782));
+  set('seg-regular-pct', pct(s.regular||5782, total) + ' del base');
+  set('seg-frecuente', fmt(s.frecuente || 6169));
+  set('seg-frecuente-pct', pct(s.frecuente||6169, total) + ' del base');
+  set('seg-vip', fmt(s.vip || 6245));
+  set('seg-vip-pct', pct(s.vip||6245, total) + ' del base');
 
   // J1
-  document.getElementById('j1-activos').textContent = fmt(s.j1_activos || 0);
-  document.getElementById('j1-conv').textContent = fmt(s.convertidos || 0);
-  document.getElementById('j1-conv-s').textContent = fmt(s.conv_org||0) + ' org · ' + fmt(s.conv_cup||0) + ' cupón';
-  document.getElementById('j1-churn').textContent = fmt(s.churn || 0);
-  document.getElementById('j1-tasa').textContent = pct(s.convertidos||0, s.j1_total||1).replace('%','') + '%';
-  document.getElementById('j1-cups').textContent = fmt(s.codigos_disp || 0);
-  document.getElementById('j1-cups-s').textContent = fmt(s.codigos_can||0) + ' canjeados';
+  set('j1-activos', fmt(s.j1_activos || 0));
+  set('j1-conv', fmt(s.convertidos || 0));
+  set('j1-conv-s', fmt(s.conv_org||0) + ' org · ' + fmt(s.conv_cup||0) + ' cupón');
+  set('j1-churn', fmt(s.churn || 0));
+  set('j1-tasa', pct(s.convertidos||0, s.j1_total||1).replace('%','') + '%');
+  set('j1-cups', fmt(s.codigos_disp || 0));
+  set('j1-cups-s', fmt(s.codigos_can||0) + ' canjeados');
 
   // Toques
   for (let i=1; i<=7; i++) {
@@ -1370,34 +1373,34 @@ function renderStats(s) {
   }
 
   // Conversión orgánica vs cupón
-  document.getElementById('conv-org').textContent = fmt(s.conv_org || 0);
-  document.getElementById('conv-cup').textContent = fmt(s.conv_cup || 0);
+  set('conv-org', fmt(s.conv_org || 0));
+  set('conv-cup', fmt(s.conv_cup || 0));
 
   // Inversión
-  document.getElementById('inv-total').textContent = fmtCOP(s.inversion_total || 0);
-  document.getElementById('inv-ing').textContent = fmtCOP((s.convertidos||0) * 33080 * 2);
+  set('inv-total', fmtCOP(s.inversion_total || 0));
+  set('inv-ing', fmtCOP((s.convertidos||0) * 33080 * 2));
   const roi = s.inversion_total > 0 ? ((s.convertidos||0)*33080*2) / s.inversion_total : 0;
-  document.getElementById('inv-roi').textContent = roi.toFixed(1) + 'x';
-  document.getElementById('inv-cpc').textContent = s.convertidos > 0 ? fmtCOP(s.inversion_total/s.convertidos) : '—';
-  document.getElementById('costo-wa').textContent = fmtCOP(s.costo_wa || 0);
-  document.getElementById('costo-email').textContent = fmtCOP(s.costo_email || 0);
-  document.getElementById('costo-cups').textContent = fmtCOP(s.costo_cupones || 0);
-  document.getElementById('costo-total').textContent = fmtCOP(s.inversion_total || 0);
+  set('inv-roi', roi.toFixed(1) + 'x');
+  set('inv-cpc', s.convertidos > 0 ? fmtCOP(s.inversion_total/s.convertidos) : '—');
+  set('costo-wa', fmtCOP(s.costo_wa || 0));
+  set('costo-email', fmtCOP(s.costo_email || 0));
+  set('costo-cups', fmtCOP(s.costo_cupones || 0));
+  set('costo-total', fmtCOP(s.inversion_total || 0));
 
-  document.getElementById('cup-gen').textContent = fmt(s.codigos_gen || 0);
-  document.getElementById('cup-disp').textContent = fmt(s.codigos_disp || 0);
-  document.getElementById('cup-can').textContent = fmt(s.codigos_can || 0);
-  document.getElementById('cup-venc').textContent = fmt(s.codigos_venc || 0);
-  document.getElementById('cup-tasa').textContent = pct(s.codigos_can||0, s.codigos_gen||1).replace('%','') + '%';
+  set('cup-gen', fmt(s.codigos_gen || 0));
+  set('cup-disp', fmt(s.codigos_disp || 0));
+  set('cup-can', fmt(s.codigos_can || 0));
+  set('cup-venc', fmt(s.codigos_venc || 0));
+  set('cup-tasa', pct(s.codigos_can||0, s.codigos_gen||1).replace('%','') + '%');
 
   // Cohortes
   renderCohortes(s.cohortes || {});
 
   // Aprobación
-  document.getElementById('ap-push').textContent = fmt(s.push_hoy || 0);
-  document.getElementById('ap-wa').textContent = fmt(s.wa_hoy || 0);
-  document.getElementById('ap-email').textContent = fmt(s.email_hoy || 0);
-  document.getElementById('sys-sync').textContent = 'Hoy 2:00am';
+  set('ap-push', fmt(s.push_hoy || 0));
+  set('ap-wa', fmt(s.wa_hoy || 0));
+  set('ap-email', fmt(s.email_hoy || 0));
+  set('sys-sync', 'Hoy 2:00am');
 }
 
 function renderCohortes(cohortes) {
@@ -1501,7 +1504,10 @@ function toggleTheme() {
   }
 })();
 
-window.addEventListener('DOMContentLoaded', cargar);
+window.addEventListener('DOMContentLoaded', () => {
+  // Esperar un tick para que todos los elementos estén en el DOM
+  setTimeout(cargar, 100);
+});
 </script>
 </body>
 </html>
