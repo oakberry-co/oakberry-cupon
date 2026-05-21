@@ -1258,6 +1258,10 @@ body.light {
 <div class="toast" id="toast"></div>
 
 <script>
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
 const API_URL = "https://oakberry-api-664413392517.us-central1.run.app";
 
 // ── NAVEGACIÓN ──────────────────────────────────────────────
