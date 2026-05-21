@@ -659,6 +659,10 @@ body.light {
       <div class="tab-dot" style="background:#4ade80"></div>
       UET
     </div>
+    <div class="tab" onclick="showPanel('adq')">
+      <div class="tab-dot" style="background:var(--yellow)"></div>
+      Adquisición
+    </div>
     <div class="tab" onclick="showPanel('control')">
       <div class="tab-dot" style="background:var(--green)"></div>
       Control
@@ -750,7 +754,42 @@ body.light {
         <span class="section-hd-title">Pirámide de clientes</span>
         <span class="section-hd-sub" id="fecha-sync">—</span>
       </div>
-      <button class="btn" onclick="cargar()">Actualizar datos</button>
+      <div style="display:flex;align-items:center;gap:10px">
+        <!-- Filtro ciudad -->
+        <select id="filtro-ciudad" onchange="aplicarFiltros()" style="
+          font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;
+          padding:6px 12px;border-radius:8px;
+          border:1px solid var(--line2);background:#fff;
+          color:var(--text);cursor:pointer;outline:none;">
+          <option value="">Todas las ciudades</option>
+          <option value="Pereira">🧪 Pereira (Piloto)</option>
+          <option value="Bogota">Bogotá</option>
+          <option value="Medellin">Medellín</option>
+          <option value="Cali">Cali</option>
+          <option value="Barranquilla">Barranquilla</option>
+          <option value="Bucaramanga">Bucaramanga</option>
+          <option value="Cartagena">Cartagena</option>
+        </select>
+        <!-- Filtro tienda -->
+        <select id="filtro-tienda" onchange="aplicarFiltros()" style="
+          font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;
+          padding:6px 12px;border-radius:8px;
+          border:1px solid var(--line2);background:#fff;
+          color:var(--text);cursor:pointer;outline:none;">
+          <option value="">Todas las tiendas</option>
+        </select>
+        <button class="btn" onclick="cargar()">↺ Actualizar</button>
+      </div>
+    </div>
+    <!-- Badge piloto cuando está filtrado por Pereira -->
+    <div id="badge-piloto" style="display:none;margin-bottom:16px">
+      <div style="
+        display:inline-flex;align-items:center;gap:8px;
+        background:#fff3e0;border:1px solid #F5C842;
+        border-radius:20px;padding:6px 16px;
+        font-size:11px;font-weight:700;color:#b45309;">
+        🧪 Piloto activo · Pereira · Ocasionales churneados · 107 clientes
+      </div>
     </div>
 
     <div class="kpi-row">
@@ -1255,6 +1294,92 @@ body.light {
       <div class="card-body">
         <div id="uet-resumen" style="font-size:12px;color:var(--text2);line-height:1.8">
           Sin datos suficientes aún. Los insights aparecerán cuando al menos 5 clientes completen la encuesta.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ ADQUISICIÓN ════ -->
+  <div class="panel" id="panel-adq">
+    <div class="section-hd">
+      <div class="section-hd-left">
+        <span class="section-hd-title">Adquisición</span>
+        <span class="section-hd-sub">Cupones · Tasa de canje · Fuentes · Ciudades</span>
+      </div>
+      <button class="btn" onclick="cargarAdq()">↺ Actualizar</button>
+    </div>
+
+    <!-- KPIs adquisición -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div class="card">
+        <div class="card-body" style="padding:16px 18px">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-weight:700">Cupones generados</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:900;color:var(--purple)" id="adq-total">—</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">Todos los canales</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px 18px">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-weight:700">Canjeados</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:900;color:var(--green)" id="adq-canjeados">—</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px" id="adq-tasa-lbl">0% tasa de canje</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px 18px">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-weight:700">Disponibles</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:900;color:var(--amber)" id="adq-disponibles">—</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">Pendientes de canje</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:16px 18px">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-weight:700">Vencidos</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:900;color:var(--red)" id="adq-vencidos">—</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">Sin redimir</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fuentes + ciudades -->
+    <div class="two-col" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Por fuente</span></div>
+        <div class="card-body" style="padding:0">
+          <table class="log-table" id="adq-fuentes-tabla">
+            <thead><tr><th>Fuente</th><th>Generados</th><th>Canjeados</th><th>Tasa</th></tr></thead>
+            <tbody id="adq-fuentes-body">
+              <tr><td colspan="4" class="empty">Conectado a Apps Script — datos próximamente</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Por ciudad</span></div>
+        <div class="card-body" style="padding:0">
+          <table class="log-table" id="adq-ciudades-tabla">
+            <thead><tr><th>Ciudad</th><th>Generados</th><th>Canjeados</th><th>Tasa</th></tr></thead>
+            <tbody id="adq-ciudades-body">
+              <tr><td colspan="4" class="empty">Conectado a Apps Script — datos próximamente</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nota migración -->
+    <div class="card">
+      <div class="card-body" style="padding:20px 24px">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="font-size:24px">🔄</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Migración pendiente · Apps Script → BigQuery</div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.7">
+              Los cupones de adquisición viven actualmente en Google Sheets (Apps Script). 
+              Cuando se complete la migración a BigQuery, esta sección mostrará datos en tiempo real 
+              con los mismos filtros de ciudad y tienda que el resto del CRM.
+            </div>
+          </div>
         </div>
       </div>
     </div>
