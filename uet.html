@@ -289,28 +289,38 @@ body.light-mode .pv-section::after{background:rgba(0,0,0,.08);}
 
   <!-- ENCUESTA STATE -->
   <div id="stateEncuesta" class="show">
-    <!-- HERO -->
-    <div class="hero">
-      <img src="/bowl-hero.jpg" alt="Oakberry bowl"
-        onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg,#5F4B8B,#3a2a5e)';">
-      <div class="hero-overlay"></div>
-      <div class="brand-badge"><span>Oakberry</span></div>
-      <div class="timer-badge">
-        <div class="timer-dot"></div>
-        <span class="timer-txt">Solo 72h para canjear</span>
+    <!-- HERO COMPLETO -->
+    <div style="background:var(--primary);position:relative;overflow:hidden;">
+      <!-- Foto con fallback -->
+      <div style="position:relative;width:100%;height:220px;overflow:hidden;">
+        <img src="/bowl-hero.jpg" alt="Bowl Oakberry"
+          style="width:100%;height:100%;object-fit:cover;object-position:center 20%;"
+          onerror="this.parentElement.style.background='linear-gradient(160deg,#7a5ca8 0%,#3a2a5e 100%)';this.style.display='none';">
+        <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,rgba(95,75,139,.95) 100%);"></div>
+        <!-- Badge timer -->
+        <div style="position:absolute;top:14px;right:14px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);border:1px solid rgba(248,113,113,.4);border-radius:20px;padding:5px 11px;display:flex;align-items:center;gap:5px;">
+          <div style="width:5px;height:5px;border-radius:50%;background:#f87171;animation:blink 1s infinite;flex-shrink:0;"></div>
+          <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.04em;">Solo 72h para canjear</span>
+        </div>
+        <!-- Badge brand -->
+        <div style="position:absolute;top:14px;left:14px;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:4px 10px;">
+          <span style="font-size:11px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1.5px;">Oakberry</span>
+        </div>
       </div>
-      <div class="hero-content">
-        <div class="hero-title">Tu bowl gratis<br>te espera 🫐</div>
-        <div class="hero-sub" id="hdr-sub">Responde · Pereira</div>
+      <!-- PRECIO ANCLA DOMINANTE -->
+      <div style="padding:20px 24px 22px;text-align:center;">
+        <!-- Ciudad -->
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;" id="hdr-sub">Responde · Pereira</div>
+        <!-- Precio tachado grande -->
+        <div style="font-size:15px;font-weight:700;color:rgba(255,255,255,.45);text-decoration:line-through;margin-bottom:4px;">$19.500</div>
+        <!-- GRATIS grande -->
+        <div style="font-size:38px;font-weight:900;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;line-height:1;margin-bottom:6px;">GRATIS</div>
+        <!-- Producto -->
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:30px;padding:7px 16px;">
+          <span style="font-size:16px;">🫐</span>
+          <span style="font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Bowl 7oz · Sin toppings · <span id="ciudad-lbl">Pereira</span></span>
+        </div>
       </div>
-    </div>
-    <!-- PRECIO ANCLA -->
-    <div class="precio-wrap">
-      <div class="precio-badge">
-        <span class="precio-old">$19.500</span>
-        <span class="precio-new">🫐 Gratis para ti</span>
-      </div>
-      <div class="precio-prod">Bowl 7oz sin toppings · <span id="ciudad-lbl">Pereira</span></div>
     </div>
     <!-- PROGRESS -->
     <div class="prog-wrap">
@@ -389,7 +399,7 @@ body.light-mode .pv-section::after{background:rgba(0,0,0,.08);}
 
 <script>
 const API = "https://oakberry-api-664413392517.us-central1.run.app";
-const MASTER_PWD = "oak2026uet"; // ← Línea 585 aprox — cambia aquí la contraseña
+const MASTER_PWD = "Oakberry123"; // ← Línea 585 aprox — cambia aquí la contraseña
 const MASTER_KEY = "uet_master_v2";
 
 const urlP  = new URLSearchParams(window.location.search);
@@ -526,7 +536,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     const segKey = segMap[SEG] || "ocasional";
     preguntas = SURVEYS[segKey] || SURVEYS["ocasional"];
 
-    document.getElementById("hdr-sub").innerHTML   = `Responde · <strong>${CIUDAD}</strong>`;
+    document.getElementById("hdr-sub").textContent  = `Responde · ${CIUDAD}`;
     document.getElementById("ciudad-lbl").textContent = CIUDAD;
 
     const dots = document.getElementById("prog-dots");
@@ -550,8 +560,9 @@ function renderStep(idx) {
 
   const esUltima = idx === preguntas.length-1;
   const btnTxt   = esUltima ? "Quiero mi bowl 🫐" : "Siguiente →";
-  // Abiertas: siempre ready (son opcionales). Cerradas: bloqueadas hasta seleccionar.
+  // Abiertas: siempre ready (son opcionales). Cerradas: BLOQUEADAS hasta seleccionar.
   const btnReady = q.tipo === "abierta" ? "ready" : "";
+  // Extra seguridad: función avanzar verifica antes de proceder
 
   const body = document.getElementById("survey-body");
 
@@ -598,7 +609,13 @@ function selOpt(step, val, btn) {
 
 function avanzar(idx) {
   const q = preguntas[idx];
-  if (q.tipo === "cerrada" && !respuestas[q.id]) return;
+  // Doble verificación — bloqueado si cerrada sin respuesta
+  if (q.tipo === "cerrada" && !respuestas[q.id]) {
+    // Vibrar el botón visualmente
+    const btn = document.getElementById("btn-"+idx);
+    if(btn){ btn.style.transform="translateX(4px)"; setTimeout(()=>btn.style.transform="translateX(-4px)",80); setTimeout(()=>btn.style.transform="",160); }
+    return;
+  }
   if (q.tipo === "abierta") respuestas[q.id] = document.getElementById("open-"+idx)?.value||"";
 
   document.getElementById("dot-"+idx)?.classList.replace("active","done");
