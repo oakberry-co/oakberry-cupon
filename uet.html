@@ -10,6 +10,7 @@
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Montserrat',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;
     background:linear-gradient(rgba(95,75,139,0.6),rgba(95,75,139,0.6)),url('oakville-bg.jpg') center/cover no-repeat fixed;}
+  body.preview-mode{background:#0c0b08;display:block;padding:0;}
 
   .card{background:rgba(255,255,255,0.97);border-radius:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;animation:cardIn .5s cubic-bezier(0.22,1,0.36,1) both;}
   @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
@@ -126,6 +127,64 @@
 </style>
 </head>
 <body>
+
+<!-- ── LLAVE MAESTRA ── -->
+<div id="masterWrap" style="display:none;position:fixed;inset:0;background:rgba(12,11,8,.95);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:36px;width:100%;max-width:340px;text-align:center;font-family:'Montserrat',sans-serif;">
+    <div style="font-size:20px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#f0ede4;margin-bottom:4px;">Oakberry</div>
+    <div style="font-size:9px;color:#4a4840;text-transform:uppercase;letter-spacing:.12em;margin-bottom:24px;">Llave maestra · UET</div>
+    <input id="masterPwd" type="password" placeholder="Código de acceso"
+      style="width:100%;padding:13px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#f0ede4;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;outline:none;text-align:center;letter-spacing:.1em;margin-bottom:10px;"
+      onkeydown="if(event.key==='Enter')checkMaster()">
+    <button onclick="checkMaster()"
+      style="width:100%;padding:13px;background:#5F4B8B;border:none;border-radius:10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;">
+      Acceder →
+    </button>
+    <div id="masterErr" style="font-size:10px;color:#f87171;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:10px;display:none;">Código incorrecto</div>
+    <div id="masterClose" style="font-size:10px;color:#4a4840;margin-top:14px;cursor:pointer;text-decoration:underline;display:none;" onclick="closeMaster()">Cancelar — ver encuesta normal</div>
+  </div>
+</div>
+
+<!-- ── PANEL PREVIEW (solo visible con llave) ── -->
+<div id="previewPanel" style="display:none;font-family:'Montserrat',sans-serif;padding:28px 20px;max-width:960px;margin:0 auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08);">
+    <div>
+      <div style="font-size:14px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#f0ede4;">Oakberry · UET Preview</div>
+      <div style="font-size:9px;color:#4a4840;text-transform:uppercase;letter-spacing:.1em;margin-top:3px;">User Experience Test · Panel de control</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:20px;padding:5px 12px;font-size:9px;font-weight:700;color:#4ade80;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:5px;">
+        <div style="width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;"></div>Modo preview
+      </div>
+      <button onclick="closeMaster()" style="background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.4);font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:5px 12px;cursor:pointer;">Salir</button>
+    </div>
+  </div>
+
+  <div style="font-size:9px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;display:flex;align-items:center;gap:8px;">Segmentos <span style="flex:1;height:1px;background:rgba(255,255,255,.06);display:inline-block;"></span></div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:28px;" id="previewGrid"></div>
+
+  <div style="font-size:9px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;display:flex;align-items:center;gap:8px;">Tokens de prueba <span style="flex:1;height:1px;background:rgba(255,255,255,.06);display:inline-block;"></span></div>
+
+  <div style="background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:12px;overflow:hidden;margin-bottom:20px;">
+    <table style="width:100%;border-collapse:collapse;font-size:10px;" id="tokensTable">
+      <thead>
+        <tr style="background:rgba(255,255,255,.02);">
+          <th style="padding:10px 16px;text-align:left;font-size:8px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06);">Token</th>
+          <th style="padding:10px 16px;text-align:left;font-size:8px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06);">Segmento</th>
+          <th style="padding:10px 16px;text-align:left;font-size:8px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06);">Ciudad</th>
+          <th style="padding:10px 16px;text-align:left;font-size:8px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06);">Link directo</th>
+        </tr>
+      </thead>
+      <tbody id="tokensBody"></tbody>
+    </table>
+  </div>
+
+  <div style="background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.12);border-radius:10px;padding:12px 16px;font-size:10px;color:#fbbf24;line-height:1.7;">
+    <strong>Modo demo:</strong> Los tokens de prueba no guardan nada en BigQuery ni generan cupones reales. Para probar el flujo real usa un token generado desde Cloud Run.
+  </div>
+</div>
+
 <div class="card" id="mainCard">
 
   <!-- ── ENCUESTA ── -->
@@ -216,6 +275,16 @@
 <script>
 const API = "https://oakberry-api-664413392517.us-central1.run.app";
 const TOKEN = new URLSearchParams(window.location.search).get("t") || "";
+const DEMO  = new URLSearchParams(window.location.search).get("demo") === "1";
+
+// Datos demo por token de preview
+const DEMO_DATA = {
+  "DEMO_OT01": {ok:true, nombre:"Carlos Demo",   segmento:"One-time",  ciudad:"Pereira",  tienda:"Oakberry Pereira", ya_respondio:false},
+  "DEMO_OC01": {ok:true, nombre:"María Demo",    segmento:"Ocasional", ciudad:"Pereira",  tienda:"Oakberry Pereira", ya_respondio:false},
+  "DEMO_RE01": {ok:true, nombre:"Juan Demo",     segmento:"Regular",   ciudad:"Bogotá",   tienda:"Oakberry Zona T",  ya_respondio:false},
+  "DEMO_FR01": {ok:true, nombre:"Ana Demo",      segmento:"Frecuente", ciudad:"Medellín", tienda:"Oakberry Oviedo",  ya_respondio:false},
+  "DEMO_VP01": {ok:true, nombre:"Daniel Demo",   segmento:"VIP",       ciudad:"Cali",     tienda:"Oakberry Granada", ya_respondio:false},
+};
 
 // ── PREGUNTAS POR SEGMENTO ────────────────────────────────────
 const SURVEYS = {
@@ -282,8 +351,14 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (!TOKEN) { showState("stateError"); return; }
 
   try {
-    const res = await fetch(`${API}/uet/token?t=${TOKEN}`);
-    const data = await res.json();
+    // Modo demo — no llama a la API
+    let data;
+    if (DEMO && DEMO_DATA[TOKEN]) {
+      data = DEMO_DATA[TOKEN];
+    } else {
+      const res = await fetch(`${API}/uet/token?t=${TOKEN}`);
+      data = await res.json();
+    }
 
     if (!data.ok) { showState("stateError"); return; }
 
@@ -418,12 +493,19 @@ async function finalizar() {
   };
 
   try {
-    const res  = await fetch(`${API}/uet/responder`, {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
+    // Modo demo — genera cupón fake sin guardar nada
+    let data;
+    if (DEMO) {
+      await new Promise(r => setTimeout(r, 1500));
+      data = {ok:true, codigo:"RDEMO1", vence:"31 de diciembre de 2026"};
+    } else {
+      const res  = await fetch(`${API}/uet/responder`, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(body)
+      });
+      data = await res.json();
+    }
 
     completarCarga(() => {
       if (data.ok) {
@@ -499,6 +581,105 @@ function fechaVence(){
   const d=new Date();d.setDate(d.getDate()+7);
   return d.toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"});
 }
+// ── LLAVE MAESTRA ─────────────────────────────────────────────
+const MASTER_PWD = "oak2026";
+const MASTER_KEY = "uet_master_auth";
+
+const DEMO_TOKENS = [
+  {token:"DEMO_OT01",seg:"one_time", label:"One-timer",  ciudad:"Pereira",  color:"rgba(248,113,113,.1)",tc:"#f87171"},
+  {token:"DEMO_OC01",seg:"ocasional",label:"Ocasional",  ciudad:"Pereira",  color:"rgba(251,191,36,.1)", tc:"#fbbf24"},
+  {token:"DEMO_RE01",seg:"regular",  label:"Regular",    ciudad:"Bogotá",   color:"rgba(255,255,255,.07)",tc:"#8a877e"},
+  {token:"DEMO_FR01",seg:"frecuente",label:"Frecuente",  ciudad:"Medellín", color:"rgba(74,222,128,.1)", tc:"#4ade80"},
+  {token:"DEMO_VP01",seg:"vip",      label:"VIP",        ciudad:"Cali",     color:"rgba(167,139,250,.1)",tc:"#a78bfa"},
+];
+
+// Verificar llave al cargar — ?master=1 abre el modal
+window.addEventListener("DOMContentLoaded", () => {
+  const url = new URLSearchParams(window.location.search);
+  // Auto-auth si ya tiene sesión guardada
+  if (localStorage.getItem(MASTER_KEY) === MASTER_PWD) {
+    showPreview(); return;
+  }
+  // ?master=1 en la URL abre el modal de contraseña
+  if (url.get("master") === "1") {
+    openMaster();
+  }
+});
+
+function openMaster() {
+  const wrap = document.getElementById("masterWrap");
+  wrap.style.display = "flex";
+  document.getElementById("masterClose").style.display = TOKEN ? "block" : "none";
+  setTimeout(() => document.getElementById("masterPwd")?.focus(), 100);
+}
+
+function closeMaster() {
+  document.getElementById("masterWrap").style.display = "none";
+}
+
+function checkMaster() {
+  const val = document.getElementById("masterPwd").value;
+  if (val === MASTER_PWD) {
+    localStorage.setItem(MASTER_KEY, MASTER_PWD);
+    document.getElementById("masterWrap").style.display = "none";
+    showPreview();
+  } else {
+    const err = document.getElementById("masterErr");
+    err.style.display = "block";
+    setTimeout(() => err.style.display = "none", 2000);
+  }
+}
+
+function showPreview() {
+  document.body.classList.add("preview-mode");
+  document.getElementById("mainCard").style.display = "none";
+  document.getElementById("previewPanel").style.display = "block";
+  renderPreviewGrid();
+  renderTokensTable();
+}
+
+function renderPreviewGrid() {
+  const grid = document.getElementById("previewGrid");
+  const DESCS = {
+    one_time:  "Primera impresión y barrera de hábito",
+    ocasional: "Momento de quiebre y condición de retorno",
+    regular:   "Cambios percibidos y frecuencia perdida",
+    frecuente: "Gradual vs incidente puntual",
+    vip:       "Espacio abierto — qué pasó exactamente",
+  };
+  grid.innerHTML = DEMO_TOKENS.map(t => `
+    <div style="background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:12px;overflow:hidden;">
+      <div style="padding:16px 18px 0;">
+        <span style="background:${t.color};color:${t.tc};font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;">${t.label}</span>
+        <div style="font-size:14px;font-weight:900;color:#f0ede4;margin-bottom:4px;">${t.label} churneado</div>
+        <div style="font-size:10px;color:#8a877e;line-height:1.5;margin-bottom:14px;">${DESCS[t.seg]}</div>
+      </div>
+      <div style="padding:0 18px 16px;display:flex;gap:8px;">
+        <button onclick="navigator.clipboard.writeText('${window.location.origin}/uet?t=${t.token}&demo=1').then(()=>alert('Link copiado'))"
+          style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#8a877e;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;">
+          📋 Copiar
+        </button>
+        <button onclick="window.open('${window.location.origin}/uet?t=${t.token}&demo=1','_blank')"
+          style="flex:1;padding:9px;border-radius:8px;border:none;background:#5F4B8B;color:#fff;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;">
+          Ver →
+        </button>
+      </div>
+    </div>`).join("");
+}
+
+function renderTokensTable() {
+  const tbody = document.getElementById("tokensBody");
+  const LABELS = {one_time:"One-timer",ocasional:"Ocasional",regular:"Regular",frecuente:"Frecuente",vip:"VIP"};
+  const COLORS = {one_time:"#f87171",ocasional:"#fbbf24",regular:"#8a877e",frecuente:"#4ade80",vip:"#a78bfa"};
+  tbody.innerHTML = DEMO_TOKENS.map(t => `
+    <tr style="border-bottom:.5px solid rgba(255,255,255,.04);">
+      <td style="padding:10px 16px;font-family:'Courier New',monospace;font-size:10px;color:#f0ede4;">${t.token}</td>
+      <td style="padding:10px 16px;"><span style="font-size:8px;font-weight:700;color:${COLORS[t.seg]};text-transform:uppercase;letter-spacing:.06em;">${LABELS[t.seg]}</span></td>
+      <td style="padding:10px 16px;color:#8a877e;font-size:10px;">${t.ciudad}</td>
+      <td style="padding:10px 16px;"><a href="${window.location.origin}/uet?t=${t.token}&demo=1" target="_blank" style="font-family:'Courier New',monospace;font-size:9px;color:#5F4B8B;text-decoration:none;padding:3px 8px;border:1px solid rgba(95,75,139,.3);border-radius:4px;">Abrir →</a></td>
+    </tr>`).join("");
+}
+
 function copiar(){
   const code=document.getElementById("r-code").textContent;
   navigator.clipboard?.writeText(code).then(()=>{
