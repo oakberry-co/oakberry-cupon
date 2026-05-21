@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oakberry · UET</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--primary:#5F4B8B;--pd:#4a3a6e;--yellow:#F5C842;--white:#fff;--off:#rgba(255,255,255,0.97);--border:#eee;--gray:#999;--green:#27ae60;--red:#c0392b;}
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Montserrat',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;
+    background:linear-gradient(rgba(95,75,139,0.6),rgba(95,75,139,0.6)),url('oakville-bg.jpg') center/cover no-repeat fixed;}
+
+  .card{background:rgba(255,255,255,0.97);border-radius:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;animation:cardIn .5s cubic-bezier(0.22,1,0.36,1) both;}
+  @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+  .card-header{background:var(--primary);padding:28px 30px 24px;text-align:center;}
+  .brand{font-size:28px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
+  .brand-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:14px;}
+  .bowl-badge{display:inline-flex;align-items:center;gap:10px;background:var(--yellow);border-radius:50px;padding:10px 22px;}
+  .bowl-badge .icon{font-size:26px;}
+  .bowl-badge .txt{font-size:12px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;text-align:left;line-height:1.5;}
+
+  /* PROGRESS */
+  .prog-wrap{padding:20px 28px 0;}
+  .prog-top{display:flex;justify-content:space-between;margin-bottom:8px;}
+  .prog-lbl{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1px;}
+  .prog-pct{font-size:10px;font-weight:900;color:var(--primary);}
+  .prog-bar{background:#f0ebff;border-radius:50px;height:8px;overflow:hidden;margin-bottom:12px;}
+  .prog-fill{height:8px;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));transition:width .5s cubic-bezier(.22,1,.36,1);}
+  .prog-dots{display:flex;justify-content:center;gap:8px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:#e8e0f5;transition:all .3s;}
+  .dot.active{background:var(--primary);transform:scale(1.2);}
+  .dot.done{background:var(--green);}
+
+  /* BODY */
+  .card-body{padding:22px 28px 28px;}
+  .q-num{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
+  .q-text{font-size:15px;font-weight:900;color:var(--primary);line-height:1.4;margin-bottom:16px;}
+
+  /* OPCIONES CERRADAS */
+  .opts{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+  .opt{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:14px;border:2px solid var(--border);background:#fff;cursor:pointer;transition:all .18s;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#555;width:100%;text-align:left;}
+  .opt:hover{border-color:var(--primary);background:#f5f0ff;}
+  .opt.sel{border-color:var(--primary);background:#f0ebff;color:var(--primary);}
+  .opt-radio{min-width:20px;height:20px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
+  .opt.sel .opt-radio{background:var(--primary);border-color:var(--primary);}
+  .opt.sel .opt-radio::after{content:'';width:7px;height:7px;border-radius:50%;background:#fff;}
+  .opt-em{font-size:17px;flex-shrink:0;}
+
+  /* CAMPO ABIERTO */
+  .open-field{width:100%;padding:14px 16px;border-radius:12px;border:2px solid var(--border);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:var(--primary);outline:none;resize:none;transition:border-color .18s;margin-bottom:18px;min-height:80px;}
+  .open-field::placeholder{color:#bbb;font-weight:600;}
+  .open-field:focus{border-color:var(--primary);}
+  .open-hint{font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;margin-top:-14px;margin-bottom:18px;}
+
+  /* BTN */
+  .btn{width:100%;padding:17px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .18s;box-shadow:0 6px 20px rgba(95,75,139,.4);opacity:.4;pointer-events:none;position:relative;overflow:hidden;}
+  .btn.ready{opacity:1;pointer-events:all;}
+  .btn.ready:hover{background:var(--pd);transform:translateY(-1px);}
+  .btn .btn-txt{transition:opacity .18s;}
+  .btn .btn-spin{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;}
+  .btn.loading .btn-txt{opacity:0;}
+  .btn.loading .btn-spin{opacity:1;}
+  .spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* STEP */
+  .step{display:none;animation:fadeUp .3s cubic-bezier(.22,1,.36,1);}
+  .step.active{display:block;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  /* LOADING */
+  .loading-header{background:var(--primary);padding:28px 30px 24px;text-align:center;}
+  .l-icon{font-size:44px;display:block;margin-bottom:8px;animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+  .l-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+  .l-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:1.5px;}
+  .l-body{padding:28px 28px 32px;}
+  .l-bar{background:#f0ebff;border-radius:50px;height:10px;overflow:hidden;margin-bottom:10px;}
+  .l-fill{height:10px;border-radius:50px;background:linear-gradient(90deg,var(--primary),var(--yellow));width:0%;transition:width .4s ease;}
+  .l-msg{font-size:12px;font-weight:700;color:#666;text-align:center;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;min-height:36px;}
+  .l-steps{display:flex;flex-direction:column;gap:10px;}
+  .l-step{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;transition:color .3s;}
+  .l-step.active,.l-step.done{color:var(--primary);}
+  .l-step-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0;}
+  .l-check{width:18px;height:18px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .3s;}
+  .l-step.done .l-check{background:var(--primary);border-color:var(--primary);}
+  .l-step.done .l-check::after{content:'✓';font-size:10px;color:#fff;font-weight:900;}
+
+  /* CUPÓN */
+  .r-header{background:var(--primary);padding:28px 30px 22px;text-align:center;}
+  .r-icon{font-size:44px;display:block;margin-bottom:8px;animation:popIn .5s cubic-bezier(0.34,1.56,0.64,1) .15s both;}
+  @keyframes popIn{from{opacity:0;transform:scale(.3);}to{opacity:1;transform:scale(1);}}
+  .r-title{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+  .r-sub{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;}
+  .r-body{padding:24px 28px 30px;}
+  .ticket{background:var(--primary);border-radius:16px;padding:20px 24px;margin-bottom:16px;}
+  .t-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
+  .t-code{font-size:36px;font-weight:900;color:#fff;letter-spacing:4px;line-height:1;margin-bottom:4px;}
+  .t-prod{font-size:11px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
+  .t-dash{border-top:1.5px dashed rgba(255,255,255,.2);margin:14px -24px;position:relative;}
+  .t-dash::before,.t-dash::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:16px;height:16px;background:rgba(255,255,255,.97);border-radius:50%;}
+  .t-dash::before{left:-8px;}.t-dash::after{right:-8px;}
+  .t-bottom{display:flex;justify-content:space-between;align-items:center;}
+  .t-vence{font-size:11px;font-weight:600;color:rgba(255,255,255,.45);}
+  .copy-btn{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:9px 16px;border-radius:8px;cursor:pointer;transition:background .18s;}
+  .copy-btn:hover{background:rgba(255,255,255,.22);}
+  .info-pill{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.2px;line-height:1.5;margin-bottom:8px;}
+  .pill-p{background:#f5f0ff;border:1.5px solid #d4c8f5;color:var(--primary);}
+  .pill-y{background:#fffbea;border:1.5px solid #f0dc8c;color:#7a5c00;}
+  .pill-icon{font-size:16px;flex-shrink:0;}
+
+  /* ERROR */
+  .err-wrap{padding:40px 28px;text-align:center;}
+  .err-icon{font-size:44px;margin-bottom:12px;}
+  .err-title{font-size:16px;font-weight:900;color:var(--primary);margin-bottom:8px;}
+  .err-sub{font-size:12px;font-weight:600;color:var(--gray);line-height:1.6;}
+
+  /* STATES */
+  [id^="state"]{display:none;}
+  [id^="state"].show{display:block;}
+  #stateLoading.show{display:block;animation:cardIn .4s cubic-bezier(.22,1,.36,1) both;}
+  #stateCupon.show{display:block;animation:cardIn .4s cubic-bezier(.22,1,.36,1) both;}
+  #stateError.show{display:block;}
+</style>
+</head>
+<body>
+<div class="card" id="mainCard">
+
+  <!-- ── ENCUESTA ── -->
+  <div id="stateEncuesta" class="show">
+    <div class="card-header">
+      <div class="brand">Oakberry</div>
+      <div class="brand-sub" id="hdr-sub">Tu opinión · Reactivación</div>
+      <div class="bowl-badge">
+        <span class="icon">🫐</span>
+        <span class="txt">Bowl 7oz gratis<br><span style="font-size:10px;font-weight:600;">sin toppings · al responder</span></span>
+      </div>
+    </div>
+
+    <div class="prog-wrap">
+      <div class="prog-top">
+        <span class="prog-lbl" id="prog-lbl">Pregunta 1 de 5</span>
+        <span class="prog-pct" id="prog-pct">20%</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:20%"></div></div>
+      <div class="prog-dots" id="prog-dots"></div>
+    </div>
+
+    <div class="card-body" id="survey-body">
+      <!-- Se construye dinámicamente según segmento -->
+    </div>
+  </div>
+
+  <!-- ── LOADING ── -->
+  <div id="stateLoading">
+    <div class="loading-header">
+      <span class="l-icon">🫐</span>
+      <div class="l-title">Generando tu cupón</div>
+      <div class="l-sub">Solo unos segundos</div>
+    </div>
+    <div class="l-body">
+      <div class="l-bar"><div class="l-fill" id="l-fill"></div></div>
+      <div class="l-msg" id="l-msg">Guardando respuestas...</div>
+      <div class="l-steps">
+        <div class="l-step" id="ls1"><span class="l-step-icon">📋</span><span style="flex:1">Guardando respuestas</span><span class="l-check"></span></div>
+        <div class="l-step" id="ls2"><span class="l-step-icon">🎟</span><span style="flex:1">Generando código único</span><span class="l-check"></span></div>
+        <div class="l-step" id="ls3"><span class="l-step-icon">💾</span><span style="flex:1">Registrando cupón</span><span class="l-check"></span></div>
+        <div class="l-step" id="ls4"><span class="l-step-icon">✅</span><span style="flex:1">¡Listo para canjear!</span><span class="l-check"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CUPÓN FINAL ── -->
+  <div id="stateCupon">
+    <div class="r-header">
+      <span class="r-icon">🎉</span>
+      <div class="r-title">¡Tu bowl está listo!</div>
+      <div class="r-sub" id="r-nombre">Gracias por tu respuesta</div>
+    </div>
+    <div class="r-body">
+      <div class="ticket">
+        <div class="t-label">Tu código · Bowl 7oz gratis</div>
+        <div class="t-code" id="r-code">——</div>
+        <div class="t-prod">🫐 Bowl The One 7oz · Sin toppings</div>
+        <div class="t-dash"></div>
+        <div class="t-bottom">
+          <div class="t-vence" id="r-vence">Válido 7 días</div>
+          <button class="copy-btn" onclick="copiar()">📋 Copiar</button>
+        </div>
+      </div>
+      <div class="info-pill pill-p">
+        <span class="pill-icon">📍</span>
+        <span id="r-tienda">Muéstrale este código al cajero en Oakberry antes de pagar.</span>
+      </div>
+      <div class="info-pill pill-y">
+        <span class="pill-icon">⚠️</span>
+        <span>Bowl sin toppings adicionales · Uso único · Intransferible · Aplican T&C</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ERROR ── -->
+  <div id="stateError">
+    <div class="card-header"></div>
+    <div class="err-wrap">
+      <div class="err-icon">😕</div>
+      <div class="err-title">Este link no es válido</div>
+      <div class="err-sub">El link que usaste ya expiró o no es válido.<br>Si crees que es un error, escríbenos a @oakberry.colombia en Instagram.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = "https://oakberry-api-664413392517.us-central1.run.app";
+const TOKEN = new URLSearchParams(window.location.search).get("t") || "";
+
+// ── PREGUNTAS POR SEGMENTO ────────────────────────────────────
+const SURVEYS = {
+  one_time: [
+    { tipo:"cerrada", id:"p1", num:"P1", titulo:"¿Qué pediste en tu visita a Oakberry?",
+      opts:[{v:"bowl_pequeno",em:"🫐",txt:"Bowl pequeño"},{v:"bowl_mediano",em:"🥣",txt:"Bowl mediano"},{v:"bowl_grande",em:"🍲",txt:"Bowl grande"},{v:"no_recuerdo",em:"🤷",txt:"No recuerdo bien"}]},
+    { tipo:"abierta", id:"p2", num:"P2", titulo:"¿Hubo algo que esperabas encontrar y no encontraste?", hint:"Cuéntanos en una línea (opcional)"},
+    { tipo:"cerrada", id:"p3", num:"P3", titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
+      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada_parecido",em:"🤷",txt:"Nada parecido"}]},
+    { tipo:"cerrada", id:"p4", num:"P4", titulo:"¿Qué tan fácil sería para ti volver esta semana?",
+      opts:[{v:"muy_facil",em:"✅",txt:"Muy fácil"},{v:"facil",em:"👍",txt:"Fácil"},{v:"esfuerzo",em:"😅",txt:"Me tocaría esforzarme"},{v:"dificil",em:"😬",txt:"Difícil"}]},
+    { tipo:"abierta", id:"p5", num:"P5", titulo:"¿Qué tendría que pasar para que Oakberry se vuelva parte de tu rutina?", hint:"Tu respuesta nos ayuda mucho (opcional)"},
+  ],
+  ocasional: [
+    { tipo:"cerrada", id:"p1", num:"P1", titulo:"¿Hubo algo puntual que te hizo parar de venir, o simplemente se fue dando solo?",
+      opts:[{v:"algo_puntual",em:"⚡",txt:"Algo puntual pasó"},{v:"se_fue_dando",em:"🌊",txt:"Se fue dando solo"},{v:"precio",em:"💸",txt:"El precio subió"},{v:"distancia",em:"📍",txt:"Me quedó lejos"}]},
+    { tipo:"abierta", id:"p2", num:"P2", titulo:"Si fue algo puntual, ¿qué fue? Si no, cuéntanos en una línea qué pasó.", hint:"Campo libre (opcional)"},
+    { tipo:"cerrada", id:"p3", num:"P3", titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
+      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada_parecido",em:"🤷",txt:"Nada parecido"}]},
+    { tipo:"cerrada", id:"p4", num:"P4", titulo:"¿Qué tan probable es que vuelvas en el próximo mes?",
+      opts:[{v:"muy_probable",em:"🔥",txt:"Muy probable"},{v:"probable",em:"👍",txt:"Probable"},{v:"poco_probable",em:"😐",txt:"Poco probable"},{v:"no_pensado",em:"💭",txt:"No lo había pensado"}]},
+    { tipo:"abierta", id:"p5", num:"P5", titulo:"Si Oakberry te ofreciera algo para volver esta semana, ¿qué tendría que ser?", hint:"Tu respuesta define nuestra oferta (opcional)"},
+  ],
+  regular: [
+    { tipo:"cerrada", id:"p1", num:"P1", titulo:"¿Qué tan seguido ibas en tu mejor momento?",
+      opts:[{v:"varias_semana",em:"🔥",txt:"Varias veces/semana"},{v:"una_semana",em:"📅",txt:"Una vez/semana"},{v:"quincenal",em:"🗓️",txt:"Cada 2 semanas"},{v:"mensual",em:"📆",txt:"Una vez/mes"}]},
+    { tipo:"abierta", id:"p2", num:"P2", titulo:"¿Hubo algo que cambió en Oakberry — precios, producto, servicio — que notaste?", hint:"Tu percepción importa (opcional)"},
+    { tipo:"cerrada", id:"p3", num:"P3", titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
+      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada_parecido",em:"🤷",txt:"Nada parecido"}]},
+    { tipo:"cerrada", id:"p4", num:"P4", titulo:"¿Qué tendría que estar diferente para que volvieras con regularidad?",
+      opts:[{v:"mejor_precio",em:"🏷️",txt:"Mejor precio"},{v:"algo_nuevo",em:"🌟",txt:"Algo nuevo en el menú"},{v:"mejor_servicio",em:"⭐",txt:"Mejor servicio"},{v:"ya_volvere",em:"😊",txt:"Nada, ya voy a volver"}]},
+    { tipo:"abierta", id:"p5", num:"P5", titulo:"¿Hay algo más que quieras que Oakberry sepa?", hint:"Totalmente libre (opcional)"},
+  ],
+  frecuente: [
+    { tipo:"cerrada", id:"p1", num:"P1", titulo:"¿Qué tan seguido ibas en tu mejor momento?",
+      opts:[{v:"varias_semana",em:"🔥",txt:"Varias veces/semana"},{v:"una_semana",em:"📅",txt:"Una vez/semana"},{v:"quincenal",em:"🗓️",txt:"Cada 2 semanas"},{v:"mensual",em:"📆",txt:"Una vez/mes"}]},
+    { tipo:"abierta", id:"p2", num:"P2", titulo:"¿Hubo algo específico que te hizo dejar de venir, o fue gradual?", hint:"Tu versión importa (opcional)"},
+    { tipo:"cerrada", id:"p3", num:"P3", titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
+      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada_parecido",em:"🤷",txt:"Nada parecido"}]},
+    { tipo:"cerrada", id:"p4", num:"P4", titulo:"¿Qué tendría que estar diferente para que volvieras con regularidad?",
+      opts:[{v:"mejor_precio",em:"🏷️",txt:"Mejor precio"},{v:"algo_nuevo",em:"🌟",txt:"Algo nuevo en el menú"},{v:"mejor_servicio",em:"⭐",txt:"Mejor servicio"},{v:"ya_volvere",em:"😊",txt:"Nada, ya voy a volver"}]},
+    { tipo:"abierta", id:"p5", num:"P5", titulo:"¿Hay algo más que quieras que Oakberry sepa?", hint:"Totalmente libre (opcional)"},
+  ],
+  vip: [
+    { tipo:"cerrada", id:"p1", num:"P1", titulo:"¿Sigues recomendando Oakberry aunque no vayas actualmente?",
+      opts:[{v:"siempre",em:"❤️",txt:"Sí, siempre"},{v:"a_veces",em:"👍",txt:"A veces"},{v:"ya_no",em:"😐",txt:"Ya no tanto"},{v:"no",em:"👎",txt:"No"}]},
+    { tipo:"abierta", id:"p2", num:"P2", titulo:"¿Qué pasó? Eras un cliente muy frecuente — queremos saberlo directamente.", hint:"Sin filtros (opcional)"},
+    { tipo:"cerrada", id:"p3", num:"P3", titulo:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
+      opts:[{v:"otra_marca",em:"🏪",txt:"Otra marca saludable"},{v:"casero",em:"🏠",txt:"Comida casera"},{v:"rapida",em:"🍔",txt:"Comida rápida"},{v:"nada_parecido",em:"🤷",txt:"Nada parecido"}]},
+    { tipo:"cerrada", id:"p4", num:"P4", titulo:"¿Qué tendría que hacer Oakberry para recuperarte como cliente frecuente?",
+      opts:[{v:"mejor_precio",em:"🏷️",txt:"Mejorar el precio"},{v:"mejor_producto",em:"🫐",txt:"Mejorar el producto"},{v:"mejor_servicio",em:"⭐",txt:"Mejorar el servicio"},{v:"ya_volvere",em:"😊",txt:"Ya tenía planeado volver"}]},
+    { tipo:"abierta", id:"p5", num:"P5", titulo:"¿Estarías dispuesto a que alguien de Oakberry te contacte 5 minutos para escucharte?", hint:"Si sí, deja tu número o simplemente escribe 'sí' (opcional)"},
+  ],
+};
+
+// ── ESTADO ────────────────────────────────────────────────────
+let SEG = "", NOMBRE = "", CIUDAD = "", TIENDA = "";
+let preguntas = [];
+let stepActual = 0;
+let respuestas = {};
+
+// ── INIT ──────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", async () => {
+  if (!TOKEN) { showState("stateError"); return; }
+
+  try {
+    const res = await fetch(`${API}/uet/token?t=${TOKEN}`);
+    const data = await res.json();
+
+    if (!data.ok) { showState("stateError"); return; }
+
+    // Si ya respondió — mostrar cupón directamente
+    if (data.ya_respondio && data.cupon) {
+      document.getElementById("r-code").textContent  = data.cupon.codigo;
+      document.getElementById("r-vence").textContent = "Válido hasta: " + data.cupon.vence;
+      document.getElementById("r-nombre").textContent = "Hola, " + (data.nombre||"Oaker").split(" ")[0] + " 🫐";
+      document.getElementById("r-tienda").textContent = `Muéstrale este código al cajero en ${data.tienda || "Oakberry"} antes de pagar.`;
+      showState("stateCupon");
+      return;
+    }
+
+    SEG    = data.segmento || "ocasional";
+    NOMBRE = data.nombre  || "";
+    CIUDAD = data.ciudad  || "";
+    TIENDA = data.tienda  || "Oakberry";
+
+    // Normalizar segmento
+    const segMap = {"One-time":"one_time","Ocasional":"ocasional","Regular":"regular","Frecuente":"frecuente","VIP":"vip"};
+    const segKey = segMap[SEG] || SEG.toLowerCase().replace("-","_") || "ocasional";
+    preguntas = SURVEYS[segKey] || SURVEYS["ocasional"];
+
+    // Actualizar header
+    document.getElementById("hdr-sub").textContent = `Tu opinión · ${CIUDAD}`;
+
+    // Construir dots
+    const dots = document.getElementById("prog-dots");
+    dots.innerHTML = preguntas.map((_,i) => `<div class="dot${i===0?" active":""}" id="dot-${i}"></div>`).join("");
+
+    // Render primera pregunta
+    renderStep(0);
+
+  } catch(e) {
+    showState("stateError");
+  }
+});
+
+// ── RENDER STEP ───────────────────────────────────────────────
+function renderStep(idx) {
+  const q   = preguntas[idx];
+  const pct = Math.round(((idx+1)/preguntas.length)*100);
+  document.getElementById("prog-fill").style.width = pct+"%";
+  document.getElementById("prog-pct").textContent  = pct+"%";
+  document.getElementById("prog-lbl").textContent  = `Pregunta ${idx+1} de ${preguntas.length}`;
+
+  const body = document.getElementById("survey-body");
+  const esUltima = idx === preguntas.length - 1;
+  const btnTxt = esUltima ? "Reclamar mi bowl gratis 🫐" : "Siguiente →";
+  const btnReady = q.tipo === "abierta" ? "ready" : ""; // abiertas siempre tienen ready (son opcionales)
+
+  if (q.tipo === "cerrada") {
+    body.innerHTML = `
+      <div class="step active" id="step-${idx}">
+        <div class="q-num">${q.num} · ${idx===0?"Contexto":idx===2?"Competencia":idx===3?"Retorno":"Insights"}</div>
+        <div class="q-text">${q.titulo}</div>
+        <div class="opts">
+          ${q.opts.map(o => `
+            <button class="opt" onclick="selOpt(${idx},'${o.v}',this)">
+              <div class="opt-radio"></div>
+              <span class="opt-em">${o.em}</span>
+              ${o.txt}
+            </button>`).join("")}
+        </div>
+        <button class="btn ${btnReady}" id="btn-${idx}" onclick="avanzar(${idx})">
+          <span class="btn-txt">${btnTxt}</span>
+          <span class="btn-spin"><span class="spin"></span></span>
+        </button>
+      </div>`;
+  } else {
+    body.innerHTML = `
+      <div class="step active" id="step-${idx}">
+        <div class="q-num">${q.num} · Abierta</div>
+        <div class="q-text">${q.titulo}</div>
+        <textarea class="open-field" id="open-${idx}" placeholder="Escribe aquí..." rows="3"
+          oninput="onOpenInput(${idx})"></textarea>
+        <div class="open-hint">${q.hint||""}</div>
+        <button class="btn ready" id="btn-${idx}" onclick="avanzar(${idx})">
+          <span class="btn-txt">${btnTxt}</span>
+          <span class="btn-spin"><span class="spin"></span></span>
+        </button>
+      </div>`;
+  }
+}
+
+function selOpt(step, val, btn) {
+  document.querySelectorAll(`#step-${step} .opt`).forEach(o => o.classList.remove("sel"));
+  btn.classList.add("sel");
+  respuestas[preguntas[step].id] = val;
+  document.getElementById("btn-"+step).classList.add("ready");
+}
+
+function onOpenInput(step) {
+  const val = document.getElementById("open-"+step)?.value || "";
+  respuestas[preguntas[step].id] = val;
+}
+
+function avanzar(idx) {
+  // Guardar valor abierto si aplica
+  const q = preguntas[idx];
+  if (q.tipo === "abierta") {
+    respuestas[q.id] = document.getElementById("open-"+idx)?.value || "";
+  }
+
+  // Marcar dot como done
+  document.getElementById("dot-"+idx)?.classList.replace("active","done");
+
+  const siguiente = idx + 1;
+  if (siguiente < preguntas.length) {
+    stepActual = siguiente;
+    document.getElementById("dot-"+siguiente)?.classList.add("active");
+    renderStep(siguiente);
+    window.scrollTo({top:0,behavior:"smooth"});
+  } else {
+    finalizar();
+  }
+}
+
+// ── FINALIZAR ─────────────────────────────────────────────────
+async function finalizar() {
+  showState("stateLoading");
+  iniciarCarga();
+
+  const body = {
+    token:    TOKEN,
+    p1_tipo:  preguntas[0]?.tipo || "cerrada",
+    p1_valor: respuestas["p1"] || "",
+    p2_texto: respuestas["p2"] || "",
+    p3_valor: respuestas["p3"] || "",
+    p4_valor: respuestas["p4"] || "",
+    p5_texto: respuestas["p5"] || "",
+  };
+
+  try {
+    const res  = await fetch(`${API}/uet/responder`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+
+    completarCarga(() => {
+      if (data.ok) {
+        document.getElementById("r-code").textContent   = data.codigo;
+        document.getElementById("r-vence").textContent  = "Válido hasta: " + (data.vence || fechaVence());
+        document.getElementById("r-nombre").textContent = "Gracias, " + (NOMBRE||"Oaker").split(" ")[0] + " 🫐";
+        document.getElementById("r-tienda").textContent = `Muéstrale este código al cajero en ${TIENDA} antes de pagar.`;
+        showState("stateCupon");
+      } else {
+        alert("Hubo un error. Intenta de nuevo.");
+        showState("stateEncuesta");
+      }
+    });
+  } catch(e) {
+    completarCarga(() => {
+      // Fallback demo si la API falla
+      document.getElementById("r-code").textContent   = genCod();
+      document.getElementById("r-vence").textContent  = "Válido hasta: " + fechaVence();
+      document.getElementById("r-nombre").textContent = "Gracias, " + (NOMBRE||"Oaker").split(" ")[0] + " 🫐";
+      document.getElementById("r-tienda").textContent = `Muéstrale este código al cajero en ${TIENDA} antes de pagar.`;
+      showState("stateCupon");
+    });
+  }
+}
+
+// ── LOADING ───────────────────────────────────────────────────
+let _lt = null;
+function iniciarCarga() {
+  const pasos = [
+    {pct:25,delay:500,msg:"Guardando respuestas...",ls:1},
+    {pct:55,delay:1000,msg:"Generando código único...",ls:2},
+    {pct:80,delay:1400,msg:"Registrando cupón...",ls:3},
+  ];
+  let i=0;
+  function tick(){
+    if(i>=pasos.length)return;
+    const p=pasos[i++];
+    _lt=setTimeout(()=>{
+      setLS(p.ls,"active");
+      if(p.ls>1)setLS(p.ls-1,"done");
+      setL(p.pct,p.msg);tick();
+    },p.delay);
+  }
+  tick();
+}
+function completarCarga(cb){
+  clearTimeout(_lt);
+  setLS(3,"done");setLS(4,"active");
+  setL(95,"¡Casi listo!");
+  setTimeout(()=>{setL(100,"¡Cupón generado!");setLS(4,"done");setTimeout(cb,400);},350);
+}
+function setL(pct,msg){
+  document.getElementById("l-fill").style.width=pct+"%";
+  document.getElementById("l-msg").textContent=msg;
+}
+function setLS(n,cls){
+  const el=document.getElementById("ls"+n);
+  if(el) el.className="l-step "+cls;
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function showState(id){
+  ["stateEncuesta","stateLoading","stateCupon","stateError"].forEach(s=>{
+    const el=document.getElementById(s);
+    if(el) el.classList.toggle("show",s===id);
+  });
+}
+function genCod(){
+  const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let r="R";for(let i=0;i<5;i++)r+=c[Math.floor(Math.random()*c.length)];return r;
+}
+function fechaVence(){
+  const d=new Date();d.setDate(d.getDate()+7);
+  return d.toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"});
+}
+function copiar(){
+  const code=document.getElementById("r-code").textContent;
+  navigator.clipboard?.writeText(code).then(()=>{
+    const btn=document.querySelector(".copy-btn");
+    const prev=btn.textContent;
+    btn.textContent="✅ ¡Copiado!";
+    setTimeout(()=>btn.textContent=prev,2200);
+  });
+}
+</script>
+</body>
+</html>
