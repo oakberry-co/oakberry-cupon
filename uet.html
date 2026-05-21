@@ -582,7 +582,7 @@ function fechaVence(){
   return d.toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"});
 }
 // ── LLAVE MAESTRA ─────────────────────────────────────────────
-const MASTER_PWD = "Oakberry123";
+const MASTER_PWD = "oak2026";
 const MASTER_KEY = "uet_master_auth";
 
 const DEMO_TOKENS = [
@@ -638,6 +638,37 @@ function showPreview() {
   renderTokensTable();
 }
 
+// ── DARK / LIGHT MODE ─────────────────────────────────────────
+let isDark = true;
+function toggleTheme() {
+  isDark = !isDark;
+  const btn = document.getElementById('themeToggle');
+  if (isDark) {
+    document.getElementById('previewPanel').style.background = '';
+    document.body.style.background = '#0c0b08';
+    document.body.style.color = '#f0ede4';
+    if(btn) btn.textContent = '☀ Light';
+  } else {
+    document.getElementById('previewPanel').style.background = '#f5f4f0';
+    document.body.style.background = '#f5f4f0';
+    document.body.style.color = '#0c0b08';
+    // Actualizar cards del grid
+    document.querySelectorAll('#previewGrid > div').forEach(el => {
+      el.style.background = '#ffffff';
+      el.style.border = '1px solid rgba(0,0,0,.1)';
+    });
+    document.querySelectorAll('#tokensBody tr').forEach(el => {
+      el.style.borderColor = 'rgba(0,0,0,.06)';
+    });
+    if(btn) btn.textContent = '🌙 Dark';
+  }
+  localStorage.setItem('uet_theme', isDark ? 'dark' : 'light');
+}
+
+function getBase() {
+  return window.location.protocol + '//' + window.location.host;
+}
+
 function renderPreviewGrid() {
   const grid = document.getElementById("previewGrid");
   const DESCS = {
@@ -655,11 +686,11 @@ function renderPreviewGrid() {
         <div style="font-size:10px;color:#8a877e;line-height:1.5;margin-bottom:14px;">${DESCS[t.seg]}</div>
       </div>
       <div style="padding:0 18px 16px;display:flex;gap:8px;">
-        <button onclick="navigator.clipboard.writeText('${window.location.origin}/uet?t=${t.token}&demo=1').then(()=>alert('Link copiado'))"
+        <button onclick="(function(){var u=getBase()+'/uet?t=${t.token}&demo=1';navigator.clipboard.writeText(u).then(()=>alert('Link copiado: '+u));})()"
           style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#8a877e;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;">
           📋 Copiar
         </button>
-        <button onclick="window.open('${window.location.origin}/uet?t=${t.token}&demo=1','_blank')"
+        <button onclick="window.open(getBase()+'/uet?t=${t.token}&demo=1','_blank')"
           style="flex:1;padding:9px;border-radius:8px;border:none;background:#5F4B8B;color:#fff;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;">
           Ver →
         </button>
@@ -676,7 +707,7 @@ function renderTokensTable() {
       <td style="padding:10px 16px;font-family:'Courier New',monospace;font-size:10px;color:#f0ede4;">${t.token}</td>
       <td style="padding:10px 16px;"><span style="font-size:8px;font-weight:700;color:${COLORS[t.seg]};text-transform:uppercase;letter-spacing:.06em;">${LABELS[t.seg]}</span></td>
       <td style="padding:10px 16px;color:#8a877e;font-size:10px;">${t.ciudad}</td>
-      <td style="padding:10px 16px;"><a href="${window.location.origin}/uet?t=${t.token}&demo=1" target="_blank" style="font-family:'Courier New',monospace;font-size:9px;color:#5F4B8B;text-decoration:none;padding:3px 8px;border:1px solid rgba(95,75,139,.3);border-radius:4px;">Abrir →</a></td>
+      <td style="padding:10px 16px;"><a href="javascript:void(0)" onclick="window.open(getBase()+'/uet?t=${t.token}&demo=1','_blank')"  style="font-family:'Courier New',monospace;font-size:9px;color:#5F4B8B;text-decoration:none;padding:3px 8px;border:1px solid rgba(95,75,139,.3);border-radius:4px;">Abrir →</a></td>
     </tr>`).join("");
 }
 
