@@ -3,36 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oakberry · Centro de Mando CRM</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Oakberry CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0c0c0a;
-  --bg2: #111110;
-  --bg3: #1a1a18;
-  --bg4: #222220;
-  --line: rgba(255,255,255,.06);
-  --line2: rgba(255,255,255,.12);
-  --text: #e8e6df;
-  --text2: #888880;
-  --text3: #555550;
-  --green: #4ade80;
-  --green-d: #16a34a;
-  --amber: #fbbf24;
-  --amber-d: #d97706;
-  --red: #f87171;
-  --red-d: #dc2626;
-  --blue: #60a5fa;
-  --blue-d: #2563eb;
-  --purple: #a78bfa;
-  --pink: #FF2068;
-  --accent: #FF2068;
+  --bg:     #f7f5fb;
+  --bg2:    #ffffff;
+  --bg3:    #f0ebff;
+  --bg4:    #e8e0f5;
+  --line:   rgba(95,75,139,.08);
+  --line2:  rgba(95,75,139,.18);
+  --text:   #2a1a4e;
+  --text2:  #5F4B8B;
+  --text3:  #9a8ab8;
+  --green:  #27ae60;
+  --green-d:#1e8449;
+  --amber:  #d97706;
+  --amber-d:#b45309;
+  --red:    #c0392b;
+  --red-d:  #a93226;
+  --blue:   #2563eb;
+  --blue-d: #1d4ed8;
+  --purple: #5F4B8B;
+  --pink:   #5F4B8B;
+  --accent: #5F4B8B;
+  --yellow: #F5C842;
 }
 *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
 html { font-size: 14px; }
 body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
+  font-family: 'Montserrat', sans-serif;
+  background: #ffffff;
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
@@ -65,14 +66,14 @@ body {
   box-shadow: 0 0 8px var(--accent);
 }
 .brand-name {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 15px;
   font-weight: 800;
   letter-spacing: .06em;
   text-transform: uppercase;
 }
 .brand-tag {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 9px;
   color: var(--text3);
   letter-spacing: .12em;
@@ -89,7 +90,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .1em;
@@ -99,7 +100,7 @@ body {
   transition: all .15s;
   border-bottom: 2px solid transparent;
 }
-.tab:hover { color: var(--text); background: var(--bg2); }
+.tab:hover { color: var(--text); background: #ffffff; }
 .tab.active { color: var(--text); border-bottom-color: var(--accent); }
 .tab-dot { width: 6px; height: 6px; border-radius: 50%; }
 .topbar-right {
@@ -115,7 +116,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 9px;
   color: var(--text2);
   text-transform: uppercase;
@@ -129,7 +130,7 @@ body {
 .status-dot.loading { background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: blink 1s infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 .btn {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 9px;
   padding: 5px 12px;
   border-radius: 3px;
@@ -161,7 +162,7 @@ body {
 }
 .sidebar-section {
   padding: 6px 16px 2px;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 8px;
   color: var(--text3);
   text-transform: uppercase;
@@ -177,8 +178,8 @@ body {
   transition: background .1s;
   border-left: 2px solid transparent;
 }
-.sidebar-item:hover { background: var(--bg2); }
-.sidebar-item.active { border-left-color: var(--accent); background: var(--bg2); }
+.sidebar-item:hover { background: #ffffff; }
+.sidebar-item.active { border-left-color: var(--accent); background: #ffffff; }
 .sidebar-item-left {
   display: flex;
   align-items: center;
@@ -188,7 +189,7 @@ body {
 }
 .sidebar-item.active .sidebar-item-left { color: var(--text); }
 .sidebar-badge {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 9px;
   padding: 1px 6px;
   border-radius: 10px;
@@ -216,12 +217,12 @@ body {
   gap: 10px;
 }
 .section-hd-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 16px;
   font-weight: 700;
 }
 .section-hd-sub {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 9px;
   color: var(--text3);
   text-transform: uppercase;
@@ -240,13 +241,13 @@ body {
   margin-bottom: 20px;
 }
 .kpi {
-  background: var(--bg2);
+  background: #ffffff;
   padding: 16px 18px;
   transition: background .15s;
 }
 .kpi:hover { background: var(--bg3); }
 .kpi-l {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 8px;
   color: var(--text3);
   text-transform: uppercase;
@@ -254,7 +255,7 @@ body {
   margin-bottom: 6px;
 }
 .kpi-v {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 26px;
   font-weight: 800;
   display: block;
@@ -266,7 +267,7 @@ body {
   color: var(--text3);
 }
 .kpi-trend {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 9px;
   margin-top: 6px;
 }
@@ -282,7 +283,7 @@ body {
   margin-bottom: 20px;
 }
 .seg-card {
-  background: var(--bg2);
+  background: #ffffff;
   border: 1px solid var(--line2);
   border-radius: 6px;
   overflow: hidden;
@@ -295,14 +296,14 @@ body {
   border-bottom: 1px solid var(--line);
 }
 .seg-name {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 8px;
   text-transform: uppercase;
   letter-spacing: .1em;
   margin-bottom: 4px;
 }
 .seg-n {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 24px;
   font-weight: 800;
   display: block;
@@ -310,7 +311,7 @@ body {
   line-height: 1;
 }
 .seg-pct {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 9px;
   color: var(--text3);
 }
@@ -326,7 +327,7 @@ body {
   font-size: 10px;
 }
 .seg-m-l { color: var(--text3); }
-.seg-m-v { font-family: 'Space Mono', monospace; font-size: 9px; }
+.seg-m-v { font-family: 'Montserrat', sans-serif; font-size: 9px; }
 
 .s-onetime .seg-top { border-top: 2px solid var(--red); }
 .s-onetime .seg-n { color: var(--red); }
@@ -351,7 +352,7 @@ body {
   margin-bottom: 20px;
 }
 .jf-step {
-  background: var(--bg2);
+  background: #ffffff;
   padding: 14px 12px;
   text-align: center;
   position: relative;
@@ -361,7 +362,7 @@ body {
 .jf-step:hover { background: var(--bg3); }
 .jf-step + .jf-step { border-left: 1px solid var(--line); }
 .jf-day {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 8px;
   color: var(--text3);
   text-transform: uppercase;
@@ -369,7 +370,7 @@ body {
   margin-bottom: 4px;
 }
 .jf-n {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 20px;
   font-weight: 800;
   margin-bottom: 3px;
@@ -383,7 +384,7 @@ body {
   margin-bottom: 3px;
 }
 .jf-canal {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 8px;
   color: var(--text3);
 }
@@ -398,7 +399,7 @@ body {
 
 /* ── CARD ── */
 .card {
-  background: var(--bg2);
+  background: #ffffff;
   border: 1px solid var(--line2);
   border-radius: 6px;
   overflow: hidden;
@@ -411,7 +412,7 @@ body {
   justify-content: space-between;
 }
 .card-title {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: .1em;
@@ -429,11 +430,11 @@ body {
   border-bottom: 1px solid var(--line);
 }
 .cohort-row:last-child { border-bottom: none; }
-.cohort-mes { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text2); }
-.cohort-n { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--green); }
+.cohort-mes { font-family: 'Montserrat', sans-serif; font-size: 10px; color: var(--text2); }
+.cohort-n { font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 700; color: var(--green); }
 .cohort-bar-bg { background: var(--bg3); border-radius: 2px; height: 4px; }
 .cohort-bar { height: 4px; border-radius: 2px; background: var(--green); }
-.cohort-pct { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--green); text-align: right; }
+.cohort-pct { font-family: 'Montserrat', sans-serif; font-size: 9px; color: var(--green); text-align: right; }
 
 /* ── INVERSIÓN ── */
 .inv-row {
@@ -445,18 +446,18 @@ body {
   font-size: 12px;
 }
 .inv-row:last-child { border-bottom: none; }
-.inv-val { font-family: 'Space Mono', monospace; font-size: 11px; }
+.inv-val { font-family: 'Montserrat', sans-serif; font-size: 11px; }
 
 /* ── CONTROL DE APROBACIÓN ── */
 .approval-box {
-  background: var(--bg2);
+  background: #ffffff;
   border: 1px solid var(--amber-d);
   border-radius: 6px;
   padding: 20px;
   margin-bottom: 20px;
 }
 .approval-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: var(--amber);
@@ -482,8 +483,8 @@ body {
   border-radius: 4px;
   padding: 10px 12px;
 }
-.ap-label { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
-.ap-val { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
+.ap-label { font-family: 'Montserrat', sans-serif; font-size: 8px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+.ap-val { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 700; }
 .approval-actions { display: flex; gap: 10px; }
 .btn-approve {
   flex: 1;
@@ -492,7 +493,7 @@ body {
   border: none;
   border-radius: 4px;
   color: #fff;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -506,7 +507,7 @@ body {
   border: 1px solid var(--red);
   border-radius: 4px;
   color: var(--red);
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -518,7 +519,7 @@ body {
 /* ── LOG TABLE ── */
 .log-table { width: 100%; border-collapse: collapse; font-size: 11px; }
 .log-table th {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 8px;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -531,9 +532,9 @@ body {
 .log-table td { padding: 8px 12px; border-bottom: 1px solid var(--line); }
 .log-table tr:last-child td { border-bottom: none; }
 .log-table tr:hover td { background: var(--bg3); }
-.mono { font-family: 'Space Mono', monospace; font-size: 9px; }
+.mono { font-family: 'Montserrat', sans-serif; font-size: 9px; }
 .badge {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 8px;
   padding: 2px 6px;
   border-radius: 3px;
@@ -559,10 +560,10 @@ body {
 }
 .geo-row:last-child { border-bottom: none; }
 .geo-city { font-size: 12px; }
-.geo-stamps { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+.geo-stamps { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; }
 .geo-bar-bg { background: var(--bg3); border-radius: 2px; height: 3px; }
 .geo-bar { height: 3px; border-radius: 2px; }
-.geo-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--text3); text-align: right; }
+.geo-label { font-family: 'Montserrat', sans-serif; font-size: 9px; color: var(--text3); text-align: right; }
 
 /* ── EMPTY STATE ── */
 .empty { text-align: center; padding: 32px; color: var(--text3); font-size: 12px; line-height: 1.8; }
@@ -576,7 +577,7 @@ body {
   border: 1px solid var(--line2);
   border-radius: 6px;
   padding: 12px 16px;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 10px;
   color: var(--text);
   z-index: 9999;
@@ -615,7 +616,7 @@ body.light {
 }
 .paused-banner.show { display: flex; }
 .paused-banner-txt {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Montserrat', sans-serif;
   font-size: 10px;
   color: var(--red);
   text-transform: uppercase;
@@ -954,13 +955,13 @@ body.light {
         <div class="card-body">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
             <div style="background:var(--bg3);border-radius:4px;padding:14px;text-align:center">
-              <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--blue)" id="conv-org">—</div>
-              <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Orgánica</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:24px;font-weight:800;color:var(--blue)" id="conv-org">—</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Orgánica</div>
               <div style="font-size:10px;color:var(--text3);margin-top:3px">Volvió sin cupón</div>
             </div>
             <div style="background:var(--bg3);border-radius:4px;padding:14px;text-align:center">
-              <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--green)" id="conv-cup">—</div>
-              <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Cupón J1</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:24px;font-weight:800;color:var(--green)" id="conv-cup">—</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Cupón J1</div>
               <div style="font-size:10px;color:var(--text3);margin-top:3px">Canjeó descuento</div>
             </div>
           </div>
@@ -1118,19 +1119,19 @@ body.light {
         <div class="card-body">
           <div style="display:flex;flex-direction:column;gap:10px">
             <div style="background:var(--bg3);border-radius:4px;padding:12px;border-left:2px solid var(--red)">
-              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Bogotá · J1 máxima intensidad</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Bogotá · J1 máxima intensidad</div>
               <div style="font-size:11px;color:var(--text3);line-height:1.5">5.4 stamps/cliente — 2.3x menos leal que ciudades intermedias. Descuentos más agresivos, más toques, ventana más corta.</div>
             </div>
             <div style="background:var(--bg3);border-radius:4px;padding:12px;border-left:2px solid var(--amber)">
-              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Medellín · J2 y J3 prioritarios</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Medellín · J2 y J3 prioritarios</div>
               <div style="font-size:11px;color:var(--text3);line-height:1.5">6.6 stamps/cliente — buena base de Ocasionales y Regulares. El mayor ROI está en subirlos a Frecuente.</div>
             </div>
             <div style="background:var(--bg3);border-radius:4px;padding:12px;border-left:2px solid var(--purple)">
-              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Valledupar · J4 y J5 enfocados</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Valledupar · J4 y J5 enfocados</div>
               <div style="font-size:11px;color:var(--text3);line-height:1.5">12.3 stamps/cliente — la base VIP más fuerte. Proteger estos clientes es la prioridad. Cada VIP perdido = 35 clientes nuevos en valor.</div>
             </div>
             <div style="background:var(--bg3);border-radius:4px;padding:12px;border-left:2px solid var(--text3)">
-              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Santa Marta · Solo adquisición</div>
+              <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Santa Marta · Solo adquisición</div>
               <div style="font-size:11px;color:var(--text3);line-height:1.5">3.4 stamps/cliente — alta rotación turística. Los journeys de retención no aplican aquí. Foco en capturar datos en primera visita.</div>
             </div>
           </div>
@@ -1184,29 +1185,29 @@ body.light {
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="uet-kpis">
       <div class="card">
         <div class="card-body" style="padding:16px 18px">
-          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Enviados</div>
-          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--blue)" id="uet-enviados">—</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Enviados</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:var(--blue)" id="uet-enviados">—</div>
           <div style="font-size:10px;color:var(--text3);margin-top:4px">WA + Push</div>
         </div>
       </div>
       <div class="card">
         <div class="card-body" style="padding:16px 18px">
-          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Respondieron</div>
-          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green)" id="uet-completados">—</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Respondieron</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:var(--green)" id="uet-completados">—</div>
           <div style="font-size:10px;color:var(--text3);margin-top:4px" id="uet-tasa-lbl">0% tasa respuesta</div>
         </div>
       </div>
       <div class="card">
         <div class="card-body" style="padding:16px 18px">
-          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Cupones generados</div>
-          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--amber)" id="uet-cupones">—</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Cupones generados</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:var(--amber)" id="uet-cupones">—</div>
           <div style="font-size:10px;color:var(--text3);margin-top:4px" id="uet-canjeados-lbl">0 canjeados</div>
         </div>
       </div>
       <div class="card">
         <div class="card-body" style="padding:16px 18px">
-          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Abiertos</div>
-          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--purple)" id="uet-abiertos">—</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Abiertos</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:var(--purple)" id="uet-abiertos">—</div>
           <div style="font-size:10px;color:var(--text3);margin-top:4px" id="uet-apertura-lbl">0% tasa apertura</div>
         </div>
       </div>
@@ -1272,7 +1273,7 @@ body.light {
       <div class="card-body" style="padding:24px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:24px">
           <div>
-            <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px" id="master-title">Sistema activo</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px" id="master-title">Sistema activo</div>
             <div style="font-size:12px;color:var(--text3);line-height:1.6;max-width:520px" id="master-sub">
               El programa corre automáticamente. Sync a las 2am · Journey J1 a las 3pm. Para detener todo usa el botón de pausa — se puede reactivar en cualquier momento.
             </div>
@@ -1293,7 +1294,7 @@ body.light {
                 box-shadow:0 1px 4px rgba(0,0,0,.3);
               "></div>
             </div>
-            <div id="master-label" style="font-family:'Space Mono',monospace;font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.08em">En vivo</div>
+            <div id="master-label" style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.08em">En vivo</div>
           </div>
         </div>
       </div>
@@ -1444,7 +1445,7 @@ async function cargarUET() {
           <div style="flex:1;background:var(--bg3);border-radius:2px;height:6px;overflow:hidden">
             <div style="width:${pct}%;height:6px;background:${color};border-radius:2px"></div>
           </div>
-          <span style="font-family:'Space Mono',monospace;font-size:10px;color:${color};width:36px;text-align:right">${pct}%</span>
+          <span style="font-family:'Montserrat',sans-serif;font-size:10px;color:${color};width:36px;text-align:right">${pct}%</span>
         </div>`;
       }).join('');
     }
@@ -1459,27 +1460,27 @@ async function cargarUET() {
       resEl.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div style="background:var(--bg3);border-radius:6px;padding:14px;border-left:2px solid var(--green)">
-            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Tasa de respuesta</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Tasa de respuesta</div>
             <div style="font-size:13px;color:var(--text2);line-height:1.6">
               ${totComp} de ${totEnv} clientes completaron la encuesta (${tasaResp}%).
               ${totComp >= 10 ? 'Muestra estadísticamente relevante.' : 'Muestra preliminar.'}
             </div>
           </div>
           <div style="background:var(--bg3);border-radius:6px;padding:14px;border-left:2px solid var(--red)">
-            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Competidor principal</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Competidor principal</div>
             <div style="font-size:13px;color:var(--text2);line-height:1.6">
               El ${((totalesP3[topComp?.[0]]||0)/totalP3*100).toFixed(0)}% de los churneados reemplazó Oakberry con <strong style="color:var(--text)">${topLabel}</strong>.
             </div>
           </div>
           <div style="background:var(--bg3);border-radius:6px;padding:14px;border-left:2px solid var(--amber)">
-            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Cupones generados</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Cupones generados</div>
             <div style="font-size:13px;color:var(--text2);line-height:1.6">
               ${totCup} clientes reclamaron su bowl gratis.
               Tasa de canje: ${totCup > 0 ? ((totCanj/totCup)*100).toFixed(0) : 0}%.
             </div>
           </div>
           <div style="background:var(--bg3);border-radius:6px;padding:14px;border-left:2px solid var(--purple)">
-            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Siguiente acción</div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Siguiente acción</div>
             <div style="font-size:13px;color:var(--text2);line-height:1.6">
               ${totCanj > 0 ? `${totCanj} clientes volvieron a la tienda. Monitorear si generan segundo stamp.` : 'Ningún cupón canjeado aún. Activar seguimiento.'}
             </div>
@@ -1720,7 +1721,7 @@ function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
   const btn = document.getElementById('theme-btn');
   btn.textContent = isLight ? '🌙 Dark' : '☀ Light';
-  localStorage.setItem('oak_theme', isLight ? 'light' : 'dark');
+  localStorage.setItem('oak_theme', isLight ? 'light' : 'light');
 }
 
 // Restaurar tema guardado
