@@ -1694,6 +1694,7 @@ function aplicarFiltros() {
   const tiendaS = document.getElementById('filtro-tienda');
   if (!tiendaS) return;
 
+  // Poblar tiendas según ciudad
   tiendaS.innerHTML = '<option value="">Todas las tiendas</option>';
   if (ciudad && TIENDAS_MAP[ciudad]) {
     TIENDAS_MAP[ciudad].forEach(t => {
@@ -1704,11 +1705,15 @@ function aplicarFiltros() {
     tiendaS.disabled = false;
   } else {
     tiendaS.disabled = true;
+    tiendaS.value = '';
   }
 
   // Badge piloto Pereira
   const badge = document.getElementById('badge-piloto');
   if (badge) badge.style.display = ciudad === 'Pereira' ? 'block' : 'none';
+
+  // Re-cargar stats con filtros aplicados
+  cargar();
 }
 
 function showPanel(id) {
@@ -1757,7 +1762,12 @@ async function cargar() {
   txt.textContent = 'Actualizando...';
 
   try {
-    const res = await fetch(API_URL + '/stats');
+    const ciudad = document.getElementById('filtro-ciudad')?.value || '';
+    const tienda = document.getElementById('filtro-tienda')?.value || '';
+    let statsUrl = API_URL + '/stats';
+    if (tienda)      statsUrl += '?tienda=' + encodeURIComponent(tienda);
+    else if (ciudad) statsUrl += '?ciudad=' + encodeURIComponent(ciudad);
+    const res = await fetch(statsUrl);
     const data = await res.json();
     if (data.ok) {
       renderStats(data);
