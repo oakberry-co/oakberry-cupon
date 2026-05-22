@@ -796,11 +796,45 @@ body.light {
       </div>
     </div>
 
+    <!-- Fila 1: Base de clientes -->
     <div class="kpi-row">
       <div class="kpi">
-        <div class="kpi-l">Total clientes</div>
+        <div class="kpi-l">Total base</div>
         <span class="kpi-v" id="kpi-total">—</span>
-        <div class="kpi-s">Base activa Loopy</div>
+        <div class="kpi-s">Registrados en Loopy</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">Activos</div>
+        <span class="kpi-v" style="color:var(--green)" id="kpi-activos">—</span>
+        <div class="kpi-s kpi-trend" id="kpi-activos-pct">— del base</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">En riesgo</div>
+        <span class="kpi-v" style="color:var(--amber)" id="kpi-enriesgo">—</span>
+        <div class="kpi-s kpi-trend" id="kpi-enriesgo-pct">— del base</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">Churneados</div>
+        <span class="kpi-v" style="color:var(--red)" id="kpi-churneados">—</span>
+        <div class="kpi-s kpi-trend" id="kpi-churneados-pct">— del base</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">Fantasmas</div>
+        <span class="kpi-v" style="color:var(--text3)" id="kpi-fantasmas">—</span>
+        <div class="kpi-s">Nunca compraron</div>
+      </div>
+    </div>
+    <!-- Fila 2: Alcance y canales -->
+    <div class="kpi-row" style="margin-top:8px">
+      <div class="kpi">
+        <div class="kpi-l">Con celular</div>
+        <span class="kpi-v" style="color:var(--blue)" id="kpi-concel">—</span>
+        <div class="kpi-s kpi-trend" id="kpi-concel-pct">— alcance WA</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">Multitienda</div>
+        <span class="kpi-v" style="color:var(--purple)" id="kpi-multitienda">—</span>
+        <div class="kpi-s">Visitan 2+ tiendas</div>
       </div>
       <div class="kpi">
         <div class="kpi-l">En journey J1</div>
@@ -811,11 +845,6 @@ body.light {
         <div class="kpi-l">Convertidos J1</div>
         <span class="kpi-v" style="color:var(--green)" id="kpi-conv">—</span>
         <div class="kpi-s kpi-trend" id="kpi-conv-pct">—% tasa</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-l">Mensajes hoy</div>
-        <span class="kpi-v" style="color:var(--amber)" id="kpi-msg">—</span>
-        <div class="kpi-s">Push + WA + Email</div>
       </div>
       <div class="kpi">
         <div class="kpi-l">Inversión acum.</div>
@@ -1760,13 +1789,23 @@ function renderStats(s) {
   set('sb-logs', fmt(s.logs_hoy || 0));
   set('sb-sync', 'Hoy 2am');
 
-  // KPIs overview
-  set('kpi-total', fmt(total));
-  set('kpi-j1', fmt(s.j1_activos || 0));
-  set('kpi-conv', fmt(s.convertidos || 0));
-  set('kpi-conv-pct', pct(s.convertidos||0, s.j1_total||1) + ' tasa');
-  set('kpi-msg', fmt(s.mensajes_hoy || 0));
-  set('kpi-inv', fmtCOP(s.inversion_total || 0));
+  // KPIs overview — fila 1: estado base
+  set('kpi-total',          fmt(total));
+  set('kpi-activos',        fmt(s.activos || 0));
+  set('kpi-activos-pct',    pct(s.activos||0, total) + ' del base');
+  set('kpi-enriesgo',       fmt(s.en_riesgo || 0));
+  set('kpi-enriesgo-pct',   pct(s.en_riesgo||0, total) + ' del base');
+  set('kpi-churneados',     fmt(s.churneados || 0));
+  set('kpi-churneados-pct', pct(s.churneados||0, total) + ' del base');
+  set('kpi-fantasmas',      fmt(s.fantasmas || 0));
+  // KPIs overview — fila 2: canales y journeys
+  set('kpi-concel',         fmt(s.con_celular || 0));
+  set('kpi-concel-pct',     pct(s.con_celular||0, total) + ' alcance WA');
+  set('kpi-multitienda',    fmt(s.multitienda || 0));
+  set('kpi-j1',             fmt(s.j1_activos || 0));
+  set('kpi-conv',           fmt(s.convertidos || 0));
+  set('kpi-conv-pct',       pct(s.convertidos||0, s.j1_total||1) + ' tasa');
+  set('kpi-inv',            fmtCOP(s.inversion_total || 0));
 
   // Segmentos
   set('seg-onetime', fmt(s.one_time || 5589));
