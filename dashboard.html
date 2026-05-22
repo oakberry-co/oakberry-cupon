@@ -769,6 +769,10 @@ body.light {
           <option value="Barranquilla">Barranquilla</option>
           <option value="Bucaramanga">Bucaramanga</option>
           <option value="Cartagena">Cartagena</option>
+          <option value="Cucuta">Cúcuta</option>
+          <option value="Monteria">Montería</option>
+          <option value="SantaMarta">Santa Marta</option>
+          <option value="Valledupar">Valledupar</option>
         </select>
         <!-- Filtro tienda -->
         <select id="filtro-tienda" onchange="aplicarFiltros()" style="
@@ -1614,6 +1618,70 @@ async function cargarUET() {
   }
 }
 
+// ── TIENDAS POR CIUDAD — carga dinámica desde BigQuery ────────
+let TIENDAS_MAP = {};
+
+async function cargarTiendas() {
+  try {
+    const res  = await fetch(API_URL + '/tiendas');
+    const data = await res.json();
+    if (!data.ok) return;
+
+    TIENDAS_MAP = {};
+    Object.entries(data.tiendas).forEach(([ciudad, arr]) => {
+      TIENDAS_MAP[ciudad] = arr.map(t => t.tienda);
+    });
+
+    // Poblar select de ciudades dinámicamente
+    const ciudadS = document.getElementById('filtro-ciudad');
+    if (!ciudadS) return;
+    const current = ciudadS.value;
+    ciudadS.innerHTML = '<option value="">Todas las ciudades</option>';
+
+    // Orden: Pereira primero (piloto), luego alfabético
+    const ciudades = Object.keys(TIENDAS_MAP).sort((a,b) => {
+      if (a === 'Pereira') return -1;
+      if (b === 'Pereira') return 1;
+      return a.localeCompare(b);
+    });
+
+    ciudades.forEach(ciudad => {
+      const opt = document.createElement('option');
+      opt.value = ciudad;
+      opt.textContent = ciudad === 'Pereira'
+        ? '🧪 Pereira (Piloto)'
+        : ciudad;
+      ciudadS.appendChild(opt);
+    });
+
+    if (current) ciudadS.value = current;
+  } catch(e) {
+    console.warn('No se pudo cargar tiendas:', e.message);
+  }
+}
+
+function aplicarFiltros() {
+  const ciudad  = document.getElementById('filtro-ciudad')?.value || '';
+  const tiendaS = document.getElementById('filtro-tienda');
+  if (!tiendaS) return;
+
+  tiendaS.innerHTML = '<option value="">Todas las tiendas</option>';
+  if (ciudad && TIENDAS_MAP[ciudad]) {
+    TIENDAS_MAP[ciudad].forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = t;
+      tiendaS.appendChild(opt);
+    });
+    tiendaS.disabled = false;
+  } else {
+    tiendaS.disabled = true;
+  }
+
+  // Badge piloto Pereira
+  const badge = document.getElementById('badge-piloto');
+  if (badge) badge.style.display = ciudad === 'Pereira' ? 'block' : 'none';
+}
+
 function showPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1621,6 +1689,8 @@ function showPanel(id) {
   document.querySelectorAll('.tab').forEach(t => {
     if (t.getAttribute('onclick')?.includes(id)) t.classList.add('active');
   });
+  if (id === 'uet') cargarUET();
+  if (id === 'adq') cargarAdq();
 }
 
 // ── TOAST ────────────────────────────────────────────────────
@@ -1851,6 +1921,7 @@ function toggleTheme() {
   if (localStorage.getItem('oak_theme') === 'light') {
     document.body.classList.add('light');
     document.addEventListener('DOMContentLoaded', () => {
+  cargarTiendas();
       const btn = document.getElementById('theme-btn');
       if (btn) btn.textContent = '🌙 Dark';
     });
