@@ -669,11 +669,16 @@ body.light {
     </div>
   </div>
   <div class="topbar-right">
+    <select id="filtro-ciudad" onchange="aplicarFiltros()" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;border:1px solid var(--line2);background:#fff;color:var(--text);cursor:pointer;outline:none;max-width:150px;">
+      <option value="">Todas las ciudades</option>
+    </select>
+    <select id="filtro-tienda" onchange="aplicarFiltros()" disabled style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;border:1px solid var(--line2);background:#fff;color:var(--text);cursor:pointer;outline:none;max-width:150px;">
+      <option value="">Todas las tiendas</option>
+    </select>
     <div class="status-pill">
       <div class="status-dot loading" id="statusDot"></div>
       <span id="statusTxt">Cargando...</span>
     </div>
-    <button class="btn" id="theme-btn" onclick="toggleTheme()" style="min-width:64px">☀ Light</button>
     <button class="btn" onclick="cargar()">↺ Sync</button>
   </div>
 </div>
@@ -754,36 +759,7 @@ body.light {
         <span class="section-hd-title">Pirámide de clientes</span>
         <span class="section-hd-sub" id="fecha-sync">—</span>
       </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <!-- Filtro ciudad -->
-        <select id="filtro-ciudad" onchange="aplicarFiltros()" style="
-          font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;
-          padding:6px 12px;border-radius:8px;
-          border:1px solid var(--line2);background:#fff;
-          color:var(--text);cursor:pointer;outline:none;">
-          <option value="">Todas las ciudades</option>
-          <option value="Pereira">🧪 Pereira (Piloto)</option>
-          <option value="Bogota">Bogotá</option>
-          <option value="Medellin">Medellín</option>
-          <option value="Cali">Cali</option>
-          <option value="Barranquilla">Barranquilla</option>
-          <option value="Bucaramanga">Bucaramanga</option>
-          <option value="Cartagena">Cartagena</option>
-          <option value="Cucuta">Cúcuta</option>
-          <option value="Monteria">Montería</option>
-          <option value="SantaMarta">Santa Marta</option>
-          <option value="Valledupar">Valledupar</option>
-        </select>
-        <!-- Filtro tienda -->
-        <select id="filtro-tienda" onchange="aplicarFiltros()" style="
-          font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;
-          padding:6px 12px;border-radius:8px;
-          border:1px solid var(--line2);background:#fff;
-          color:var(--text);cursor:pointer;outline:none;">
-          <option value="">Todas las tiendas</option>
-        </select>
-        <button class="btn" onclick="cargar()">↺ Actualizar</button>
-      </div>
+
     </div>
     <!-- Badge piloto cuando está filtrado por Pereira -->
     <div id="badge-piloto" style="display:none;margin-bottom:16px">
@@ -1712,8 +1688,14 @@ function aplicarFiltros() {
   const badge = document.getElementById('badge-piloto');
   if (badge) badge.style.display = ciudad === 'Pereira' ? 'block' : 'none';
 
-  // Re-cargar stats con filtros aplicados
-  cargar();
+  // Re-cargar el panel activo con los nuevos filtros
+  const panelActivo = document.querySelector('.panel.active')?.id?.replace('panel-','');
+  if (panelActivo === 'overview') cargar();
+  else if (panelActivo === 'j1') cargarJ1 ? cargarJ1() : cargar();
+  else if (panelActivo === 'geo') cargarGeo ? cargarGeo() : cargar();
+  else if (panelActivo === 'inversion') cargarInversion ? cargarInversion() : cargar();
+  else if (panelActivo === 'uet') cargarUET();
+  else cargar();
 }
 
 function showPanel(id) {
