@@ -897,19 +897,7 @@ body.light {
         </div>
       </div>
     </div>
-    <!-- Card Fantasmas — al lado de VIP -->
-    <div class="seg-card" style="border-top-color:var(--text3)">
-      <div class="seg-top">
-        <div class="seg-name">FANTASMA</div>
-        <span class="seg-n" style="color:var(--text3)" id="seg-fantasma">—</span>
-        <span class="seg-pct" id="seg-fantasma-pct">— del base</span>
-      </div>
-      <div class="seg-bot">
-        <div class="seg-m"><span class="seg-m-l">LTV relativo</span><span class="seg-m-v" style="color:var(--text3)">0x</span></div>
-        <div class="seg-m"><span class="seg-m-l">Churn hist.</span><span class="seg-m-v" style="color:var(--text3)">100%</span></div>
-        <div class="seg-m"><span class="seg-m-l">Journey</span><span class="seg-m-v" style="color:var(--text3)">Excluido</span></div>
-      </div>
-    </div>
+
   </div>
 
 
@@ -1840,8 +1828,6 @@ function renderStats(s) {
   set('kpi-inv',            fmtCOP(s.inversion_total || 0));
 
   // Segmentos
-  set('seg-fantasma', fmt(s.fantasmas || 0));
-  set('seg-fantasma-pct', pct(s.fantasmas||0, total) + ' del base');
   set('seg-onetime', fmt(s.one_time || 5589));
   set('seg-onetime-pct', pct(s.one_time||5589, total) + ' del base');
   set('seg-ocasional', fmt(s.ocasional || 6736));
