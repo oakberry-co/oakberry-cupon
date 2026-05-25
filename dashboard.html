@@ -835,21 +835,6 @@ body.light {
       </div>
     </div>
     <!-- Tabla fantasmas por tienda — visible solo al filtrar -->
-    <div id="fantasmas-bloque" style="display:none;margin-bottom:20px">
-      <div class="card">
-        <div class="card-hd">
-          <span class="card-title">👻 Fantasmas por tienda</span>
-          <span class="card-sub" id="fantasmas-subtitle">Clientes registrados que nunca compraron</span>
-        </div>
-        <div class="card-body" style="padding:0">
-          <table class="log-table">
-            <thead><tr><th>Tienda</th><th>Ciudad</th><th>Total</th><th>Fantasmas</th><th>%</th><th>Con stamps</th></tr></thead>
-            <tbody id="fantasmas-tbody"><tr><td colspan="6" class="empty">Selecciona ciudad o tienda</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
     <div class="pyramid" id="pyramid-grid">
       <div class="seg-card s-onetime">
         <div class="seg-top">
@@ -910,6 +895,35 @@ body.light {
           <div class="seg-m"><span class="seg-m-l">Churn hist.</span><span class="seg-m-v" style="color:var(--green)">18%</span></div>
           <div class="seg-m"><span class="seg-m-l">Journey</span><span class="seg-m-v" style="color:var(--text3)">J5 próximo</span></div>
         </div>
+      </div>
+    </div>
+    <!-- Card Fantasmas — al lado de VIP -->
+    <div class="seg-card" style="border-top-color:var(--text3);opacity:0.85">
+      <div class="seg-top">
+        <div class="seg-name" style="color:var(--text3)">👻 Fantasma</div>
+        <span class="seg-n" style="color:var(--text3)" id="seg-fantasma">—</span>
+        <span class="seg-pct" id="seg-fantasma-pct">— del base</span>
+      </div>
+      <div class="seg-bot">
+        <div class="seg-m"><span class="seg-m-l">Stamps</span><span class="seg-m-v" style="color:var(--text3)">0</span></div>
+        <div class="seg-m"><span class="seg-m-l">Churn hist.</span><span class="seg-m-v" style="color:var(--text3)">100%</span></div>
+        <div class="seg-m"><span class="seg-m-l">Journey</span><span class="seg-m-v" style="color:var(--text3)">Excluido</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla fantasmas por tienda — visible al filtrar ciudad/tienda -->
+  <div id="fantasmas-bloque" style="display:none;margin-top:16px;margin-bottom:4px">
+    <div class="card">
+      <div class="card-hd">
+        <span class="card-title">👻 Fantasmas por tienda</span>
+        <span class="card-sub" id="fantasmas-subtitle">Clientes registrados que nunca compraron</span>
+      </div>
+      <div class="card-body" style="padding:0">
+        <table class="log-table">
+          <thead><tr><th>Tienda</th><th>Ciudad</th><th>Total</th><th>Fantasmas</th><th>%</th><th>Con stamps</th></tr></thead>
+          <tbody id="fantasmas-tbody"><tr><td colspan="6" class="empty">Selecciona ciudad o tienda para ver el desglose</td></tr></tbody>
+        </table>
       </div>
     </div>
   </div>
