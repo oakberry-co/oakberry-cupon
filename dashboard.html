@@ -1659,29 +1659,51 @@ async function cargarTiendas() {
       ciudadS.appendChild(opt);
     });
 
-    if (current) ciudadS.value = current;
+    if (current) {
+      ciudadS.value = current;
+      // Restaurar tiendas del select si había ciudad seleccionada
+      if (current && TIENDAS_MAP[current]) {
+        const tiendaS = document.getElementById('filtro-tienda');
+        if (tiendaS) {
+          const currentTienda = tiendaS.value;
+          tiendaS.innerHTML = '<option value="">Todas las tiendas</option>';
+          TIENDAS_MAP[current].forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t; opt.textContent = t;
+            tiendaS.appendChild(opt);
+          });
+          tiendaS.disabled = false;
+          if (currentTienda) tiendaS.value = currentTienda;
+        }
+      }
+    }
   } catch(e) {
     console.warn('No se pudo cargar tiendas:', e.message);
   }
 }
 
 function aplicarFiltros() {
-  const ciudad  = document.getElementById('filtro-ciudad')?.value || '';
-  const tiendaS = document.getElementById('filtro-tienda');
+  const ciudad       = document.getElementById('filtro-ciudad')?.value || '';
+  const tiendaS      = document.getElementById('filtro-tienda');
   if (!tiendaS) return;
+  const tiendaActual = tiendaS.value; // guardar antes de repoblar
 
-  // Poblar tiendas según ciudad
-  tiendaS.innerHTML = '<option value="">Todas las tiendas</option>';
+  // Poblar tiendas según ciudad — solo si cambió la ciudad
   if (ciudad && TIENDAS_MAP[ciudad]) {
+    tiendaS.innerHTML = '<option value="">Todas las tiendas</option>';
     TIENDAS_MAP[ciudad].forEach(t => {
       const opt = document.createElement('option');
       opt.value = t; opt.textContent = t;
       tiendaS.appendChild(opt);
     });
     tiendaS.disabled = false;
+    // Restaurar tienda seleccionada si sigue siendo válida
+    if (tiendaActual && TIENDAS_MAP[ciudad].includes(tiendaActual)) {
+      tiendaS.value = tiendaActual;
+    }
   } else {
+    tiendaS.innerHTML = '<option value="">Todas las tiendas</option>';
     tiendaS.disabled = true;
-    tiendaS.value = '';
   }
 
   // Badge piloto Pereira
@@ -1690,11 +1712,11 @@ function aplicarFiltros() {
 
   // Re-cargar el panel activo con los nuevos filtros
   const panelActivo = document.querySelector('.panel.active')?.id?.replace('panel-','');
-  if (panelActivo === 'overview') cargar();
-  else if (panelActivo === 'j1') cargarJ1 ? cargarJ1() : cargar();
-  else if (panelActivo === 'geo') cargarGeo ? cargarGeo() : cargar();
-  else if (panelActivo === 'inversion') cargarInversion ? cargarInversion() : cargar();
-  else if (panelActivo === 'uet') cargarUET();
+  if      (panelActivo === 'overview')  cargar();
+  else if (panelActivo === 'j1')        typeof cargarJ1 === 'function' ? cargarJ1() : cargar();
+  else if (panelActivo === 'geo')       typeof cargarGeo === 'function' ? cargarGeo() : cargar();
+  else if (panelActivo === 'inversion') typeof cargarInversion === 'function' ? cargarInversion() : cargar();
+  else if (panelActivo === 'uet')       cargarUET();
   else cargar();
 }
 
@@ -1749,6 +1771,8 @@ async function cargar() {
     let statsUrl = API_URL + '/stats';
     if (tienda)      statsUrl += '?tienda=' + encodeURIComponent(tienda);
     else if (ciudad) statsUrl += '?ciudad=' + encodeURIComponent(ciudad);
+    // Preservar valores de los selects después del fetch
+    const _ciudad = ciudad, _tienda = tienda;
     const res = await fetch(statsUrl);
     const data = await res.json();
     if (data.ok) {
@@ -1800,6 +1824,8 @@ function renderStats(s) {
   set('kpi-inv',            fmtCOP(s.inversion_total || 0));
 
   // Segmentos
+  set('seg-fantasma', fmt(s.fantasmas || 0));
+  set('seg-fantasma-pct', pct(s.fantasmas||0, total) + ' del base');
   set('seg-onetime', fmt(s.one_time || 5589));
   set('seg-onetime-pct', pct(s.one_time||5589, total) + ' del base');
   set('seg-ocasional', fmt(s.ocasional || 6736));
