@@ -898,35 +898,21 @@ body.light {
       </div>
     </div>
     <!-- Card Fantasmas — al lado de VIP -->
-    <div class="seg-card" style="border-top-color:var(--text3);opacity:0.85">
+    <div class="seg-card" style="border-top-color:var(--text3)">
       <div class="seg-top">
-        <div class="seg-name" style="color:var(--text3)">👻 Fantasma</div>
+        <div class="seg-name">FANTASMA</div>
         <span class="seg-n" style="color:var(--text3)" id="seg-fantasma">—</span>
         <span class="seg-pct" id="seg-fantasma-pct">— del base</span>
       </div>
       <div class="seg-bot">
-        <div class="seg-m"><span class="seg-m-l">Stamps</span><span class="seg-m-v" style="color:var(--text3)">0</span></div>
+        <div class="seg-m"><span class="seg-m-l">LTV relativo</span><span class="seg-m-v" style="color:var(--text3)">0x</span></div>
         <div class="seg-m"><span class="seg-m-l">Churn hist.</span><span class="seg-m-v" style="color:var(--text3)">100%</span></div>
         <div class="seg-m"><span class="seg-m-l">Journey</span><span class="seg-m-v" style="color:var(--text3)">Excluido</span></div>
       </div>
     </div>
   </div>
 
-  <!-- Tabla fantasmas por tienda — visible al filtrar ciudad/tienda -->
-  <div id="fantasmas-bloque" style="display:none;margin-top:16px;margin-bottom:4px">
-    <div class="card">
-      <div class="card-hd">
-        <span class="card-title">👻 Fantasmas por tienda</span>
-        <span class="card-sub" id="fantasmas-subtitle">Clientes registrados que nunca compraron</span>
-      </div>
-      <div class="card-body" style="padding:0">
-        <table class="log-table">
-          <thead><tr><th>Tienda</th><th>Ciudad</th><th>Total</th><th>Fantasmas</th><th>%</th><th>Con stamps</th></tr></thead>
-          <tbody id="fantasmas-tbody"><tr><td colspan="6" class="empty">Selecciona ciudad o tienda para ver el desglose</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+
 
   <!-- ════ JOURNEY J1 ════ -->
   <div class="panel" id="panel-j1">
@@ -1911,59 +1897,6 @@ function renderStats(s) {
   set('ap-wa', fmt(s.wa_hoy || 0));
   set('ap-email', fmt(s.email_hoy || 0));
   set('sys-sync', 'Hoy 2:00am');
-  cargarFantasmasTienda();
-}
-
-async function cargarFantasmasTienda() {
-  try {
-    const ciudad = document.getElementById('filtro-ciudad')?.value || '';
-    const tienda = document.getElementById('filtro-tienda')?.value || '';
-    const bloque = document.getElementById('fantasmas-bloque');
-    if (!bloque) return;
-
-    if (!ciudad && !tienda) { bloque.style.display = 'none'; return; }
-    bloque.style.display = 'block';
-
-    let url = API_URL + '/segmentos';
-    if (tienda)      url += '?tienda=' + encodeURIComponent(tienda);
-    else if (ciudad) url += '?ciudad=' + encodeURIComponent(ciudad);
-
-    const res  = await fetch(url);
-    const data = await res.json();
-    if (!data.ok) return;
-
-    const tbody    = document.getElementById('fantasmas-tbody');
-    const subtitle = document.getElementById('fantasmas-subtitle');
-    const tiendas  = (data.tiendas || []).filter(t => t.tienda !== 'Sin tienda');
-
-    if (!tiendas.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin datos</td></tr>';
-      return;
-    }
-
-    const totF = tiendas.reduce((s,t) => s + t.fantasmas, 0);
-    const totC = tiendas.reduce((s,t) => s + t.total, 0);
-    subtitle.textContent = totC > 0
-      ? fmt(totF) + ' fantasmas de ' + fmt(totC) + ' clientes (' + (totF/totC*100).toFixed(1) + '%)'
-      : 'Sin datos';
-
-    tbody.innerHTML = tiendas
-      .sort((a,b) => b.fantasmas - a.fantasmas)
-      .map(t => {
-        const pctV = t.total > 0 ? (t.fantasmas/t.total*100).toFixed(1) : 0;
-        const col  = pctV >= 30 ? 'var(--red)' : pctV >= 15 ? 'var(--amber)' : 'var(--green)';
-        return '<tr>'
-          + '<td style="font-weight:700">' + t.tienda + '</td>'
-          + '<td>' + t.ciudad + '</td>'
-          + '<td>' + fmt(t.total) + '</td>'
-          + '<td style="color:var(--text3);font-weight:700">' + fmt(t.fantasmas) + '</td>'
-          + '<td style="color:' + col + ';font-weight:700">' + pctV + '%</td>'
-          + '<td style="color:var(--green)">' + fmt(t.total - t.fantasmas) + '</td>'
-          + '</tr>';
-      }).join('');
-  } catch(e) {
-    console.warn('cargarFantasmasTienda:', e);
-  }
 }
 
 function renderCohortes(cohortes) {
