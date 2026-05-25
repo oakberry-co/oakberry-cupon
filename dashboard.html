@@ -622,6 +622,13 @@ body.light {
   text-transform: uppercase;
   letter-spacing: .08em;
 }
+
+/* ── BIBLIA SUB-PANELS ── */
+.bib-panel { display: none; }
+.bib-panel.active { display: block; }
+.bjp { display: none; }
+.bjp.active { display: block; }
+.bjnav.active { background: var(--bg3) !important; }
 </style>
 </head>
 <body>
@@ -667,6 +674,10 @@ body.light {
       <div class="tab-dot" style="background:var(--green)"></div>
       Control
     </div>
+    <div class="tab" onclick="showPanel('biblia')">
+      <div class="tab-dot" style="background:var(--purple)"></div>
+      Biblia CRM
+    </div>
   </div>
   <div class="topbar-right">
     <select id="filtro-ciudad" onchange="aplicarFiltros()" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;border:1px solid var(--line2);background:#fff;color:var(--text);cursor:pointer;outline:none;max-width:150px;">
@@ -695,33 +706,33 @@ body.light {
     </div>
     <span class="sidebar-badge alert" id="sb-j1-activos">—</span>
   </div>
-  <div class="sidebar-item" style="opacity:.4">
+  <div class="sidebar-item" onclick="showPanel('biblia');showBibliaJ('j2')">
     <div class="sidebar-item-left">
-      <div style="width:6px;height:6px;border-radius:50%;background:var(--bg4)"></div>
+      <div style="width:6px;height:6px;border-radius:50%;background:var(--amber)"></div>
       J2 Ocasional
     </div>
-    <span class="sidebar-badge">Próximo</span>
+    <span class="sidebar-badge ok">🔥 83 WA</span>
   </div>
-  <div class="sidebar-item" style="opacity:.4">
+  <div class="sidebar-item" style="opacity:.5" onclick="showPanel('biblia');showBibliaJ('j3')">
     <div class="sidebar-item-left">
-      <div style="width:6px;height:6px;border-radius:50%;background:var(--bg4)"></div>
+      <div style="width:6px;height:6px;border-radius:50%;background:var(--text2)"></div>
       J3 Regular
     </div>
-    <span class="sidebar-badge">Próximo</span>
+    <span class="sidebar-badge">Biblia ↗</span>
   </div>
-  <div class="sidebar-item" style="opacity:.4">
+  <div class="sidebar-item" style="opacity:.5" onclick="showPanel('biblia');showBibliaJ('j4')">
     <div class="sidebar-item-left">
-      <div style="width:6px;height:6px;border-radius:50%;background:var(--bg4)"></div>
+      <div style="width:6px;height:6px;border-radius:50%;background:var(--green)"></div>
       J4 Frecuente
     </div>
-    <span class="sidebar-badge">Próximo</span>
+    <span class="sidebar-badge">Biblia ↗</span>
   </div>
-  <div class="sidebar-item" style="opacity:.4">
+  <div class="sidebar-item" style="opacity:.5" onclick="showPanel('biblia');showBibliaJ('j5')">
     <div class="sidebar-item-left">
-      <div style="width:6px;height:6px;border-radius:50%;background:var(--bg4)"></div>
+      <div style="width:6px;height:6px;border-radius:50%;background:var(--purple)"></div>
       J5 VIP
     </div>
-    <span class="sidebar-badge">Próximo</span>
+    <span class="sidebar-badge">Biblia ↗</span>
   </div>
 
   <div class="sidebar-section">Base de clientes</div>
@@ -1484,6 +1495,312 @@ body.light {
     </div>
   </div>
 
+
+<!-- ════ BIBLIA CRM ════ -->
+<div class="panel" id="panel-biblia">
+  <div class="section-hd">
+    <div class="section-hd-left">
+      <span class="section-hd-title">Biblia del CRM — Journeys J1–J5</span>
+      <span class="section-hd-sub">Espíritu de marca · Ofertas por segmento · Copy completo</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn primary" onclick="showBibliaTab('journeys')">Journeys</button>
+      <button class="btn" onclick="showBibliaTab('copy')">Copy</button>
+      <button class="btn" onclick="showBibliaTab('cajeros')">Cajeros</button>
+      <button class="btn" onclick="showBibliaTab('reglas')">Reglas</button>
+    </div>
+  </div>
+
+  <!-- Alerta filosofía -->
+  <div style="background:rgba(95,75,139,.06);border:1px solid rgba(95,75,139,.2);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--text2);line-height:1.6">
+    <strong style="color:var(--text)">Filosofía:</strong> Oakberry no es fast food — es un estilo de vida. Cada mensaje es una invitación genuina. One-timer necesita un regalo. Regular necesita su programa activo. Frecuente necesita reconocimiento. VIP necesita pertenecer, nunca un precio.
+  </div>
+
+  <!-- Mapa resumen -->
+  <div style="background:#fff;border:1px solid var(--line2);border-radius:6px;overflow:hidden;margin-bottom:20px;">
+    <div class="card-hd"><span class="card-title">Mapa de journeys · Estado del piloto Pereira</span></div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <thead>
+        <tr style="background:var(--bg3)">
+          <th style="padding:9px 14px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:1px solid var(--line2)">Journey</th>
+          <th style="padding:9px 14px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:1px solid var(--line2)">Segmento</th>
+          <th style="padding:9px 14px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:1px solid var(--line2)">Elegibles</th>
+          <th style="padding:9px 14px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:1px solid var(--line2)">LTV rel.</th>
+          <th style="padding:9px 14px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:1px solid var(--line2)">Oferta</th>
+          <th style="padding:9px 14px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:1px solid var(--line2)">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:9px 14px;font-weight:700;color:var(--red)">J1</td>
+          <td style="padding:9px 14px">One-timer churneado</td>
+          <td style="padding:9px 14px;font-weight:700">9,383</td>
+          <td style="padding:9px 14px;color:var(--text3)">1x</td>
+          <td style="padding:9px 14px">Bowl 7oz gratis (UET)</td>
+          <td style="padding:9px 14px"><span class="badge b-wa">Pendiente activar</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--line);background:rgba(74,222,128,.02)">
+          <td style="padding:9px 14px;font-weight:700;color:var(--amber)">J2</td>
+          <td style="padding:9px 14px">Ocasional churneado</td>
+          <td style="padding:9px 14px;font-weight:700">6,147</td>
+          <td style="padding:9px 14px;color:var(--text3)">2.3x</td>
+          <td style="padding:9px 14px">Bowl 7oz gratis (UET)</td>
+          <td style="padding:9px 14px"><span class="badge b-ok">🔥 83 WA + 25 push listos</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:9px 14px;font-weight:700;color:var(--text2)">J3</td>
+          <td style="padding:9px 14px">Regular churneado</td>
+          <td style="padding:9px 14px;font-weight:700">6,239</td>
+          <td style="padding:9px 14px;color:var(--text3)">4.8x</td>
+          <td style="padding:9px 14px">Sello doble / 20% OFF</td>
+          <td style="padding:9px 14px"><span class="badge b-skip">Decisión pendiente</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--line)">
+          <td style="padding:9px 14px;font-weight:700;color:var(--green)">J4</td>
+          <td style="padding:9px 14px">Frecuente churneado</td>
+          <td style="padding:9px 14px;font-weight:700">5,158</td>
+          <td style="padding:9px 14px;color:var(--text3)">11x</td>
+          <td style="padding:9px 14px">Reconocimiento puro</td>
+          <td style="padding:9px 14px"><span class="badge b-skip">Decisión pendiente</span></td>
+        </tr>
+        <tr>
+          <td style="padding:9px 14px;font-weight:700;color:var(--purple)">J5</td>
+          <td style="padding:9px 14px">VIP — Clan Oakberry</td>
+          <td style="padding:9px 14px;font-weight:700">3,881</td>
+          <td style="padding:9px 14px;color:var(--text3)">35x</td>
+          <td style="padding:9px 14px">Acceso exclusivo + pertenencia</td>
+          <td style="padding:9px 14px"><span class="badge b-email">Coord. franquiciado</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SUB-TABS BIBLIA -->
+  <div style="display:flex;gap:1px;background:var(--line);border:1px solid var(--line2);border-radius:6px;overflow:hidden;margin-bottom:20px;" id="biblia-tabs">
+    <div class="bib-tab active" data-tab="journeys" onclick="showBibliaTab('journeys')" style="flex:1;padding:9px 12px;text-align:center;cursor:pointer;background:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);border-bottom:2px solid var(--accent)">Journeys</div>
+    <div class="bib-tab" data-tab="copy" onclick="showBibliaTab('copy')" style="flex:1;padding:9px 12px;text-align:center;cursor:pointer;background:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:2px solid transparent">Copy</div>
+    <div class="bib-tab" data-tab="cajeros" onclick="showBibliaTab('cajeros')" style="flex:1;padding:9px 12px;text-align:center;cursor:pointer;background:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:2px solid transparent">Scripts Cajeros</div>
+    <div class="bib-tab" data-tab="reglas" onclick="showBibliaTab('reglas')" style="flex:1;padding:9px 12px;text-align:center;cursor:pointer;background:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:2px solid transparent">Reglas</div>
+  </div>
+
+  <!-- ─── SUB-PANEL: JOURNEYS ─── -->
+  <div class="bib-panel active" id="bib-journeys">
+    <!-- J nav -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line2);border-radius:6px;overflow:hidden;margin-bottom:16px;">
+      <div class="bjnav active" id="bjnav-j1" onclick="showBibliaJ('j1')" style="padding:10px 8px;text-align:center;cursor:pointer;background:#fff"><span style="font-size:14px;font-weight:800;color:var(--red);display:block">J1</span><span style="font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">One-timer</span></div>
+      <div class="bjnav" id="bjnav-j2" onclick="showBibliaJ('j2')" style="padding:10px 8px;text-align:center;cursor:pointer;background:#fff"><span style="font-size:14px;font-weight:800;color:var(--amber);display:block">J2</span><span style="font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">Ocasional</span></div>
+      <div class="bjnav" id="bjnav-j3" onclick="showBibliaJ('j3')" style="padding:10px 8px;text-align:center;cursor:pointer;background:#fff"><span style="font-size:14px;font-weight:800;color:var(--text2);display:block">J3</span><span style="font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">Regular</span></div>
+      <div class="bjnav" id="bjnav-j4" onclick="showBibliaJ('j4')" style="padding:10px 8px;text-align:center;cursor:pointer;background:#fff"><span style="font-size:14px;font-weight:800;color:var(--green);display:block">J4</span><span style="font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">Frecuente</span></div>
+      <div class="bjnav" id="bjnav-j5" onclick="showBibliaJ('j5')" style="padding:10px 8px;text-align:center;cursor:pointer;background:#fff"><span style="font-size:14px;font-weight:800;color:var(--purple);display:block">J5</span><span style="font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">VIP · Clan</span></div>
+    </div>
+
+    <!-- J1 detail -->
+    <div class="bjp active" id="bjp-j1">
+      <div style="background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.2);border-radius:6px;padding:16px 20px;margin-bottom:14px">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="width:40px;height:40px;border-radius:6px;background:rgba(192,57,43,.12);color:var(--red);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0">J1</div>
+          <div><div style="font-size:14px;font-weight:700;color:var(--red)">One-timer → Ocasional</div><div style="font-size:12px;color:var(--text2);line-height:1.5;margin-top:3px">Vinieron una vez. Probaron el açaí. El trabajo es darles una razón para volver y convertir esa visita en hábito. 7 toques en 60 días, comenzando sin oferta para medir conversión orgánica.</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div style="background:rgba(192,57,43,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--red)">9,383</div><div style="font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.05em;opacity:.7">elegibles</div></div>
+          <div style="background:rgba(192,57,43,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--red)">7 toques</div><div style="font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.05em;opacity:.7">en 60 días</div></div>
+          <div style="background:rgba(192,57,43,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--red)">LTV 1x</div><div style="font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.05em;opacity:.7">churn hist. 52%</div></div>
+          <div style="background:rgba(192,57,43,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--red)">Meta 20%</div><div style="font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.05em;opacity:.7">conversión</div></div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--line2);border-radius:6px;margin-bottom:14px;overflow:hidden">
+        <div style="padding:9px 14px;background:var(--bg3);border-bottom:1px solid var(--line);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text2)">🎁 Oferta · Bowl 7oz gratis (UET)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr">
+          <div style="padding:11px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Oferta</div><div style="font-size:12px;font-weight:600">Bowl 7oz gratis (UET)</div></div>
+          <div style="padding:11px 14px;border-bottom:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Mecanismo</div><div style="font-size:12px;font-weight:600">5 preguntas → cupón RXXXXX → cajero valida en 72h</div></div>
+          <div style="padding:11px 14px;border-right:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Lógica estratégica</div><div style="font-size:12px;font-weight:600">Primero escuchamos, luego regalamos. Genera datos + goodwill.</div></div>
+          <div style="padding:11px 14px"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Costo estimado</div><div style="font-size:12px;font-weight:600">~$4,500 COP bowl 7oz sin toppings</div></div>
+        </div>
+      </div>
+      <div style="background:var(--line);border:1px solid var(--line2);border-radius:6px;display:grid;grid-template-columns:repeat(7,1fr);gap:1px;overflow:hidden;margin-bottom:14px">
+        <div style="background:#fff;padding:11px 8px;text-align:center"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Día 3</div><div style="font-size:12px;font-weight:700;color:var(--blue);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--blue);line-height:28px;margin:0 auto 4px">P</div><div style="font-size:8px;color:var(--text3)">Push motivacional</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Día 7</div><div style="font-size:12px;font-weight:700;color:var(--blue);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--blue);line-height:28px;margin:0 auto 4px">P</div><div style="font-size:8px;color:var(--text3)">Push motivacional</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Día 15</div><div style="font-size:12px;font-weight:700;color:var(--blue);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--blue);line-height:28px;margin:0 auto 4px">P</div><div style="font-size:8px;color:var(--text3)">Push motivacional</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Día 21</div><div style="font-size:12px;font-weight:700;color:var(--green);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--green);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA + UET link</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Día 35</div><div style="font-size:12px;font-weight:700;color:var(--green);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--green);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA recordatorio</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Día 50</div><div style="font-size:12px;font-weight:700;color:var(--red);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--red);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA cierre urgente</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Día 60</div><div style="font-size:12px;font-weight:700;color:var(--text3);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--text3);line-height:28px;margin:0 auto 4px">✗</div><div style="font-size:8px;color:var(--text3)">Churn definitivo</div></div>
+      </div>
+    </div>
+
+    <!-- J2 detail -->
+    <div class="bjp" id="bjp-j2">
+      <div style="background:rgba(217,119,6,.05);border:1px solid rgba(217,119,6,.2);border-radius:6px;padding:16px 20px;margin-bottom:14px">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="width:40px;height:40px;border-radius:6px;background:rgba(217,119,6,.12);color:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0">J2</div>
+          <div><div style="font-size:14px;font-weight:700;color:var(--amber)">Ocasional churneado → Regular</div><div style="font-size:12px;color:var(--text2);line-height:1.5;margin-top:3px">Vinieron 2–3 veces. Tenían el hábito empezando. El UET nos dice qué fue — y la recuperación viene con datos reales. <strong style="color:var(--green)">Piloto Pereira listo: 83 WA + 25 push generados.</strong></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div style="background:rgba(217,119,6,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--amber)">6,147</div><div style="font-size:9px;color:var(--amber-d);text-transform:uppercase;letter-spacing:.05em;opacity:.8">elegibles totales</div></div>
+          <div style="background:rgba(217,119,6,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--green)">83 WA</div><div style="font-size:9px;color:var(--amber-d);text-transform:uppercase;letter-spacing:.05em;opacity:.8">listos Pereira</div></div>
+          <div style="background:rgba(217,119,6,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--green)">25 Push</div><div style="font-size:9px;color:var(--amber-d);text-transform:uppercase;letter-spacing:.05em;opacity:.8">sin celular</div></div>
+          <div style="background:rgba(217,119,6,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--amber)">LTV 2.3x</div><div style="font-size:9px;color:var(--amber-d);text-transform:uppercase;letter-spacing:.05em;opacity:.8">churn hist. 41%</div></div>
+        </div>
+      </div>
+      <div style="background:rgba(39,174,96,.06);border:1px solid rgba(39,174,96,.25);border-radius:6px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6">
+        <strong style="color:var(--green-d)">🔥 Listo para disparar:</strong> Ejecutar <code style="font-size:10px;background:var(--bg3);padding:2px 6px;border-radius:3px">python3 ~/oakberry-job/enviar_wa_uet.py</code> · Probar primero con Daniel: <code style="font-size:10px;background:var(--bg3);padding:2px 6px;border-radius:3px">t=3S7a8PsE</code> · Push individual: <code style="font-size:10px;background:var(--bg3);padding:2px 6px;border-radius:3px">POST /v1/card/push</code> con cardID en body.
+      </div>
+      <div style="background:var(--line);border:1px solid var(--line2);border-radius:6px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;overflow:hidden">
+        <div style="background:#fff;padding:11px 8px;text-align:center"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 1</div><div style="font-size:12px;font-weight:700;color:var(--green);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--green);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA + Push UET</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 7</div><div style="font-size:12px;font-weight:700;color:var(--blue);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--blue);line-height:28px;margin:0 auto 4px">P</div><div style="font-size:8px;color:var(--text3)">Push recordación</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 14</div><div style="font-size:12px;font-weight:700;color:var(--amber);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--amber);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA cierre urgente</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 60</div><div style="font-size:12px;font-weight:700;color:var(--text3);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--text3);line-height:28px;margin:0 auto 4px">✗</div><div style="font-size:8px;color:var(--text3)">Churn definitivo</div></div>
+      </div>
+    </div>
+
+    <!-- J3 detail -->
+    <div class="bjp" id="bjp-j3">
+      <div style="background:rgba(95,75,139,.05);border:1px solid rgba(95,75,139,.2);border-radius:6px;padding:16px 20px;margin-bottom:14px">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="width:40px;height:40px;border-radius:6px;background:rgba(95,75,139,.12);color:var(--text2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0">J3</div>
+          <div><div style="font-size:14px;font-weight:700;color:var(--text2)">Regular churneado → Frecuente</div><div style="font-size:12px;color:var(--text2);line-height:1.5;margin-top:3px">Tienen hábito (4–7 visitas). No los recuperamos con descuentos — los recuperamos activando su programa de lealtad. El sello doble cuesta $0 y activa el juego de la tarjeta.</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div style="background:rgba(95,75,139,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--text2)">6,239</div><div style="font-size:9px;color:var(--text2);text-transform:uppercase;opacity:.7">elegibles</div></div>
+          <div style="background:rgba(95,75,139,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--text2)">4–7</div><div style="font-size:9px;color:var(--text2);text-transform:uppercase;opacity:.7">stamps hist.</div></div>
+          <div style="background:rgba(95,75,139,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--text2)">LTV 4.8x</div><div style="font-size:9px;color:var(--text2);text-transform:uppercase;opacity:.7">churn hist. 37%</div></div>
+          <div style="background:rgba(95,75,139,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--text2)">$0</div><div style="font-size:9px;color:var(--text2);text-transform:uppercase;opacity:.7">costo sello doble</div></div>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.5"><strong>Oferta recomendada:</strong> Sello doble en próxima visita. Costo $0, activa el juego de completar la tarjeta. <strong>Alternativa:</strong> 20% OFF primer bowl del mes.</div>
+      <div style="background:var(--line);border:1px solid var(--line2);border-radius:6px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;overflow:hidden">
+        <div style="background:#fff;padding:11px 8px;text-align:center"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 5</div><div style="font-size:12px;font-weight:700;color:var(--blue);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--blue);line-height:28px;margin:0 auto 4px">P</div><div style="font-size:8px;color:var(--text3)">Push stamps</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 15</div><div style="font-size:12px;font-weight:700;color:var(--green);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--green);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA sello doble</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 30</div><div style="font-size:12px;font-weight:700;color:var(--amber);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--amber);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA urgencia</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 60</div><div style="font-size:12px;font-weight:700;color:var(--text3);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--text3);line-height:28px;margin:0 auto 4px">✗</div><div style="font-size:8px;color:var(--text3)">Churn</div></div>
+      </div>
+    </div>
+
+    <!-- J4 detail -->
+    <div class="bjp" id="bjp-j4">
+      <div style="background:rgba(39,174,96,.05);border:1px solid rgba(39,174,96,.2);border-radius:6px;padding:16px 20px;margin-bottom:14px">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="width:40px;height:40px;border-radius:6px;background:rgba(39,174,96,.12);color:var(--green-d);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0">J4</div>
+          <div><div style="font-size:14px;font-weight:700;color:var(--green-d)">Frecuente churneado → VIP</div><div style="font-size:12px;color:var(--text2);line-height:1.5;margin-top:3px">8–15 visitas. LTV 11x. No necesitan oferta — necesitan sentir que Oakberry los notó. El mensaje con su producto favorito y su horario habitual es más poderoso que cualquier descuento.</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div style="background:rgba(39,174,96,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--green)">5,158</div><div style="font-size:9px;color:var(--green-d);text-transform:uppercase;opacity:.8">elegibles</div></div>
+          <div style="background:rgba(39,174,96,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--green)">LTV 11x</div><div style="font-size:9px;color:var(--green-d);text-transform:uppercase;opacity:.8">más rentables</div></div>
+          <div style="background:rgba(39,174,96,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--green)">29%</div><div style="font-size:9px;color:var(--green-d);text-transform:uppercase;opacity:.8">churn histórico</div></div>
+          <div style="background:rgba(39,174,96,.08);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--green)">$0</div><div style="font-size:9px;color:var(--green-d);text-transform:uppercase;opacity:.8">descuento inicial</div></div>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border-left:3px solid var(--green);border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.5">Usar <strong>franja_preferida</strong> y <strong>producto_preferido</strong> de analytics.customer_profiles. Cruce: customer_id = cid = cardID de Loopy.</div>
+      <div style="background:var(--line);border:1px solid var(--line2);border-radius:6px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;overflow:hidden">
+        <div style="background:#fff;padding:11px 8px;text-align:center"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 5</div><div style="font-size:12px;font-weight:700;color:var(--blue);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--blue);line-height:28px;margin:0 auto 4px">P</div><div style="font-size:8px;color:var(--text3)">Push reconocimiento</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 20</div><div style="font-size:12px;font-weight:700;color:var(--green);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--green);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA dato real</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 35</div><div style="font-size:12px;font-weight:700;color:var(--amber);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--amber);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA sello doble</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 60</div><div style="font-size:12px;font-weight:700;color:var(--text3);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--text3);line-height:28px;margin:0 auto 4px">✗</div><div style="font-size:8px;color:var(--text3)">Churn/escalar VIP</div></div>
+      </div>
+    </div>
+
+    <!-- J5 detail -->
+    <div class="bjp" id="bjp-j5">
+      <div style="background:rgba(95,75,139,.07);border:1px solid rgba(95,75,139,.25);border-radius:6px;padding:16px 20px;margin-bottom:14px">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="width:40px;height:40px;border-radius:6px;background:rgba(95,75,139,.15);color:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0">J5</div>
+          <div><div style="font-size:14px;font-weight:700;color:var(--purple)">Clan Oakberry — VIP churneado</div><div style="font-size:12px;color:var(--text2);line-height:1.5;margin-top:3px">16+ visitas. LTV 35x. Este journey no vende — pregunta, escucha, y les devuelve su identidad. <strong style="color:var(--red)">NUNCA descuento a VIP.</strong> El Clan necesita pertenecer, no ahorrar.</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div style="background:rgba(95,75,139,.1);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--purple)">3,881</div><div style="font-size:9px;color:var(--purple);text-transform:uppercase;opacity:.8">elegibles</div></div>
+          <div style="background:rgba(95,75,139,.1);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--purple)">LTV 35x</div><div style="font-size:9px;color:var(--purple);text-transform:uppercase;opacity:.8">más valiosos</div></div>
+          <div style="background:rgba(95,75,139,.1);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--purple)">18%</div><div style="font-size:9px;color:var(--purple);text-transform:uppercase;opacity:.8">churn histórico</div></div>
+          <div style="background:rgba(95,75,139,.1);border-radius:4px;padding:8px 10px"><div style="font-size:15px;font-weight:700;color:var(--red)">$0</div><div style="font-size:9px;color:var(--purple);text-transform:uppercase;opacity:.8">descuento — siempre</div></div>
+        </div>
+      </div>
+      <div style="background:var(--line);border:1px solid var(--line2);border-radius:6px;display:grid;grid-template-columns:repeat(5,1fr);gap:1px;overflow:hidden">
+        <div style="background:#fff;padding:11px 8px;text-align:center"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 3</div><div style="font-size:12px;font-weight:700;color:var(--green);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--green);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA personal</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 14</div><div style="font-size:12px;font-weight:700;color:var(--green);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--green);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">WA acceso Clan</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 21</div><div style="font-size:12px;font-weight:700;color:var(--amber);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--amber);line-height:28px;margin:0 auto 4px">📞</div><div style="font-size:8px;color:var(--text3)">Llamada franquiciado</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 45</div><div style="font-size:12px;font-weight:700;color:var(--purple);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--purple);line-height:28px;margin:0 auto 4px">W</div><div style="font-size:8px;color:var(--text3)">UET VIP</div></div>
+        <div style="background:#fff;padding:11px 8px;text-align:center;border-left:1px solid var(--line)"><div style="font-size:8px;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Día 90</div><div style="font-size:12px;font-weight:700;color:var(--text3);display:block;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--text3);line-height:28px;margin:0 auto 4px">✗</div><div style="font-size:8px;color:var(--text3)">Churn definitivo</div></div>
+      </div>
+    </div>
+  </div><!-- /bib-journeys -->
+
+  <!-- ─── SUB-PANEL: COPY ─── -->
+  <div class="bib-panel" id="bib-copy">
+    <!-- J2 copy primero — es el activo -->
+    <div class="section-hd" style="margin-bottom:10px"><div class="section-hd-left"><span style="font-size:13px;font-weight:700;color:var(--amber)">J2 · Piloto Pereira — Ocasional churneado</span><span class="section-hd-sub">83 WA + 25 push listos</span></div></div>
+    <div style="background:#fff;border:1px solid var(--line2);border-radius:6px;margin-bottom:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--line)"><span style="font-size:10px;font-weight:700;color:var(--text2)">Día 1 — WA</span><span class="badge b-wa">WA</span><span style="font-size:8px;color:var(--text3);margin-left:auto">oakberry_uet_reactivacion ✅</span></div>
+      <div style="padding:12px 14px"><div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;border-left:2px solid var(--line2);padding-left:10px;margin-bottom:8px">"Hola {{nombre}} 🫐 Extrañamos verte en Oakberry {{ciudad}}. Queremos escucharte: responde 2 minutos y te regalamos un bowl. [Ver mi regalo]"</div><div style="font-size:10px;color:var(--text3);background:var(--bg3);border-radius:4px;padding:6px 10px"><strong style="color:var(--text2)">Variables:</strong> {{1}}=nombre, {{2}}=ciudad. Botón → oakberry-cupones.com/uet?t=TOKEN. Ejecutar: python3 ~/oakberry-job/enviar_wa_uet.py</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--line2);border-radius:6px;margin-bottom:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--line)"><span style="font-size:10px;font-weight:700;color:var(--text2)">Día 1 — Push (sin cel)</span><span class="badge b-push">Push individual</span><span style="font-size:8px;color:var(--text3);margin-left:auto">POST /v1/card/push — cardID en body</span></div>
+      <div style="padding:12px 14px"><div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;border-left:2px solid var(--line2);padding-left:10px;margin-bottom:8px">"{{nombre}}, tu bowl gratis te está esperando 🫐 Cuéntanos qué pasó → oakberry-cupones.com/uet?t=TOKEN"</div><div style="font-size:10px;background:rgba(192,57,43,.06);color:var(--red-d);border-radius:4px;padding:6px 10px"><strong>⚠ CRÍTICO:</strong> NUNCA /v1/card/cid/{CID}/push — broadcast accidental 38,031 clientes (incidente 2026-05-22). Siempre cardID individual en body.</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--line2);border-radius:6px;margin-bottom:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--line)"><span style="font-size:10px;font-weight:700;color:var(--text2)">Día 7</span><span class="badge b-push">Push</span><span style="font-size:8px;color:var(--text3);margin-left:auto">Recordación token activo</span></div>
+      <div style="padding:12px 14px"><div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;border-left:2px solid var(--line2);padding-left:10px;margin-bottom:8px">"Tu bowl gratis sigue activo 🫐 2 minutos y es tuyo. Oakberry {{ciudad}}"</div><div style="font-size:10px;color:var(--text3);background:var(--bg3);border-radius:4px;padding:6px 10px">Solo para tokens en estado 'pendiente' en uet.uet_tokens.</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--line2);border-radius:6px;margin-bottom:24px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--line)"><span style="font-size:10px;font-weight:700;color:var(--text2)">Día 14</span><span class="badge b-wa">WA</span><span style="font-size:8px;color:var(--text3);margin-left:auto">oakberry_react_cupon ✅</span></div>
+      <div style="padding:12px 14px"><div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;border-left:2px solid var(--line2);padding-left:10px;margin-bottom:8px">"{{nombre}}, tu cupón vence en 48 horas 🫐 Es el último momento. [Reclamar ahora]"</div><div style="font-size:10px;color:var(--text3);background:var(--bg3);border-radius:4px;padding:6px 10px">Deadline real basado en fecha_creacion + 72h del token. Si venció, regenerar antes de enviar.</div></div>
+    </div>
+    <!-- J4 copy como ejemplo de personalización -->
+    <div class="section-hd" style="margin-bottom:10px"><div class="section-hd-left"><span style="font-size:13px;font-weight:700;color:var(--green)">J4 · Frecuente — Copy hiperpersonalizado</span><span class="section-hd-sub">Ejemplo de uso de datos BQ</span></div></div>
+    <div style="background:#fff;border:1px solid var(--line2);border-radius:6px;margin-bottom:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--line)"><span style="font-size:10px;font-weight:700;color:var(--text2)">Día 5</span><span class="badge b-push">Push individual</span><span style="font-size:8px;color:var(--text3);margin-left:auto">Reconocimiento puro — sin oferta</span></div>
+      <div style="padding:12px 14px"><div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;border-left:2px solid var(--line2);padding-left:10px;margin-bottom:8px">"{{nombre}}, tu {{producto_favorito}} de las {{franja_preferida}} te está esperando 🫐 Oakberry {{ciudad}}"</div><div style="font-size:10px;color:var(--text3);background:var(--bg3);border-radius:4px;padding:6px 10px"><strong style="color:var(--text2)">Ejemplo real:</strong> "Carolina, tu Bowl Classic 12oz de las noches te está esperando 🫐 Oakberry Pereira". Usa hora_promedio → franja (Mañana/Tarde/Noche).</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(95,75,139,.2);border-radius:6px;margin-bottom:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(95,75,139,.06);border-bottom:1px solid rgba(95,75,139,.1)"><span style="font-size:10px;font-weight:700;color:var(--purple)">J5 VIP — Día 3</span><span class="badge b-wa">WA</span><span style="font-size:8px;color:var(--text3);margin-left:auto">oakberry_reactivacion ✅</span></div>
+      <div style="padding:12px 14px"><div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;border-left:2px solid var(--purple);padding-left:10px;margin-bottom:8px">"{{nombre}}, eres del Clan Oakberry 🫐 {{ordenes_matcheadas}} visitas no se olvidan. Te extrañamos en {{ciudad}}. ¿Hay algo que podamos hacer mejor?"</div><div style="font-size:10px;color:var(--text3);background:var(--bg3);border-radius:4px;padding:6px 10px"><strong style="color:var(--text2)">NUNCA precio.</strong> ordenes_matcheadas desde analytics.customer_profiles.</div></div>
+    </div>
+  </div><!-- /bib-copy -->
+
+  <!-- ─── SUB-PANEL: CAJEROS ─── -->
+  <div class="bib-panel" id="bib-cajeros">
+    <div style="background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.2);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--text2);line-height:1.6"><strong style="color:var(--blue)">Principio:</strong> El canje es el momento de mayor apertura. El cajero tiene 15 segundos para convertir una redención en un hábito. El script no se lee — se interioriza.</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="background:#fff;border:1px solid var(--line2);border-radius:6px;overflow:hidden">
+        <div style="padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--line);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);display:flex;align-items:center;gap:6px"><span style="color:var(--amber)">●</span> J1 · J2 — UET (Bowl gratis)</div>
+        <div style="padding:14px 16px"><div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;border-left:2px solid var(--accent);padding-left:10px">"Bienvenido de vuelta a Oakberry. El bowl 7oz es tuyo — ¿te lo armamos con los toppings que más te gustan, o quieres probar algo nuevo hoy?"</div><div style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.6">Objetivo: que el cliente se sienta bienvenido de vuelta, no como alguien redimiendo un cupón.<br><strong style="color:var(--text2)">Después del canje:</strong> "¿Ya tienes tu tarjeta Loopy activa? Con cada visita acumulas sellos para tu próximo regalo."</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--line2);border-radius:6px;overflow:hidden">
+        <div style="padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--line);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);display:flex;align-items:center;gap:6px"><span style="color:var(--text2)">●</span> J3 — Sello doble</div>
+        <div style="padding:14px 16px"><div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;border-left:2px solid var(--accent);padding-left:10px">"Te llega un sello doble hoy — ya tienes {{stamps+2}} en tu tarjeta. Te faltan {{nuevo_resto}} para el siguiente premio. ¿Armamos tu {{producto_favorito}}?"</div><div style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.6"><strong style="color:var(--text2)">Cómo aplicar:</strong> Dar stamp manual en Loopy → cliente escanea dos veces o cajero lo registra como doble.</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--line2);border-radius:6px;overflow:hidden">
+        <div style="padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--line);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);display:flex;align-items:center;gap:6px"><span style="color:var(--green)">●</span> J4 — Frecuente recuperado</div>
+        <div style="padding:14px 16px"><div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;border-left:2px solid var(--accent);padding-left:10px">"Bienvenido de vuelta — llevabas un tiempo sin venir y nos alegra mucho tenerte de vuelta. El sello doble queda en tu tarjeta. ¿El {{producto_favorito}} de siempre?"</div><div style="margin-top:8px;font-size:11px;color:var(--text3)">Tono genuino, no corporativo. Este cliente tiene 8–15 visitas — sabe cómo funciona el lugar.</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid rgba(95,75,139,.2);border-radius:6px;overflow:hidden">
+        <div style="padding:10px 16px;background:rgba(95,75,139,.06);border-bottom:1px solid rgba(95,75,139,.1);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--purple);display:flex;align-items:center;gap:6px"><span>●</span> J5 — VIP / Clan Oakberry</div>
+        <div style="padding:14px 16px"><div style="font-size:13px;color:var(--text);line-height:1.7;font-style:italic;border-left:2px solid var(--purple);padding-left:10px">"Bienvenido de vuelta — eres del Clan. Llevabas tiempo sin venir y nos alegra mucho tenerte de nuevo acá. ¿Armamos tu {{producto_favorito}} de siempre, o quieres probar lo nuevo que llegó esta semana?"</div><div style="margin-top:8px;font-size:11px;color:var(--red-d);line-height:1.6"><strong>NUNCA mencionar precio ni descuento.</strong> Si pregunta: "El Clan siempre tiene acceso preferencial — te cuento lo nuevo de este mes."</div></div>
+      </div>
+    </div>
+  </div><!-- /bib-cajeros -->
+
+  <!-- ─── SUB-PANEL: REGLAS ─── -->
+  <div class="bib-panel" id="bib-reglas">
+    <div style="background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.2);border-radius:6px;padding:16px 20px;margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">⚠ Reglas críticas de seguridad técnica</div>
+      <div style="display:grid;grid-template-columns:180px 1fr;gap:8px;font-size:12px">
+        <div style="font-weight:700;color:var(--red);padding:7px 0;border-bottom:1px solid rgba(192,57,43,.1)">Push individual SIEMPRE</div><div style="padding:7px 0;border-bottom:1px solid rgba(192,57,43,.1);color:var(--text2)">✅ POST /v1/card/push con cardID en body | ❌ NUNCA /v1/card/cid/{CID}/push → broadcast a 38,031 (incidente 2026-05-22)</div>
+        <div style="font-weight:700;color:var(--red);padding:7px 0;border-bottom:1px solid rgba(192,57,43,.1)">CID prueba SIEMPRE</div><div style="padding:7px 0;border-bottom:1px solid rgba(192,57,43,.1);color:var(--text2)">✅ PRUEBAS: 2OPqOafv9Vs7ZyJYGX7Zu4 | ❌ NUNCA: CfeDg1FTyntvdqWN1hEKX (38,031 reales)</div>
+        <div style="font-weight:700;color:var(--red);padding:7px 0;border-bottom:1px solid rgba(192,57,43,.1)">Probar con Daniel</div><div style="padding:7px 0;border-bottom:1px solid rgba(192,57,43,.1);color:var(--text2)">cardID: F4pM2ZaODXvNqc | URL: oakberry-cupones.com/uet?t=3S7a8PsE | --sim antes del real</div>
+        <div style="font-weight:700;color:var(--red);padding:7px 0">Broadcast solo emocional</div><div style="padding:7px 0;color:var(--text2)">/v1/card/cid/{CID}/push solo para mensajes genéricos SIN precios ni promos</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:rgba(95,75,139,.06);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.5"><strong>One-timer y Ocasional:</strong> Primero el regalo, luego la relación. El UET es una conversación, no una encuesta.</div>
+      <div style="background:rgba(95,75,139,.06);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.5"><strong>Regular:</strong> El sello doble activa el juego mental de completar la tarjeta. Costo $0, impacto alto.</div>
+      <div style="background:rgba(95,75,139,.06);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.5"><strong>Frecuente:</strong> Sin descuento inicial. El reconocimiento con dato real demuestra que Oakberry lo conoce. Eso vale más que un 20% OFF.</div>
+      <div style="background:rgba(95,75,139,.08);border-left:3px solid var(--purple);border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.5"><strong style="color:var(--purple)">VIP — Clan Oakberry:</strong> NUNCA precio. NUNCA descuento. El precio es el lenguaje de los clientes, no del Clan. Pertenencia, acceso exclusivo, identidad.</div>
+      <div style="background:rgba(37,99,235,.04);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.5"><strong>Copy general:</strong> Presente, no pasado. "Tu açaí te espera" — no "extrañamos que no hayas venido". El cliente siempre tiene la puerta abierta.</div>
+      <div style="background:rgba(37,99,235,.04);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.5"><strong>Cruce de datos:</strong> raw_loopy.card_perfil.cid = analytics.customer_profiles.customer_id = cardID de Loopy. Este es el eje de toda personalización.</div>
+    </div>
+  </div><!-- /bib-reglas -->
+
+</div><!-- /panel-biblia -->
+
 </div><!-- /main -->
 </div><!-- /layout -->
 
@@ -1733,6 +2050,30 @@ function showPanel(id) {
   });
   if (id === 'uet') cargarUET();
   if (id === 'adq') cargarAdq();
+  if (id === 'biblia') { /* listo, no requiere carga */ }
+}
+
+function showBibliaTab(tab) {
+  document.querySelectorAll('.bib-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('#biblia-tabs .bib-tab').forEach(t => {
+    t.style.borderBottom = '2px solid transparent';
+    t.style.color = 'var(--text3)';
+  });
+  const p = document.getElementById('bib-' + tab);
+  if (p) p.style.display = 'block';
+  const t = document.querySelector(`#biblia-tabs .bib-tab[data-tab="${tab}"]`);
+  if (t) { t.style.borderBottom = '2px solid var(--accent)'; t.style.color = 'var(--text2)'; }
+}
+
+function showBibliaJ(id) {
+  document.querySelectorAll('.bjp').forEach(p => { p.style.display = 'none'; });
+  document.querySelectorAll('.bjnav').forEach(n => { n.style.background = '#fff'; });
+  const p = document.getElementById('bjp-' + id);
+  if (p) p.style.display = 'block';
+  const n = document.getElementById('bjnav-' + id);
+  if (n) n.style.background = 'var(--bg3)';
+  // también asegurarse de estar en sub-tab journeys
+  showBibliaTab('journeys');
 }
 
 // ── TOAST ────────────────────────────────────────────────────
