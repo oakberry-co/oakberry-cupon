@@ -5,6 +5,7 @@
     { "source": "/links",          "destination": "/links.html"               },
     { "source": "/r",              "destination": "/r.html"                   },
     { "source": "/tyc",            "destination": "/tyc.html"                 },
+    { "source": "/tyc/reat",       "destination": "/tyc_reactivacion.html"    },
     { "source": "/portal",         "destination": "/portal.html"              },
     { "source": "/cursos",         "destination": "/cursos.html"              },
     { "source": "/reactivar",      "destination": "/reactivar.html"           },
