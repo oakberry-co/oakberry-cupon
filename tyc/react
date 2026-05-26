@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Términos y Condiciones · Programa de Reactivación · Oakberry Colombia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--primary:#5F4B8B;--primary-dark:#4a3870;--yellow:#F5C842;--white:#fff;--off-white:#F7F5FF;--text:#1A1427;--gray:#888;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Montserrat',sans-serif;background:var(--off-white);color:var(--text);min-height:100vh;padding-bottom:90px;}
+    .header{background:var(--primary);padding:18px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,0.18);}
+    .back-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;padding:8px 14px;border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;text-decoration:none;transition:background 0.18s;white-space:nowrap;}
+    .back-btn:hover{background:rgba(255,255,255,0.25);}
+    .header-title{color:#fff;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:0.8px;}
+    .header-sub{color:rgba(255,255,255,0.55);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+    .container{max-width:640px;margin:0 auto;padding:24px 16px 40px;}
+    .brand-badge{background:var(--primary);color:var(--yellow);font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:2px;text-align:center;padding:22px 20px;border-radius:16px;margin-bottom:6px;}
+    .brand-badge small{display:block;font-size:10px;font-weight:700;color:rgba(255,255,255,0.55);letter-spacing:2px;margin-top:4px;}
+    .last-updated{text-align:center;font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:24px;}
+    .section{background:#fff;border-radius:14px;padding:20px 18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(95,75,139,0.06);}
+    .section-title{font-size:13px;font-weight:900;color:var(--primary);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+    .num{display:inline-flex;align-items:center;justify-content:center;background:var(--primary);color:#fff;font-size:10px;font-weight:900;min-width:22px;height:22px;border-radius:50%;flex-shrink:0;}
+    .body{font-size:12px;font-weight:600;color:#444;line-height:1.8;}
+    .body p{margin-bottom:10px;}
+    .body p:last-child{margin-bottom:0;}
+    .body ul{padding-left:18px;margin-bottom:10px;}
+    .body ul li{margin-bottom:5px;}
+    .body strong{color:var(--text);font-weight:800;}
+    .highlight{background:var(--off-white);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:11px 14px;margin:10px 0;font-size:12px;font-weight:700;color:var(--primary);line-height:1.6;}
+    .highlight-warn{background:#fff8f0;border-left:3px solid #d97706;border-radius:0 10px 10px 0;padding:11px 14px;margin:10px 0;font-size:12px;font-weight:700;color:#b45309;line-height:1.6;}
+    .footer-info{text-align:center;font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.4px;margin-top:28px;line-height:2;}
+    .footer-info a{color:var(--primary);text-decoration:none;}
+    .accept-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 16px;box-shadow:0 -3px 16px rgba(0,0,0,0.1);display:flex;gap:10px;justify-content:center;}
+    .accept-bar>*{max-width:300px;flex:1;}
+    .btn-back-bar{background:var(--off-white);color:var(--primary);border:2px solid var(--primary);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;padding:14px 16px;border-radius:12px;cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center;}
+    .btn-close{background:var(--primary);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;padding:14px;border-radius:12px;cursor:pointer;transition:background 0.18s;}
+    .btn-close:hover{background:var(--primary-dark);}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <button class="back-btn" onclick="goBack()">&#8592; Volver</button>
+  <div>
+    <div class="header-title">Términos y Condiciones</div>
+    <div class="header-sub">Oakberry Colombia · Programa de Reactivación</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="brand-badge">OAKBERRY 🫐
+    <small>Programa de Reactivación · Términos y Condiciones · 2026</small>
+  </div>
+  <div class="last-updated">Última actualización: Mayo 2026</div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">1</span> Objeto y Alcance</div>
+    <div class="body">
+      <p>Los presentes términos regulan la participación en el <strong>Programa de Reactivación de Oakberry Colombia</strong>, operado por <strong>Manel Foods S.A.S.</strong></p>
+      <p>El programa consiste en el envío de beneficios exclusivos (descuentos, sellos dobles y productos gratuitos) a clientes registrados en el programa de fidelización <strong>Loopy Loyalty</strong> que llevan un período de tiempo sin visitar las tiendas participantes.</p>
+      <p>Al recibir y utilizar un beneficio del programa, el participante acepta en su totalidad estos términos.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">2</span> Elegibilidad</div>
+    <div class="body">
+      <p>Para participar en el programa el cliente debe:</p>
+      <ul>
+        <li>Estar registrado en el programa de fidelización <strong>Loopy Loyalty</strong> de Oakberry Colombia.</li>
+        <li>Haber cumplido el período de inactividad definido por segmento para cada campaña.</li>
+        <li>Haber recibido el mensaje de reactivación a través de WhatsApp Business o notificación push de Loopy.</li>
+        <li>Encontrarse dentro del período de vigencia indicado en el mensaje recibido.</li>
+      </ul>
+      <div class="highlight">La elegibilidad es determinada automáticamente por el sistema. No es posible solicitar la inclusión manual en el programa.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">3</span> Tipos de Beneficios</div>
+    <div class="body">
+      <p>El programa puede otorgar los siguientes beneficios según el segmento y el momento del journey:</p>
+      <ul>
+        <li><strong>Descuento porcentual (25% o 30% OFF):</strong> aplica sobre el precio regular de un bowl 9oz en tiendas participantes.</li>
+        <li><strong>Bowl 9oz gratis:</strong> otorgado mediante cupón UET previa respuesta a encuesta de satisfacción.</li>
+        <li><strong>Sello doble en Loopy:</strong> por cada sello ganado en una visita dentro del período activo, el sistema acredita automáticamente un sello adicional en la tarjeta del cliente.</li>
+      </ul>
+      <div class="highlight-warn">Cada beneficio aplica a un único bowl 9oz por visita. No es acumulable con otras promociones, descuentos o programas activos.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">4</span> Funcionamiento del Cupón de Descuento</div>
+    <div class="body">
+      <ul>
+        <li>El código de descuento es enviado directamente al número de WhatsApp registrado en Loopy.</li>
+        <li>El cliente presenta el código al cajero en la tienda participante.</li>
+        <li>El cajero valida el código en el sistema antes de aplicar el descuento.</li>
+        <li>El código tiene una vigencia indicada en el mensaje recibido — una vez vencido no puede ser reactivado.</li>
+        <li>Cada código es de uso único e intransferible — una vez canjeado queda invalidado definitivamente.</li>
+        <li>El sistema registra automáticamente el canje para evitar uso múltiple.</li>
+      </ul>
+      <div class="highlight">El descuento aplica exclusivamente sobre bowl 9oz a precio regular. No aplica sobre productos en promoción, combos, toppings adicionales ni delivery.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">5</span> Funcionamiento del Sello Doble</div>
+    <div class="body">
+      <ul>
+        <li>El sello doble se acredita automáticamente en la tarjeta Loopy del cliente dentro de las <strong>24 horas siguientes</strong> a la visita registrada.</li>
+        <li>El cajero no necesita realizar ninguna acción adicional — el sistema lo aplica de forma automática.</li>
+        <li>El sello doble aplica únicamente durante el período activo del programa para ese cliente.</li>
+        <li>Una vez vencida la ventana del programa, las visitas posteriores generan sellos simples con normalidad.</li>
+        <li>El sello doble no es retroactivo — no aplica sobre visitas anteriores al inicio del programa.</li>
+      </ul>
+      <div class="highlight">Si el cliente ya recibió el sello doble por una visita, no se aplica de nuevo por la misma visita bajo ninguna circunstancia.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">6</span> Tiendas Participantes</div>
+    <div class="body">
+      <p>El programa aplica en tiendas físicas <strong>Oakberry Colombia</strong> participantes en la campaña activa. Durante el piloto inicial, aplica exclusivamente en tiendas de <strong>Pereira</strong>.</p>
+      <div class="highlight-warn">Los cupones solo son válidos en la ciudad indicada en el mensaje recibido. El sistema rechaza automáticamente cupones presentados en tiendas no asignadas a la campaña.</div>
+      <p>No aplica para pedidos por plataformas de delivery, domicilios ni canales digitales.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">7</span> Vigencia y Vencimiento</div>
+    <div class="body">
+      <ul>
+        <li>Cada beneficio tiene una vigencia específica indicada en el mensaje recibido.</li>
+        <li>Los cupones de descuento vencen en la fecha y hora indicadas — no hay extensiones.</li>
+        <li>La ventana de sello doble vence automáticamente según el segmento del cliente.</li>
+        <li>Oakberry Colombia no tiene obligación de reactivar beneficios vencidos.</li>
+      </ul>
+      <div class="highlight">La fecha y hora de vencimiento son calculadas automáticamente desde el momento del envío del mensaje. Son definitivas e inapelables.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">8</span> Política de Privacidad y Datos</div>
+    <div class="body">
+      <p>Al participar, el usuario autoriza a <strong>Manel Foods S.A.S.</strong> para el tratamiento de sus datos personales conforme a la <strong>Ley 1581 de 2012</strong>.</p>
+      <p>Los datos del programa de fidelización Loopy Loyalty (historial de visitas, sellos, segmento) son utilizados exclusivamente para:</p>
+      <ul>
+        <li>Determinar la elegibilidad y el tipo de beneficio del cliente.</li>
+        <li>Personalizar el mensaje de reactivación.</li>
+        <li>Aplicar el sello doble automático.</li>
+        <li>Prevenir el uso fraudulento de cupones.</li>
+        <li>Análisis estadístico interno del programa.</li>
+      </ul>
+      <div class="highlight">Oakberry Colombia no venderá ni compartirá los datos con terceros con fines comerciales.</div>
+      <p>Para no recibir más comunicaciones del programa, responde <strong>STOP</strong> al mensaje de WhatsApp recibido o usa el botón <strong>"Dejar de recibir mensajes"</strong> en el mensaje.</p>
+      <p>Para ejercer derechos de acceso, corrección o supresión escribir a <strong>dzuluaga@manelfoods.com</strong></p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">9</span> Limitaciones de Responsabilidad</div>
+    <div class="body">
+      <p>Oakberry Colombia no será responsable por fallas técnicas ajenas a su control, pérdida del código dentro del período de vigencia, uso no autorizado del código por terceros, ni por cambios en el menú o disponibilidad de productos.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">10</span> Modificaciones y Terminación</div>
+    <div class="body">
+      <p>Oakberry Colombia puede modificar, suspender o terminar el programa en cualquier momento. Los cambios no afectarán beneficios válidamente generados antes de la modificación.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="num">11</span> Ley Aplicable</div>
+    <div class="body">
+      <p>Estos términos se rigen por las leyes de Colombia. Cualquier controversia se resolverá ante los tribunales de Bogotá D.C.</p>
+      <p>Domicilio: <strong>Cl. 109 #15-48, Bogotá D.C.</strong></p>
+    </div>
+  </div>
+
+  <div class="footer-info">
+    <p>Oakberry Colombia · Manel Foods S.A.S.</p>
+    <p>Cl. 109 #15-48, Bogotá D.C., Colombia</p>
+    <p>dzuluaga@manelfoods.com</p>
+    <p style="margin-top:6px;">&copy; 2026 Oakberry Colombia. Todos los derechos reservados.</p>
+  </div>
+
+</div>
+
+<div class="accept-bar">
+  <button class="btn-back-bar" onclick="goBack()">&#8592; Volver</button>
+  <button class="btn-close" onclick="goBack()">Entendido &#8594;</button>
+</div>
+
+<script>
+  function goBack() {
+    if (window.history.length > 1 && document.referrer) {
+      window.history.back();
+    } else {
+      window.location.href = "/";
+    }
+  }
+</script>
+
+</body>
+</html>
