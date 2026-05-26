@@ -32,8 +32,7 @@
     .footer-info{text-align:center;font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.4px;margin-top:28px;line-height:2;}
     .footer-info a{color:var(--primary);text-decoration:none;}
     .accept-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 16px;box-shadow:0 -3px 16px rgba(0,0,0,0.1);display:flex;gap:10px;justify-content:center;}
-    .accept-bar>*{max-width:300px;flex:1;}
-    .btn-back-bar{background:var(--off-white);color:var(--primary);border:2px solid var(--primary);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;padding:14px 16px;border-radius:12px;cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center;}
+    .accept-bar>*{max-width:600px;flex:1;}
     .btn-close{background:var(--primary);color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;padding:14px;border-radius:12px;cursor:pointer;transition:background 0.18s;}
     .btn-close:hover{background:var(--primary-dark);}
   </style>
@@ -81,13 +80,13 @@
   <div class="section">
     <div class="section-title"><span class="num">3</span> Tipos de Beneficios</div>
     <div class="body">
-      <p>El programa puede otorgar los siguientes beneficios según el segmento y el momento del journey:</p>
+      <p>El programa puede otorgar los siguientes beneficios según el segmento y el momento del journey. Los beneficios específicos de cada campaña son indicados en el mensaje recibido:</p>
       <ul>
-        <li><strong>Descuento porcentual (25% o 30% OFF):</strong> aplica sobre el precio regular de un bowl 9oz en tiendas participantes.</li>
-        <li><strong>Bowl 9oz gratis:</strong> otorgado mediante cupón UET previa respuesta a encuesta de satisfacción.</li>
+        <li><strong>Descuento porcentual:</strong> el porcentaje de descuento es definido por Oakberry Colombia para cada campaña y comunicado en el mensaje recibido. Aplica sobre el precio regular de un bowl 9oz en tiendas participantes.</li>
+        <li><strong>Bowl de regalo:</strong> otorgado mediante cupón previa respuesta a encuesta de satisfacción. El tamaño del bowl de regalo es definido por Oakberry Colombia para cada campaña y especificado en el cupón correspondiente.</li>
         <li><strong>Sello doble en Loopy:</strong> por cada sello ganado en una visita dentro del período activo, el sistema acredita automáticamente un sello adicional en la tarjeta del cliente.</li>
       </ul>
-      <div class="highlight-warn">Cada beneficio aplica a un único bowl 9oz por visita. No es acumulable con otras promociones, descuentos o programas activos.</div>
+      <div class="highlight-warn">Cada beneficio aplica sobre un único bowl por visita, independientemente de la cantidad de productos adquiridos. No es acumulable con otras promociones, descuentos o programas activos.</div>
     </div>
   </div>
 
@@ -102,7 +101,7 @@
         <li>Cada código es de uso único e intransferible — una vez canjeado queda invalidado definitivamente.</li>
         <li>El sistema registra automáticamente el canje para evitar uso múltiple.</li>
       </ul>
-      <div class="highlight">El descuento aplica exclusivamente sobre bowl 9oz a precio regular. No aplica sobre productos en promoción, combos, toppings adicionales ni delivery.</div>
+      <div class="highlight">El descuento aplica exclusivamente sobre <strong>un (1) bowl 9oz a precio regular</strong>, independientemente de la cantidad de bowls comprados en la visita. Si el cliente adquiere más de un bowl, el descuento se aplica sobre uno solo. No aplica sobre productos en promoción, combos, toppings adicionales ni delivery.</div>
     </div>
   </div>
 
@@ -192,8 +191,7 @@
 </div>
 
 <div class="accept-bar">
-  <button class="btn-back-bar" onclick="goBack()">&#8592; Volver</button>
-  <button class="btn-close" onclick="goBack()">Entendido &#8594;</button>
+  <button class="btn-close" onclick="goBack()">&#8592; Volver</button>
 </div>
 
 <script>
