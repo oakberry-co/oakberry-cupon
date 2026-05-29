@@ -1812,6 +1812,7 @@ function set(id, val) {
   if (el) el.textContent = val;
 }
 const API_URL = "https://oakberry-api-664413392517.us-central1.run.app";
+const REACT_API = "https://oakberry-reactivacion-api-664413392517.us-central1.run.app"; // programa reactivación (crm.*)
 
 // ── UET DATA ──────────────────────────────────────────────────
 async function cargarUET() {
@@ -2113,7 +2114,7 @@ async function cargar() {
   try {
     const ciudad = document.getElementById('filtro-ciudad')?.value || '';
     const tienda = document.getElementById('filtro-tienda')?.value || '';
-    let statsUrl = API_URL + '/stats';
+    let statsUrl = REACT_API + '/stats';
     if (tienda)      statsUrl += '?tienda=' + encodeURIComponent(tienda);
     else if (ciudad) statsUrl += '?ciudad=' + encodeURIComponent(ciudad);
     // Preservar valores de los selects después del fetch
