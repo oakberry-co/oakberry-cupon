@@ -358,21 +358,49 @@ const DEV_MODE = new URLSearchParams(window.location.search).get("dev") === "dzu
 // Se guarda en localStorage — si el dispositivo ya generó un cupón
 // en esta campaña, se bloquea aunque cambie el número de celular.
 function generarFingerprint() {
+  // Señal canvas: render de texto+formas, distintiva por GPU/drivers/fuentes.
+  function canvasFP() {
+    try {
+      const c = document.createElement("canvas");
+      c.width = 240; c.height = 60;
+      const ctx = c.getContext("2d");
+      ctx.textBaseline = "top";
+      ctx.font = "14px 'Arial'";
+      ctx.fillStyle = "#f60"; ctx.fillRect(125, 1, 62, 20);
+      ctx.fillStyle = "#069"; ctx.fillText("Oakberry 🫐 cupón", 2, 15);
+      ctx.fillStyle = "rgba(102,204,0,0.7)"; ctx.fillText("Oakberry 🫐 cupón", 4, 17);
+      return c.toDataURL();
+    } catch (e) { return "nocanvas"; }
+  }
+  // Señal WebGL: vendor + renderer (GPU del equipo).
+  function webglFP() {
+    try {
+      const gl = document.createElement("canvas").getContext("webgl");
+      const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+      return (gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) || "") + "~" +
+             (gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || "");
+    } catch (e) { return "nowebgl"; }
+  }
   const data = [
     navigator.userAgent,
     navigator.language,
+    (navigator.languages || []).join(","),
     screen.width + "x" + screen.height + "x" + screen.colorDepth,
     new Date().getTimezoneOffset(),
     navigator.hardwareConcurrency || "",
+    navigator.deviceMemory || "",
     navigator.platform || "",
+    canvasFP(),
+    webglFP(),
   ].join("|");
-  // Hash simple pero suficiente para fingerprinting básico
-  let hash = 0;
+  // Doble hash (más largo) para reducir colisiones entre equipos similares.
+  let h1 = 0x811c9dc5, h2 = 0;
   for (let i = 0; i < data.length; i++) {
-    hash = ((hash << 5) - hash) + data.charCodeAt(i);
-    hash |= 0;
+    const ch = data.charCodeAt(i);
+    h1 = ((h1 << 5) - h1) + ch; h1 |= 0;
+    h2 = ((h2 << 7) - h2) + ch * 31; h2 |= 0;
   }
-  return Math.abs(hash).toString(36);
+  return Math.abs(h1).toString(36) + Math.abs(h2).toString(36);
 }
 
 const DEVICE_FP = generarFingerprint();
