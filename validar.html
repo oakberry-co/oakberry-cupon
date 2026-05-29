@@ -437,6 +437,7 @@
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
 const CRM_API   = "https://oakberry-api-664413392517.us-central1.run.app"; // Cloud Run — cupones UET
+const REACT_API = "https://oakberry-reactivacion-api-664413392517.us-central1.run.app"; // Cloud Run — cupones reactivación
 
 let _nuevo = "";
 let _loopy = "";
@@ -591,6 +592,29 @@ async function validar() {
                 "📍 " + tienda,
               ].filter(l => l.trim() !== "👤" && l.trim() !== "🎁")
             );
+          } else if (uetRes.mensaje && uetRes.mensaje.includes("no existe")) {
+            // ── Fallback 2: cupones de Reactivación (BigQuery crm via Cloud Run) ──
+            try {
+              const reactRes = await fetch(
+                `${REACT_API}/reactivacion/validar?codigo=${encodeURIComponent(codigo)}`
+                + `&tienda=${encodeURIComponent(tienda)}`
+                + `&ciudad=${encodeURIComponent(ciudad)}`
+                + `&cajero_info=${encodeURIComponent(perfilCliente)}`
+              ).then(r => r.json());
+
+              if (reactRes.ok) {
+                document.getElementById("codigo").value = "";
+                const lineas = reactRes.mensaje.split("\n");
+                mostrarResultado(true, lineas[0], lineas.slice(1));
+                if (_loopy === "NO") {
+                  document.getElementById("postLoopyBanner").classList.add("show");
+                }
+              } else {
+                mostrarError(reactRes.mensaje || uetRes.mensaje);
+              }
+            } catch(reactErr) {
+              mostrarError(uetRes.mensaje);
+            }
           } else {
             mostrarError(uetRes.mensaje || res.mensaje);
           }
