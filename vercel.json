@@ -1,5 +1,12 @@
 {
   "version": 2,
+  "redirects": [
+    {
+      "source": "/r/:codigo",
+      "destination": "https://oakberry-reactivacion-api-664413392517.us-central1.run.app/r/:codigo?src=wa",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     { "source": "/validar",        "destination": "/validar.html"             },
     { "source": "/links",          "destination": "/links.html"               },
