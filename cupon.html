@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tu cupón Oakberry 🫐</title>
+<style>
+  :root {
+    --dg: #2D5016;
+    --dg-dark: #1a3009;
+    --or: #E8793A;
+    --pu: #5F4B8B;
+    --cr: #F5F0E8;
+    --gy: #5C5C5C;
+    --bg: #FAFAF8;
+    --gr: #5C9F4A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: #222;
+    line-height: 1.5;
+    padding-bottom: 40px;
+  }
+  .container { max-width: 480px; margin: 0 auto; padding: 0; }
+
+  #loading {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    background: linear-gradient(135deg, var(--dg) 0%, var(--dg-dark) 100%);
+    color: white;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: var(--or);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hero {
+    background: linear-gradient(135deg, var(--dg) 0%, var(--dg-dark) 100%);
+    color: white;
+    padding: 32px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '🫐';
+    position: absolute;
+    font-size: 200px;
+    opacity: 0.08;
+    top: -40px; right: -30px;
+    transform: rotate(15deg);
+  }
+  .logo {
+    font-size: 12px; letter-spacing: 4px;
+    opacity: 0.85; font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: 26px; font-weight: 700;
+    margin-bottom: 8px;
+    position: relative; z-index: 2;
+  }
+  .hero .subtitle {
+    font-size: 16px; opacity: 0.9;
+    position: relative; z-index: 2;
+  }
+
+  .cupon-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin: -24px 20px 24px;
+    box-shadow: 0 10px 30px rgba(45,80,22,0.15);
+    position: relative;
+    z-index: 3;
+    text-align: center;
+  }
+  .cupon-label {
+    font-size: 11px; color: var(--gy);
+    letter-spacing: 2px; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .cupon-codigo {
+    font-size: 36px; font-weight: 800;
+    color: var(--dg); letter-spacing: 4px;
+    font-family: 'Courier New', monospace;
+    margin: 8px 0 16px;
+    background: var(--cr);
+    padding: 16px 8px;
+    border-radius: 12px;
+    border: 2px dashed var(--or);
+  }
+  .copy-btn {
+    background: var(--or); color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .copy-btn:active { transform: scale(0.96); }
+  .copy-btn.copied { background: var(--gr); }
+
+  .cupon-info {
+    display: grid;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    font-size: 14px;
+  }
+  .cupon-info-row {
+    display: flex;
+    justify-content: space-between;
+    color: var(--gy);
+  }
+  .cupon-info-row strong { color: #222; }
+
+  .beneficio {
+    background: white;
+    margin: 0 20px 24px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  }
+  .beneficio-img {
+    height: 180px;
+    background: linear-gradient(135deg, #d4f1d4 0%, #e8f4e0 50%, #fff5f0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    position: relative;
+  }
+  .beneficio-img::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 40%, rgba(232,121,58,0.15), transparent 60%);
+  }
+  .beneficio-text {
+    padding: 20px 24px;
+    text-align: center;
+  }
+  .beneficio-text h3 {
+    color: var(--dg);
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .beneficio-text p {
+    color: var(--gy);
+    font-size: 14px;
+  }
+
+  .pasos {
+    background: white;
+    margin: 0 20px 24px;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  }
+  .pasos h2 {
+    color: var(--dg);
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .paso {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .paso:last-child { border-bottom: none; }
+  .paso-num {
+    background: var(--or);
+    color: white;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .paso-text {
+    font-size: 14px;
+    color: #333;
+    padding-top: 3px;
+  }
+
+  .cta-row {
+    display: flex;
+    gap: 12px;
+    margin: 0 20px 24px;
+  }
+  .cta {
+    flex: 1;
+    background: var(--dg);
+    color: white;
+    border: none;
+    padding: 16px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .cta:active { transform: scale(0.97); }
+  .cta.secondary {
+    background: white;
+    color: var(--dg);
+    border: 2px solid var(--dg);
+  }
+
+  .encuesta {
+    background: linear-gradient(135deg, #fff8f0 0%, #fff 100%);
+    margin: 0 20px 24px;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #ffe8d1;
+    text-align: center;
+  }
+  .encuesta-emoji {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .encuesta h3 {
+    color: var(--or);
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+  .encuesta p {
+    color: var(--gy);
+    font-size: 13px;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .btn-encuesta {
+    background: var(--or);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 12px;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .skip-link {
+    display: block;
+    color: var(--gy);
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .footer {
+    text-align: center;
+    color: var(--gy);
+    font-size: 11px;
+    padding: 24px 20px;
+  }
+  .footer a {
+    color: var(--gy);
+    text-decoration: underline;
+  }
+
+  #error {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 32px;
+    text-align: center;
+    background: var(--cr);
+  }
+  #error h1 { color: var(--dg); margin-bottom: 12px; }
+  #error p { color: var(--gy); margin-bottom: 24px; max-width: 320px; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div>Cargando tu cupón...</div>
+</div>
+
+<div id="content" style="display:none;">
+  <div class="container">
+
+    <div class="hero">
+      <div class="logo">OAKBERRY · COLOMBIA</div>
+      <h1>¡Hola, <span id="nombre">amig@</span>! 💚</h1>
+      <p class="subtitle"><span id="hero-msg">Tu beneficio te está esperando</span></p>
+    </div>
+
+    <div class="cupon-card">
+      <div class="cupon-label">TU CUPÓN</div>
+      <div class="cupon-codigo" id="codigo">CARGANDO</div>
+      <button class="copy-btn" id="copyBtn" onclick="copyCode()">
+        📋 Copiar código
+      </button>
+      <div class="cupon-info">
+        <div class="cupon-info-row">
+          <span>🎁 Beneficio</span>
+          <strong id="producto">—</strong>
+        </div>
+        <div class="cupon-info-row">
+          <span>📍 Disponible en</span>
+          <strong id="tienda">tu tienda Oakberry</strong>
+        </div>
+        <div class="cupon-info-row">
+          <span>⏰ Válido hasta</span>
+          <strong id="vence">—</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="beneficio">
+      <div class="beneficio-img">🫐</div>
+      <div class="beneficio-text">
+        <h3>Tu próximo bowl, recién armado a tu gusto</h3>
+        <p>Açaí 100% natural, granola crujiente, frutos rojos frescos, coco rallado y todo lo que te haga feliz 🥥🍓✨</p>
+      </div>
+    </div>
+
+    <div class="pasos">
+      <h2>Cómo lo redimes</h2>
+      <div class="paso">
+        <div class="paso-num">1</div>
+        <div class="paso-text">Pasa por <strong id="tienda2">tu tienda Oakberry</strong></div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">2</div>
+        <div class="paso-text">Arma tu bowl como más te guste</div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">3</div>
+        <div class="paso-text">Muéstrale este código al cajero al momento de pagar</div>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a class="cta" id="ctaMaps" target="_blank" rel="noopener">
+        📍 Cómo llegar
+      </a>
+      <button class="cta secondary" onclick="copyCode()">
+        📋 Copiar código
+      </button>
+    </div>
+
+    <div class="encuesta">
+      <div class="encuesta-emoji">💚</div>
+      <h3>¿Tienes 30 segundos?</h3>
+      <p>Nos encantaría saber qué te trae de regreso. Tu opinión nos ayuda a hacerlo mejor.<br><strong>Totalmente voluntario.</strong></p>
+      <a class="btn-encuesta" id="encuestaBtn" href="#">Sí, contarles 🙌</a>
+      <a class="skip-link" href="#" onclick="hideEncuesta(event)">Ahora no, ir directo a la tienda</a>
+    </div>
+
+    <div class="footer">
+      <p>Aplican <a href="/tyc">términos y condiciones</a></p>
+      <p style="margin-top:6px;">Oakberry Colombia · 2026</p>
+    </div>
+
+  </div>
+</div>
+
+<div id="error" style="display:none;">
+  <div style="font-size:60px;">😕</div>
+  <h1>No encontramos tu cupón</h1>
+  <p id="errorMsg">El código no es válido o ya fue canjeado. Si crees que es un error, escríbenos.</p>
+  <a class="cta" href="https://www.oakberry-cupones.com" style="text-decoration:none;">Volver al inicio</a>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const codigo = (params.get('c') || params.get('codigo') || '').toUpperCase().trim();
+const API = "https://oakberry-reactivacion-api-664413392517.us-central1.run.app";
+
+function showError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'none';
+  document.getElementById('error').style.display = 'flex';
+  if (msg) document.getElementById('errorMsg').textContent = msg;
+}
+
+function showContent() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+}
+
+function copyCode() {
+  if (!codigo) return;
+  navigator.clipboard.writeText(codigo).then(() => {
+    const btns = document.querySelectorAll('.copy-btn, .cta.secondary');
+    btns.forEach(b => {
+      const orig = b.innerHTML;
+      b.innerHTML = '✅ ¡Copiado!';
+      b.classList.add('copied');
+      setTimeout(() => {
+        b.innerHTML = orig;
+        b.classList.remove('copied');
+      }, 1500);
+    });
+  });
+}
+
+function hideEncuesta(e) {
+  e.preventDefault();
+  document.querySelector('.encuesta').style.display = 'none';
+}
+
+function formatearFecha(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]}`;
+  } catch (e) { return iso; }
+}
+
+function renderCupon(data) {
+  const nombre = data.nombre || 'amig@';
+  document.getElementById('nombre').textContent = nombre;
+  document.getElementById('codigo').textContent = data.codigo;
+  document.getElementById('producto').textContent = data.valor_descuento || data.producto || '—';
+  document.getElementById('vence').textContent = formatearFecha(data.fecha_vencimiento);
+
+  const tier = data.tier || '';
+  let heroMsg = 'Tu beneficio te está esperando';
+  if (tier === 'BDAY') heroMsg = '🎂 ¡Feliz cumpleaños! Tu regalo te espera';
+  else if (tier === 'T3' || tier === 'T4') heroMsg = `Tu ${data.valor_descuento || 'bowl'} GRATIS te espera`;
+  else if (tier === 'T1' || tier === 'T2') heroMsg = `Te apartamos ${data.valor_descuento || 'un detalle'} para ti`;
+  document.getElementById('hero-msg').textContent = heroMsg;
+
+  const tienda = data.ciudad_restriccion || 'tu tienda Oakberry';
+  document.getElementById('tienda').textContent = tienda;
+  document.getElementById('tienda2').textContent = tienda;
+
+  const mapsQuery = encodeURIComponent(`Oakberry ${tienda}`);
+  document.getElementById('ctaMaps').href = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+
+  document.getElementById('encuestaBtn').href = `/uet?t=${data.codigo}`;
+
+  if (tier === 'T5') {
+    const encuesta = document.querySelector('.encuesta');
+    const pasos = document.querySelector('.pasos');
+    pasos.parentNode.insertBefore(encuesta, pasos);
+  }
+
+  showContent();
+}
+
+if (!codigo) {
+  showError('No se recibió código en el enlace.');
+} else {
+  fetch(`${API}/reactivacion/info?codigo=${encodeURIComponent(codigo)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) renderCupon(data);
+      else showError(data.mensaje || 'Cupón no encontrado.');
+    })
+    .catch(err => {
+      console.error(err);
+      showError('Error de conexión. Intenta de nuevo en unos segundos.');
+    });
+}
+</script>
+</body>
+</html>
