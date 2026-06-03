@@ -2,356 +2,535 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tu cupón Oakberry 🫐</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<meta name="theme-color" content="#5F4B8B">
+<title>Oakberry · Tu Cupón 🫐</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
+    --primary: #5F4B8B;
+    --pd: #4a3a6e;
+    --yellow: #F5C842;
+    --yellow-d: #d4a82c;
+    --red: #e74c3c;
+    --green: #27ae60;
+    --orange: #e67e22;
     --dg: #2D5016;
-    --dg-dark: #1a3009;
-    --or: #E8793A;
-    --pu: #5F4B8B;
-    --cr: #F5F0E8;
-    --gy: #5C5C5C;
-    --bg: #FAFAF8;
-    --gr: #5C9F4A;
+    --cream: #F5F0E8;
+    --berry: #5F4B8B;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { font-size: 16px; -webkit-text-size-adjust: 100%; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg);
-    color: #222;
-    line-height: 1.5;
-    padding-bottom: 40px;
-  }
-  .container { max-width: 480px; margin: 0 auto; padding: 0; }
-
-  #loading {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
+    min-height: 100dvh;
+    padding: 20px 14px;
+    background: linear-gradient(rgba(20,10,40,0.55), rgba(20,10,40,0.65)),
+                url('oakville-bg.jpg') center/cover no-repeat fixed;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    color: #333;
+  }
+  @supports not (background-attachment: fixed) {
+    body { background-attachment: scroll; }
+  }
+
+  /* ─── Loading ─── */
+  #loading {
+    position: fixed; inset: 0;
+    background: linear-gradient(rgba(20,10,40,0.88), rgba(20,10,40,0.92)),
+                url('oakville-bg.jpg') center/cover no-repeat fixed;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    gap: 16px;
-    background: linear-gradient(135deg, var(--dg) 0%, var(--dg-dark) 100%);
-    color: white;
+    gap: 18px;
+    color: #fff;
+    z-index: 100;
   }
   .spinner {
-    width: 36px; height: 36px;
+    width: 40px; height: 40px;
     border: 3px solid rgba(255,255,255,0.2);
-    border-top-color: var(--or);
+    border-top-color: var(--yellow);
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
   }
+  #loading-text {
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-  .hero {
-    background: linear-gradient(135deg, var(--dg) 0%, var(--dg-dark) 100%);
-    color: white;
-    padding: 32px 24px 48px;
+  /* ─── Card principal ─── */
+  .card {
+    background: rgba(255,255,255,0.97);
+    border-radius: 28px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    overflow: hidden;
+    animation: fadeIn 0.4s ease;
+  }
+
+  /* ─── Header ─── */
+  .card-header {
+    background: var(--primary);
+    padding: 28px 24px 22px;
     text-align: center;
     position: relative;
     overflow: hidden;
   }
-  .hero::before {
+  .card-header::before {
     content: '🫐';
     position: absolute;
-    font-size: 200px;
-    opacity: 0.08;
-    top: -40px; right: -30px;
+    font-size: 160px;
+    opacity: 0.10;
+    top: -36px; right: -28px;
     transform: rotate(15deg);
+    pointer-events: none;
+    line-height: 1;
   }
-  .logo {
-    font-size: 12px; letter-spacing: 4px;
-    opacity: 0.85; font-weight: 700;
-    margin-bottom: 16px;
+  .brand {
+    font-size: clamp(22px, 6vw, 26px);
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    position: relative; z-index: 2;
+    line-height: 1.1;
   }
-  .hero h1 {
-    font-size: 26px; font-weight: 700;
-    margin-bottom: 8px;
+  .brand-sub {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    margin-top: 5px;
     position: relative; z-index: 2;
   }
-  .hero .subtitle {
-    font-size: 16px; opacity: 0.9;
+  .saludo {
+    margin-top: 18px;
+    font-size: clamp(13px, 3.6vw, 15px);
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     position: relative; z-index: 2;
+    line-height: 1.4;
+  }
+  .saludo strong {
+    color: var(--yellow);
+    font-weight: 900;
+  }
+  .hero-msg {
+    margin-top: 6px;
+    font-size: clamp(10px, 2.8vw, 12px);
+    color: rgba(255,255,255,0.88);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    position: relative; z-index: 2;
+    line-height: 1.4;
+    padding: 0 8px;
   }
 
-  .cupon-card {
-    background: white;
-    border-radius: 16px;
-    padding: 28px 24px;
-    margin: -24px 20px 24px;
-    box-shadow: 0 10px 30px rgba(45,80,22,0.15);
-    position: relative;
-    z-index: 3;
-    text-align: center;
-  }
+  /* ─── Body ─── */
+  .card-body { padding: 24px 22px 22px; }
+
+  /* ─── Cupón ─── */
   .cupon-label {
-    font-size: 11px; color: var(--gy);
-    letter-spacing: 2px; font-weight: 700;
-    margin-bottom: 8px;
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #999;
+    text-align: center;
+    margin-bottom: 12px;
   }
-  .cupon-codigo {
-    font-size: 36px; font-weight: 800;
-    color: var(--dg); letter-spacing: 4px;
-    font-family: 'Courier New', monospace;
-    margin: 8px 0 16px;
-    background: var(--cr);
-    padding: 16px 8px;
-    border-radius: 12px;
-    border: 2px dashed var(--or);
+  .codigo-box {
+    background: linear-gradient(135deg, #faf6ef, #fff);
+    border: 2px dashed var(--yellow);
+    border-radius: 14px;
+    padding: 22px 12px;
+    text-align: center;
+    margin-bottom: 14px;
+    user-select: all;
+  }
+  .codigo {
+    font-size: clamp(26px, 7.5vw, 32px);
+    font-weight: 900;
+    color: var(--primary);
+    letter-spacing: clamp(3px, 1.2vw, 5px);
+    font-family: 'Montserrat', 'Courier New', monospace;
+    line-height: 1.05;
+    word-break: break-all;
   }
   .copy-btn {
-    background: var(--or); color: white;
+    background: var(--yellow);
+    color: #5d4200;
     border: none;
-    padding: 10px 24px;
-    border-radius: 24px;
-    font-size: 14px; font-weight: 600;
+    padding: 14px 24px;
+    border-radius: 100px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
     cursor: pointer;
-    transition: transform 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: transform 0.18s, background 0.18s;
+    box-shadow: 0 4px 14px rgba(245,200,66,0.35);
+    width: 100%;
+    min-height: 44px;
   }
-  .copy-btn:active { transform: scale(0.96); }
-  .copy-btn.copied { background: var(--gr); }
+  .copy-btn:active { transform: scale(0.97); }
+  .copy-btn.copied { background: var(--green); color: #fff; }
 
-  .cupon-info {
-    display: grid;
-    gap: 8px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-    font-size: 14px;
+  /* ─── Info ─── */
+  .info-block {
+    margin-top: 18px;
+    border-top: 1.5px dashed #ddd;
+    padding-top: 16px;
   }
-  .cupon-info-row {
+  .info-row {
     display: flex;
     justify-content: space-between;
-    color: var(--gy);
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid #f4f4f4;
+    gap: 12px;
   }
-  .cupon-info-row strong { color: #222; }
-
-  .beneficio {
-    background: white;
-    margin: 0 20px 24px;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-  }
-  .beneficio-img {
-    height: 180px;
-    background: linear-gradient(135deg, #d4f1d4 0%, #e8f4e0 50%, #fff5f0 100%);
+  .info-row:last-child { border-bottom: none; }
+  .info-label {
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #999;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 80px;
-    position: relative;
+    gap: 6px;
+    flex-shrink: 0;
   }
-  .beneficio-img::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 30% 40%, rgba(232,121,58,0.15), transparent 60%);
-  }
-  .beneficio-text {
-    padding: 20px 24px;
-    text-align: center;
-  }
-  .beneficio-text h3 {
-    color: var(--dg);
-    font-size: 18px;
-    margin-bottom: 8px;
-  }
-  .beneficio-text p {
-    color: var(--gy);
-    font-size: 14px;
+  .info-value {
+    font-size: clamp(11px, 3vw, 13px);
+    font-weight: 800;
+    color: var(--primary);
+    text-align: right;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.3;
   }
 
-  .pasos {
-    background: white;
-    margin: 0 20px 24px;
+  /* ─── Antoja ─── */
+  .antoja {
+    margin-top: 18px;
+    background: linear-gradient(135deg, var(--cream), #fff);
     border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-  }
-  .pasos h2 {
-    color: var(--dg);
-    font-size: 18px;
+    padding: 18px;
     text-align: center;
-    margin-bottom: 16px;
+    border: 1.5px solid #f0e8d8;
+  }
+  .antoja-emoji {
+    font-size: 36px;
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .antoja-title {
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 6px;
+  }
+  .antoja-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #666;
+    line-height: 1.55;
+  }
+
+  /* ─── Pasos ─── */
+  .pasos-block {
+    margin-top: 18px;
+    background: #fafafa;
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .pasos-title {
+    font-size: 10px;
+    font-weight: 900;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 14px;
   }
   .paso {
     display: flex;
+    gap: 12px;
     align-items: flex-start;
-    gap: 14px;
-    padding: 12px 0;
+    padding: 10px 0;
     border-bottom: 1px solid #f0f0f0;
   }
-  .paso:last-child { border-bottom: none; }
+  .paso:last-child { border-bottom: none; padding-bottom: 4px; }
   .paso-num {
-    background: var(--or);
-    color: white;
-    width: 28px; height: 28px;
+    background: var(--primary);
+    color: #fff;
+    width: 24px; height: 24px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
+    font-size: 11px;
+    font-weight: 900;
     flex-shrink: 0;
   }
   .paso-text {
-    font-size: 14px;
-    color: #333;
-    padding-top: 3px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #444;
+    line-height: 1.55;
+    padding-top: 4px;
   }
+  .paso-text strong { color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
 
+  /* ─── CTAs ─── */
   .cta-row {
-    display: flex;
-    gap: 12px;
-    margin: 0 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 18px;
   }
   .cta {
-    flex: 1;
-    background: var(--dg);
-    color: white;
-    border: none;
-    padding: 16px 12px;
+    padding: 15px 12px;
     border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    text-align: center;
-    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
     cursor: pointer;
-    transition: transform 0.2s;
+    text-decoration: none;
+    text-align: center;
+    transition: transform 0.18s, background 0.18s;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
+    min-height: 48px;
+    line-height: 1.2;
+  }
+  .cta-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(95,75,139,0.30);
+  }
+  .cta-secondary {
+    background: #fff;
+    color: var(--primary);
+    border: 2px solid var(--primary);
   }
   .cta:active { transform: scale(0.97); }
-  .cta.secondary {
-    background: white;
-    color: var(--dg);
-    border: 2px solid var(--dg);
-  }
 
+  /* ─── Encuesta ─── */
   .encuesta {
-    background: linear-gradient(135deg, #fff8f0 0%, #fff 100%);
-    margin: 0 20px 24px;
+    margin-top: 18px;
+    background: linear-gradient(135deg, #fff8e1, #fffde7);
+    border: 2px solid var(--yellow);
     border-radius: 16px;
-    padding: 24px;
-    border: 1px solid #ffe8d1;
+    padding: 20px 18px 16px;
     text-align: center;
   }
-  .encuesta-emoji {
-    font-size: 32px;
-    margin-bottom: 8px;
-  }
-  .encuesta h3 {
-    color: var(--or);
-    font-size: 17px;
-    margin-bottom: 8px;
-  }
-  .encuesta p {
-    color: var(--gy);
+  .encuesta-emoji { font-size: 32px; margin-bottom: 4px; line-height: 1; }
+  .encuesta-title {
     font-size: 13px;
-    margin-bottom: 16px;
-    line-height: 1.6;
+    font-weight: 900;
+    color: #7a5c00;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .encuesta-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #5d4200;
+    line-height: 1.55;
+    margin-bottom: 14px;
   }
   .btn-encuesta {
-    background: var(--or);
-    color: white;
+    background: #5d4200;
+    color: var(--yellow);
     border: none;
-    padding: 12px 24px;
-    border-radius: 24px;
-    font-size: 14px;
-    font-weight: 600;
+    padding: 13px 28px;
+    border-radius: 100px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     cursor: pointer;
-    margin-bottom: 12px;
     text-decoration: none;
     display: inline-block;
+    transition: transform 0.18s, background 0.18s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-height: 44px;
+    line-height: 1.4;
   }
   .skip-link {
     display: block;
-    color: var(--gy);
-    font-size: 12px;
+    margin-top: 12px;
+    color: #b8940f;
+    font-size: 10px;
+    font-weight: 700;
     text-decoration: underline;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     cursor: pointer;
+    padding: 6px;
   }
 
+  /* ─── Footer ─── */
   .footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
     text-align: center;
-    color: var(--gy);
-    font-size: 11px;
-    padding: 24px 20px;
   }
-  .footer a {
-    color: var(--gy);
-    text-decoration: underline;
+  .footer-tyc {
+    font-size: 9px;
+    font-weight: 700;
+    color: #aaa;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1.7;
+  }
+  .footer-tyc a { color: var(--primary); text-decoration: underline; }
+
+  /* ─── Error ─── */
+  .err-card {
+    background: #fdf0f0;
+    border: 2px solid #f5c6c6;
+    border-radius: 16px;
+    padding: 26px 20px;
+    text-align: center;
+  }
+  .err-icon { font-size: 48px; margin-bottom: 12px; line-height: 1; }
+  .err-title {
+    font-size: 15px;
+    font-weight: 900;
+    color: #c0392b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .err-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: #922b21;
+    line-height: 1.6;
+    margin-bottom: 18px;
   }
 
-  #error {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 32px;
-    text-align: center;
-    background: var(--cr);
+  /* ─── Hover solo en mouse devices ─── */
+  @media (hover: hover) {
+    .copy-btn:hover { background: var(--yellow-d); transform: translateY(-1px); }
+    .cta-primary:hover { background: var(--pd); transform: translateY(-1px); }
+    .cta-secondary:hover { background: #f5f0ff; }
+    .btn-encuesta:hover { background: #3d2a00; transform: translateY(-1px); }
+    .skip-link:hover { color: #7a5c00; }
   }
-  #error h1 { color: var(--dg); margin-bottom: 12px; }
-  #error p { color: var(--gy); margin-bottom: 24px; max-width: 320px; }
+
+  /* ─── Móvil pequeño (iPhone SE, etc.) ─── */
+  @media (max-width: 360px) {
+    body { padding: 14px 10px; }
+    .card-body { padding: 20px 18px; }
+    .card-header { padding: 24px 18px 20px; }
+    .codigo { letter-spacing: 2.5px; }
+    .cta-row { grid-template-columns: 1fr; }
+  }
+
+  /* ─── Desktop / tablet grande ─── */
+  @media (min-width: 768px) {
+    body { padding: 40px 20px; }
+    .card { max-width: 460px; }
+    .card-header { padding: 36px 30px 26px; }
+    .card-body { padding: 32px 30px 28px; }
+    .codigo { font-size: 36px; letter-spacing: 6px; }
+    .saludo { font-size: 16px; }
+    .hero-msg { font-size: 13px; }
+  }
+
+  /* ─── Landscape móvil ─── */
+  @media (max-height: 480px) and (orientation: landscape) {
+    body { padding: 16px; }
+    .card-header { padding: 20px 24px 16px; }
+    .card-body { padding: 20px 24px; }
+  }
 </style>
 </head>
 <body>
 
+<!-- ─── LOADING ─── -->
 <div id="loading">
   <div class="spinner"></div>
-  <div>Cargando tu cupón...</div>
+  <div id="loading-text">Cargando tu cupón</div>
 </div>
 
-<div id="content" style="display:none;">
-  <div class="container">
+<!-- ─── CONTENIDO ─── -->
+<div class="card" id="content" style="display:none;">
+  <div class="card-header">
+    <div class="brand">OAKBERRY</div>
+    <div class="brand-sub">Tu cupón · Colombia</div>
+    <div class="saludo">¡Hola, <strong id="nombre">amig@</strong>! 💚</div>
+    <div class="hero-msg" id="hero-msg">Tu beneficio te está esperando</div>
+  </div>
 
-    <div class="hero">
-      <div class="logo">OAKBERRY · COLOMBIA</div>
-      <h1>¡Hola, <span id="nombre">amig@</span>! 💚</h1>
-      <p class="subtitle"><span id="hero-msg">Tu beneficio te está esperando</span></p>
+  <div class="card-body">
+
+    <div class="cupon-label">— Código de tu cupón —</div>
+    <div class="codigo-box">
+      <div class="codigo" id="codigo">CARGANDO</div>
     </div>
+    <button class="copy-btn" id="copyBtn" onclick="copyCode()">
+      📋 Copiar código
+    </button>
 
-    <div class="cupon-card">
-      <div class="cupon-label">TU CUPÓN</div>
-      <div class="cupon-codigo" id="codigo">CARGANDO</div>
-      <button class="copy-btn" id="copyBtn" onclick="copyCode()">
-        📋 Copiar código
-      </button>
-      <div class="cupon-info">
-        <div class="cupon-info-row">
-          <span>🎁 Beneficio</span>
-          <strong id="producto">—</strong>
-        </div>
-        <div class="cupon-info-row">
-          <span>📍 Disponible en</span>
-          <strong id="tienda">tu tienda Oakberry</strong>
-        </div>
-        <div class="cupon-info-row">
-          <span>⏰ Válido hasta</span>
-          <strong id="vence">—</strong>
-        </div>
+    <div class="info-block">
+      <div class="info-row">
+        <span class="info-label">🎁 Beneficio</span>
+        <span class="info-value" id="producto">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">📍 Tienda</span>
+        <span class="info-value" id="tienda">tu Oakberry</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">⏰ Vence</span>
+        <span class="info-value" id="vence">—</span>
       </div>
     </div>
 
-    <div class="beneficio">
-      <div class="beneficio-img">🫐</div>
-      <div class="beneficio-text">
-        <h3>Tu próximo bowl, recién armado a tu gusto</h3>
-        <p>Açaí 100% natural, granola crujiente, frutos rojos frescos, coco rallado y todo lo que te haga feliz 🥥🍓✨</p>
-      </div>
+    <div class="antoja">
+      <div class="antoja-emoji">🫐🥥🍓</div>
+      <div class="antoja-title">Tu próximo bowl, recién hecho</div>
+      <div class="antoja-text">Açaí 100% natural, granola crujiente, frutos rojos frescos y todo lo que te haga feliz ✨</div>
     </div>
 
-    <div class="pasos">
-      <h2>Cómo lo redimes</h2>
+    <div class="pasos-block">
+      <div class="pasos-title">— Cómo lo redimes —</div>
       <div class="paso">
         <div class="paso-num">1</div>
-        <div class="paso-text">Pasa por <strong id="tienda2">tu tienda Oakberry</strong></div>
+        <div class="paso-text">Pasa por <strong id="tienda2">tu tienda</strong></div>
       </div>
       <div class="paso">
         <div class="paso-num">2</div>
@@ -359,40 +538,47 @@
       </div>
       <div class="paso">
         <div class="paso-num">3</div>
-        <div class="paso-text">Muéstrale este código al cajero al momento de pagar</div>
+        <div class="paso-text">Muéstrale este código al cajero</div>
       </div>
     </div>
 
     <div class="cta-row">
-      <a class="cta" id="ctaMaps" target="_blank" rel="noopener">
-        📍 Cómo llegar
-      </a>
-      <button class="cta secondary" onclick="copyCode()">
-        📋 Copiar código
-      </button>
+      <a class="cta cta-primary" id="ctaMaps" target="_blank" rel="noopener">📍 Cómo llegar</a>
+      <button class="cta cta-secondary" onclick="copyCode()">📋 Copiar</button>
     </div>
 
-    <div class="encuesta">
-      <div class="encuesta-emoji">💚</div>
-      <h3>¿Tienes 30 segundos?</h3>
-      <p>Nos encantaría saber qué te trae de regreso. Tu opinión nos ayuda a hacerlo mejor.<br><strong>Totalmente voluntario.</strong></p>
+    <div class="encuesta" id="encuestaBlock">
+      <div class="encuesta-emoji">💛</div>
+      <div class="encuesta-title">¿Tienes 30 segundos?</div>
+      <div class="encuesta-text">Nos encantaría saber qué te trae de regreso.<br>Es <strong>totalmente voluntario</strong>.</div>
       <a class="btn-encuesta" id="encuestaBtn" href="#">Sí, contarles 🙌</a>
-      <a class="skip-link" href="#" onclick="hideEncuesta(event)">Ahora no, ir directo a la tienda</a>
+      <a class="skip-link" href="#" onclick="hideEncuesta(event)">Ahora no, ir a la tienda →</a>
     </div>
 
     <div class="footer">
-      <p>Aplican <a href="/tyc">términos y condiciones</a></p>
-      <p style="margin-top:6px;">Oakberry Colombia · 2026</p>
+      <div class="footer-tyc">
+        Aplican <a href="/tyc">términos y condiciones</a><br>
+        Oakberry Colombia · 2026
+      </div>
     </div>
 
   </div>
 </div>
 
-<div id="error" style="display:none;">
-  <div style="font-size:60px;">😕</div>
-  <h1>No encontramos tu cupón</h1>
-  <p id="errorMsg">El código no es válido o ya fue canjeado. Si crees que es un error, escríbenos.</p>
-  <a class="cta" href="https://www.oakberry-cupones.com" style="text-decoration:none;">Volver al inicio</a>
+<!-- ─── ERROR ─── -->
+<div class="card" id="error" style="display:none;">
+  <div class="card-header">
+    <div class="brand">OAKBERRY</div>
+    <div class="brand-sub">Cupón no encontrado</div>
+  </div>
+  <div class="card-body">
+    <div class="err-card">
+      <div class="err-icon">😕</div>
+      <div class="err-title">No encontramos tu cupón</div>
+      <div class="err-text" id="errorMsg">El código no es válido o ya fue canjeado. Si crees que es un error, escríbenos.</div>
+      <a class="cta cta-primary" href="https://www.oakberry-cupones.com" style="display:inline-flex;padding:14px 28px;text-decoration:none;">Volver al inicio</a>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -403,7 +589,7 @@ const API = "https://oakberry-reactivacion-api-664413392517.us-central1.run.app"
 function showError(msg) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('content').style.display = 'none';
-  document.getElementById('error').style.display = 'flex';
+  document.getElementById('error').style.display = 'block';
   if (msg) document.getElementById('errorMsg').textContent = msg;
 }
 
@@ -414,8 +600,18 @@ function showContent() {
 
 function copyCode() {
   if (!codigo) return;
-  navigator.clipboard.writeText(codigo).then(() => {
-    const btns = document.querySelectorAll('.copy-btn, .cta.secondary');
+  const fallbackCopy = () => {
+    const ta = document.createElement('textarea');
+    ta.value = codigo;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+  };
+
+  const showFeedback = () => {
+    const btns = document.querySelectorAll('.copy-btn, .cta-secondary');
     btns.forEach(b => {
       const orig = b.innerHTML;
       b.innerHTML = '✅ ¡Copiado!';
@@ -425,12 +621,18 @@ function copyCode() {
         b.classList.remove('copied');
       }, 1500);
     });
-  });
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(codigo).then(showFeedback).catch(() => { fallbackCopy(); showFeedback(); });
+  } else {
+    fallbackCopy(); showFeedback();
+  }
 }
 
 function hideEncuesta(e) {
   e.preventDefault();
-  document.querySelector('.encuesta').style.display = 'none';
+  document.getElementById('encuestaBlock').style.display = 'none';
 }
 
 function formatearFecha(iso) {
@@ -439,7 +641,7 @@ function formatearFecha(iso) {
     const d = new Date(iso);
     const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
     const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-    return `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]}`;
+    return `${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}`;
   } catch (e) { return iso; }
 }
 
@@ -454,10 +656,10 @@ function renderCupon(data) {
   let heroMsg = 'Tu beneficio te está esperando';
   if (tier === 'BDAY') heroMsg = '🎂 ¡Feliz cumpleaños! Tu regalo te espera';
   else if (tier === 'T3' || tier === 'T4') heroMsg = `Tu ${data.valor_descuento || 'bowl'} GRATIS te espera`;
-  else if (tier === 'T1' || tier === 'T2') heroMsg = `Te apartamos ${data.valor_descuento || 'un detalle'} para ti`;
+  else if (tier === 'T1' || tier === 'T2') heroMsg = `Te apartamos ${data.valor_descuento || 'un detalle'}`;
   document.getElementById('hero-msg').textContent = heroMsg;
 
-  const tienda = data.ciudad_restriccion || 'tu tienda Oakberry';
+  const tienda = data.ciudad_restriccion || 'tu tienda';
   document.getElementById('tienda').textContent = tienda;
   document.getElementById('tienda2').textContent = tienda;
 
@@ -467,9 +669,9 @@ function renderCupon(data) {
   document.getElementById('encuestaBtn').href = `/uet?t=${data.codigo}`;
 
   if (tier === 'T5') {
-    const encuesta = document.querySelector('.encuesta');
-    const pasos = document.querySelector('.pasos');
-    pasos.parentNode.insertBefore(encuesta, pasos);
+    const encuesta = document.getElementById('encuestaBlock');
+    const antoja = document.querySelector('.antoja');
+    antoja.parentNode.insertBefore(encuesta, antoja);
   }
 
   showContent();
