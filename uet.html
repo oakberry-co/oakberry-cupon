@@ -423,6 +423,13 @@ body.lt #pv{color:#0c0b08;}
 
 <script>
 const API="https://oakberry-api-664413392517.us-central1.run.app";
+const REACT_API="https://oakberry-reactivacion-api-664413392517.us-central1.run.app";
+// Detectar tokens del programa de Reactivación (RET) o Cumpleaños (BDY)
+// → usar nuestro Cloud Run en vez del API viejo de Adquisición
+function getApiFor(token){
+  const t=(token||"").toUpperCase();
+  return (t.startsWith("RET")||t.startsWith("BDY")) ? REACT_API : API;
+}
 const MPWD="Oakberry123"; // ← cambia aquí la contraseña
 const MKEY="uet_m3";
 const up=new URLSearchParams(window.location.search);
@@ -512,7 +519,7 @@ window.addEventListener("DOMContentLoaded",async()=>{
   try{
     let d;
     if(DEMO&&DD[TOKEN]) d=DD[TOKEN];
-    else{const r=await fetch(`${API}/uet/token?t=${TOKEN}`);d=await r.json();}
+    else{const r=await fetch(`${getApiFor(TOKEN)}/uet/token?t=${TOKEN}`);d=await r.json();}
     if(!d.ok){st("sErr");return;}
     if(d.ya_respondio&&d.cupon){
       _("rcode").textContent=d.cupon.codigo;
@@ -616,7 +623,7 @@ async function fin(){
   try{
     let d;
     if(DEMO){await new Promise(r=>setTimeout(r,1800));d={ok:true,codigo:gCod(),vence:fVence()};}
-    else{const r=await fetch(`${API}/uet/responder`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});d=await r.json();}
+    else{const r=await fetch(`${getApiFor(TOKEN)}/uet/responder`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});d=await r.json();}
     cCarga(()=>{
       if(d.ok){
         _("rcode").textContent=d.codigo;_("rvence").textContent=d.vence||fVence();
