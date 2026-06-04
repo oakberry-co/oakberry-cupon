@@ -348,24 +348,17 @@ body.lt #pv{color:#0c0b08;}
         <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.04em;">Solo 72h para canjear</span>
       </div>
     </div>
-    <!-- MITAD INFERIOR: precio ancla dominante -->
-    <div style="background:linear-gradient(to bottom,rgba(58,42,94,1) 0%,#3a2a5e 100%);padding:18px 24px 22px;text-align:center;">
-      <!-- Ciudad -->
-      <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;" id="plbl3">Responde · Pereira</div>
-      <!-- Precio ancla con impacto visual -->
-      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;">
-        <div style="height:1px;width:40px;background:rgba(255,255,255,.15);"></div>
-        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:2px;">Valor real</div>
-        <div style="height:1px;width:40px;background:rgba(255,255,255,.15);"></div>
-      </div>
-      <div style="font-size:28px;font-weight:900;color:rgba(255,255,255,.35);text-decoration:line-through;margin-bottom:0px;letter-spacing:1px;line-height:1;">$19.500</div>
-      <div style="font-size:11px;font-weight:700;color:rgba(248,113,113,.8);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;">↓ Para ti hoy</div>
-      <!-- GRATIS gigante -->
-      <div style="font-size:58px;font-weight:900;color:#F5C842;text-transform:uppercase;letter-spacing:2px;line-height:1;margin-bottom:12px;text-shadow:0 4px 30px rgba(245,200,66,.3);">GRATIS</div>
-      <!-- Producto pill -->
-      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:30px;padding:7px 18px;">
-        <span style="font-size:15px;">🫐</span>
-        <span style="font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;" id="plbl">Bowl 7oz · Sin toppings extra · Pereira</span>
+    <!-- MITAD INFERIOR: framing identitario — sin priming GRATIS -->
+    <div style="background:linear-gradient(to bottom,rgba(58,42,94,1) 0%,#3a2a5e 100%);padding:24px 26px 26px;text-align:center;">
+      <!-- Tag de pertenencia -->
+      <div style="font-size:9px;font-weight:700;color:rgba(245,200,66,.85);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;" id="plbl3">Para ti · Pereira</div>
+      <!-- Mensaje principal: tensión + invitación -->
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Eras parte de Oakberry</div>
+      <div style="font-size:26px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:14px;letter-spacing:.5px;">Queremos entender<br>qué cambió.</div>
+      <!-- Sub: brevedad + recompensa sutil -->
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:30px;padding:8px 18px;">
+        <span style="font-size:14px;">🫐</span>
+        <span style="font-size:10px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;" id="plbl">5 preguntas · 2 min · Bowl al final</span>
       </div>
     </div>
     <div class="prog">
@@ -452,56 +445,83 @@ const DT=[
 ];
 const DESCS={one_time:"Primera impresión y barrera de hábito",ocasional:"Momento de quiebre y condición de retorno",regular:"Cambios percibidos y frecuencia perdida",frecuente:"Gradual vs incidente puntual",vip:"Espacio abierto — qué pasó exactamente"};
 
+// v2 — Rediseñada con panel Hormozi (oferta/outcome) + Kennedy (forced-choice accionable) + Godin (worldview/identidad)
+// Estructura mantenida c/a/c/c/a por compatibilidad con backend uet_respuestas
 const SV={
   one_time:[
-    {t:"c",id:"p1",n:"P1",cat:"Contexto",q:"¿Qué pediste en tu visita a Oakberry?",
-      o:[{v:"bowl_p",e:"🫐",l:"Bowl pequeño"},{v:"bowl_m",e:"🥣",l:"Bowl mediano"},{v:"bowl_g",e:"🍲",l:"Bowl grande"},{v:"nr",e:"🤷",l:"No recuerdo bien"}]},
-    {t:"a",id:"p2",n:"P2",cat:"Abierta",q:"¿Hubo algo que esperabas encontrar y no encontraste? (obligatorio)",h:"Cuéntanos en una línea"},
-    {t:"c",id:"p3",n:"P3",cat:"Competencia",q:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
-      o:[{v:"marca",e:"🏪",l:"Otra marca saludable"},{v:"casero",e:"🏠",l:"Comida casera"},{v:"rapida",e:"🍔",l:"Comida rápida"},{v:"nada",e:"🤷",l:"Nada parecido"}]},
-    {t:"c",id:"p4",n:"P4",cat:"Retorno",q:"¿Qué tan fácil sería para ti volver esta semana?",
-      o:[{v:"mf",e:"✅",l:"Muy fácil"},{v:"f",e:"👍",l:"Fácil"},{v:"e",e:"😅",l:"Me tocaría esforzarme"},{v:"d",e:"😬",l:"Difícil"}]},
-    {t:"a",id:"p5",n:"P5",cat:"Abierta",q:"¿Qué tendría que pasar para que Oakberry sea parte de tu rutina? (obligatorio)",h:"Tu respuesta define nuestra oferta"},
+    // P1 [Hormozi]: outcome esperado, no producto. Mide expectativa de resultado, no commodity.
+    {t:"c",id:"p1",n:"P1",cat:"Expectativa",q:"¿Qué esperabas SENTIR cuando saliste de Oakberry esa vez?",
+      o:[{v:"energia",e:"⚡",l:"Energía / vitalidad"},{v:"ligereza",e:"🌿",l:"Ligereza saludable"},{v:"premium",e:"✨",l:"Un gusto premium"},{v:"antojo",e:"🤤",l:"Antojo cumplido"},{v:"nada",e:"🤷",l:"No tenía expectativa clara"}]},
+    // P2 [Godin]: worldview gap entre imagen previa y experiencia.
+    {t:"a",id:"p2",n:"P2",cat:"Worldview",q:"¿Qué te imaginabas de Oakberry ANTES de probar, y coincidió con lo que viviste?",h:"Sé honesto — si fue mejor, igual, o peor"},
+    // P3 [Hormozi]: consumer inertia específica para one-time, NO competencia genérica.
+    {t:"c",id:"p3",n:"P3",cat:"Qué pasó después",q:"Después de esa visita, ¿qué te pasó?",
+      o:[{v:"nopense",e:"💭",l:"No se me ocurrió volver"},{v:"complico",e:"🔄",l:"Lo intenté pero se complicó"},{v:"otra",e:"🍽️",l:"Encontré otra cosa que me gustó más"},{v:"noconvencio",e:"😐",l:"No me convenció lo suficiente"}]},
+    // P4 [Kennedy]: forced-choice de palanca, no de "qué tan fácil" (eso no es accionable).
+    {t:"c",id:"p4",n:"P4",cat:"Fricción",q:"Si volvieras esta semana, ¿qué necesitarías que cambie?",
+      o:[{v:"cerca",e:"📍",l:"Que esté más cerca"},{v:"rapido",e:"⚡",l:"Que sea más rápido"},{v:"barato",e:"💸",l:"Que sea más barato"},{v:"nuevo",e:"🌟",l:"Que tenga algo nuevo"},{v:"recordar",e:"🔔",l:"Nada, solo recordarlo"}]},
+    // P5 [Godin]: tensión identitaria — la mejor pregunta de la versión original. Mantenida con guía mejorada.
+    {t:"a",id:"p5",n:"P5",cat:"Identidad",q:"¿Qué tendría que pasar para que Oakberry sea parte de tu rutina?",h:"Lo que digas define nuestra oferta — ej: 'que esté en mi camino al trabajo', 'que tenga un sabor que me enganche'..."},
   ],
   ocasional:[
-    {t:"c",id:"p1",n:"P1",cat:"Contexto",q:"¿Qué te hizo parar de venir?",
-      o:[{v:"puntual",e:"⚡",l:"Algo puntual pasó"},{v:"solo",e:"🌊",l:"Se fue dando solo"},{v:"precio",e:"💸",l:"El precio me frenó"},{v:"lejos",e:"📍",l:"Me quedó lejos"}]},
-    {t:"a",id:"p2",n:"P2",cat:"Abierta",q:"Si fue algo puntual, ¿qué fue? Cuéntanos. (obligatorio)",h:"Campo libre"},
-    {t:"c",id:"p3",n:"P3",cat:"Competencia",q:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
-      o:[{v:"marca",e:"🏪",l:"Otra marca saludable"},{v:"casero",e:"🏠",l:"Comida casera"},{v:"rapida",e:"🍔",l:"Comida rápida"},{v:"nada",e:"🤷",l:"Nada parecido"}]},
+    // P1 [Hormozi]: causa de pausa con opción "otra cosa que me gustó más" (churn lateral).
+    {t:"c",id:"p1",n:"P1",cat:"Causa",q:"¿Qué te hizo parar de venir?",
+      o:[{v:"puntual",e:"⚡",l:"Algo puntual pasó"},{v:"solo",e:"🌊",l:"Se fue dando solo"},{v:"precio",e:"💸",l:"El precio me frenó"},{v:"lejos",e:"📍",l:"Me quedó lejos"},{v:"otra",e:"🍽️",l:"Encontré algo que me gustó más"}]},
+    // P2 [Kennedy]: separar "vida cambió" vs "Oakberry cambió" — accionable para diferenciar churn evitable vs no.
+    {t:"a",id:"p2",n:"P2",cat:"Contexto",q:"¿Fue algo en Oakberry o algo en tu vida lo que cambió? Cuéntanos.",h:"Una frase basta — buscamos entender el quiebre real"},
+    // P3 [Hormozi]: lateral movement vs disappearance. ESTO SI ES COMPETENCIA REAL para ocasional.
+    {t:"c",id:"p3",n:"P3",cat:"Reemplazo",q:"Cuando dejaste de venir, ¿reemplazaste Oakberry por algo o desapareció de tu radar?",
+      o:[{v:"marca",e:"🏪",l:"Lo reemplacé por otra marca saludable"},{v:"casero",e:"🏠",l:"Lo reemplacé por comida casera"},{v:"desaparecio",e:"💨",l:"Simplemente desapareció de mi rutina"},{v:"otra",e:"🛒",l:"Sigo comiendo similar, pero en otro lugar"}]},
+    // P4 [mantener]: probabilidad de retorno — buena señal predictiva.
     {t:"c",id:"p4",n:"P4",cat:"Retorno",q:"¿Qué tan probable es que vuelvas este mes?",
       o:[{v:"mp",e:"🔥",l:"Muy probable"},{v:"p",e:"👍",l:"Probable"},{v:"pp",e:"😐",l:"Poco probable"},{v:"np",e:"💭",l:"No lo había pensado"}]},
-    {t:"a",id:"p5",n:"P5",cat:"Abierta",q:"¿Qué oferta te haría volver esta semana? (obligatorio)",h:"Tu respuesta define nuestra oferta"},
+    // P5 [Kennedy]: forzar a apostar entre 3 alternativas — no "qué oferta" (siempre dirán 'descuento').
+    {t:"a",id:"p5",n:"P5",cat:"Apuesta",q:"Si tuvieras que apostar: ¿qué te haría volver — un mejor precio, un producto que te enganche, o un cambio en algo que no te gustó?",h:"Apuesta por UNA. Eso nos dice dónde invertir"},
   ],
   regular:[
+    // P1 [mantener]: frecuencia anterior — buena para baseline.
     {t:"c",id:"p1",n:"P1",cat:"Frecuencia",q:"¿Qué tan seguido ibas en tu mejor momento?",
       o:[{v:"vs",e:"🔥",l:"Varias veces/semana"},{v:"us",e:"📅",l:"Una vez/semana"},{v:"q",e:"🗓️",l:"Cada 2 semanas"},{v:"m",e:"📆",l:"Una vez/mes"}]},
-    {t:"a",id:"p2",n:"P2",cat:"Abierta",q:"¿Notaste algo que cambió en Oakberry — precios, producto, servicio? (obligatorio)",h:"Tu percepción importa"},
-    {t:"c",id:"p3",n:"P3",cat:"Competencia",q:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
-      o:[{v:"marca",e:"🏪",l:"Otra marca saludable"},{v:"casero",e:"🏠",l:"Comida casera"},{v:"rapida",e:"🍔",l:"Comida rápida"},{v:"nada",e:"🤷",l:"Nada parecido"}]},
-    {t:"c",id:"p4",n:"P4",cat:"Retorno",q:"¿Qué tendría que cambiar para que volvieras con regularidad?",
-      o:[{v:"precio",e:"🏷️",l:"Mejor precio"},{v:"nuevo",e:"🌟",l:"Algo nuevo en el menú"},{v:"servicio",e:"⭐",l:"Mejor servicio"},{v:"voy",e:"😊",l:"Nada, ya voy a volver"}]},
-    {t:"a",id:"p5",n:"P5",cat:"Abierta",q:"¿Hay algo más que Oakberry deba saber? (obligatorio)",h:"Totalmente libre"},
+    // P2 [Kennedy + Godin]: separar cambio percibido en Oakberry vs cambio propio.
+    {t:"a",id:"p2",n:"P2",cat:"Cambio",q:"¿Notaste algo que cambió en Oakberry — precios, producto, servicio? ¿O fue tu rutina la que cambió?",h:"Sé específico — '$X subió a $Y', 'el sabor no era igual', 'cambié de trabajo'..."},
+    // P3 [Hormozi]: PRICING PULSE — la pregunta más alta-leverage. Reemplaza competencia genérica.
+    {t:"c",id:"p3",n:"P3",cat:"Anchor de precio",q:"¿Cuánto recuerdas pagar por un bowl normalmente?",
+      o:[{v:"menos15",e:"💰",l:"Menos de $15.000"},{v:"15a20",e:"💵",l:"$15.000 - $20.000"},{v:"20a25",e:"💸",l:"$20.000 - $25.000"},{v:"mas25",e:"💳",l:"Más de $25.000"},{v:"norecuerdo",e:"🤷",l:"No recuerdo"}]},
+    // P4 [Hormozi]: palanca de retorno — añadida opción "sorpréndeme" (Godin: notable).
+    {t:"c",id:"p4",n:"P4",cat:"Palanca",q:"¿Qué tendría que cambiar para que volvieras con regularidad?",
+      o:[{v:"precio",e:"🏷️",l:"Que baje el precio"},{v:"sabor",e:"🫐",l:"Que vuelva el sabor que recordaba"},{v:"servicio",e:"⭐",l:"Que mejore el servicio"},{v:"sorprender",e:"🌟",l:"Que me sorprenda con algo nuevo"},{v:"voy",e:"😊",l:"Nada, ya tenía pensado volver"}]},
+    // P5 [Godin]: identidad — qué status game jugabas con Oakberry. Pregunta de tribu.
+    {t:"a",id:"p5",n:"P5",cat:"Identidad",q:"Cuando ibas seguido, ¿qué dirías que decía Oakberry de ti? (que te cuidas, que te das un gusto, que sigues una rutina...)",h:"Pensalo como: 'comer Oakberry me hacía sentir...'"},
   ],
   frecuente:[
+    // P1 [mantener]
     {t:"c",id:"p1",n:"P1",cat:"Frecuencia",q:"¿Qué tan seguido ibas en tu mejor momento?",
       o:[{v:"vs",e:"🔥",l:"Varias veces/semana"},{v:"us",e:"📅",l:"Una vez/semana"},{v:"q",e:"🗓️",l:"Cada 2 semanas"},{v:"m",e:"📆",l:"Una vez/mes"}]},
-    {t:"a",id:"p2",n:"P2",cat:"Abierta",q:"¿Fue algo específico o se fue dando? Cuéntanos. (obligatorio)",h:"Tu versión importa"},
-    {t:"c",id:"p3",n:"P3",cat:"Competencia",q:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
-      o:[{v:"marca",e:"🏪",l:"Otra marca saludable"},{v:"casero",e:"🏠",l:"Comida casera"},{v:"rapida",e:"🍔",l:"Comida rápida"},{v:"nada",e:"🤷",l:"Nada parecido"}]},
-    {t:"c",id:"p4",n:"P4",cat:"Retorno",q:"¿Qué tendría que cambiar para que volvieras con regularidad?",
-      o:[{v:"precio",e:"🏷️",l:"Mejor precio"},{v:"nuevo",e:"🌟",l:"Algo nuevo en el menú"},{v:"servicio",e:"⭐",l:"Mejor servicio"},{v:"voy",e:"😊",l:"Nada, ya voy a volver"}]},
-    {t:"a",id:"p5",n:"P5",cat:"Abierta",q:"¿Hay algo más que Oakberry deba saber? (obligatorio)",h:"Totalmente libre"},
+    // P2 [Hormozi]: separar evento específico vs gradual — diferencia entre churn recuperable o no.
+    {t:"a",id:"p2",n:"P2",cat:"Quiebre",q:"¿Cómo dejaste de venir — algo específico pasó, o fue gradual? Cuéntanos tu versión.",h:"Ej: 'cambié de oficina', 'el precio subió', 'me cansé del sabor', 'fue gradual sin razón'..."},
+    // P3 [Hormozi]: PRICING PULSE.
+    {t:"c",id:"p3",n:"P3",cat:"Anchor de precio",q:"¿Cuánto recuerdas pagar por un bowl normalmente?",
+      o:[{v:"menos15",e:"💰",l:"Menos de $15.000"},{v:"15a20",e:"💵",l:"$15.000 - $20.000"},{v:"20a25",e:"💸",l:"$20.000 - $25.000"},{v:"mas25",e:"💳",l:"Más de $25.000"},{v:"norecuerdo",e:"🤷",l:"No recuerdo"}]},
+    // P4 [Hormozi]: palanca de retorno.
+    {t:"c",id:"p4",n:"P4",cat:"Palanca",q:"¿Qué tendría que cambiar para que volvieras?",
+      o:[{v:"precio",e:"🏷️",l:"Que baje el precio"},{v:"sabor",e:"🫐",l:"Que vuelva el sabor que recordaba"},{v:"servicio",e:"⭐",l:"Que mejore el servicio"},{v:"sorprender",e:"🌟",l:"Que me sorprenda con algo nuevo"},{v:"voy",e:"😊",l:"Nada, ya tenía pensado volver"}]},
+    // P5 [Godin]: identidad — frecuentes tienen worldview más definido. Esta respuesta vale oro.
+    {t:"a",id:"p5",n:"P5",cat:"Identidad",q:"Cuando ibas seguido, ¿qué dirías que decía Oakberry de ti?",h:"'Comer Oakberry seguido me hacía sentir / decir / pensar...'"},
   ],
   vip:[
+    // P1 [mantener — excelente]: separa churn de consumo vs churn de tribu.
     {t:"c",id:"p1",n:"P1",cat:"Lealtad",q:"¿Sigues recomendando Oakberry aunque no vayas?",
       o:[{v:"si",e:"❤️",l:"Sí, siempre"},{v:"av",e:"👍",l:"A veces"},{v:"no_tanto",e:"😐",l:"Ya no tanto"},{v:"no",e:"👎",l:"No"}]},
-    {t:"a",id:"p2",n:"P2",cat:"Abierta",q:"¿Qué pasó? Eras muy frecuente — queremos saberlo directamente. (obligatorio)",h:"Sin filtros"},
-    {t:"c",id:"p3",n:"P3",cat:"Competencia",q:"Cuando no vas a Oakberry, ¿qué comes en su lugar?",
-      o:[{v:"marca",e:"🏪",l:"Otra marca saludable"},{v:"casero",e:"🏠",l:"Comida casera"},{v:"rapida",e:"🍔",l:"Comida rápida"},{v:"nada",e:"🤷",l:"Nada parecido"}]},
+    // P2 [Godin]: la narrativa actual del defensor convertido. ESTA respuesta define la campaña.
+    {t:"a",id:"p2",n:"P2",cat:"Narrativa",q:"Si un amigo te pregunta hoy '¿vale la pena Oakberry?', ¿qué le dirías exactamente?",h:"Tu respuesta literal — no la versión diplomática"},
+    // P3 [Hormozi]: PRICING PULSE — crítico en VIP que paga ticket alto.
+    {t:"c",id:"p3",n:"P3",cat:"Anchor de precio",q:"¿Cuánto recuerdas pagar por un bowl normalmente?",
+      o:[{v:"menos15",e:"💰",l:"Menos de $15.000"},{v:"15a20",e:"💵",l:"$15.000 - $20.000"},{v:"20a25",e:"💸",l:"$20.000 - $25.000"},{v:"mas25",e:"💳",l:"Más de $25.000"},{v:"norecuerdo",e:"🤷",l:"No recuerdo"}]},
+    // P4 [Hormozi]: qué necesita Oakberry — añadida opción "sorpréndeme" para VIPs aburridos.
     {t:"c",id:"p4",n:"P4",cat:"Recuperación",q:"¿Qué necesita hacer Oakberry para recuperarte?",
-      o:[{v:"precio",e:"🏷️",l:"Mejorar el precio"},{v:"producto",e:"🫐",l:"Mejorar el producto"},{v:"servicio",e:"⭐",l:"Mejorar el servicio"},{v:"voy",e:"😊",l:"Ya tenía planeado volver"}]},
-    {t:"a",id:"p5",n:"P5",cat:"Abierta",q:"¿Te contactamos 5 minutos para escucharte? (obligatorio)",h:"Escribe 'sí' o deja tu número"},
+      o:[{v:"precio",e:"🏷️",l:"Mejorar el precio"},{v:"producto",e:"🫐",l:"Mejorar el producto"},{v:"servicio",e:"⭐",l:"Mejorar el servicio"},{v:"sorprender",e:"🌟",l:"Volver a sorprenderme"},{v:"voy",e:"😊",l:"Ya tenía planeado volver"}]},
+    // P5 [Hormozi + Godin]: callback con framing identitario, no transaccional.
+    {t:"a",id:"p5",n:"P5",cat:"Llamada",q:"¿Aceptarías una llamada de 5 minutos? Queremos escucharte directamente — no para venderte, para entender qué cambiar.",h:"'Sí, mi horario es...' / 'Sí pero por WhatsApp' / 'No, prefiero no'"},
   ],
 };
 
@@ -531,8 +551,8 @@ window.addEventListener("DOMContentLoaded",async()=>{
     SEG=d.segmento||"Ocasional";NOM=d.nombre||"";CIU=d.ciudad||"";TIE=d.tienda||"Oakberry";
     const SM={"One-time":"one_time","Ocasional":"ocasional","Regular":"regular","Frecuente":"frecuente","VIP":"vip"};
     PQ=SV[SM[SEG]||"ocasional"]||SV.ocasional;
-    _("plbl").textContent=`Bowl 7oz · Sin toppings · ${CIU}`;
-    if(_("plbl3")) _("plbl3").textContent=`Responde · ${CIU}`;
+    _("plbl").textContent=`5 preguntas · 2 min · Bowl al final`;
+    if(_("plbl3")) _("plbl3").textContent=`Para ti${NOM?", "+NOM.split(" ")[0]:""} · ${CIU}`;
     const dots=_("pdots");
     dots.innerHTML=PQ.map((_,i)=>`<div class="dot${i===0?" active":""}" id="dot-${i}"></div>`).join("");
     st("sEnc");rStep(0);
