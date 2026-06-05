@@ -12,7 +12,8 @@
     { "source": "/cursos",         "destination": "/cursos.html"              },
     { "source": "/reactivar",      "destination": "/reactivar.html"           },
     { "source": "/tiendas",        "destination": "/tiendas.html"             },
-    { "source": "/dashboard",      "destination": "/dashboard.html"           },
+    { "source": "/dashboard",         "destination": "https://dashboard.oakberry-cupones.com/dashboard/" },
+    { "source": "/dashboard/:path*",  "destination": "https://dashboard.oakberry-cupones.com/dashboard/:path*" },
     { "source": "/adidas-activar", "destination": "/adidas-activar.html"      },
     { "source": "/concurso",       "destination": "/concurso-v2.html"         },
     { "source": "/reglamento",     "destination": "/reglamento-concurso.html" },
@@ -22,4 +23,3 @@
     { "source": "/api/(.*)",       "destination": "/api/$1"                   }
   ]
 }
-
