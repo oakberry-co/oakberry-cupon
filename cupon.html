@@ -2,83 +2,440 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-<meta name="theme-color" content="#5F4B8B">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Oakberry · Tu Cupón 🫐</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root { --primary: #5F4B8B; --pd: #4a3a6e; --yellow: #F5C842; --yellow-d: #d4a82c; --red: #e74c3c; --green: #27ae60; --orange: #e67e22; --dg: #2D5016; --cream: #F5F0E8; }
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html { font-size: 16px; -webkit-text-size-adjust: 100%; }
-  body { font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif; min-height: 100vh; min-height: 100dvh; padding: 20px 14px; background: linear-gradient(rgba(20,10,40,0.55), rgba(20,10,40,0.65)), url('oakville-bg.jpg') center/cover no-repeat fixed; display: flex; align-items: flex-start; justify-content: center; color: #333; }
-  @supports not (background-attachment: fixed) { body { background-attachment: scroll; } }
-  #loading { position: fixed; inset: 0; background: linear-gradient(rgba(20,10,40,0.88), rgba(20,10,40,0.92)), url('oakville-bg.jpg') center/cover no-repeat fixed; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 18px; color: #fff; z-index: 100; }
-  .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.2); border-top-color: var(--yellow); border-radius: 50%; animation: spin 0.7s linear infinite; }
-  #loading-text { font-size: 12px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; }
+  :root {
+    --primary: #5F4B8B;
+    --pd: #4a3a6e;
+    --yellow: #F5C842;
+    --red: #e74c3c;
+    --green: #27ae60;
+    --orange: #e67e22;
+    --dg: #2D5016;
+    --cream: #F5F0E8;
+    --berry: #5F4B8B;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px;
+    background: linear-gradient(rgba(20,10,40,0.55), rgba(20,10,40,0.65)),
+                url('oakville-bg.jpg') center/cover no-repeat fixed;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  /* ─── Loading ─── */
+  #loading {
+    position: fixed; inset: 0;
+    background: linear-gradient(rgba(20,10,40,0.85), rgba(20,10,40,0.9)),
+                url('oakville-bg.jpg') center/cover no-repeat fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 18px;
+    color: #fff;
+    z-index: 100;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: var(--yellow);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  #loading-text {
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  .card { background: rgba(255,255,255,0.97); border-radius: 28px; width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.35); overflow: hidden; animation: fadeIn 0.4s ease; }
-  .card-header { background: var(--primary); padding: 28px 24px 22px; text-align: center; position: relative; overflow: hidden; }
-  .card-header::before { content: '🫐'; position: absolute; font-size: 160px; opacity: 0.10; top: -36px; right: -28px; transform: rotate(15deg); pointer-events: none; line-height: 1; }
-  .brand { font-size: clamp(22px, 6vw, 26px); font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 3px; position: relative; z-index: 2; line-height: 1.1; }
-  .brand-sub { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 2.5px; margin-top: 5px; position: relative; z-index: 2; }
-  .saludo { margin-top: 18px; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 1px; position: relative; z-index: 2; line-height: 1.4; }
-  .saludo strong { color: var(--yellow); font-weight: 900; }
-  .hero-msg { margin-top: 6px; font-size: clamp(10px, 2.8vw, 12px); color: rgba(255,255,255,0.88); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; position: relative; z-index: 2; line-height: 1.4; padding: 0 8px; }
-  .card-body { padding: 24px 22px 22px; }
-  .cupon-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; color: #999; text-align: center; margin-bottom: 12px; }
-  .codigo-box { background: linear-gradient(135deg, #faf6ef, #fff); border: 2px dashed var(--yellow); border-radius: 14px; padding: 22px 12px; text-align: center; margin-bottom: 14px; user-select: all; }
-  .codigo { font-size: clamp(26px, 7.5vw, 32px); font-weight: 900; color: var(--primary); letter-spacing: clamp(3px, 1.2vw, 5px); font-family: 'Montserrat', 'Courier New', monospace; line-height: 1.05; word-break: break-all; }
-  .copy-btn { background: var(--yellow); color: #5d4200; border: none; padding: 14px 24px; border-radius: 100px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: transform 0.18s, background 0.18s; box-shadow: 0 4px 14px rgba(245,200,66,0.35); width: 100%; min-height: 44px; }
+
+  /* ─── Card principal ─── */
+  .card {
+    background: rgba(255,255,255,0.97);
+    border-radius: 28px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    overflow: hidden;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Header ─── */
+  .card-header {
+    background: var(--primary);
+    padding: 28px 30px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-header::before {
+    content: '🫐';
+    position: absolute;
+    font-size: 140px;
+    opacity: 0.10;
+    top: -28px; right: -22px;
+    transform: rotate(15deg);
+    pointer-events: none;
+  }
+  .brand {
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    position: relative; z-index: 2;
+  }
+  .brand-sub {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    margin-top: 4px;
+    position: relative; z-index: 2;
+  }
+  .saludo {
+    margin-top: 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative; z-index: 2;
+  }
+  .saludo strong {
+    color: var(--yellow);
+    font-weight: 900;
+  }
+  .hero-msg {
+    margin-top: 6px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    position: relative; z-index: 2;
+  }
+
+  /* ─── Body ─── */
+  .card-body {
+    padding: 28px 28px 24px;
+  }
+
+  /* ─── Cupón Block ─── */
+  .cupon-label {
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #999;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .codigo-box {
+    background: linear-gradient(135deg, #faf6ef, #fff);
+    border: 2px dashed var(--yellow);
+    border-radius: 14px;
+    padding: 22px 12px 18px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .codigo {
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--primary);
+    letter-spacing: 4px;
+    font-family: 'Montserrat', monospace;
+    line-height: 1.1;
+  }
+  .copy-btn {
+    background: var(--yellow);
+    color: #5d4200;
+    border: none;
+    padding: 11px 24px;
+    border-radius: 100px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.18s;
+    box-shadow: 0 4px 12px rgba(245,200,66,0.3);
+    width: 100%;
+  }
   .copy-btn:active { transform: scale(0.97); }
   .copy-btn.copied { background: var(--green); color: #fff; }
-  .info-block { margin-top: 18px; border-top: 1.5px dashed #ddd; padding-top: 16px; }
-  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid #f4f4f4; gap: 12px; }
-  .info-row:last-child { border-bottom: none; }
-  .info-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #999; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-  .info-value { font-size: clamp(11px, 3vw, 13px); font-weight: 800; color: var(--primary); text-align: right; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
-  .antoja { margin-top: 18px; background: linear-gradient(135deg, var(--cream), #fff); border-radius: 16px; padding: 18px; text-align: center; border: 1.5px solid #f0e8d8; }
-  .antoja-emoji { font-size: 36px; margin-bottom: 6px; line-height: 1; }
-  .antoja-title { font-size: 12px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; }
-  .antoja-text { font-size: 11px; font-weight: 700; color: #666; line-height: 1.55; }
-  .pasos-block { margin-top: 18px; background: #fafafa; border-radius: 14px; padding: 18px; }
-  .pasos-title { font-size: 10px; font-weight: 900; color: #888; text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 14px; }
-  .paso { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-  .paso:last-child { border-bottom: none; padding-bottom: 4px; }
-  .paso-num { background: var(--primary); color: #fff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; flex-shrink: 0; }
-  .paso-text { font-size: 12px; font-weight: 700; color: #444; line-height: 1.55; padding-top: 4px; }
-  .paso-text strong { color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
-  .cta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
-  .cta { padding: 15px 12px; border-radius: 12px; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; cursor: pointer; text-decoration: none; text-align: center; transition: transform 0.18s, background 0.18s; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; line-height: 1.2; }
-  .cta-primary { background: var(--primary); color: #fff; box-shadow: 0 6px 18px rgba(95,75,139,0.30); }
-  .cta-secondary { background: #fff; color: var(--primary); border: 2px solid var(--primary); }
-  .cta:active { transform: scale(0.97); }
-  .footer { margin-top: 20px; padding-top: 16px; border-top: 1px solid #eee; text-align: center; }
-  .footer-tyc { font-size: 9px; font-weight: 700; color: #aaa; letter-spacing: 1px; text-transform: uppercase; line-height: 1.7; }
-  .footer-tyc a { color: var(--primary); text-decoration: underline; }
-  .err-card { background: #fdf0f0; border: 2px solid #f5c6c6; border-radius: 16px; padding: 26px 20px; text-align: center; }
-  .err-icon { font-size: 48px; margin-bottom: 12px; line-height: 1; }
-  .err-title { font-size: 15px; font-weight: 900; color: #c0392b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-  .err-text { font-size: 12px; font-weight: 700; color: #922b21; line-height: 1.6; margin-bottom: 18px; }
-  @media (hover: hover) {
-    .copy-btn:hover { background: var(--yellow-d); transform: translateY(-1px); }
-    .cta-primary:hover { background: var(--pd); transform: translateY(-1px); }
-    .cta-secondary:hover { background: #f5f0ff; }
+
+  /* ─── Info ─── */
+  .info-block {
+    margin-top: 18px;
+    border-top: 1.5px dashed #ddd;
+    padding-top: 16px;
   }
-  @media (max-width: 360px) { body { padding: 14px 10px; } .card-body { padding: 20px 18px; } .card-header { padding: 24px 18px 20px; } .codigo { letter-spacing: 2.5px; } .cta-row { grid-template-columns: 1fr; } }
-  @media (min-width: 768px) { body { padding: 40px 20px; } .card { max-width: 460px; } .card-header { padding: 36px 30px 26px; } .card-body { padding: 32px 30px 28px; } .codigo { font-size: 36px; letter-spacing: 6px; } .saludo { font-size: 16px; } .hero-msg { font-size: 13px; } }
-  @media (max-height: 480px) and (orientation: landscape) { body { padding: 16px; } .card-header { padding: 20px 24px 16px; } .card-body { padding: 20px 24px; } }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid #f4f4f4;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-label {
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .info-value {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--primary);
+    text-align: right;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── Beneficio (antoja) ─── */
+  .antoja {
+    margin-top: 18px;
+    background: linear-gradient(135deg, var(--cream), #fff);
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    text-align: center;
+    border: 1.5px solid #f0e8d8;
+  }
+  .antoja-emoji {
+    font-size: 36px;
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .antoja-title {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 4px;
+  }
+  .antoja-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  /* ─── Pasos ─── */
+  .pasos-block {
+    margin-top: 18px;
+    background: #fafafa;
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .pasos-title {
+    font-size: 10px;
+    font-weight: 900;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .paso {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .paso:last-child { border-bottom: none; }
+  .paso-num {
+    background: var(--primary);
+    color: #fff;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .paso-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #444;
+    line-height: 1.5;
+    padding-top: 4px;
+  }
+  .paso-text strong { color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ─── CTAs ─── */
+  .cta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .cta {
+    padding: 14px 10px;
+    border-radius: 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.18s;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .cta-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(95,75,139,0.30);
+  }
+  .cta-primary:hover { background: var(--pd); transform: translateY(-1px); }
+  .cta-secondary {
+    background: #fff;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+  .cta-secondary:hover { background: #f5f0ff; }
+  .cta:active { transform: scale(0.97); }
+
+  /* ─── Encuesta ─── */
+  .encuesta {
+    margin-top: 18px;
+    background: linear-gradient(135deg, #fff8e1, #fffde7);
+    border: 2px solid var(--yellow);
+    border-radius: 16px;
+    padding: 18px 18px 14px;
+    text-align: center;
+  }
+  .encuesta-emoji { font-size: 28px; margin-bottom: 4px; }
+  .encuesta-title {
+    font-size: 12px;
+    font-weight: 900;
+    color: #7a5c00;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .encuesta-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #5d4200;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .btn-encuesta {
+    background: #5d4200;
+    color: var(--yellow);
+    border: none;
+    padding: 11px 22px;
+    border-radius: 100px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.18s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .btn-encuesta:hover { transform: translateY(-1px); background: #3d2a00; }
+  .skip-link {
+    display: block;
+    margin-top: 10px;
+    color: #b8940f;
+    font-size: 10px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+
+  /* ─── Footer ─── */
+  .footer {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+    text-align: center;
+  }
+  .footer-tyc {
+    font-size: 9px;
+    font-weight: 700;
+    color: #aaa;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+  .footer-tyc a { color: var(--primary); text-decoration: underline; }
+
+  /* ─── Error ─── */
+  .err-card {
+    background: #fdf0f0;
+    border: 2px solid #f5c6c6;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+  }
+  .err-icon { font-size: 44px; margin-bottom: 10px; }
+  .err-title {
+    font-size: 14px;
+    font-weight: 900;
+    color: #c0392b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .err-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #922b21;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 380px) {
+    .codigo { font-size: 26px; letter-spacing: 3px; }
+    .brand { font-size: 22px; }
+  }
 </style>
 </head>
 <body>
 
+<!-- ─── LOADING ─── -->
 <div id="loading">
   <div class="spinner"></div>
   <div id="loading-text">Cargando tu cupón</div>
 </div>
 
+<!-- ─── CONTENIDO ─── -->
 <div class="card" id="content" style="display:none;">
   <div class="card-header">
     <div class="brand">OAKBERRY</div>
@@ -88,12 +445,17 @@
   </div>
 
   <div class="card-body">
+
+    <!-- Cupón -->
     <div class="cupon-label">— Código de tu cupón —</div>
     <div class="codigo-box">
       <div class="codigo" id="codigo">CARGANDO</div>
     </div>
-    <button class="copy-btn" id="copyBtn" onclick="copyCode()">📋 Copiar código</button>
+    <button class="copy-btn" id="copyBtn" onclick="copyCode()">
+      📋 Copiar código
+    </button>
 
+    <!-- Info -->
     <div class="info-block">
       <div class="info-row">
         <span class="info-label">🎁 Beneficio</span>
@@ -104,17 +466,19 @@
         <span class="info-value" id="tienda">tu Oakberry</span>
       </div>
       <div class="info-row">
-        <span class="info-label">⏰ Vence</span>
+        <span class="info-label">⏰ Válido hasta</span>
         <span class="info-value" id="vence">—</span>
       </div>
     </div>
 
+    <!-- Antoja -->
     <div class="antoja">
       <div class="antoja-emoji">🫐🥥🍓</div>
       <div class="antoja-title">Tu próximo bowl, recién hecho</div>
       <div class="antoja-text">Açaí 100% natural, granola crujiente, frutos rojos frescos y todo lo que te haga feliz ✨</div>
     </div>
 
+    <!-- Pasos -->
     <div class="pasos-block">
       <div class="pasos-title">— Cómo lo redimes —</div>
       <div class="paso">
@@ -131,20 +495,33 @@
       </div>
     </div>
 
+    <!-- CTAs -->
     <div class="cta-row">
       <a class="cta cta-primary" id="ctaMaps" target="_blank" rel="noopener">📍 Cómo llegar</a>
       <button class="cta cta-secondary" onclick="copyCode()">📋 Copiar</button>
     </div>
 
+    <!-- Encuesta -->
+    <div class="encuesta" id="encuestaBlock">
+      <div class="encuesta-emoji">💛</div>
+      <div class="encuesta-title">¿Tienes 30 segundos?</div>
+      <div class="encuesta-text">Nos encantaría saber qué te trae de regreso.<br>Es <strong>totalmente voluntario</strong>.</div>
+      <a class="btn-encuesta" id="encuestaBtn" href="#">Sí, contarles 🙌</a>
+      <a class="skip-link" href="#" onclick="hideEncuesta(event)">Ahora no, ir a la tienda →</a>
+    </div>
+
+    <!-- Footer -->
     <div class="footer">
       <div class="footer-tyc">
         Aplican <a href="/tyc">términos y condiciones</a><br>
         Oakberry Colombia · 2026
       </div>
     </div>
+
   </div>
 </div>
 
+<!-- ─── ERROR ─── -->
 <div class="card" id="error" style="display:none;">
   <div class="card-header">
     <div class="brand">OAKBERRY</div>
@@ -155,7 +532,7 @@
       <div class="err-icon">😕</div>
       <div class="err-title">No encontramos tu cupón</div>
       <div class="err-text" id="errorMsg">El código no es válido o ya fue canjeado. Si crees que es un error, escríbenos.</div>
-      <a class="cta cta-primary" href="https://www.oakberry-cupones.com" style="display:inline-flex;padding:14px 28px;text-decoration:none;">Volver al inicio</a>
+      <a class="cta cta-primary" href="https://www.oakberry-cupones.com" style="text-decoration:none;display:inline-block;padding:12px 26px;">Volver al inicio</a>
     </div>
   </div>
 </div>
@@ -179,27 +556,23 @@ function showContent() {
 
 function copyCode() {
   if (!codigo) return;
-  const fallbackCopy = () => {
-    const ta = document.createElement('textarea');
-    ta.value = codigo;
-    ta.style.position = 'fixed'; ta.style.left = '-9999px';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); } catch(e) {}
-    document.body.removeChild(ta);
-  };
-  const showFeedback = () => {
+  navigator.clipboard.writeText(codigo).then(() => {
     const btns = document.querySelectorAll('.copy-btn, .cta-secondary');
     btns.forEach(b => {
       const orig = b.innerHTML;
       b.innerHTML = '✅ ¡Copiado!';
       b.classList.add('copied');
-      setTimeout(() => { b.innerHTML = orig; b.classList.remove('copied'); }, 1500);
+      setTimeout(() => {
+        b.innerHTML = orig;
+        b.classList.remove('copied');
+      }, 1500);
     });
-  };
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(codigo).then(showFeedback).catch(() => { fallbackCopy(); showFeedback(); });
-  } else { fallbackCopy(); showFeedback(); }
+  });
+}
+
+function hideEncuesta(e) {
+  e.preventDefault();
+  document.getElementById('encuestaBlock').style.display = 'none';
 }
 
 function formatearFecha(iso) {
@@ -226,12 +599,24 @@ function renderCupon(data) {
   else if (tier === 'T1' || tier === 'T2') heroMsg = `Te apartamos ${data.valor_descuento || 'un detalle'}`;
   document.getElementById('hero-msg').textContent = heroMsg;
 
-  const tiendaNombre = data.tienda_nombre || 'tu tienda';
-  document.getElementById('tienda').textContent = tiendaNombre;
+  // Usar nombre real de tienda y maps_link directo desde dim_tiendas_master
+  const tiendaNombre = data.tienda_nombre || data.ciudad_restriccion || 'tu tienda';
+  const ciudad = data.tienda_ciudad || data.ciudad_restriccion || '';
+  document.getElementById('tienda').textContent = tiendaNombre + (ciudad ? ` · ${ciudad}` : '');
   document.getElementById('tienda2').textContent = tiendaNombre;
 
-  // Link directo a Maps de la tienda (del CSV)
-  document.getElementById('ctaMaps').href = data.maps_link || `https://www.google.com/maps/search/?api=1&query=Oakberry`;
+  // maps_link viene directo del CSV maestro; fallback a búsqueda genérica si no hay
+  const mapsLink = data.maps_link
+    || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('Oakberry ' + tiendaNombre)}`;
+  document.getElementById('ctaMaps').href = mapsLink;
+
+  document.getElementById('encuestaBtn').href = `/uet?t=${data.codigo}`;
+
+  if (tier === 'T5') {
+    const encuesta = document.getElementById('encuestaBlock');
+    const antoja = document.querySelector('.antoja');
+    antoja.parentNode.insertBefore(encuesta, antoja);
+  }
 
   showContent();
 }
