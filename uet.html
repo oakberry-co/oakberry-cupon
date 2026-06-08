@@ -1,950 +1,731 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Oakberry · Validar Cupón</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
-  <style>
-    :root { --primary:#5F4B8B; --pd:#4a3a6e; --yellow:#F5C842; --red:#e74c3c; --green:#27ae60; --orange:#e67e22; }
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family:'Montserrat',sans-serif;
-      min-height:100vh; display:flex; align-items:center; justify-content:center;
-      padding:24px 16px;
-      background:linear-gradient(rgba(20,10,40,0.5),rgba(20,10,40,0.6)),
-                 url('oakville-bg.jpg') center/cover no-repeat fixed;
-    }
-    .card {
-      background:rgba(255,255,255,0.97); border-radius:28px;
-      width:100%; max-width:400px;
-      box-shadow:0 20px 60px rgba(0,0,0,0.35); overflow:hidden;
-    }
-    .card-header {
-      background:var(--primary); padding:28px 30px 22px; text-align:center;
-    }
-    .brand { font-size:26px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:2px; }
-    .brand-sub { font-size:11px; font-weight:700; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:2px; margin-top:4px; }
-    .card-body { padding:28px 28px 32px; }
-    .field { margin-bottom:14px; }
-    label { display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#999; margin-bottom:6px; }
-    input, select {
-      width:100%; padding:14px 16px; border-radius:12px;
-      border:2px solid #eee; font-family:'Montserrat',sans-serif;
-      font-size:13px; font-weight:700; color:var(--primary);
-      outline:none; background:#fff; transition:border-color 0.18s;
-      -webkit-appearance:none;
-    }
-    input { text-transform:uppercase; letter-spacing:2px; font-size:15px; }
-    input:focus, select:focus { border-color:var(--primary); }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oakberry · Tu bowl te espera</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p:#5F4B8B;--pd:#4a3a6e;--y:#F5C842;
+  --w:#fff;--off:rgba(255,255,255,.97);
+  --bd:#eee;--gr:#999;--gn:#27ae60;--rd:#c0392b;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 
-    .section-sep {
-      font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:2px;
-      color:#bbb; margin:18px 0 12px; display:flex; align-items:center; gap:8px;
-    }
-    .section-sep::before, .section-sep::after { content:''; flex:1; height:1px; background:#eee; }
+/* BODY — siempre con fondo */
+body{
+  font-family:'Montserrat',sans-serif;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px 16px;
+  background-color:#3a2a5e;
+  background-image:linear-gradient(rgba(58,42,94,.75),rgba(58,42,94,.75)),url('bowl-hero.jpg.jpg');
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+  background-repeat:no-repeat;
+}
+body.pv{
+  background:#0c0b08 !important;
+  display:block !important;
+  padding:0 !important;
+  align-items:unset !important;
+  justify-content:unset !important;
+}
 
-    .toggle-wrap { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .toggle-btn {
-      padding:13px 8px; border-radius:12px; border:2px solid #eee;
-      background:#fafafa; font-family:'Montserrat',sans-serif;
-      font-size:12px; font-weight:700; color:#aaa;
-      cursor:pointer; text-align:center; text-transform:uppercase;
-      letter-spacing:0.5px; transition:all 0.18s; user-select:none;
-    }
-    .toggle-btn:hover { border-color:var(--primary); color:var(--primary); }
-    .toggle-btn.selected-si  { background:#eafaf1; border-color:var(--green);  color:var(--green); }
-    .toggle-btn.selected-no  { background:#fef9e7; border-color:var(--orange); color:var(--orange); }
+@keyframes cardIn{from{opacity:0;transform:translateY(24px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes popIn{from{opacity:0;transform:scale(.3);}to{opacity:1;transform:scale(1);}}
 
-    .loopy-banner {
-      display:none; margin-top:4px; margin-bottom:4px;
-      background:linear-gradient(135deg, #fff8e1, #fffde7);
-      border:2px solid var(--yellow); border-radius:16px;
-      padding:16px 18px; animation:fadeIn 0.3s ease;
-    }
-    .loopy-banner.show { display:block; }
-    .loopy-banner-title { font-size:13px; font-weight:900; color:#7a5c00; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
-    .loopy-banner-body { font-size:12px; font-weight:700; color:#5d4200; line-height:1.6; }
-    .loopy-steps { margin-top:10px; display:flex; flex-direction:column; gap:5px; }
-    .loopy-step { display:flex; align-items:flex-start; gap:8px; font-size:11px; font-weight:700; color:#7a5c00; }
-    .loopy-step-num { min-width:20px; height:20px; border-radius:50%; background:var(--yellow); color:#5d4200; font-size:10px; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+/* CARD */
+.card{
+  background:var(--off);border-radius:28px;
+  width:100%;max-width:420px;
+  box-shadow:0 24px 64px rgba(0,0,0,.4);
+  overflow:hidden;
+  animation:cardIn .5s cubic-bezier(.22,1,.36,1) both;
+}
+@media(max-width:480px){
+  body{padding:0;}
+  .card{border-radius:0;min-height:100vh;box-shadow:none;}
+}
 
-    .btn {
-      width:100%; padding:17px; background:var(--primary); color:#fff;
-      border:none; border-radius:12px; font-family:'Montserrat',sans-serif;
-      font-size:14px; font-weight:900; text-transform:uppercase; letter-spacing:1px;
-      cursor:pointer; margin-top:6px; transition:background 0.18s, transform 0.12s;
-      box-shadow:0 6px 20px rgba(95,75,139,0.35);
-      position:relative; overflow:hidden;
-    }
-    .btn:hover:not(:disabled) { background:var(--pd); transform:translateY(-1px); }
-    .btn:disabled { opacity:0.5; cursor:not-allowed; }
-    .btn-text { transition:opacity 0.18s; }
-    .btn-loader { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.18s; }
-    .btn.loading .btn-text { opacity:0; }
-    .btn.loading .btn-loader { opacity:1; }
-    .spin { width:20px; height:20px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.65s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg); } }
+/* HERO */
+.hero{
+  position:relative;width:100%;height:230px;
+  background:linear-gradient(160deg,#7a5ca8,#3a2a5e);
+  overflow:hidden;
+}
+.hero-img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:center 75%;
+  display:block;
+}
+.hero-grad{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,.05) 0%,rgba(58,42,94,.92) 100%);
+}
+.hero-brand{
+  position:absolute;top:14px;left:14px;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.18);border-radius:8px;
+  padding:4px 11px;
+  font-size:11px;font-weight:900;color:#fff;
+  text-transform:uppercase;letter-spacing:1.5px;
+}
+.hero-timer{
+  position:absolute;top:14px;right:14px;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(8px);
+  border:1px solid rgba(248,113,113,.5);border-radius:20px;
+  padding:5px 11px;
+  display:flex;align-items:center;gap:5px;
+}
+.timer-dot{width:6px;height:6px;border-radius:50%;background:#f87171;flex-shrink:0;animation:blink 1s infinite;}
+.timer-txt{font-size:10px;font-weight:700;color:#fff;letter-spacing:.04em;}
 
-    .result { display:none; margin-top:18px; border-radius:16px; padding:18px 20px; text-align:left; }
-    .result.show { display:block; animation:fadeIn 0.3s ease; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
-    .result.ok  { background:#eafaf1; border:2px solid #a9dfbf; }
-    .result.err { background:#fdedec; border:2px solid #f5b7b1; }
-    .result-icon { font-size:32px; display:block; margin-bottom:8px; }
-    .result-title { font-size:15px; font-weight:900; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
-    .result.ok  .result-title { color:var(--green); }
-    .result.err .result-title { color:var(--red); }
-    .result-row { font-size:12px; font-weight:700; color:#444; margin-bottom:5px; line-height:1.5; }
-    .result-row span { color:var(--primary); }
-    .divider-line { border:none; border-top:1.5px dashed #ddd; margin:10px 0; }
+/* PRECIO HERO */
+.precio-hero{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:16px 22px 20px;text-align:center;
+}
+.precio-old{
+  font-size:13px;font-weight:700;
+  color:rgba(255,255,255,.45);
+  text-decoration:line-through;
+  margin-bottom:2px;
+}
+.precio-gratis{
+  font-size:44px;font-weight:900;
+  color:var(--y);
+  text-transform:uppercase;letter-spacing:1px;
+  line-height:1;
+  margin-bottom:8px;
+  text-shadow:0 2px 20px rgba(0,0,0,.4);
+}
+.precio-pill{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:30px;padding:6px 16px;
+}
+.precio-pill span{font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;}
 
-    .post-loopy-banner {
-      display:none; margin-top:14px;
-      background:linear-gradient(135deg,#fff8e1,#fffde7);
-      border:2px solid var(--yellow); border-radius:14px; padding:14px 16px;
-    }
-    .post-loopy-banner.show { display:block; animation:fadeIn 0.3s ease 0.2s both; }
-    .post-loopy-title { font-size:12px; font-weight:900; color:#7a5c00; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
-    .post-loopy-body { font-size:11px; font-weight:700; color:#5d4200; line-height:1.7; }
+/* PROGRESS */
+.prog{padding:16px 24px 0;}
+.prog-top{display:flex;justify-content:space-between;margin-bottom:6px;}
+.prog-lbl{font-size:10px;font-weight:700;color:var(--gr);text-transform:uppercase;letter-spacing:1px;}
+.prog-pct{font-size:10px;font-weight:900;color:var(--p);}
+.prog-bar{background:#f0ebff;border-radius:50px;height:7px;overflow:hidden;margin-bottom:10px;}
+.prog-fill{height:7px;border-radius:50px;background:linear-gradient(90deg,var(--p),var(--y));transition:width .5s cubic-bezier(.22,1,.36,1);}
+.prog-dots{display:flex;justify-content:center;gap:7px;}
+.dot{width:7px;height:7px;border-radius:50%;background:#e8e0f5;transition:all .3s;}
+.dot.active{background:var(--p);transform:scale(1.25);}
+.dot.done{background:var(--gn);}
 
-    /* ── Tarjeta datos cliente Adidas ── */
-    .adidas-client-card {
-      display:none; margin-top:14px;
-      background:#0a0a0a; border:2px solid #fff;
-      border-radius:16px; overflow:hidden;
-      animation:fadeIn 0.3s ease 0.15s both;
-    }
-    .adidas-client-card.show { display:block; }
-    .adc-header {
-      background:#000; padding:11px 16px;
-      display:flex; align-items:center; justify-content:space-between;
-      border-bottom:1px solid #222;
-    }
-    .adc-brand { font-weight:900; font-size:11px; letter-spacing:3px; color:#fff; text-transform:uppercase; }
-    .adc-badge { font-size:9px; font-weight:900; letter-spacing:1.5px; padding:4px 10px; border-radius:100px; text-transform:uppercase; white-space:nowrap; }
-    .adc-badge.nuevo    { background:rgba(34,197,94,0.15);  border:1.5px solid #22c55e; color:#22c55e; }
-    .adc-badge.conocido { background:rgba(245,200,66,0.12); border:1.5px solid #F5C842; color:#b8940f; }
-    .adc-body { padding:12px 16px; }
-    .adc-row  { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #1a1a1a; }
-    .adc-row:last-child { border-bottom:none; }
-    .adc-icon  { font-size:13px; width:20px; text-align:center; flex-shrink:0; }
-    .adc-label { font-size:9px; font-weight:900; letter-spacing:1px; text-transform:uppercase; color:#555; width:55px; flex-shrink:0; }
-    .adc-value { font-size:12px; font-weight:700; color:#fff; flex:1; word-break:break-all; }
-    .adc-loopy-tip {
-      margin-top:10px; padding:9px 12px;
-      background:rgba(34,197,94,0.08); border:1.5px solid rgba(34,197,94,0.25);
-      border-radius:10px; font-size:11px; font-weight:700; color:#86efac; line-height:1.5;
-    }
+/* BODY */
+.cbody{padding:16px 24px 24px;}
+.q-num{font-size:10px;font-weight:700;color:var(--gr);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;}
+.q-txt{font-size:15px;font-weight:900;color:var(--p);line-height:1.4;margin-bottom:14px;}
 
-    /* ── Tarjetas de error tipificadas ── */
-    .err-card { display:none; margin-top:18px; border-radius:16px; padding:18px 20px; animation:fadeIn 0.3s ease; }
-    .err-card.show { display:block; }
-    .err-card .err-icon { font-size:36px; display:block; margin-bottom:10px; }
-    .err-card .err-reason { font-size:14px; font-weight:900; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px; }
-    .err-card .err-detail { font-size:12px; font-weight:700; color:#666; margin-bottom:14px; line-height:1.6; }
-    .err-card .err-action-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#aaa; margin-bottom:6px; }
-    .err-card .err-action { font-size:12px; font-weight:700; line-height:1.6; padding:10px 14px; border-radius:10px; }
-    .err-card.type-canjeado  { background:#fdf0f0; border:2px solid #f5c6c6; }
-    .err-card.type-canjeado  .err-reason { color:#c0392b; }
-    .err-card.type-canjeado  .err-action { background:#fce4e4; color:#922b21; }
-    .err-card.type-ciudad    { background:#f0f4ff; border:2px solid #c5cff5; }
-    .err-card.type-ciudad    .err-reason { color:#2c3e8c; }
-    .err-card.type-ciudad    .err-action { background:#e0e8ff; color:#1a2460; }
-    .err-card.type-horario   { background:#fff8f0; border:2px solid #f5dbb8; }
-    .err-card.type-horario   .err-reason { color:#b7570a; }
-    .err-card.type-horario   .err-action { background:#ffecd6; color:#7d3a05; }
-    .err-card.type-formato   { background:#f5f0ff; border:2px solid #d4c8f5; }
-    .err-card.type-formato   .err-reason { color:#5F4B8B; }
-    .err-card.type-formato   .err-action { background:#ede6ff; color:#3a2a6e; }
-    .err-card.type-vencido   { background:#f5f0ff; border:2px solid #d4c8f5; }
-    .err-card.type-vencido   .err-reason { color:#5F4B8B; }
-    .err-card.type-vencido   .err-action { background:#ece6ff; color:#3d2d7a; }
-    .err-card.type-noexiste  { background:#f0f0f0; border:2px solid #d0d0d0; }
-    .err-card.type-noexiste  .err-reason { color:#444; }
-    .err-card.type-noexiste  .err-action { background:#e4e4e4; color:#333; }
+/* OPTS */
+.opts{display:flex;flex-direction:column;gap:7px;margin-bottom:16px;}
+.opt{
+  display:flex;align-items:center;gap:11px;
+  padding:12px 14px;border-radius:13px;
+  border:2px solid var(--bd);background:#fff;
+  cursor:pointer;transition:all .15s;
+  font-family:'Montserrat',sans-serif;
+  font-size:12px;font-weight:700;color:#555;
+  width:100%;text-align:left;
+}
+.opt:hover{border-color:var(--p);background:#f5f0ff;}
+.opt.sel{border-color:var(--p);background:#f0ebff;color:var(--p);}
+.opt-r{min-width:18px;height:18px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.opt.sel .opt-r{background:var(--p);border-color:var(--p);}
+.opt.sel .opt-r::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff;}
+.opt-em{font-size:16px;flex-shrink:0;}
 
-    /* ── Bloqueo sin activar (Adidas) ── */
-    .adidas-no-activado {
-      display:none; margin-top:14px;
-      background:#fff8e1; border:2px solid #f39c12;
-      border-radius:16px; padding:20px; text-align:center;
-      animation:fadeIn 0.3s ease;
-    }
-    .adidas-no-activado.show { display:block; }
-    .adidas-no-activado-icon { font-size:36px; margin-bottom:10px; display:block; }
-    .adidas-no-activado-title { font-size:14px; font-weight:900; color:#7d3c00; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
-    .adidas-no-activado-desc { font-size:11px; font-weight:700; color:#7d5a00; line-height:1.6; margin-bottom:16px; }
-    .adidas-qr-wrap { background:#fff; border-radius:12px; padding:14px; margin-bottom:14px; display:inline-block; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
-    .adidas-qr-wrap img, .adidas-qr-wrap canvas { border-radius:6px; }
-    .adidas-no-activado-steps { text-align:left; margin-bottom:16px; }
-    .adidas-step { display:flex; align-items:flex-start; gap:10px; padding:6px 0; font-size:11px; font-weight:700; color:#5d3a00; }
-    .adidas-step-num { min-width:20px; height:20px; border-radius:50%; background:#f39c12; color:#fff; font-size:10px; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
-    .adidas-retry-btn { width:100%; padding:14px; background:#0a0a0a; color:#fff; border:none; border-radius:12px; font-family:'Montserrat',sans-serif; font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:1px; cursor:pointer; transition:all 0.18s; }
-    .adidas-retry-btn:hover { background:#333; }
+/* TEXTAREA */
+.ta{
+  width:100%;padding:13px 15px;
+  border-radius:12px;border:2px solid var(--bd);
+  font-family:'Montserrat',sans-serif;
+  font-size:13px;font-weight:600;color:var(--p);
+  outline:none;resize:none;
+  transition:border-color .15s;
+  margin-bottom:5px;min-height:80px;
+}
+.ta::placeholder{color:#bbb;font-weight:600;}
+.ta:focus{border-color:var(--p);}
+.ta-hint{font-size:9px;font-weight:700;color:#ccc;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
+.ta-err{font-size:10px;font-weight:700;color:var(--rd);text-transform:uppercase;letter-spacing:.3px;display:none;margin-bottom:10px;}
+.ta-err.show{display:block;}
 
-    /* ── Banner Adidas (cupón válido) ── */
-    .adidas-banner { display:none; background:#000; border-radius:16px; padding:24px; margin-bottom:16px; text-align:center; }
-    .adidas-banner.show { display:block; animation:adFadeIn 0.4s ease; }
-    @keyframes adFadeIn { from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);} }
-    .adidas-stripes { display:flex; justify-content:center; gap:6px; margin-bottom:16px; }
-    .adidas-stripe { width:8px; height:40px; background:#fff; border-radius:2px; transform:skewX(-15deg); }
-    .adidas-title { font-size:11px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:3px; margin-bottom:6px; }
-    .adidas-main { font-size:20px; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:2px; margin-bottom:4px; }
-    .adidas-product { font-size:13px; font-weight:700; color:#fff; margin-bottom:16px; }
-    .adidas-action { background:#fff; color:#000; font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:1px; padding:12px 24px; border-radius:8px; display:inline-block; }
-    .adidas-valid { font-size:10px; color:rgba(255,255,255,0.4); margin-top:12px; letter-spacing:1px; }
+/* BTN */
+.btn{
+  width:100%;padding:16px;
+  background:var(--p);color:#fff;border:none;border-radius:12px;
+  font-family:'Montserrat',sans-serif;
+  font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 6px 20px rgba(95,75,139,.4);
+  opacity:.35;pointer-events:none;
+  position:relative;overflow:hidden;
+}
+.btn.ok{opacity:1;pointer-events:all;}
+.btn.ok:hover{background:var(--pd);transform:translateY(-1px);}
+.btn.shake{animation:shake .3s ease;}
+.bt{transition:opacity .18s;}
+.bs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;}
+.btn.ld .bt{opacity:0;}
+.btn.ld .bs{opacity:1;}
+.sp{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;}
 
-    .reset-btn {
-      width:100%; padding:14px; margin-top:14px;
-      background:transparent; border:2px solid var(--primary);
-      border-radius:12px; font-family:'Montserrat',sans-serif;
-      font-size:13px; font-weight:900; color:var(--primary);
-      text-transform:uppercase; letter-spacing:1px;
-      cursor:pointer; transition:all 0.18s;
-    }
-    .reset-btn:hover { background:var(--primary); color:#fff; }
-    .form-section { transition:opacity 0.2s; }
-    .form-section.hidden { display:none; }
+/* STATES */
+.state{display:none;}
+.state.on{display:block;}
 
-    /* ── MODAL RESCATE ── */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;padding:20px;}
-    .modal-overlay.show{display:flex;}
-    .modal{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:380px;position:relative;animation:modalIn .3s cubic-bezier(0.34,1.56,0.64,1);}
-    @keyframes modalIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
-    .modal-close{position:absolute;top:16px;right:16px;background:transparent;border:none;font-size:20px;cursor:pointer;color:#999;line-height:1;}
-    .modal-header{background:#f39c12;border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
-    .modal-header-icon{font-size:28px;margin-bottom:6px;}
-    .modal-header-title{font-size:15px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;}
-    .modal-header-sub{font-size:10px;color:rgba(255,255,255,0.85);font-weight:600;letter-spacing:1px;margin-top:3px;}
-    .modal-info{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:12px;margin-bottom:16px;font-size:11px;color:#7a5c00;line-height:1.6;}
-    .modal-field{margin-bottom:14px;}
-    .modal-field label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--primary);margin-bottom:6px;}
-    .modal-field input{width:100%;padding:12px 14px;border:2px solid #e0d9f0;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#2c2c2c;outline:none;transition:border-color .2s;}
-    .modal-field input:focus{border-color:var(--primary);}
-    .modal-btn{width:100%;padding:14px;background:#f39c12;border:none;border-radius:12px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;color:#fff;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .2s;margin-top:4px;}
-    .modal-btn:hover{background:#e67e22;}
-    .modal-btn:disabled{opacity:.5;cursor:not-allowed;}
-    .modal-result{display:none;text-align:center;padding:12px 0;}
-    .modal-result.ok .modal-result-code{background:var(--primary);border-radius:12px;padding:14px;margin:10px 0;}
-    .modal-result-code-label{font-size:10px;color:rgba(255,255,255,0.7);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
-    .modal-result-code-val{font-size:32px;font-weight:900;color:#fff;letter-spacing:4px;}
-    .modal-result-code-sub{font-size:10px;color:rgba(255,255,255,0.7);margin-top:3px;}
-    .modal-result-instr{background:#e8f8f0;border:1px solid #27ae60;border-radius:10px;padding:10px;font-size:12px;color:#1a5c3a;font-weight:600;line-height:1.5;margin-top:8px;}
-    .modal-result-err{background:#fde8e8;border:1px solid #e74c3c;border-radius:10px;padding:12px;font-size:12px;color:#c0392b;line-height:1.5;}
-    .modal-audit{font-size:10px;color:#aaa;text-align:center;margin-top:12px;}
-    .rescue-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:10px 16px;background:#f39c12;color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .2s;}
-    .rescue-btn:hover{background:#e67e22;transform:translateY(-1px);}
-  </style>
+/* LOADING */
+.lh{background:var(--p);padding:28px 30px 24px;text-align:center;}
+.li{font-size:44px;display:block;margin-bottom:8px;}
+.lt{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.ls{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1.5px;}
+.lb{padding:28px;}
+.lbar{background:#f0ebff;border-radius:50px;height:9px;overflow:hidden;margin-bottom:8px;}
+.lbar-f{height:9px;border-radius:50px;background:linear-gradient(90deg,var(--p),var(--y));width:0%;transition:width .4s;}
+.lmsg{font-size:11px;font-weight:700;color:#666;text-align:center;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;min-height:32px;}
+.lsteps{display:flex;flex-direction:column;gap:9px;}
+.lstep{display:flex;align-items:center;gap:9px;font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.4px;transition:color .3s;}
+.lstep.a,.lstep.d{color:var(--p);}
+.lstep-i{font-size:15px;width:22px;text-align:center;flex-shrink:0;}
+.lstep-c{width:17px;height:17px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .3s;}
+.lstep.d .lstep-c{background:var(--p);border-color:var(--p);}
+.lstep.d .lstep-c::after{content:'✓';font-size:9px;color:#fff;font-weight:900;}
+
+/* CUPÓN */
+.rh{background:var(--p);padding:28px 30px 22px;text-align:center;}
+.ri{font-size:44px;display:block;margin-bottom:8px;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) .1s both;}
+.rt{font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.rs{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;}
+.rb{padding:20px 24px 26px;}
+.ticket{background:var(--p);border-radius:14px;padding:18px 22px;margin-bottom:14px;}
+.tl{font-size:9px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:7px;}
+.tc{font-size:34px;font-weight:900;color:#fff;letter-spacing:4px;line-height:1;margin-bottom:4px;}
+.tp{font-size:11px;font-weight:700;color:var(--y);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.td{border-top:1.5px dashed rgba(255,255,255,.2);margin:12px -22px;position:relative;}
+.td::before,.td::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:15px;height:15px;background:var(--off);border-radius:50%;}
+.td::before{left:-7px;}.td::after{right:-7px;}
+.tb{display:flex;justify-content:space-between;align-items:center;}
+.tv{font-size:10px;font-weight:600;color:rgba(255,255,255,.45);}
+.tv span{color:var(--y);font-weight:700;}
+.cbtn{background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 14px;border-radius:7px;cursor:pointer;}
+.cbtn:hover{background:rgba(255,255,255,.2);}
+.pill{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;border-radius:11px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.2px;line-height:1.5;margin-bottom:8px;}
+.pill.pp{background:#f5f0ff;border:1.5px solid #d4c8f5;color:var(--p);}
+.pill.py{background:#fffbea;border:1.5px solid #f0dc8c;color:#7a5c00;}
+.pill-i{font-size:15px;flex-shrink:0;}
+
+/* ERROR */
+.ew{padding:40px 24px;text-align:center;}
+.ei{font-size:44px;margin-bottom:12px;}
+.et{font-size:16px;font-weight:900;color:var(--p);margin-bottom:8px;}
+.es{font-size:12px;font-weight:600;color:var(--gr);line-height:1.6;}
+
+/* ── MASTER ── */
+.mo{display:none;position:fixed;inset:0;background:rgba(12,11,8,.95);z-index:9999;align-items:center;justify-content:center;padding:20px;}
+.mo.on{display:flex;}
+.mc{background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:36px;width:100%;max-width:340px;text-align:center;}
+.mb{font-size:20px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#f0ede4;margin-bottom:4px;}
+.msub{font-size:9px;color:#4a4840;text-transform:uppercase;letter-spacing:.12em;margin-bottom:22px;}
+.mi{width:100%;padding:13px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#f0ede4;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;outline:none;text-align:center;letter-spacing:.1em;margin-bottom:10px;}
+.mi::placeholder{color:#4a4840;}
+.mi:focus{border-color:var(--p);}
+.mbtn{width:100%;padding:13px;background:var(--p);border:none;border-radius:10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;}
+.mbtn:hover{background:var(--pd);}
+.merr{font-size:10px;color:#f87171;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:10px;display:none;}
+.merr.on{display:block;}
+.mcancel{font-size:10px;color:#4a4840;margin-top:14px;cursor:pointer;text-decoration:underline;display:none;}
+.mcancel.on{display:block;}
+
+/* ── PREVIEW ── */
+#pv{display:none;padding:28px 20px;max-width:960px;margin:0 auto;}
+#pv.on{display:block;}
+.pvtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08);}
+.pvbrand{font-size:14px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#f0ede4;}
+.pvtag{font-size:9px;color:#4a4840;text-transform:uppercase;letter-spacing:.1em;margin-top:3px;}
+.pvacts{display:flex;gap:8px;align-items:center;}
+.pvpill{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:20px;padding:5px 12px;font-size:9px;font-weight:700;color:#4ade80;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:5px;}
+.pvpill-d{width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;}
+.pvbtn{background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(255,255,255,.4);font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:5px 12px;cursor:pointer;}
+.pvbtn:hover{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);}
+.pvs{font-size:9px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.pvs::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06);}
+.pvgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-bottom:28px;}
+.pvcard{background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:12px;overflow:hidden;transition:border-color .15s;}
+.pvcard:hover{border-color:var(--p);}
+.pvcb{padding:16px 18px 0;}
+.pvtag-s{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;}
+.pvcn{font-size:14px;font-weight:900;color:#f0ede4;margin-bottom:4px;}
+.pvcd{font-size:10px;color:#8a877e;line-height:1.5;margin-bottom:14px;}
+.pvcbtns{padding:0 18px 16px;display:flex;gap:8px;}
+.pvcbtn{flex:1;padding:9px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}
+.pvcbtn.o{border:1px solid rgba(255,255,255,.1);background:transparent;color:#8a877e;}
+.pvcbtn.o:hover{border-color:var(--p);color:#f0ede4;}
+.pvcbtn.s{border:none;background:var(--p);color:#fff;}
+.pvcbtn.s:hover{background:var(--pd);}
+.pvtbl{background:#151410;border:1px solid rgba(255,255,255,.14);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.pvtbl table{width:100%;border-collapse:collapse;font-size:10px;}
+.pvtbl th{padding:10px 16px;text-align:left;font-size:8px;font-weight:700;color:#4a4840;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);}
+.pvtbl td{padding:10px 16px;border-bottom:.5px solid rgba(255,255,255,.04);color:#8a877e;}
+.pvtbl tr:last-child td{border-bottom:none;}
+.pvlink{font-family:'Courier New',monospace;font-size:9px;color:var(--p);text-decoration:none;padding:3px 8px;border:1px solid rgba(95,75,139,.3);border-radius:4px;}
+.pvnota{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.12);border-radius:10px;padding:12px 16px;font-size:10px;color:#fbbf24;line-height:1.7;}
+
+/* LIGHT */
+body.lt .pvcard{background:#fff;border-color:rgba(0,0,0,.1);}
+body.lt .pvcn{color:#0c0b08;}
+body.lt .pvtbl{background:#fff;border-color:rgba(0,0,0,.1);}
+body.lt .pvtbl td{color:#555;}
+body.lt .pvtop{border-color:rgba(0,0,0,.08);}
+body.lt .pvbrand{color:#0c0b08;}
+body.lt .pvs{color:#888;}
+body.lt .pvs::after{background:rgba(0,0,0,.08);}
+body.lt #pv{color:#0c0b08;}
+</style>
 </head>
 <body>
-<div class="card">
-  <div class="card-header">
-    <div class="brand">Oakberry</div>
-    <div class="brand-sub">Validador de cupones · Cajero</div>
+
+<!-- MASTER MODAL -->
+<div class="mo" id="mo">
+  <div class="mc">
+    <div class="mb">Oakberry</div>
+    <div class="msub">Llave maestra · UET</div>
+    <input class="mi" type="password" id="mpwd" placeholder="Código de acceso" onkeydown="if(event.key==='Enter')chkM()">
+    <button class="mbtn" onclick="chkM()">Acceder →</button>
+    <div class="merr" id="merr">Código incorrecto</div>
+    <div class="mcancel" id="mcancel" onclick="closeM()">Cancelar</div>
   </div>
-  <div class="card-body">
+</div>
 
-    <div class="form-section" id="formSection">
-    <div class="field">
-      <label>Código del cupón</label>
-      <input type="text" id="codigo" placeholder="XXXXX" maxlength="5">
+<!-- PREVIEW -->
+<div id="pv">
+  <div class="pvtop">
+    <div><div class="pvbrand">Oakberry · UET Preview</div><div class="pvtag">User Experience Test · Panel de control</div></div>
+    <div class="pvacts">
+      <div class="pvpill"><div class="pvpill-d"></div>Modo preview</div>
+      <button class="pvbtn" id="themeBtn" onclick="tgTheme()">☀ Light</button>
+      <button class="pvbtn" onclick="exitPv()">Salir</button>
     </div>
-    <div class="field">
-      <label>Ciudad</label>
-      <select id="ciudad" onchange="cargarTiendas()">
-        <option value="">Selecciona ciudad</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Tienda</label>
-      <select id="tienda">
-        <option value="">Selecciona tienda</option>
-      </select>
-    </div>
-
-    <div class="section-sep">Perfil del cliente</div>
-
-    <div class="field">
-      <label>¿Es la primera vez que prueba Oakberry?</label>
-      <div class="toggle-wrap">
-        <button class="toggle-btn" id="nuevo-si" onclick="setNuevo('SI')">✅ Sí, es nuevo</button>
-        <button class="toggle-btn" id="nuevo-no" onclick="setNuevo('NO')">🔄 Ya nos conoce</button>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>¿Tiene tarjeta Loopy?</label>
-      <div class="toggle-wrap">
-        <button class="toggle-btn" id="loopy-si" onclick="setLoopy('SI')">✅ Sí tiene</button>
-        <button class="toggle-btn" id="loopy-no" onclick="setLoopy('NO')">❌ No tiene</button>
-      </div>
-    </div>
-
-    <div class="loopy-banner" id="loopyBanner">
-      <div class="loopy-banner-title">⭐ ¡Invítalo a Loopy ahora!</div>
-      <div class="loopy-banner-body">
-        Este cliente no tiene tarjeta Loopy. Es el momento perfecto para inscribirlo — acumula sellos y gana productos gratis.
-        <div class="loopy-steps">
-          <div class="loopy-step"><span class="loopy-step-num">1</span><span>Invítalo a escanear el código QR de Loopy</span></div>
-          <div class="loopy-step"><span class="loopy-step-num">2</span><span>Cuéntale: con 10 sellos gana un producto gratis 🫐</span></div>
-        </div>
-      </div>
-    </div>
-    </div><!-- /form-section -->
-
-    <button class="btn" id="mainBtn" onclick="validar()">
-      <span class="btn-text">Validar cupón</span>
-      <span class="btn-loader"><span class="spin"></span></span>
-    </button>
-
-    <!-- RESULTADO cupones normales -->
-    <div class="result" id="resultado">
-      <span class="result-icon" id="resIcon"></span>
-      <div class="result-title" id="resTitle"></div>
-      <hr class="divider-line">
-      <div id="resRows"></div>
-    </div>
-
-    <!-- BANNER ADIDAS (cupón válido) -->
-    <div class="adidas-banner" id="adidasBanner">
-      <div class="adidas-stripes">
-        <div class="adidas-stripe"></div><div class="adidas-stripe"></div><div class="adidas-stripe"></div>
-      </div>
-      <div class="adidas-title">Cupón válido · Campaña oficial</div>
-      <div class="adidas-main">Adidas × Oakberry</div>
-      <div class="adidas-product">🫐 Bowl gratis · Regalo oficial Adidas</div>
-      <div class="adidas-action">✅ Entregar el bowl al cliente</div>
-      <div class="adidas-valid">Código canjeado · Uso único confirmado</div>
-    </div>
-
-    <!-- TARJETA DATOS CLIENTE ADIDAS (nueva) -->
-    <div class="adidas-client-card" id="adidasClientCard">
-      <div class="adc-header">
-        <span class="adc-brand">ADIDAS × OAKBERRY · Datos del cliente</span>
-        <span class="adc-badge" id="adcBadge">—</span>
-      </div>
-      <div class="adc-body">
-        <div class="adc-row">
-          <span class="adc-icon">👤</span>
-          <span class="adc-label">Nombre</span>
-          <span class="adc-value" id="adcNombre">—</span>
-        </div>
-        <div class="adc-row">
-          <span class="adc-icon">📱</span>
-          <span class="adc-label">Celular</span>
-          <span class="adc-value" id="adcCelular">—</span>
-        </div>
-        <div class="adc-row">
-          <span class="adc-icon">📧</span>
-          <span class="adc-label">Email</span>
-          <span class="adc-value" id="adcEmail">—</span>
-        </div>
-        <div class="adc-row">
-          <span class="adc-icon">📍</span>
-          <span class="adc-label">Ciudad</span>
-          <span class="adc-value" id="adcCiudad">—</span>
-        </div>
-        <div class="adc-loopy-tip" id="adcLoopyTip" style="display:none;">
-          ⭐ Cliente <strong>nuevo en Oakberry</strong> — invítalo a Loopy antes de que se vaya.
-        </div>
-      </div>
-    </div>
-
-    <!-- BLOQUEO ADIDAS SIN ACTIVAR -->
-    <div class="adidas-no-activado" id="adidasNoActivado">
-      <span class="adidas-no-activado-icon">📵</span>
-      <div class="adidas-no-activado-title">Código no activado</div>
-      <div class="adidas-no-activado-desc">
-        Este código Adidas no puede canjearse todavía.<br>
-        El cliente debe activarlo primero escaneando el QR.
-      </div>
-      <div class="adidas-qr-wrap" id="adidasQRWrap">
-        <div id="adidasQRDiv"></div>
-      </div>
-      <div class="adidas-no-activado-steps">
-        <div class="adidas-step"><span class="adidas-step-num">1</span><span>El cliente escanea el QR con su celular</span></div>
-        <div class="adidas-step"><span class="adidas-step-num">2</span><span>Ingresa nombre, celular y email</span></div>
-        <div class="adidas-step"><span class="adidas-step-num">3</span><span>Vuelve a ingresar el código aquí</span></div>
-      </div>
-      <button class="adidas-retry-btn" onclick="resetAdidas()">🔄 Reintentar validación</button>
-    </div>
-
-    <!-- TARJETAS DE ERROR TIPIFICADAS -->
-    <div class="err-card type-canjeado" id="errCanjeado">
-      <span class="err-icon">🔒</span>
-      <div class="err-reason">Cupón ya utilizado</div>
-      <div class="err-detail">Este código ya fue canjeado anteriormente y no puede volver a usarse.</div>
-      <div class="err-action-label">Qué decirle al cliente</div>
-      <div class="err-action">Este cupón ya fue redimido. Si tienes dudas, comunícate con nosotros.</div>
-    </div>
-
-    <div class="err-card type-vencido" id="errVencido">
-      <span class="err-icon">⏳</span>
-      <div class="err-reason">Cupón vencido</div>
-      <div class="err-detail">Este cupón ya venció y no puede canjearse.</div>
-      <div class="err-action-label">Qué decirle al cliente</div>
-      <div class="err-action">Tu cupón ya expiró. Si recibiste un mensaje de segunda oportunidad, úsalo para generar uno nuevo.</div>
-    </div>
-
-    <div class="err-card type-ciudad" id="errCiudad">
-      <span class="err-icon">📍</span>
-      <div class="err-reason">Ciudad incorrecta</div>
-      <div class="err-detail" id="errCiudadDetalle">Este cupón fue generado para otra ciudad.</div>
-      <div class="err-action-label">Qué decirle al cliente</div>
-      <div class="err-action">Tu cupón solo es válido en la ciudad donde lo generaste. Puedes usarlo allá dentro de su vigencia.</div>
-    </div>
-
-    <div class="err-card type-horario" id="errHorario">
-      <span class="err-icon">⏰</span>
-      <div class="err-reason">Fuera del horario permitido</div>
-      <div class="err-detail" id="errHorarioDetalle">Este cupón tiene restricción de horario.</div>
-      <div class="err-action-label">Qué decirle al cliente</div>
-      <div class="err-action" id="errHorarioAccion">Tu cupón solo aplica en el horario indicado. ¡Vuelve en ese momento y con gusto te lo aplicamos!</div>
-    </div>
-
-    <div class="err-card type-formato" id="errFormato">
-      <span class="err-icon">🔤</span>
-      <div class="err-reason">Código inválido</div>
-      <div class="err-detail">El código ingresado no tiene el formato correcto. Debe ser 5 caracteres.</div>
-      <div class="err-action-label">Qué hacer</div>
-      <div class="err-action">Pídele al cliente que muestre el código en pantalla y vuelve a digitarlo con cuidado.</div>
-    </div>
-
-    <div class="err-card type-noexiste" id="errNoExiste">
-      <span class="err-icon">❓</span>
-      <div class="err-reason">Código no encontrado</div>
-      <div class="err-detail">El código ingresado no existe en el sistema. Si el cliente puede mostrar su pantalla con el cupón, puedes generar un código de rescate válido por 10 minutos.</div>
-      <div class="err-action-label">Opciones</div>
-      <div class="err-action">Verifica que el código esté bien escrito. Si el cliente muestra su pantalla con el cupón, usa el rescate.</div>
-      <button class="rescue-btn" onclick="abrirRescate()">🚨 Generar código de rescate</button>
-    </div>
-
-    <div class="post-loopy-banner" id="postLoopyBanner">
-      <div class="post-loopy-title">⭐ Recuerda inscribir al cliente en Loopy</div>
-      <div class="post-loopy-body">
-        Antes de que se vaya: regístralo en la app Loopy de caja con su celular. Esta compra ya le puede contar su primer sello. 🫐
-      </div>
-    </div>
-
-    <button class="reset-btn" id="resetBtn" style="display:none;" onclick="resetForm()">
-      ← Validar otro cupón
-    </button>
-
   </div>
+  <div class="pvs">Segmentos</div>
+  <div class="pvgrid" id="pvgrid"></div>
+  <div class="pvs">Tokens de prueba</div>
+  <div class="pvtbl"><table><thead><tr><th>Token</th><th>Segmento</th><th>Ciudad</th><th>Link</th></tr></thead><tbody id="pvtb"></tbody></table></div>
+  <div class="pvnota"><strong>Modo demo:</strong> No guarda nada en BigQuery ni genera cupones reales.</div>
+</div>
+
+<!-- CARD -->
+<div class="card" id="card">
+
+  <!-- ENCUESTA -->
+  <div class="state on" id="sEnc">
+    <!-- MITAD SUPERIOR: foto del producto -->
+    <div style="position:relative;width:100%;height:220px;overflow:hidden;flex-shrink:0;">
+      <img src="bowl-hero.jpg.jpg" alt="Bowl Oakberry"
+        style="width:100%;height:100%;object-fit:cover;object-position:center 35%;"
+        onerror="this.parentElement.style.background='linear-gradient(160deg,#7a5ca8,#3a2a5e)';this.style.display='none';">
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 55%,rgba(58,42,94,.98) 100%);"></div>
+      <!-- Badge marca -->
+      <div style="position:absolute;top:13px;left:13px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:4px 11px;">
+        <span style="font-size:11px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:1.5px;">Oakberry</span>
+      </div>
+      <!-- Badge timer -->
+      <div style="position:absolute;top:13px;right:13px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(248,113,113,.5);border-radius:20px;padding:5px 11px;display:flex;align-items:center;gap:5px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:#f87171;animation:blink 1s infinite;flex-shrink:0;"></div>
+        <span style="font-size:10px;font-weight:700;color:#fff;letter-spacing:.04em;">Solo 72h para canjear</span>
+      </div>
+    </div>
+    <!-- MITAD INFERIOR: framing identitario — sin priming GRATIS -->
+    <div style="background:linear-gradient(to bottom,rgba(58,42,94,1) 0%,#3a2a5e 100%);padding:24px 26px 26px;text-align:center;">
+      <!-- Tag de pertenencia -->
+      <div style="font-size:9px;font-weight:700;color:rgba(245,200,66,.85);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;" id="plbl3">Para ti · Pereira</div>
+      <!-- Mensaje principal: tensión + invitación -->
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Eras parte de Oakberry</div>
+      <div style="font-size:26px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:14px;letter-spacing:.5px;">Queremos entender<br>qué cambió.</div>
+      <!-- Sub: brevedad + recompensa sutil -->
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:30px;padding:8px 18px;">
+        <span style="font-size:14px;">🫐</span>
+        <span style="font-size:10px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.5px;" id="plbl">5 preguntas · 2 min · Bowl al final</span>
+      </div>
+    </div>
+    <div class="prog">
+      <div class="prog-top">
+        <span class="prog-lbl" id="plbl2">Pregunta 1 de 5</span>
+        <span class="prog-pct" id="ppct">20%</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:20%"></div></div>
+      <div class="prog-dots" id="pdots"></div>
+    </div>
+    <div class="cbody" id="sbody"></div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="state" id="sLoad">
+    <div class="lh"><span class="li">🫐</span><div class="lt2">Generando tu cupón</div><div class="ls">Solo unos segundos</div></div>
+    <div class="lb">
+      <div class="lbar"><div class="lbar-f" id="lf"></div></div>
+      <div class="lmsg" id="lmsg">Guardando respuestas...</div>
+      <div class="lsteps">
+        <div class="lstep" id="ls1"><span class="lstep-i">📋</span><span style="flex:1">Guardando respuestas</span><span class="lstep-c"></span></div>
+        <div class="lstep" id="ls2"><span class="lstep-i">🎟</span><span style="flex:1">Generando código único</span><span class="lstep-c"></span></div>
+        <div class="lstep" id="ls3"><span class="lstep-i">💾</span><span style="flex:1">Registrando cupón</span><span class="lstep-c"></span></div>
+        <div class="lstep" id="ls4"><span class="lstep-i">✅</span><span style="flex:1">¡Listo para canjear!</span><span class="lstep-c"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUPÓN -->
+  <div class="state" id="sCup">
+    <div class="rh"><span class="ri">🎉</span><div class="rt">¡Tu bowl está listo!</div><div class="rs" id="rnomb">Gracias por tu respuesta</div></div>
+    <div class="rb">
+      <div class="ticket">
+        <div class="tl">Tu código · Bowl 7oz gratis</div>
+        <div class="tc" id="rcode">——</div>
+        <div class="tp">🫐 Bowl The One 7oz · Sin toppings extra · Valor $19.500</div>
+        <div class="td"></div>
+        <div class="tb">
+          <div class="tv">Vence: <span id="rvence">—</span></div>
+          <button class="cbtn" onclick="copiar()">📋 Copiar</button>
+        </div>
+      </div>
+      <div class="pill pp"><span class="pill-i">📍</span><span id="rtienda">Muéstrale este código al cajero antes de pagar.</span></div>
+      <div class="pill py"><span class="pill-i">⚠️</span><span>Bowl sin toppings extra · Uso único · 72h para canjear · Aplican T&C</span></div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="state" id="sErr">
+    <div style="background:var(--p);padding:28px;text-align:center;"><div style="font-size:26px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:2px;">Oakberry</div></div>
+    <div class="ew"><div class="ei">😕</div><div class="et">Este link no es válido</div><div class="es">El link expiró o no es válido.<br>Escríbenos a @oakberry.colombia en Instagram.</div></div>
+  </div>
+
 </div>
 
 <script>
-const SCRIPT_URL = "https://api.oakberry-cupones.com";
-const CRM_API   = "https://oakberry-api-664413392517.us-central1.run.app"; // Cloud Run — cupones UET
-const REACT_API = "https://oakberry-reactivacion-api-664413392517.us-central1.run.app"; // Cloud Run — cupones reactivación
-
-let _nuevo = "";
-let _loopy = "";
-
-function setNuevo(val) {
-  _nuevo = val;
-  document.getElementById("nuevo-si").className = "toggle-btn" + (val === "SI" ? " selected-si" : "");
-  document.getElementById("nuevo-no").className = "toggle-btn" + (val === "NO" ? " selected-no" : "");
+const API="https://oakberry-api-664413392517.us-central1.run.app";
+const REACT_API="https://oakberry-reactivacion-api-664413392517.us-central1.run.app";
+// Detectar tokens del programa de Reactivación (RET) o Cumpleaños (BDY)
+// → usar nuestro Cloud Run en vez del API viejo de Adquisición
+function getApiFor(token){
+  const t=(token||"").toUpperCase();
+  return (t.startsWith("RET")||t.startsWith("BDY")) ? REACT_API : API;
 }
+const MPWD="Oakberry123"; // ← cambia aquí la contraseña
+const MKEY="uet_m3";
+const up=new URLSearchParams(window.location.search);
+const TOKEN=up.get("t")||"";
+const DEMO=up.get("demo")==="1";
 
-function setLoopy(val) {
-  _loopy = val;
-  document.getElementById("loopy-si").className = "toggle-btn" + (val === "SI" ? " selected-si" : "");
-  document.getElementById("loopy-no").className = "toggle-btn" + (val === "NO" ? " selected-no" : "");
-  document.getElementById("loopyBanner").classList.toggle("show", val === "NO");
-}
+const DD={
+  "DEMO_OT01":{ok:true,nombre:"Carlos Demo",segmento:"One-time",ciudad:"Pereira",tienda:"Oakberry Pereira",ya_respondio:false},
+  "DEMO_OC01":{ok:true,nombre:"María Demo",segmento:"Ocasional",ciudad:"Pereira",tienda:"Oakberry Pereira",ya_respondio:false},
+  "DEMO_RE01":{ok:true,nombre:"Juan Demo",segmento:"Regular",ciudad:"Bogotá",tienda:"Oakberry Zona T",ya_respondio:false},
+  "DEMO_FR01":{ok:true,nombre:"Ana Demo",segmento:"Frecuente",ciudad:"Medellín",tienda:"Oakberry Oviedo",ya_respondio:false},
+  "DEMO_VP01":{ok:true,nombre:"Daniel Demo",segmento:"VIP",ciudad:"Cali",tienda:"Oakberry Granada",ya_respondio:false},
+};
+const DT=[
+  {token:"DEMO_OT01",seg:"one_time",label:"One-timer",ciudad:"Pereira",color:"rgba(248,113,113,.15)",tc:"#f87171"},
+  {token:"DEMO_OC01",seg:"ocasional",label:"Ocasional",ciudad:"Pereira",color:"rgba(251,191,36,.15)",tc:"#fbbf24"},
+  {token:"DEMO_RE01",seg:"regular",label:"Regular",ciudad:"Bogotá",color:"rgba(255,255,255,.08)",tc:"#8a877e"},
+  {token:"DEMO_FR01",seg:"frecuente",label:"Frecuente",ciudad:"Medellín",color:"rgba(74,222,128,.15)",tc:"#4ade80"},
+  {token:"DEMO_VP01",seg:"vip",label:"VIP",ciudad:"Cali",color:"rgba(167,139,250,.15)",tc:"#a78bfa"},
+];
+const DESCS={one_time:"Primera impresión y barrera de hábito",ocasional:"Momento de quiebre y condición de retorno",regular:"Cambios percibidos y frecuencia perdida",frecuente:"Gradual vs incidente puntual",vip:"Espacio abierto — qué pasó exactamente"};
 
-function formatearDescuento(str) {
-  if (!str) return str;
-  const s = str.toString().trim();
-  if (s.includes("%")) return s;
-  const n = parseFloat(s);
-  if (!isNaN(n) && n > 0 && n <= 1) return Math.round(n * 100) + "%";
-  if (!isNaN(n)) return Math.round(n) + "%";
-  return s;
-}
+// v2 — Rediseñada con panel Hormozi (oferta/outcome) + Kennedy (forced-choice accionable) + Godin (worldview/identidad)
+// Estructura mantenida c/a/c/c/a por compatibilidad con backend uet_respuestas
+const SV={
+  one_time:[
+    // P1 [Hormozi]: outcome esperado, no producto. Mide expectativa de resultado, no commodity.
+    {t:"c",id:"p1",n:"P1",cat:"Expectativa",q:"¿Qué esperabas SENTIR cuando saliste de Oakberry esa vez?",
+      o:[{v:"energia",e:"⚡",l:"Energía / vitalidad"},{v:"ligereza",e:"🌿",l:"Ligereza saludable"},{v:"premium",e:"✨",l:"Un gusto premium"},{v:"antojo",e:"🤤",l:"Antojo cumplido"},{v:"nada",e:"🤷",l:"No tenía expectativa clara"}]},
+    // P2 [Godin]: worldview gap entre imagen previa y experiencia.
+    {t:"a",id:"p2",n:"P2",cat:"Worldview",q:"¿Qué te imaginabas de Oakberry ANTES de probar, y coincidió con lo que viviste?",h:"Sé honesto — si fue mejor, igual, o peor"},
+    // P3 [Hormozi]: consumer inertia específica para one-time, NO competencia genérica.
+    {t:"c",id:"p3",n:"P3",cat:"Qué pasó después",q:"Después de esa visita, ¿qué te pasó?",
+      o:[{v:"nopense",e:"💭",l:"No se me ocurrió volver"},{v:"complico",e:"🔄",l:"Lo intenté pero se complicó"},{v:"otra",e:"🍽️",l:"Encontré otra cosa que me gustó más"},{v:"noconvencio",e:"😐",l:"No me convenció lo suficiente"}]},
+    // P4 [Kennedy]: forced-choice de palanca, no de "qué tan fácil" (eso no es accionable).
+    {t:"c",id:"p4",n:"P4",cat:"Fricción",q:"Si volvieras esta semana, ¿qué necesitarías que cambie?",
+      o:[{v:"cerca",e:"📍",l:"Que esté más cerca"},{v:"rapido",e:"⚡",l:"Que sea más rápido"},{v:"barato",e:"💸",l:"Que sea más barato"},{v:"nuevo",e:"🌟",l:"Que tenga algo nuevo"},{v:"recordar",e:"🔔",l:"Nada, solo recordarlo"}]},
+    // P5 [Godin]: tensión identitaria — la mejor pregunta de la versión original. Mantenida con guía mejorada.
+    {t:"a",id:"p5",n:"P5",cat:"Identidad",q:"¿Qué tendría que pasar para que Oakberry sea parte de tu rutina?",h:"Lo que digas define nuestra oferta — ej: 'que esté en mi camino al trabajo', 'que tenga un sabor que me enganche'..."},
+  ],
+  ocasional:[
+    // P1 [Hormozi]: causa de pausa con opción "otra cosa que me gustó más" (churn lateral).
+    {t:"c",id:"p1",n:"P1",cat:"Causa",q:"¿Qué te hizo parar de venir?",
+      o:[{v:"puntual",e:"⚡",l:"Algo puntual pasó"},{v:"solo",e:"🌊",l:"Se fue dando solo"},{v:"precio",e:"💸",l:"El precio me frenó"},{v:"lejos",e:"📍",l:"Me quedó lejos"},{v:"otra",e:"🍽️",l:"Encontré algo que me gustó más"}]},
+    // P2 [Kennedy]: separar "vida cambió" vs "Oakberry cambió" — accionable para diferenciar churn evitable vs no.
+    {t:"a",id:"p2",n:"P2",cat:"Contexto",q:"¿Fue algo en Oakberry o algo en tu vida lo que cambió? Cuéntanos.",h:"Una frase basta — buscamos entender el quiebre real"},
+    // P3 [Hormozi]: lateral movement vs disappearance. ESTO SI ES COMPETENCIA REAL para ocasional.
+    {t:"c",id:"p3",n:"P3",cat:"Reemplazo",q:"Cuando dejaste de venir, ¿reemplazaste Oakberry por algo o desapareció de tu radar?",
+      o:[{v:"marca",e:"🏪",l:"Lo reemplacé por otra marca saludable"},{v:"casero",e:"🏠",l:"Lo reemplacé por comida casera"},{v:"desaparecio",e:"💨",l:"Simplemente desapareció de mi rutina"},{v:"otra",e:"🛒",l:"Sigo comiendo similar, pero en otro lugar"}]},
+    // P4 [mantener]: probabilidad de retorno — buena señal predictiva.
+    {t:"c",id:"p4",n:"P4",cat:"Retorno",q:"¿Qué tan probable es que vuelvas este mes?",
+      o:[{v:"mp",e:"🔥",l:"Muy probable"},{v:"p",e:"👍",l:"Probable"},{v:"pp",e:"😐",l:"Poco probable"},{v:"np",e:"💭",l:"No lo había pensado"}]},
+    // P5 [Kennedy]: forzar a apostar entre 3 alternativas — no "qué oferta" (siempre dirán 'descuento').
+    {t:"a",id:"p5",n:"P5",cat:"Apuesta",q:"Si tuvieras que apostar: ¿qué te haría volver — un mejor precio, un producto que te enganche, o un cambio en algo que no te gustó?",h:"Apuesta por UNA. Eso nos dice dónde invertir"},
+  ],
+  regular:[
+    // P1 [mantener]: frecuencia anterior — buena para baseline.
+    {t:"c",id:"p1",n:"P1",cat:"Frecuencia",q:"¿Qué tan seguido ibas en tu mejor momento?",
+      o:[{v:"vs",e:"🔥",l:"Varias veces/semana"},{v:"us",e:"📅",l:"Una vez/semana"},{v:"q",e:"🗓️",l:"Cada 2 semanas"},{v:"m",e:"📆",l:"Una vez/mes"}]},
+    // P2 [Kennedy + Godin]: separar cambio percibido en Oakberry vs cambio propio.
+    {t:"a",id:"p2",n:"P2",cat:"Cambio",q:"¿Notaste algo que cambió en Oakberry — precios, producto, servicio? ¿O fue tu rutina la que cambió?",h:"Sé específico — '$X subió a $Y', 'el sabor no era igual', 'cambié de trabajo'..."},
+    // P3 [Hormozi]: PRICING PULSE — la pregunta más alta-leverage. Reemplaza competencia genérica.
+    {t:"c",id:"p3",n:"P3",cat:"Anchor de precio",q:"¿Cuánto recuerdas pagar por un bowl normalmente?",
+      o:[{v:"menos15",e:"💰",l:"Menos de $15.000"},{v:"15a20",e:"💵",l:"$15.000 - $20.000"},{v:"20a25",e:"💸",l:"$20.000 - $25.000"},{v:"mas25",e:"💳",l:"Más de $25.000"},{v:"norecuerdo",e:"🤷",l:"No recuerdo"}]},
+    // P4 [Hormozi]: palanca de retorno — añadida opción "sorpréndeme" (Godin: notable).
+    {t:"c",id:"p4",n:"P4",cat:"Palanca",q:"¿Qué tendría que cambiar para que volvieras con regularidad?",
+      o:[{v:"precio",e:"🏷️",l:"Que baje el precio"},{v:"sabor",e:"🫐",l:"Que vuelva el sabor que recordaba"},{v:"servicio",e:"⭐",l:"Que mejore el servicio"},{v:"sorprender",e:"🌟",l:"Que me sorprenda con algo nuevo"},{v:"voy",e:"😊",l:"Nada, ya tenía pensado volver"}]},
+    // P5 [Godin]: identidad — qué status game jugabas con Oakberry. Pregunta de tribu.
+    {t:"a",id:"p5",n:"P5",cat:"Identidad",q:"Cuando ibas seguido, ¿qué dirías que decía Oakberry de ti? (que te cuidas, que te das un gusto, que sigues una rutina...)",h:"Pensalo como: 'comer Oakberry me hacía sentir...'"},
+  ],
+  frecuente:[
+    // P1 [mantener]
+    {t:"c",id:"p1",n:"P1",cat:"Frecuencia",q:"¿Qué tan seguido ibas en tu mejor momento?",
+      o:[{v:"vs",e:"🔥",l:"Varias veces/semana"},{v:"us",e:"📅",l:"Una vez/semana"},{v:"q",e:"🗓️",l:"Cada 2 semanas"},{v:"m",e:"📆",l:"Una vez/mes"}]},
+    // P2 [Hormozi]: separar evento específico vs gradual — diferencia entre churn recuperable o no.
+    {t:"a",id:"p2",n:"P2",cat:"Quiebre",q:"¿Cómo dejaste de venir — algo específico pasó, o fue gradual? Cuéntanos tu versión.",h:"Ej: 'cambié de oficina', 'el precio subió', 'me cansé del sabor', 'fue gradual sin razón'..."},
+    // P3 [Hormozi]: PRICING PULSE.
+    {t:"c",id:"p3",n:"P3",cat:"Anchor de precio",q:"¿Cuánto recuerdas pagar por un bowl normalmente?",
+      o:[{v:"menos15",e:"💰",l:"Menos de $15.000"},{v:"15a20",e:"💵",l:"$15.000 - $20.000"},{v:"20a25",e:"💸",l:"$20.000 - $25.000"},{v:"mas25",e:"💳",l:"Más de $25.000"},{v:"norecuerdo",e:"🤷",l:"No recuerdo"}]},
+    // P4 [Hormozi]: palanca de retorno.
+    {t:"c",id:"p4",n:"P4",cat:"Palanca",q:"¿Qué tendría que cambiar para que volvieras?",
+      o:[{v:"precio",e:"🏷️",l:"Que baje el precio"},{v:"sabor",e:"🫐",l:"Que vuelva el sabor que recordaba"},{v:"servicio",e:"⭐",l:"Que mejore el servicio"},{v:"sorprender",e:"🌟",l:"Que me sorprenda con algo nuevo"},{v:"voy",e:"😊",l:"Nada, ya tenía pensado volver"}]},
+    // P5 [Godin]: identidad — frecuentes tienen worldview más definido. Esta respuesta vale oro.
+    {t:"a",id:"p5",n:"P5",cat:"Identidad",q:"Cuando ibas seguido, ¿qué dirías que decía Oakberry de ti?",h:"'Comer Oakberry seguido me hacía sentir / decir / pensar...'"},
+  ],
+  vip:[
+    // P1 [mantener — excelente]: separa churn de consumo vs churn de tribu.
+    {t:"c",id:"p1",n:"P1",cat:"Lealtad",q:"¿Sigues recomendando Oakberry aunque no vayas?",
+      o:[{v:"si",e:"❤️",l:"Sí, siempre"},{v:"av",e:"👍",l:"A veces"},{v:"no_tanto",e:"😐",l:"Ya no tanto"},{v:"no",e:"👎",l:"No"}]},
+    // P2 [Godin]: la narrativa actual del defensor convertido. ESTA respuesta define la campaña.
+    {t:"a",id:"p2",n:"P2",cat:"Narrativa",q:"Si un amigo te pregunta hoy '¿vale la pena Oakberry?', ¿qué le dirías exactamente?",h:"Tu respuesta literal — no la versión diplomática"},
+    // P3 [Hormozi]: PRICING PULSE — crítico en VIP que paga ticket alto.
+    {t:"c",id:"p3",n:"P3",cat:"Anchor de precio",q:"¿Cuánto recuerdas pagar por un bowl normalmente?",
+      o:[{v:"menos15",e:"💰",l:"Menos de $15.000"},{v:"15a20",e:"💵",l:"$15.000 - $20.000"},{v:"20a25",e:"💸",l:"$20.000 - $25.000"},{v:"mas25",e:"💳",l:"Más de $25.000"},{v:"norecuerdo",e:"🤷",l:"No recuerdo"}]},
+    // P4 [Hormozi]: qué necesita Oakberry — añadida opción "sorpréndeme" para VIPs aburridos.
+    {t:"c",id:"p4",n:"P4",cat:"Recuperación",q:"¿Qué necesita hacer Oakberry para recuperarte?",
+      o:[{v:"precio",e:"🏷️",l:"Mejorar el precio"},{v:"producto",e:"🫐",l:"Mejorar el producto"},{v:"servicio",e:"⭐",l:"Mejorar el servicio"},{v:"sorprender",e:"🌟",l:"Volver a sorprenderme"},{v:"voy",e:"😊",l:"Ya tenía planeado volver"}]},
+    // P5 [Hormozi + Godin]: callback con framing identitario, no transaccional.
+    {t:"a",id:"p5",n:"P5",cat:"Llamada",q:"¿Aceptarías una llamada de 5 minutos? Queremos escucharte directamente — no para venderte, para entender qué cambiar.",h:"'Sí, mi horario es...' / 'Sí pero por WhatsApp' / 'No, prefiero no'"},
+  ],
+};
 
-function fetchGET(params) {
-  return new Promise((resolve, reject) => {
-    const cb  = "cb_" + Math.random().toString(36).slice(2);
-    const url = SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
-    const s   = document.createElement("script");
-    let settled = false;
-    function cleanup() { settled = true; delete window[cb]; if (s.parentNode) s.parentNode.removeChild(s); }
-    window[cb] = d => { if(settled)return; cleanup(); resolve(d); };
-    s.onerror  = () => { if(settled)return; cleanup(); reject(new Error("Error de red")); };
-    s.src = url;
-    document.body.appendChild(s);
-    setTimeout(() => { if(!settled){ cleanup(); reject(new Error("Timeout")); } }, 10000);
+// ESTADO
+let SEG="",NOM="",CIU="",TIE="";
+let PQ=[],SA=0,RS={};
+
+window.addEventListener("DOMContentLoaded",async()=>{
+  if(!TOKEN){
+    if(localStorage.getItem(MKEY)===MPWD){showPv();return;}
+    if(up.get("master")==="1"){openM();return;}
+    st("sErr");return;
+  }
+  // Con token — nunca preview
+  try{
+    let d;
+    if(DEMO&&DD[TOKEN]) d=DD[TOKEN];
+    else{const r=await fetch(`${getApiFor(TOKEN)}/uet/token?t=${TOKEN}`);d=await r.json();}
+    if(!d.ok){st("sErr");return;}
+    if(d.ya_respondio&&d.cupon){
+      _("rcode").textContent=d.cupon.codigo;
+      _("rvence").textContent=d.cupon.vence;
+      _("rnomb").textContent="Hola, "+(d.nombre||"Oaker").split(" ")[0]+" 🫐";
+      _("rtienda").textContent=`Muéstrale este código al cajero en ${d.tienda||"Oakberry"}.`;
+      st("sCup");return;
+    }
+    SEG=d.segmento||"Ocasional";NOM=d.nombre||"";CIU=d.ciudad||"";TIE=d.tienda||"Oakberry";
+    const SM={"One-time":"one_time","Ocasional":"ocasional","Regular":"regular","Frecuente":"frecuente","VIP":"vip"};
+    PQ=SV[SM[SEG]||"ocasional"]||SV.ocasional;
+    _("plbl").textContent=`5 preguntas · 2 min · Bowl al final`;
+    if(_("plbl3")) _("plbl3").textContent=`Para ti${NOM?", "+NOM.split(" ")[0]:""} · ${CIU}`;
+    const dots=_("pdots");
+    dots.innerHTML=PQ.map((_,i)=>`<div class="dot${i===0?" active":""}" id="dot-${i}"></div>`).join("");
+    st("sEnc");rStep(0);
+  }catch(e){st("sErr");}
+});
+
+function _(id){return document.getElementById(id);}
+
+function st(id){
+  ["sEnc","sLoad","sCup","sErr"].forEach(s=>{
+    const el=_(s);if(el)el.classList.toggle("on",s===id);
   });
 }
 
-const _cache = {};
-function fetchGETCached(params) {
-  const key = JSON.stringify(params);
-  if (_cache[key]) return Promise.resolve(_cache[key]);
-  return fetchGET(params).then(d => { _cache[key] = d; return d; });
-}
+function rStep(idx){
+  const q=PQ[idx];
+  const pct=Math.round(((idx+1)/PQ.length)*100);
+  _("pfill").style.width=pct+"%";
+  _("ppct").textContent=pct+"%";
+  _("plbl2").textContent=`Pregunta ${idx+1} de ${PQ.length}`;
+  const last=idx===PQ.length-1;
+  const btxt=last?"Quiero mi bowl 🫐":"Siguiente →";
 
-// ─────────────────────────────────────────────────────────────
-// Carga tiendas/ciudades desde nuestro Cloud Run (CSV maestro Loopy)
-// Fallback al Apps Script viejo si nuestro endpoint falla
-// ─────────────────────────────────────────────────────────────
-async function cargarTodoDesdeReact() {
-  try {
-    const r = await fetch(`${REACT_API}/tiendas?accion=todo`);
-    if (!r.ok) throw new Error("status " + r.status);
-    const data = await r.json();
-    if (!data || !data.ciudades) throw new Error("respuesta inválida");
-    _cache[JSON.stringify({accion:"obtenerCiudades"})] = { ciudades: data.ciudades };
-    Object.entries(data.tiendas || {}).forEach(([ciudad, tiendas]) => {
-      _cache[JSON.stringify({accion:"obtenerTiendas", ciudad})] = { tiendas };
-    });
-    console.log("[validar] tiendas cargadas desde CSV maestro:", data.ciudades.length, "ciudades");
-    return data;
-  } catch(e) {
-    console.warn("[validar] /tiendas falló, fallback a Apps Script:", e.message);
-    return null;
+  const body=_("sbody");
+  if(q.t==="c"){
+    body.innerHTML=`
+      <div id="step-${idx}">
+        <div class="q-num">${q.n} · ${q.cat}</div>
+        <div class="q-txt">${q.q}</div>
+        <div class="opts">${q.o.map(o=>`
+          <button class="opt" onclick="selO(${idx},'${o.v}',this)">
+            <div class="opt-r"></div>
+            <span class="opt-em">${o.e}</span>${o.l}
+          </button>`).join("")}
+        </div>
+        <button class="btn" id="btn-${idx}" onclick="adv(${idx})">
+          <span class="bt">${btxt}</span><span class="bs"><span class="sp"></span></span>
+        </button>
+      </div>`;
+  } else {
+    body.innerHTML=`
+      <div id="step-${idx}">
+        <div class="q-num">${q.n} · ${q.cat}</div>
+        <div class="q-txt">${q.q}</div>
+        <textarea class="ta" id="ta-${idx}" placeholder="Escribe aquí..."></textarea>
+        <div class="ta-err" id="taerr-${idx}">⚠ Este campo es obligatorio</div>
+        <div class="ta-hint">${q.h||""}</div>
+        <button class="btn ok" id="btn-${idx}" onclick="adv(${idx})">
+          <span class="bt">${btxt}</span><span class="bs"><span class="sp"></span></span>
+        </button>
+      </div>`;
   }
 }
 
-async function cargarTodo() {
-  // 1. Intentar primero nuestro Cloud Run (fuente única de verdad)
-  const fromReact = await cargarTodoDesdeReact();
-  if (fromReact) return fromReact;
-  // 2. Fallback al Apps Script viejo
-  try {
-    const data = await fetchGET({ accion: "obtenerTodo" });
-    if (!data || !data.ciudades) return false;
-    _cache[JSON.stringify({accion:"obtenerCiudades"})] = { ciudades: data.ciudades };
-    Object.entries(data.tiendas || {}).forEach(([ciudad, tiendas]) => {
-      _cache[JSON.stringify({accion:"obtenerTiendas", ciudad})] = { tiendas };
-    });
-    return data;
-  } catch(e) { return false; }
+function selO(idx,val,btn){
+  document.querySelectorAll(`#step-${idx} .opt`).forEach(o=>o.classList.remove("sel"));
+  btn.classList.add("sel");
+  RS[PQ[idx].id]=val;
+  _(`btn-${idx}`).classList.add("ok");
 }
 
-async function cargarCiudades() {
-  try {
-    const data = await fetchGETCached({ accion: "obtenerCiudades" });
-    const ciudades = Array.isArray(data) ? data : (data.ciudades || []);
-    const sel = document.getElementById("ciudad");
-    ciudades.forEach(c => sel.add(new Option(c, c)));
-    ciudades.forEach(c => fetchGETCached({ accion: "obtenerTiendas", ciudad: c }));
-  } catch(e) {}
-}
-
-async function cargarTiendas() {
-  const ciudad = document.getElementById("ciudad").value;
-  const sel    = document.getElementById("tienda");
-  sel.innerHTML = '<option value="">Selecciona tienda</option>';
-  if (!ciudad) return;
-  try {
-    const data = await fetchGETCached({ accion: "obtenerTiendas", ciudad });
-    const tiendas = Array.isArray(data) ? data : (data.tiendas || []);
-    tiendas.forEach(t => sel.add(new Option(t, t)));
-  } catch(e) {}
-}
-
-async function validar() {
-  const codigo = document.getElementById("codigo").value.trim().toUpperCase();
-  const ciudad = document.getElementById("ciudad").value;
-  const tienda = document.getElementById("tienda").value;
-
-  if (!codigo || !ciudad || !tienda) {
-    return mostrarResultado(false, "Completa código, ciudad y tienda", []);
+function adv(idx){
+  const q=PQ[idx];
+  if(q.t==="c"&&!RS[q.id]){
+    const b=_(`btn-${idx}`);
+    b.classList.add("shake");
+    setTimeout(()=>b.classList.remove("shake"),400);
+    return;
   }
-  if (!_nuevo) return mostrarResultado(false, "Indica si es la primera vez del cliente", []);
-  if (!_loopy) return mostrarResultado(false, "Indica si el cliente tiene tarjeta Loopy", []);
-
-  const perfilCliente = (_nuevo === "SI" ? "Cliente nuevo" : "Ya nos conocía")
-                      + " · "
-                      + (_loopy === "SI" ? "Con Loopy" : "Sin Loopy");
-
-  const btn = document.getElementById("mainBtn");
-  btn.classList.add("loading");
-  btn.disabled = true;
-
-  try {
-    const res = await fetchGET({
-      accion: "canjearCodigo",
-      codigo, tienda, ciudad,
-      loopy: perfilCliente,
-    });
-
-    if (res.ok) {
-      const lineas = res.mensaje.split("\n").map(l =>
-        l.replace(/([\d.]+)\s+en\s+/g, (match, num) => formatearDescuento(num) + " en ")
-      );
-      document.getElementById("codigo").value = "";
-
-      // ── Detectar si es cupón Adidas ──────────────────────────
-      const esAdidas = res.mensaje.includes("Adidas") || res.esAdidas === true;
-      if (esAdidas) {
-        document.getElementById("adidasBanner").classList.add("show");
-        document.getElementById("resultado").className = "result";
-        document.getElementById("formSection").classList.add("hidden");
-        document.getElementById("mainBtn").style.display = "none";
-        document.getElementById("resetBtn").style.display = "block";
-        document.getElementById("postLoopyBanner").classList.remove("show");
-        // ── Mostrar tarjeta de datos del cliente Adidas ──
-        mostrarDatosAdidas(res);
-      } else {
-        mostrarResultado(true, lineas[0], lineas.slice(1));
-        if (_loopy === "NO") {
-          document.getElementById("postLoopyBanner").classList.add("show");
-        }
-      }
-    } else {
-      // ── Adidas no activado — viene del backend con noActivado:true ──
-      if (res.esAdidas && res.noActivado) {
-        document.getElementById("codigo").value = "";
-        mostrarBloqueadoSinActivar();
-      } else if (res.mensaje && res.mensaje.includes("no existe")) {
-        // ── Fallback: buscar en cupones UET (BigQuery via Cloud Run) ──
-        try {
-          const uetRes = await fetch(
-            `${CRM_API}/uet/validar?codigo=${encodeURIComponent(codigo)}&tienda=${encodeURIComponent(tienda)}&ciudad=${encodeURIComponent(ciudad)}`
-          ).then(r => r.json());
-
-          if (uetRes.ok) {
-            document.getElementById("codigo").value = "";
-            mostrarResultado(true,
-              "✅ Cupón UET válido",
-              [
-                "👤 " + (uetRes.nombre || ""),
-                "🎁 " + (uetRes.producto || "Bowl 7oz sin toppings extra"),
-                "📍 " + tienda,
-              ].filter(l => l.trim() !== "👤" && l.trim() !== "🎁")
-            );
-          } else if (uetRes.mensaje && uetRes.mensaje.includes("no existe")) {
-            // ── Fallback 2: cupones de Reactivación (BigQuery crm via Cloud Run) ──
-            try {
-              const reactRes = await fetch(
-                `${REACT_API}/reactivacion/validar?codigo=${encodeURIComponent(codigo)}`
-                + `&tienda=${encodeURIComponent(tienda)}`
-                + `&ciudad=${encodeURIComponent(ciudad)}`
-                + `&cajero_info=${encodeURIComponent(perfilCliente)}`
-              ).then(r => r.json());
-
-              if (reactRes.ok) {
-                document.getElementById("codigo").value = "";
-                const lineas = reactRes.mensaje.split("\n");
-                mostrarResultado(true, lineas[0], lineas.slice(1));
-                if (_loopy === "NO") {
-                  document.getElementById("postLoopyBanner").classList.add("show");
-                }
-              } else {
-                mostrarError(reactRes.mensaje || uetRes.mensaje);
-              }
-            } catch(reactErr) {
-              mostrarError(uetRes.mensaje);
-            }
-          } else {
-            mostrarError(uetRes.mensaje || res.mensaje);
-          }
-        } catch(uetErr) {
-          mostrarError(res.mensaje);
-        }
-      } else {
-        mostrarError(res.mensaje);
-      }
+  if(q.t==="a"){
+    const val=(_(`ta-${idx}`)?.value||"").trim();
+    if(!val){
+      _(`taerr-${idx}`)?.classList.add("on");
+      _(`ta-${idx}`)?.focus();
+      return;
     }
-  } catch(e) {
-    mostrarResultado(false, "❌ Error de conexión", ["Intenta de nuevo"]);
+    RS[q.id]=val;
   }
-
-  btn.classList.remove("loading");
-  btn.disabled = false;
+  _(`dot-${idx}`)?.classList.replace("active","done");
+  const nx=idx+1;
+  if(nx<PQ.length){SA=nx;_(`dot-${nx}`)?.classList.add("active");rStep(nx);window.scrollTo({top:0,behavior:"smooth"});}
+  else fin();
 }
 
-// ── Mostrar tarjeta de datos del cliente Adidas ───────────────
-// Solo se llama cuando res.ok === true — código activado y canjeado exitosamente
-function mostrarDatosAdidas(res) {
-  const card = document.getElementById("adidasClientCard");
-  if (!card) return;
-
-  const nombre  = res.activadoNombre || res.nombre    || "—";
-  const celular = res.activadoPor    || res.celular    || "—";
-  const email   = res.activadoEmail  || res.email      || "—";
-  const ciudad  = res.ciudadRealGeo  || res.ciudadReal || "—";
-  const esNuevo = (res.esNuevoOakberry === "NUEVO") || res.esNuevo === true;
-
-  document.getElementById("adcNombre").textContent  = nombre;
-  document.getElementById("adcCelular").textContent = celular;
-  document.getElementById("adcEmail").textContent   = email;
-  document.getElementById("adcCiudad").textContent  = ciudad;
-
-  const badge = document.getElementById("adcBadge");
-  if (esNuevo) {
-    badge.textContent = "🆕 Primera vez";
-    badge.className   = "adc-badge nuevo";
-    document.getElementById("adcLoopyTip").style.display = "block";
-  } else {
-    badge.textContent = "👋 Ya nos conocía";
-    badge.className   = "adc-badge conocido";
-    document.getElementById("adcLoopyTip").style.display = "none";
-  }
-
-  card.classList.add("show");
-}
-
-function mostrarResultado(ok, titulo, filas) {
-  const el = document.getElementById("resultado");
-  el.className = "result show " + (ok ? "ok" : "err");
-  document.getElementById("resIcon").textContent  = ok ? "✅" : "❌";
-  document.getElementById("resTitle").textContent = titulo;
-  document.getElementById("resRows").innerHTML    = filas
-    .map(f => f ? `<div class="result-row">${f}</div>` : "")
-    .join("");
-
-  if (ok) {
-    document.getElementById("formSection").classList.add("hidden");
-    document.getElementById("mainBtn").style.display = "none";
-    document.getElementById("resetBtn").style.display = "block";
-  } else {
-    document.getElementById("postLoopyBanner").classList.remove("show");
-    document.getElementById("formSection").classList.remove("hidden");
-    document.getElementById("mainBtn").style.display = "block";
-    document.getElementById("resetBtn").style.display = "none";
+async function fin(){
+  st("sLoad");iCarga();
+  const body={token:TOKEN,p1_tipo:PQ[0]?.t||"c",p1_valor:RS.p1||"",p2_texto:RS.p2||"",p3_valor:RS.p3||"",p4_valor:RS.p4||"",p5_texto:RS.p5||""};
+  try{
+    let d;
+    if(DEMO){await new Promise(r=>setTimeout(r,1800));d={ok:true,codigo:gCod(),vence:fVence()};}
+    else{const r=await fetch(`${getApiFor(TOKEN)}/uet/responder`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});d=await r.json();}
+    cCarga(()=>{
+      if(d.ok){
+        _("rcode").textContent=d.codigo;_("rvence").textContent=d.vence||fVence();
+        _("rnomb").textContent="Gracias, "+(NOM||"Oaker").split(" ")[0]+" 🫐";
+        _("rtienda").textContent=`Muéstrale este código al cajero en ${TIE} antes de pagar.`;
+        st("sCup");
+      }else{alert("Error. Intenta de nuevo.");st("sEnc");}
+    });
+  }catch(e){
+    cCarga(()=>{
+      _("rcode").textContent=gCod();_("rvence").textContent=fVence();
+      _("rnomb").textContent="Gracias, "+(NOM||"Oaker").split(" ")[0]+" 🫐";
+      _("rtienda").textContent=`Muéstrale este código al cajero en ${TIE}.`;
+      st("sCup");
+    });
   }
 }
 
-function ocultarTodosErrores() {
-  document.getElementById("adidasNoActivado")?.classList.remove("show");
-  ["errCanjeado","errVencido","errCiudad","errHorario","errFormato","errNoExiste"].forEach(id => {
-    document.getElementById(id).classList.remove("show");
+let _lt=null;
+function iCarga(){
+  const ps=[{p:25,d:500,m:"Guardando respuestas...",l:1},{p:55,d:1000,m:"Generando código único...",l:2},{p:80,d:1400,m:"Registrando cupón...",l:3}];
+  let i=0;function tk(){if(i>=ps.length)return;const p=ps[i++];_lt=setTimeout(()=>{sLS(p.l,"a");if(p.l>1)sLS(p.l-1,"d");sL(p.p,p.m);tk();},p.d);}tk();
+}
+function cCarga(cb){clearTimeout(_lt);sLS(3,"d");sLS(4,"a");sL(95,"¡Casi listo!");setTimeout(()=>{sL(100,"¡Cupón generado!");sLS(4,"d");setTimeout(cb,400);},350);}
+function sL(p,m){_("lf").style.width=p+"%";_("lmsg").textContent=m;}
+function sLS(n,c){const el=_("ls"+n);if(el)el.className="lstep "+(c==="a"?"a":"d"==="d"?c:"");}
+
+// MASTER
+function openM(){_("mo").classList.add("on");_("mcancel").classList.toggle("on",!!TOKEN);setTimeout(()=>_("mpwd")?.focus(),100);}
+function closeM(){_("mo").classList.remove("on");}
+function chkM(){
+  const v=_("mpwd").value;
+  if(v===MPWD){localStorage.setItem(MKEY,MPWD);closeM();showPv();}
+  else{_("merr").classList.add("on");setTimeout(()=>_("merr").classList.remove("on"),2000);}
+}
+function exitPv(){localStorage.removeItem(MKEY);_("pv").classList.remove("on");_("card").style.display="block";document.body.classList.remove("pv","lt");st("sErr");}
+
+// PREVIEW
+function showPv(){
+  document.body.classList.add("pv");
+  _("card").style.display="none";
+  _("pv").classList.add("on");
+  rPvGrid();rPvTbl();
+  if(localStorage.getItem("uet_th")==="lt"){document.body.classList.add("lt");_("themeBtn").textContent="🌙 Dark";}
+}
+function rPvGrid(){
+  _("pvgrid").innerHTML=DT.map(t=>`
+    <div class="pvcard">
+      <div class="pvcb">
+        <span class="pvtag-s" style="background:${t.color};color:${t.tc};">${t.label}</span>
+        <div class="pvcn">${t.label} churneado</div>
+        <div class="pvcd">${DESCS[t.seg]}</div>
+      </div>
+      <div class="pvcbtns">
+        <button class="pvcbtn o" onclick="pvCp('${t.token}')">📋 Copiar</button>
+        <button class="pvcbtn s" onclick="pvOp('${t.token}')">Ver →</button>
+      </div>
+    </div>`).join("");
+}
+function rPvTbl(){
+  const L={one_time:"One-timer",ocasional:"Ocasional",regular:"Regular",frecuente:"Frecuente",vip:"VIP"};
+  _("pvtb").innerHTML=DT.map(t=>`
+    <tr>
+      <td style="font-family:'Courier New',monospace;color:#f0ede4;">${t.token}</td>
+      <td><span style="font-size:8px;font-weight:700;color:${t.tc};text-transform:uppercase;">${L[t.seg]}</span></td>
+      <td>${t.ciudad}</td>
+      <td><a class="pvlink" href="javascript:void(0)" onclick="pvOp('${t.token}')">Abrir →</a></td>
+    </tr>`).join("");
+}
+function pvOp(tk){window.open(location.protocol+"//"+location.host+"/uet?t="+tk+"&demo=1","_blank");}
+function pvCp(tk){const u=location.protocol+"//"+location.host+"/uet?t="+tk+"&demo=1";navigator.clipboard?.writeText(u).then(()=>alert("Copiado:\n"+u));}
+function tgTheme(){const l=document.body.classList.toggle("lt");_("themeBtn").textContent=l?"🌙 Dark":"☀ Light";localStorage.setItem("uet_th",l?"lt":"dk");}
+
+function gCod(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let r="R";for(let i=0;i<5;i++)r+=c[Math.floor(Math.random()*c.length)];return r;}
+function fVence(){const d=new Date();d.setHours(d.getHours()+72);return d.toLocaleDateString("es-CO",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});}
+function copiar(){
+  const code=_("rcode").textContent;
+  navigator.clipboard?.writeText(code).then(()=>{
+    const b=document.querySelector(".cbtn");const p=b.textContent;
+    b.textContent="✅ ¡Copiado!";setTimeout(()=>b.textContent=p,2200);
   });
-  document.getElementById("resultado").className = "result";
-  document.getElementById("adidasBanner").classList.remove("show");
-  document.getElementById("adidasClientCard").classList.remove("show");
-  document.getElementById("adidasNoActivado").classList.remove("show");
-}
-
-function mostrarError(mensaje) {
-  ocultarTodosErrores();
-  if (mensaje.includes("ya fue canjeado")) {
-    document.getElementById("errCanjeado").classList.add("show");
-  } else if (mensaje.includes("ya venció")) {
-    document.getElementById("errVencido").classList.add("show");
-  } else if (mensaje.includes("Ciudad incorrecta")) {
-    const match = mensaje.match(/válido en: (.+)/);
-    if (match) document.getElementById("errCiudadDetalle").textContent =
-      "Este cupón fue generado para: " + match[1] + ". No aplica en esta tienda.";
-    document.getElementById("errCiudad").classList.add("show");
-  } else if (mensaje.includes("fuera de horario") || mensaje.includes("Cupón fuera")) {
-    const match = mensaje.match(/Solo válido en:\n(.+)/s);
-    if (match) {
-      document.getElementById("errHorarioDetalle").textContent = "Solo válido en: " + match[1].trim();
-      document.getElementById("errHorarioAccion").textContent  = "Tu cupón aplica en: " + match[1].trim() + ". ¡Vuelve en ese horario!";
-    }
-    document.getElementById("errHorario").classList.add("show");
-  } else if (mensaje.includes("Formato") || mensaje.includes("inválido")) {
-    document.getElementById("errFormato").classList.add("show");
-  } else {
-    document.getElementById("errNoExiste").classList.add("show");
-  }
-  document.getElementById("formSection").classList.remove("hidden");
-  document.getElementById("mainBtn").style.display = "block";
-  document.getElementById("resetBtn").style.display = "none";
-}
-
-function resetForm() {
-  document.getElementById("codigo").value = "";
-  ocultarTodosErrores();
-  document.getElementById("postLoopyBanner").classList.remove("show");
-  document.getElementById("loopyBanner").classList.remove("show");
-  document.getElementById("formSection").classList.remove("hidden");
-  document.getElementById("mainBtn").style.display = "block";
-  document.getElementById("resetBtn").style.display = "none";
-  _nuevo = ""; _loopy = "";
-  ["nuevo-si","nuevo-no","loopy-si","loopy-no"].forEach(id =>
-    document.getElementById(id).className = "toggle-btn"
-  );
-  document.getElementById("codigo").focus();
-  document.getElementById("adidasNoActivado").classList.remove("show");
-}
-
-// ── QR generado dinámicamente para el flujo sin activar ─────
-let _adidasQRGenerado = false;
-function mostrarBloqueadoSinActivar() {
-  // Mostrar el bloqueo
-  document.getElementById("adidasNoActivado").classList.add("show");
-  document.getElementById("adidasBanner").classList.remove("show");
-  document.getElementById("formSection").classList.add("hidden");
-  document.getElementById("mainBtn").style.display = "none";
-  document.getElementById("resetBtn").style.display = "none";
-  // Generar QR una sola vez
-  if (!_adidasQRGenerado) {
-    _adidasQRGenerado = true;
-    const url = "https://oakberry-cupones.com/adidas-activar";
-    const div = document.getElementById("adidasQRDiv");
-    div.innerHTML = "";
-    // QR simple con API pública — no requiere librería
-    const img = document.createElement("img");
-    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(url) + "&bgcolor=ffffff&color=000000&margin=8";
-    img.width = 180; img.height = 180;
-    img.style.borderRadius = "6px";
-    img.onerror = function() {
-      // Fallback: mostrar la URL directamente si QR falla
-      div.innerHTML = '<div style="font-size:10px;font-weight:700;color:#555;padding:10px;word-break:break-all;max-width:180px;">' + url + '</div>';
-    };
-    div.appendChild(img);
-  }
-}
-
-function resetAdidas() {
-  document.getElementById("adidasNoActivado").classList.remove("show");
-  document.getElementById("adidasClientCard").classList.remove("show");
-  document.getElementById("adidasBanner").classList.remove("show");
-  document.getElementById("formSection").classList.remove("hidden");
-  document.getElementById("mainBtn").style.display = "block";
-  document.getElementById("resetBtn").style.display = "none";
-  document.getElementById("codigo").value = "";
-  document.getElementById("codigo").focus();
-}
-
-(function warmup() {
-  const s = document.createElement("script");
-  s.src = SCRIPT_URL + "?accion=ping&callback=_warmup";
-  window._warmup = () => {};
-  s.onerror = () => {};
-  document.head.appendChild(s);
-})();
-
-window.addEventListener("DOMContentLoaded", async () => {
-  const todo = await cargarTodo();
-  if (todo) {
-    const sel = document.getElementById("ciudad");
-    todo.ciudades.forEach(c => sel.add(new Option(c, c)));
-  } else {
-    await cargarCiudades();
-  }
-});
-
-document.getElementById("codigo").addEventListener("input", function() {
-  this.value = this.value.toUpperCase();
-  ocultarTodosErrores();
-  document.getElementById("postLoopyBanner").classList.remove("show");
-});
-
-// ── RESCATE ───────────────────────────────────────────────────
-function abrirRescate() {
-  const codFallo = document.getElementById("codigo").value.trim().toUpperCase();
-  if (codFallo) document.getElementById("rCodigo").value = codFallo;
-  document.getElementById("rescateOverlay").classList.add("show");
-  document.getElementById("rescateResult").style.display = "none";
-  document.getElementById("rescateForm").style.display = "block";
-  document.getElementById("rCelular").value = "";
-}
-
-function cerrarRescate(e) {
-  if (e.target === document.getElementById("rescateOverlay")) cerrarRescateBtn();
-}
-function cerrarRescateBtn() {
-  document.getElementById("rescateOverlay").classList.remove("show");
-}
-
-async function ejecutarRescate() {
-  const codigoOriginal = document.getElementById("rCodigo").value.trim().toUpperCase();
-  const celularRaw     = document.getElementById("rCelular").value.trim();
-  const tienda         = document.getElementById("tienda").value || "No especificada";
-  const ciudad         = document.getElementById("ciudad").value || "Bogota";
-
-  if (!codigoOriginal || codigoOriginal.length !== 5) { alert("Ingresa el código original de 5 caracteres"); return; }
-  if (celularRaw.length < 10) { alert("Ingresa el celular completo (10 dígitos)"); return; }
-
-  const btn = document.getElementById("rescateSubmitBtn");
-  btn.disabled = true;
-  btn.textContent = "⟳ Procesando...";
-
-  try {
-    const res = await fetchGET({
-      accion: "rescatarCupon", codigoOriginal,
-      celular: "57" + celularRaw, ciudad, tienda,
-    });
-
-    document.getElementById("rescateForm").style.display = "none";
-    const resEl = document.getElementById("rescateResult");
-    resEl.style.display = "block";
-
-    if (res.ok) {
-      resEl.className = "modal-result ok";
-      resEl.innerHTML = `
-        <div style="font-size:13px;font-weight:700;color:#27ae60;margin-bottom:10px">✅ Código de rescate generado</div>
-        <div class="modal-result-code">
-          <div class="modal-result-code-label">Nuevo código</div>
-          <div class="modal-result-code-val">${res.codigoNuevo}</div>
-          <div class="modal-result-code-sub">⏱ Válido por 10 minutos</div>
-        </div>
-        <div class="modal-result-instr">
-          👉 Cierra este modal e ingresa el código <strong>${res.codigoNuevo}</strong> en el validador.
-          ${res.rescatesRestantes !== undefined ? `<br><br>⚠️ Quedan <strong>${res.rescatesRestantes} rescates disponibles</strong> hoy para esta tienda.` : ''}
-        </div>
-        <button class="modal-btn" style="margin-top:12px;background:#5F4B8B"
-          onclick="usarCodigoRescate('${res.codigoNuevo}')">→ Usar este código ahora</button>`;
-    } else {
-      resEl.className = "modal-result";
-      resEl.innerHTML = `<div class="modal-result-err">❌ ${res.mensaje}</div>
-        <button class="modal-btn" style="margin-top:12px" onclick="document.getElementById('rescateForm').style.display='block';this.closest('.modal-result').style.display='none';">← Intentar de nuevo</button>`;
-    }
-  } catch(e) {
-    document.getElementById("rescateResult").innerHTML = `<div class="modal-result-err">❌ Error de conexión. Intenta de nuevo.</div>`;
-    document.getElementById("rescateResult").style.display = "block";
-  }
-
-  btn.disabled = false;
-  btn.textContent = "🚨 Generar código de rescate";
-}
-
-function usarCodigoRescate(codigo) {
-  cerrarRescateBtn();
-  document.getElementById("codigo").value = codigo;
-  ocultarTodosErrores();
-  document.getElementById("formSection").classList.remove("hidden");
-  document.getElementById("mainBtn").style.display = "block";
-  document.getElementById("resetBtn").style.display = "none";
 }
 </script>
-
-<!-- MODAL RESCATE -->
-<div class="modal-overlay" id="rescateOverlay" onclick="cerrarRescate(event)">
-  <div class="modal">
-    <button class="modal-close" onclick="cerrarRescateBtn()">✕</button>
-    <div class="modal-header">
-      <div class="modal-header-icon">🚨</div>
-      <div class="modal-header-title">Rescate de Cupón</div>
-      <div class="modal-header-sub">Solo cajeros autorizados</div>
-    </div>
-    <div class="modal-info">
-      <strong>📋 Reglas del rescate — leer antes de usar</strong>
-      <div style="margin-top:8px;line-height:1.8">
-        ✅ <strong>Úsalo SOLO si:</strong> el cliente muestra su pantalla con el cupón y el validador dice "no encontrado"<br>
-        ⏱ El código de rescate es válido por <strong>10 minutos</strong> — canjéalo de inmediato<br>
-        🔢 Límite: <strong>máximo 5 rescates por tienda por día</strong><br>
-        👤 Máximo <strong>1 rescate por cliente por día</strong><br>
-        ❌ <strong>No uses esta opción si:</strong> el cliente simplemente olvidó su cupón, si el código ya fue canjeado, o si el cupón venció
-      </div>
-    </div>
-    <div id="rescateForm">
-      <div class="modal-field">
-        <label>Código original del cliente</label>
-        <input type="text" id="rCodigo" placeholder="XXXXX" maxlength="5"
-          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
-      </div>
-      <div class="modal-field">
-        <label>Celular del cliente</label>
-        <input type="tel" id="rCelular" placeholder="3001234567" maxlength="10"
-          oninput="this.value=this.value.replace(/\D/g,'')">
-      </div>
-      <button class="modal-btn" id="rescateSubmitBtn" onclick="ejecutarRescate()">
-        🚨 Generar código de rescate
-      </button>
-    </div>
-    <div class="modal-result" id="rescateResult"></div>
-    <div class="modal-audit">Todos los rescates quedan registrados para auditoría.</div>
-  </div>
-</div>
 </body>
 </html>
