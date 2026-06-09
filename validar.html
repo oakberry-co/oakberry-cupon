@@ -566,6 +566,38 @@ async function validar() {
   btn.classList.add("loading");
   btn.disabled = true;
 
+  // ── Routing por prefijo: códigos RET/BDY van DIRECTO al endpoint Reactivación
+  //    Esto evita que Apps Script (Adquisición) rechace 7-chars como "inválido"
+  //    y bloquee el fallback.
+  const esReactivacion = /^(RET|BDY)/.test(codigo);
+  if (esReactivacion) {
+    try {
+      const reactRes = await fetch(
+        `${REACT_API}/reactivacion/validar?codigo=${encodeURIComponent(codigo)}`
+        + `&tienda=${encodeURIComponent(tienda)}`
+        + `&ciudad=${encodeURIComponent(ciudad)}`
+        + `&cajero_info=${encodeURIComponent(perfilCliente)}`
+      ).then(r => r.json());
+
+      if (reactRes.ok) {
+        document.getElementById("codigo").value = "";
+        const lineas = reactRes.mensaje.split("\n");
+        mostrarResultado(true, lineas[0], lineas.slice(1));
+        if (_loopy === "NO") {
+          document.getElementById("postLoopyBanner").classList.add("show");
+        }
+      } else {
+        mostrarError(reactRes.mensaje || "no existe");
+      }
+    } catch(e) {
+      mostrarError("Error de conexión, intenta de nuevo");
+    } finally {
+      btn.classList.remove("loading");
+      btn.disabled = false;
+    }
+    return;
+  }
+
   try {
     const res = await fetchGET({
       accion: "canjearCodigo",
