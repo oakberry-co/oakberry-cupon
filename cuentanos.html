@@ -81,12 +81,12 @@
   .nps-btn.selected { background: var(--primary); border-color: var(--primary); color: #fff; transform: scale(1.06); box-shadow: 0 4px 12px rgba(95,75,139,0.30); }
   .nps-hint { display:flex; justify-content:space-between; font-size:9px; font-weight:800; color:#aaa; margin-top:6px; letter-spacing:0.5px; text-transform:uppercase; }
 
-  /* Textarea + input */
+  /* Textarea + input — font-size: 16px obligatorio para evitar zoom auto en iOS Safari */
   .q-textarea, .q-input {
-    width: 100%; padding: 14px 14px;
+    width: 100%; padding: 13px 14px;
     border: 1.8px solid #ddd; border-radius: 12px;
     font-family: 'Montserrat', sans-serif;
-    font-size: 13px; font-weight: 600;
+    font-size: 16px; font-weight: 600;
     color: #2b2b2b;
     transition: border-color 0.15s;
     resize: vertical;
@@ -149,7 +149,8 @@
   .err-msg.show { display: block; }
 
   @media (max-width: 380px) {
-    .nps-btn { font-size: 11px; padding: 10px 0; }
+    .nps-wrap { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .nps-btn { font-size: 13px; padding: 12px 0; min-width: 0; flex: none; }
     .brand { font-size: 22px; }
     .hero-title { font-size: 16px; }
   }

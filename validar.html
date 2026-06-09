@@ -28,14 +28,15 @@
     .card-body { padding:28px 28px 32px; }
     .field { margin-bottom:14px; }
     label { display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#999; margin-bottom:6px; }
+    /* font-size >= 16px obligatorio para evitar zoom automático en iOS Safari */
     input, select {
       width:100%; padding:14px 16px; border-radius:12px;
       border:2px solid #eee; font-family:'Montserrat',sans-serif;
-      font-size:13px; font-weight:700; color:var(--primary);
+      font-size:16px; font-weight:700; color:var(--primary);
       outline:none; background:#fff; transition:border-color 0.18s;
       -webkit-appearance:none;
     }
-    input { text-transform:uppercase; letter-spacing:2px; font-size:15px; }
+    input { text-transform:uppercase; letter-spacing:2px; font-size:16px; }
     input:focus, select:focus { border-color:var(--primary); }
 
     .section-sep {
