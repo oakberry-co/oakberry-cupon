@@ -63,6 +63,20 @@
       padding:16px 18px; animation:fadeIn 0.3s ease;
     }
     .loopy-banner.show { display:block; }
+
+    /* Alerta de perfil inconsistente: Nuevo + Loopy = contradicción */
+    .perfil-alerta {
+      display:none; margin:14px 0;
+      background:#fdedec; border:2px solid #e74c3c; border-radius:14px;
+      padding:16px 20px; animation:fadeIn 0.3s ease;
+    }
+    .perfil-alerta.show { display:block; }
+    .perfil-alerta-title {
+      font-size:15px; font-weight:900; color:#c0392b;
+      text-transform:uppercase; letter-spacing:0.5px;
+      margin-bottom:8px; display:flex; align-items:center; gap:8px;
+    }
+    .perfil-alerta-body { font-size:14px; font-weight:700; color:#922b21; line-height:1.55; }
     .loopy-banner-title { font-size:13px; font-weight:900; color:#7a5c00; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
     .loopy-banner-body { font-size:12px; font-weight:700; color:#5d4200; line-height:1.6; }
     .loopy-steps { margin-top:10px; display:flex; flex-direction:column; gap:5px; }
@@ -360,6 +374,18 @@
         </div>
       </div>
     </div>
+
+    <!-- Alerta: cliente nuevo + ya tiene Loopy = inconsistente -->
+    <div class="perfil-alerta" id="perfilAlerta">
+      <div class="perfil-alerta-title">⚠️ Perfil inconsistente</div>
+      <div class="perfil-alerta-body">
+        Marcaste <strong>"Sí, es nuevo"</strong> + <strong>"Sí tiene Loopy"</strong>.
+        Si el cliente nunca había venido, ¿cómo tiene tarjeta Loopy?<br><br>
+        Verifica con el cliente:
+        <br>· Si <strong>ya vino antes</strong> → marca <em>"Ya nos conoce"</em>.
+        <br>· Si es la <strong>primera vez</strong> y NO tiene Loopy → marca <em>"No tiene"</em> y registra su tarjeta en caja.
+      </div>
+    </div>
     </div><!-- /form-section -->
 
     <button class="btn" id="mainBtn" onclick="validar()">
@@ -515,6 +541,7 @@ function setNuevo(val) {
   _nuevo = val;
   document.getElementById("nuevo-si").className = "toggle-btn" + (val === "SI" ? " selected-si" : "");
   document.getElementById("nuevo-no").className = "toggle-btn" + (val === "NO" ? " selected-no" : "");
+  chequearPerfilInconsistente();
 }
 
 function setLoopy(val) {
@@ -522,6 +549,16 @@ function setLoopy(val) {
   document.getElementById("loopy-si").className = "toggle-btn" + (val === "SI" ? " selected-si" : "");
   document.getElementById("loopy-no").className = "toggle-btn" + (val === "NO" ? " selected-no" : "");
   document.getElementById("loopyBanner").classList.toggle("show", val === "NO");
+  chequearPerfilInconsistente();
+}
+
+function chequearPerfilInconsistente() {
+  // Si el cliente es NUEVO y ya tiene Loopy → contradicción
+  // (si nunca había venido, ¿cómo tiene tarjeta Loopy?)
+  const banner = document.getElementById("perfilAlerta");
+  if (!banner) return;
+  const inconsistente = (_nuevo === "SI" && _loopy === "SI");
+  banner.classList.toggle("show", inconsistente);
 }
 
 function formatearDescuento(str) {
