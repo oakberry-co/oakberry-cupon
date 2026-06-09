@@ -170,6 +170,46 @@
       padding-left:18px;
       line-height:1.5;
     }
+    /* ── Banner cumpleaños (BDY*) ── */
+    .bday-banner {
+      display:none; margin:0 0 18px;
+      background:linear-gradient(135deg, #fff4cc, #ffeaa7);
+      border:3px solid #f5c842; border-radius:18px;
+      padding:18px 22px; text-align:center;
+      animation:fadeIn 0.3s ease;
+      box-shadow:0 4px 18px rgba(245,200,66,0.30);
+    }
+    .bday-banner.show { display:block; }
+    .bday-banner-icon { font-size:38px; line-height:1; margin-bottom:8px; }
+    .bday-banner-title {
+      font-size:18px; font-weight:900;
+      color:#7d4f00; text-transform:uppercase;
+      letter-spacing:0.8px; margin-bottom:4px; line-height:1.2;
+    }
+    .bday-banner-action {
+      font-size:14px; font-weight:700; color:#8d6500;
+      line-height:1.5; margin-top:6px;
+    }
+
+    /* ── Sección Términos y Condiciones ── */
+    .result-tyc {
+      margin-top:22px;
+      padding:16px 18px;
+      background:#fbf7ff;
+      border:1.5px dashed #b8a8d0;
+      border-radius:12px;
+    }
+    .result-tyc-title {
+      font-size:12px; font-weight:900; letter-spacing:1.5px;
+      text-transform:uppercase; color:#5F4B8B;
+      margin-bottom:10px;
+    }
+    .result-tyc ul { margin:0; padding-left:22px; }
+    .result-tyc li {
+      font-size:13px; font-weight:600; color:#3d2d6e;
+      line-height:1.6; margin-bottom:4px;
+    }
+
     .result-warn {
       background:#fff4cc;
       border:2px solid #e0c060;
@@ -395,10 +435,21 @@
 
     <!-- RESULTADO cupones normales -->
     <div class="result" id="resultado">
+      <!-- Banner cumpleaños (solo BDY*) -->
+      <div class="bday-banner" id="bdayBanner">
+        <div class="bday-banner-icon">🎂🎉</div>
+        <div class="bday-banner-title" id="bdayBannerTitle">¡Hoy cumple años!</div>
+        <div class="bday-banner-action">Felicítalo personalmente — dale un detalle de cariño 💜</div>
+      </div>
       <span class="result-icon" id="resIcon"></span>
       <div class="result-title" id="resTitle"></div>
       <hr class="divider-line">
       <div id="resRows"></div>
+      <!-- Términos y condiciones -->
+      <div class="result-tyc" id="resTyc" style="display:none;">
+        <div class="result-tyc-title">📋 Términos del cupón</div>
+        <ul id="resTycList"></ul>
+      </div>
     </div>
 
     <!-- BANNER ADIDAS (cupón válido) -->
@@ -688,7 +739,11 @@ async function validar() {
       if (reactRes.ok) {
         document.getElementById("codigo").value = "";
         const lineas = reactRes.mensaje.split("\n");
-        mostrarResultado(true, lineas[0], lineas.slice(1));
+        mostrarResultado(true, lineas[0], lineas.slice(1), {
+          esCumple: reactRes.es_cumple || codigo.startsWith("BDY"),
+          nombreCliente: reactRes.nombre_cliente,
+          tyc: reactRes.tyc,
+        });
         if (_loopy === "NO") {
           document.getElementById("postLoopyBanner").classList.add("show");
         }
@@ -769,7 +824,11 @@ async function validar() {
               if (reactRes.ok) {
                 document.getElementById("codigo").value = "";
                 const lineas = reactRes.mensaje.split("\n");
-                mostrarResultado(true, lineas[0], lineas.slice(1));
+                mostrarResultado(true, lineas[0], lineas.slice(1), {
+                  esCumple: reactRes.es_cumple || codigo.startsWith("BDY"),
+                  nombreCliente: reactRes.nombre_cliente,
+                  tyc: reactRes.tyc,
+                });
                 if (_loopy === "NO") {
                   document.getElementById("postLoopyBanner").classList.add("show");
                 }
@@ -868,12 +927,37 @@ function renderLinea(linea) {
   return `<div class="result-row">${t}</div>`;
 }
 
-function mostrarResultado(ok, titulo, filas) {
+function mostrarResultado(ok, titulo, filas, opts) {
+  opts = opts || {};
   const el = document.getElementById("resultado");
   el.className = "result show " + (ok ? "ok" : "err");
   document.getElementById("resIcon").textContent  = ok ? "✅" : "❌";
   document.getElementById("resTitle").textContent = titulo;
   document.getElementById("resRows").innerHTML    = filas.map(renderLinea).join("");
+
+  // Banner cumpleaños — solo visible si opts.esCumple === true
+  const bday = document.getElementById("bdayBanner");
+  const bdayTitle = document.getElementById("bdayBannerTitle");
+  if (ok && opts.esCumple) {
+    const nombre = (opts.nombreCliente && opts.nombreCliente.trim()) ? opts.nombreCliente.trim() : "";
+    bdayTitle.textContent = nombre
+      ? `¡Hoy cumple años ${nombre}!`
+      : "¡Hoy es su cumpleaños!";
+    bday.classList.add("show");
+  } else {
+    bday.classList.remove("show");
+  }
+
+  // Términos y condiciones — solo si vienen del API
+  const tycBox = document.getElementById("resTyc");
+  const tycList = document.getElementById("resTycList");
+  if (ok && Array.isArray(opts.tyc) && opts.tyc.length) {
+    tycList.innerHTML = opts.tyc.map(t => `<li>${t}</li>`).join("");
+    tycBox.style.display = "block";
+  } else {
+    tycBox.style.display = "none";
+    tycList.innerHTML = "";
+  }
 
   if (ok) {
     document.getElementById("formSection").classList.add("hidden");
