@@ -17,7 +17,7 @@
     }
     .card {
       background:rgba(255,255,255,0.97); border-radius:28px;
-      width:100%; max-width:400px;
+      width:100%; max-width:680px;
       box-shadow:0 20px 60px rgba(0,0,0,0.35); overflow:hidden;
     }
     .card-header {
@@ -86,18 +86,87 @@
     .spin { width:20px; height:20px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.65s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
-    .result { display:none; margin-top:18px; border-radius:16px; padding:18px 20px; text-align:left; }
+    .result { display:none; margin-top:18px; border-radius:18px; padding:28px 32px; text-align:left; }
     .result.show { display:block; animation:fadeIn 0.3s ease; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
-    .result.ok  { background:#eafaf1; border:2px solid #a9dfbf; }
-    .result.err { background:#fdedec; border:2px solid #f5b7b1; }
-    .result-icon { font-size:32px; display:block; margin-bottom:8px; }
-    .result-title { font-size:15px; font-weight:900; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
-    .result.ok  .result-title { color:var(--green); }
+    .result.ok  { background:#eafaf1; border:3px solid #6dcc8c; }
+    .result.err { background:#fdedec; border:3px solid #f5b7b1; }
+    .result-icon { font-size:54px; display:block; margin-bottom:14px; line-height:1; }
+    .result-title { font-size:24px; font-weight:900; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:18px; line-height:1.2; }
+    .result.ok  .result-title { color:#1f7a3c; }
     .result.err .result-title { color:var(--red); }
-    .result-row { font-size:12px; font-weight:700; color:#444; margin-bottom:5px; line-height:1.5; }
+    .result-row { font-size:16px; font-weight:700; color:#2b2b2b; margin-bottom:8px; line-height:1.55; }
     .result-row span { color:var(--primary); }
-    .divider-line { border:none; border-top:1.5px dashed #ddd; margin:10px 0; }
+    .divider-line { border:none; border-top:1.5px dashed #b8d9c5; margin:14px 0; }
+
+    /* Highlights por tipo de línea */
+    .result-action-label { font-size:14px; font-weight:900; color:#1f7a3c; text-transform:uppercase; letter-spacing:1px; margin:18px 0 8px; }
+    .result-toteat-code {
+      background:#fff;
+      border:2px dashed #1f7a3c;
+      border-radius:12px;
+      padding:18px 22px;
+      margin:10px 0 18px;
+      font-size:22px;
+      font-weight:900;
+      color:#2C1838;
+      font-family:'Courier New', monospace;
+      letter-spacing:0.3px;
+      word-break:break-word;
+    }
+    .result-incluye {
+      background:#dcf4e3;
+      border-left:5px solid #1f7a3c;
+      padding:12px 16px;
+      margin:8px 0;
+      font-size:16px;
+      font-weight:700;
+      color:#1a5e2f;
+      border-radius:6px;
+      line-height:1.5;
+    }
+    .result-no-incluye {
+      background:#fbe4e4;
+      border-left:5px solid #c0392b;
+      padding:12px 16px;
+      margin:8px 0;
+      font-size:16px;
+      font-weight:700;
+      color:#922b21;
+      border-radius:6px;
+      line-height:1.5;
+    }
+    .result-loopy {
+      background:#f3e8ff;
+      border-left:5px solid #6B3B82;
+      padding:12px 16px;
+      margin:8px 0;
+      font-size:16px;
+      font-weight:700;
+      color:#4a2660;
+      border-radius:6px;
+      line-height:1.5;
+    }
+    .result-note {
+      font-size:14px;
+      color:#666;
+      font-style:italic;
+      margin-top:4px;
+      margin-bottom:8px;
+      padding-left:18px;
+      line-height:1.5;
+    }
+    .result-warn {
+      background:#fff4cc;
+      border:2px solid #e0c060;
+      border-radius:10px;
+      padding:14px 18px;
+      margin:14px 0;
+      font-size:15px;
+      font-weight:700;
+      color:#6b4f00;
+      line-height:1.5;
+    }
 
     .post-loopy-banner {
       display:none; margin-top:14px;
@@ -722,14 +791,52 @@ function mostrarDatosAdidas(res) {
   card.classList.add("show");
 }
 
+function renderLinea(linea) {
+  if (!linea) return "";
+  const t = linea.trim();
+  if (!t) return "";
+
+  // Caja destacada con el código a buscar en Toteat
+  if (t.startsWith("🔍")) {
+    return `<div class="result-toteat-code">${t}</div>`;
+  }
+  // Header de acción
+  if (/^EN TOTEAT|^EN LOOPY|^EN TOTEAT aplica/i.test(t)) {
+    return `<div class="result-action-label">${t}</div>`;
+  }
+  // INCLUYE
+  if (t.startsWith("✓ INCLUYE") || t.startsWith("✓ EN LOOPY")) {
+    if (t.startsWith("✓ EN LOOPY")) {
+      return `<div class="result-loopy">${t}</div>`;
+    }
+    return `<div class="result-incluye">${t}</div>`;
+  }
+  // NO INCLUYE
+  if (t.startsWith("✗ NO INCLUYE") || t.startsWith("✗ NO aplicar")) {
+    return `<div class="result-no-incluye">${t}</div>`;
+  }
+  // Notas (texto entre paréntesis o que empiece con →)
+  if (t.startsWith("(") || t.startsWith("→") || t.startsWith("   →")) {
+    return `<div class="result-note">${t}</div>`;
+  }
+  // Advertencia (⚠️)
+  if (t.startsWith("⚠️")) {
+    return `<div class="result-warn">${t}</div>`;
+  }
+  // Info de city_mismatch (ℹ️)
+  if (t.startsWith("ℹ️")) {
+    return `<div class="result-warn">${t}</div>`;
+  }
+  // Fallback genérico
+  return `<div class="result-row">${t}</div>`;
+}
+
 function mostrarResultado(ok, titulo, filas) {
   const el = document.getElementById("resultado");
   el.className = "result show " + (ok ? "ok" : "err");
   document.getElementById("resIcon").textContent  = ok ? "✅" : "❌";
   document.getElementById("resTitle").textContent = titulo;
-  document.getElementById("resRows").innerHTML    = filas
-    .map(f => f ? `<div class="result-row">${f}</div>` : "")
-    .join("");
+  document.getElementById("resRows").innerHTML    = filas.map(renderLinea).join("");
 
   if (ok) {
     document.getElementById("formSection").classList.add("hidden");
