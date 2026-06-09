@@ -248,7 +248,7 @@
     <div class="form-section" id="formSection">
     <div class="field">
       <label>Código del cupón</label>
-      <input type="text" id="codigo" placeholder="XXXXX" maxlength="5">
+      <input type="text" id="codigo" placeholder="Código del cupón" maxlength="10" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
     </div>
     <div class="field">
       <label>Ciudad</label>
@@ -406,7 +406,7 @@
     <div class="err-card type-formato" id="errFormato">
       <span class="err-icon">🔤</span>
       <div class="err-reason">Código inválido</div>
-      <div class="err-detail">El código ingresado no tiene el formato correcto. Debe ser 5 caracteres.</div>
+      <div class="err-detail">El código ingresado no tiene el formato correcto. Debe ser de 5 a 7 caracteres (letras y números).</div>
       <div class="err-action-label">Qué hacer</div>
       <div class="err-action">Pídele al cliente que muestre el código en pantalla y vuelve a digitarlo con cuidado.</div>
     </div>
@@ -852,7 +852,7 @@ async function ejecutarRescate() {
   const tienda         = document.getElementById("tienda").value || "No especificada";
   const ciudad         = document.getElementById("ciudad").value || "Bogota";
 
-  if (!codigoOriginal || codigoOriginal.length !== 5) { alert("Ingresa el código original de 5 caracteres"); return; }
+  if (!codigoOriginal || codigoOriginal.length < 5 || codigoOriginal.length > 7) { alert("Ingresa el código original (5 a 7 caracteres)"); return; }
   if (celularRaw.length < 10) { alert("Ingresa el celular completo (10 dígitos)"); return; }
 
   const btn = document.getElementById("rescateSubmitBtn");
@@ -930,7 +930,7 @@ function usarCodigoRescate(codigo) {
     <div id="rescateForm">
       <div class="modal-field">
         <label>Código original del cliente</label>
-        <input type="text" id="rCodigo" placeholder="XXXXX" maxlength="5"
+        <input type="text" id="rCodigo" placeholder="Código original" maxlength="10"
           oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
       </div>
       <div class="modal-field">
