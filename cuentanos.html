@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oakberry · Cuéntanos 💚</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #5F4B8B;
+    --pd: #4a3a6e;
+    --yellow: #F5C842;
+    --green: #27ae60;
+    --red: #e74c3c;
+    --cream: #F5F0E8;
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px;
+    background: linear-gradient(rgba(20,10,40,0.55), rgba(20,10,40,0.65)),
+                url('oakville-bg.jpg') center/cover no-repeat fixed;
+    display: flex; align-items: flex-start; justify-content: center;
+    color: #2b2b2b;
+  }
+  .card {
+    background: rgba(255,255,255,0.97);
+    border-radius: 28px;
+    width: 100%; max-width: 460px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    overflow: hidden;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from {opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }
+
+  .card-header {
+    background: var(--primary);
+    padding: 30px 26px 22px;
+    text-align: center;
+    color: #fff;
+    position: relative; overflow: hidden;
+  }
+  .card-header::before {
+    content: '🫐'; position: absolute;
+    font-size: 140px; opacity: 0.10;
+    top: -28px; right: -22px; transform: rotate(15deg);
+    pointer-events: none;
+  }
+  .brand { font-size:24px; font-weight:900; text-transform:uppercase; letter-spacing:3px; position:relative; z-index:2; }
+  .brand-sub { font-size:10px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:2.5px; margin-top:4px; position:relative; z-index:2; }
+  .hero-title { margin-top:16px; font-size:18px; font-weight:900; line-height:1.3; position:relative; z-index:2; }
+  .hero-title strong { color: var(--yellow); }
+  .hero-sub { margin-top:6px; font-size:11px; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:0.6px; position:relative; z-index:2; }
+
+  .card-body { padding: 24px 26px 28px; }
+
+  .qblock { margin-bottom: 20px; }
+  .qlabel {
+    font-size:11px; font-weight:900;
+    text-transform: uppercase; letter-spacing:1.2px;
+    color: var(--primary); margin-bottom:10px;
+    display: flex; align-items: center; gap:6px;
+  }
+  .qlabel .opt { color:#999; font-size:9px; font-weight:700; letter-spacing:0.8px; }
+
+  /* NPS scale */
+  .nps-wrap { display:flex; gap:4px; flex-wrap:wrap; justify-content:space-between; }
+  .nps-btn {
+    flex: 1 1 calc(100%/11 - 4px);
+    min-width: 30px;
+    padding: 12px 0;
+    border: 1.8px solid #ddd; background:#fff;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px; font-weight: 900;
+    color: #555; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nps-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .nps-btn.selected { background: var(--primary); border-color: var(--primary); color: #fff; transform: scale(1.06); box-shadow: 0 4px 12px rgba(95,75,139,0.30); }
+  .nps-hint { display:flex; justify-content:space-between; font-size:9px; font-weight:800; color:#aaa; margin-top:6px; letter-spacing:0.5px; text-transform:uppercase; }
+
+  /* Textarea + input */
+  .q-textarea, .q-input {
+    width: 100%; padding: 14px 14px;
+    border: 1.8px solid #ddd; border-radius: 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: #2b2b2b;
+    transition: border-color 0.15s;
+    resize: vertical;
+  }
+  .q-textarea { min-height: 80px; }
+  .q-textarea:focus, .q-input:focus { outline: none; border-color: var(--primary); }
+  .q-counter { font-size:9px; font-weight:700; color:#bbb; text-align:right; margin-top:4px; letter-spacing:0.5px; }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%; margin-top: 8px;
+    padding: 16px; background: var(--primary); color: #fff;
+    border: none; border-radius: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(95,75,139,0.30);
+    transition: all 0.18s;
+    position: relative; overflow: hidden;
+  }
+  .submit-btn:hover:not(:disabled) { background: var(--pd); transform: translateY(-1px); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .submit-btn.loading .btn-text { opacity: 0.0; }
+  .submit-btn .btn-loader { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.18s; }
+  .submit-btn.loading .btn-loader { opacity:1; }
+  .spin {
+    width:20px; height:20px;
+    border:2.5px solid rgba(255,255,255,0.3); border-top-color:#fff;
+    border-radius:50%; animation: spin 0.65s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Footer disclaimer */
+  .small-note {
+    font-size: 10px; color: #999; font-weight: 700;
+    line-height: 1.55; margin-top: 14px; text-align:center;
+    letter-spacing: 0.3px;
+  }
+
+  /* Success card */
+  .success {
+    text-align: center; padding: 30px 24px;
+  }
+  .success-emoji { font-size: 64px; margin-bottom: 12px; line-height: 1; }
+  .success-title {
+    font-size: 18px; font-weight: 900;
+    color: var(--green); text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 10px; line-height: 1.2;
+  }
+  .success-body { font-size: 13px; font-weight: 700; color: #555; line-height: 1.55; margin-bottom: 20px; }
+  .success-cta { display: inline-block; padding: 13px 28px; background: var(--primary); color: #fff; border-radius: 100px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; }
+
+  .err-msg {
+    display: none; margin-top: 8px;
+    background: #fdf0f0; border: 1.5px solid #f5c6c6;
+    color: #c0392b; padding: 10px 12px;
+    border-radius: 10px; font-size: 12px; font-weight: 700;
+  }
+  .err-msg.show { display: block; }
+
+  @media (max-width: 380px) {
+    .nps-btn { font-size: 11px; padding: 10px 0; }
+    .brand { font-size: 22px; }
+    .hero-title { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div class="card-header">
+    <div class="brand">OAKBERRY</div>
+    <div class="brand-sub">Colombia</div>
+    <div class="hero-title">¿Nos cuentas <strong>cómo lo hacemos mejor</strong>?</div>
+    <div class="hero-sub">Toma 30 segundos · 100% anónimo si quieres</div>
+  </div>
+
+  <div class="card-body" id="formArea">
+
+    <!-- Q1: NPS -->
+    <div class="qblock">
+      <div class="qlabel">
+        Del 0 al 10, ¿qué tan probable es que nos recomiendes a alguien?
+      </div>
+      <div class="nps-wrap" id="npsWrap"></div>
+      <div class="nps-hint">
+        <span>0 · Nada probable</span>
+        <span>10 · Sin duda</span>
+      </div>
+    </div>
+
+    <!-- Q2: qué te falta -->
+    <div class="qblock">
+      <div class="qlabel">
+        ¿Qué te falta para venir más seguido? <span class="opt">· opcional</span>
+      </div>
+      <textarea id="queFalta" class="q-textarea" maxlength="500"
+        placeholder="Ej: que abran más tarde, más opciones sin azúcar, precios, ubicación, etc."></textarea>
+      <div class="q-counter"><span id="qfCount">0</span> / 500</div>
+    </div>
+
+    <!-- Q3: dónde abrir -->
+    <div class="qblock">
+      <div class="qlabel">
+        ¿Te gustaría que abramos en algún lugar específico? <span class="opt">· opcional</span>
+      </div>
+      <input id="dondeAbrir" class="q-input" maxlength="300"
+        placeholder="Ej: barrio, centro comercial, ciudad...">
+    </div>
+
+    <!-- Q4: celular (opcional) -->
+    <div class="qblock">
+      <div class="qlabel">
+        Tu celular <span class="opt">· opcional · solo si quieres que te contemos novedades</span>
+      </div>
+      <input id="celular" class="q-input" maxlength="20" inputmode="tel"
+        placeholder="3XX XXX XXXX">
+    </div>
+
+    <div class="err-msg" id="errMsg"></div>
+
+    <button class="submit-btn" id="submitBtn" onclick="enviar()">
+      <span class="btn-text">Enviar respuesta 💚</span>
+      <span class="btn-loader"><span class="spin"></span></span>
+    </button>
+
+    <div class="small-note">
+      Tus respuestas nos ayudan a mejorar las tiendas y el menú. No publicamos nombres ni respuestas individuales — solo usamos resúmenes.
+    </div>
+  </div>
+
+  <!-- Success state -->
+  <div class="card-body success" id="successArea" style="display:none;">
+    <div class="success-emoji">🙏💚</div>
+    <div class="success-title">¡Gracias por contarnos!</div>
+    <div class="success-body">Tu opinión nos sirve mucho.<br>Si dejaste tu celular, te contactaremos pronto.</div>
+    <a class="success-cta" href="https://www.oakberry.com.co" target="_blank">Volver a Oakberry</a>
+  </div>
+</div>
+
+<script>
+const API = "https://oakberry-reactivacion-api-664413392517.us-central1.run.app";
+
+// Parse query params (codigo opcional para linkear con cupón)
+const params = new URLSearchParams(window.location.search);
+const codigo = (params.get('c') || params.get('codigo') || params.get('t') || '').toUpperCase().trim();
+
+// Render NPS 0-10
+const npsWrap = document.getElementById('npsWrap');
+let npsSel = null;
+for (let i = 0; i <= 10; i++) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'nps-btn';
+  b.textContent = i;
+  b.dataset.v = i;
+  b.onclick = () => {
+    npsSel = i;
+    npsWrap.querySelectorAll('.nps-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected');
+  };
+  npsWrap.appendChild(b);
+}
+
+// Counter para textarea
+const qfEl = document.getElementById('queFalta');
+const qfC = document.getElementById('qfCount');
+qfEl.addEventListener('input', () => { qfC.textContent = qfEl.value.length; });
+
+function mostrarError(msg) {
+  const e = document.getElementById('errMsg');
+  e.textContent = msg;
+  e.classList.add('show');
+  setTimeout(() => e.classList.remove('show'), 4000);
+}
+
+async function enviar() {
+  const btn = document.getElementById('submitBtn');
+  const queFalta = qfEl.value.trim();
+  const dondeAbrir = document.getElementById('dondeAbrir').value.trim();
+  const celular = document.getElementById('celular').value.trim();
+
+  // Al menos 1 campo con info
+  if (npsSel === null && !queFalta && !dondeAbrir) {
+    mostrarError('Cuéntanos al menos algo antes de enviar 💜');
+    return;
+  }
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API}/cuentanos/responder`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        codigo: codigo || null,
+        nps: npsSel,
+        que_falta: queFalta || null,
+        donde_abrir: dondeAbrir || null,
+        celular: celular || null,
+        source: codigo ? 'cuentanos-cupon' : 'cuentanos-direct',
+      })
+    }).then(r => r.json());
+
+    if (res.ok) {
+      document.getElementById('formArea').style.display = 'none';
+      document.getElementById('successArea').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      mostrarError(res.error || 'No pudimos guardar tu respuesta, intenta de nuevo');
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  } catch(e) {
+    console.error(e);
+    mostrarError('Error de conexión. Intenta de nuevo en unos segundos.');
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

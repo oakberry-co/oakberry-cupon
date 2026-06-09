@@ -210,6 +210,97 @@
     letter-spacing: 0.5px;
   }
 
+  /* ─── Incluye / No incluye ─── */
+  .iexc {
+    margin-top: 18px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1.5px solid #e8e8e8;
+  }
+  .iexc-title {
+    background: #faf6ef;
+    padding: 10px 14px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--primary);
+    text-align: center;
+    border-bottom: 1.5px solid #e8e8e8;
+  }
+  .iexc-box {
+    padding: 14px 16px 12px;
+    background: #fff;
+  }
+  .iexc-box + .iexc-box {
+    border-top: 1.5px dashed #e8e8e8;
+  }
+  .iexc-label {
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .iexc-box.incluye .iexc-label { color: var(--green); }
+  .iexc-box.no-incluye .iexc-label { color: var(--red); }
+  .iexc-list {
+    list-style: none;
+    padding-left: 0;
+  }
+  .iexc-list li {
+    font-size: 12px;
+    font-weight: 700;
+    color: #444;
+    line-height: 1.55;
+    padding: 3px 0 3px 16px;
+    position: relative;
+  }
+  .iexc-list li::before {
+    position: absolute;
+    left: 0;
+    top: 3px;
+    font-weight: 900;
+  }
+  .iexc-box.incluye .iexc-list li::before    { content: '✓'; color: var(--green); }
+  .iexc-box.no-incluye .iexc-list li::before { content: '✗'; color: var(--red); }
+  .iexc-nota {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #fff8e1;
+    border: 1.5px dashed #f5c842;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #7a5c00;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  /* ─── Banner cumpleaños ─── */
+  .bday-card {
+    margin: 14px 0 0;
+    padding: 18px 18px 16px;
+    background: linear-gradient(135deg, #fff4cc, #ffeaa7);
+    border: 2.5px solid #f5c842;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 18px rgba(245,200,66,0.25);
+  }
+  .bday-card .bday-emoji { font-size: 36px; line-height: 1; margin-bottom: 6px; }
+  .bday-card .bday-title {
+    font-size: 14px; font-weight: 900;
+    color: #7d4f00; text-transform: uppercase;
+    letter-spacing: 0.8px; line-height: 1.2;
+  }
+  .bday-card .bday-sub {
+    font-size: 11px; font-weight: 700; color: #8d6500;
+    margin-top: 4px; line-height: 1.5;
+  }
+
   /* ─── Beneficio (antoja) ─── */
   .antoja {
     margin-top: 18px;
@@ -471,6 +562,27 @@
       </div>
     </div>
 
+    <!-- Banner cumpleaños (solo BDY) -->
+    <div class="bday-card" id="bdayCard" style="display:none;">
+      <div class="bday-emoji">🎂🎉</div>
+      <div class="bday-title" id="bdayTitle">¡Feliz cumpleaños!</div>
+      <div class="bday-sub">Tu regalo te espera en la tienda 💜</div>
+    </div>
+
+    <!-- Incluye / No incluye -->
+    <div class="iexc" id="iexcBox" style="display:none;">
+      <div class="iexc-title" id="iexcTitle">Qué incluye tu cupón</div>
+      <div class="iexc-box incluye">
+        <div class="iexc-label">Sí incluye</div>
+        <ul class="iexc-list" id="iexcInc"></ul>
+      </div>
+      <div class="iexc-box no-incluye" id="iexcNoIncWrap">
+        <div class="iexc-label">No incluye (se cobra aparte)</div>
+        <ul class="iexc-list" id="iexcNoInc"></ul>
+      </div>
+      <div class="iexc-nota" id="iexcNota" style="display:none;"></div>
+    </div>
+
     <!-- Antoja -->
     <div class="antoja">
       <div class="antoja-emoji">🫐🥥🍓</div>
@@ -611,6 +723,32 @@ function renderCupon(data) {
   document.getElementById('ctaMaps').href = mapsLink;
 
   document.getElementById('encuestaBtn').href = `/uet?t=${data.codigo}`;
+
+  // Banner cumpleaños
+  if (data.es_cumple || (data.codigo || '').startsWith('BDY')) {
+    document.getElementById('bdayTitle').textContent = `¡Feliz cumpleaños, ${nombre}!`;
+    document.getElementById('bdayCard').style.display = 'block';
+  }
+
+  // Bloque Incluye / No incluye
+  const iexc = data.incluye_excluye || null;
+  if (iexc && (iexc.incluye?.length || iexc.no_incluye?.length)) {
+    if (iexc.titulo) document.getElementById('iexcTitle').textContent = iexc.titulo;
+    const incEl = document.getElementById('iexcInc');
+    incEl.innerHTML = (iexc.incluye || []).map(t => `<li>${t}</li>`).join('');
+    const noIncEl = document.getElementById('iexcNoInc');
+    if ((iexc.no_incluye || []).length) {
+      noIncEl.innerHTML = iexc.no_incluye.map(t => `<li>${t}</li>`).join('');
+    } else {
+      document.getElementById('iexcNoIncWrap').style.display = 'none';
+    }
+    const notaEl = document.getElementById('iexcNota');
+    if (iexc.nota) {
+      notaEl.textContent = iexc.nota;
+      notaEl.style.display = 'block';
+    }
+    document.getElementById('iexcBox').style.display = 'block';
+  }
 
   if (tier === 'T5') {
     const encuesta = document.getElementById('encuestaBlock');
