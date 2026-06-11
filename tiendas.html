@@ -168,7 +168,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
+const SCRIPT_URL = "https://api.oakberry-cupones.com";
 
 // Coordenadas por ciudad como fallback
 const COORDS_CIUDAD = {
@@ -220,6 +220,12 @@ function extraerCoords(mapsUrl) {
 }
 
 function getCoordstienda(tienda) {
+  // 1) coords reales del backend (columna LATITUD/LONGITUD del Sheet)
+  if (tienda.lat != null && tienda.lng != null &&
+      !isNaN(tienda.lat) && !isNaN(tienda.lng)) {
+    return [parseFloat(tienda.lat), parseFloat(tienda.lng)];
+  }
+  // 2) fallback: extraer del link de Maps (links cortos no traen coords)
   if (tienda.mapsUrl) {
     const c = extraerCoords(tienda.mapsUrl);
     if (c) return c;
