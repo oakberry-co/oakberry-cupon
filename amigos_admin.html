@@ -144,7 +144,10 @@
       <label>Escalera de descuento (sube con cada compra)</label>
       <div id="escalera"></div>
       <button type="button" class="addrung" id="addRung">+ Agregar paso</button>
-      <p class="muted">Compra 1 → X%, compra 2 → Y%… Al agotar la escalera, el cliente sigue con el calendario de abajo.</p>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:.84rem;font-weight:600;color:var(--morado)">
+        <input type="checkbox" id="escaleraLuego" checked style="width:auto"> Al agotar la escalera, seguir con los descuentos por día (calendario)
+      </label>
+      <p class="muted">Compra 1 → X%, compra 2 → Y%… Si desmarcas la casilla, al terminar la escalera el cliente ya no recibe más beneficios.</p>
     </div>
 
     <label>Calendario por día</label>
@@ -371,7 +374,8 @@ document.getElementById("generar").addEventListener("click", async ()=>{
      cupoGratis, cupo50, desc50pct:desc50, vigenciaWelcomeH:vig, campeonNombre:campeon,
      fechaInicio:document.getElementById("fechaInicio").value,
      fechaFin:document.getElementById("fechaFin").value,
-     modo:modoSel, escalera:JSON.stringify(escalera)}));
+     modo:modoSel, escalera:JSON.stringify(escalera),
+     escaleraLuego:document.getElementById("escaleraLuego").checked?"1":"0"}));
   if(!e.ok){ toast("Error creando empresa: "+(e.mensaje||""),"err"); btn.disabled=false; btn.textContent=lbl; return; }
   // 2. guardar la estrategia en cada tienda seleccionada
   let totalDias=0;
