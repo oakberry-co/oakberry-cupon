@@ -141,7 +141,8 @@ function prettyTienda(sc){ const p=sc.split("_"); return p.slice(2).join(" ").re
   CAT = r;
   const sel=document.getElementById("tienda");
   CAT.tiendas.forEach(sc=>{ const o=document.createElement("option"); o.value=sc; o.textContent=prettyTienda(sc); sel.appendChild(o); });
-  document.getElementById("tienda").value="BOG_TP_PlazaClaro";
+  sel.value="BOG_TP_PlazaClaro";
+  sel.addEventListener("change", e=>cargarValle(e.target.value));
   construirDias();
 })();
 
@@ -158,13 +159,11 @@ function construirDias(){
         <span class="nom">${nom}</span>
       </div>
       <div class="dia-body">
-        <div class="row3">
-          <div><label>Descuento</label><select class="descSel">${opts}</select></div>
-          <div><label>Desde</label><input type="time" class="hIni" value="08:00"></div>
-          <div><label>Hasta</label><input type="time" class="hFin" value="11:00"></div>
-        </div>
+        <label>Descuento</label><select class="descSel">${opts}</select>
         <label>Productos que aplican</label>
         <div class="chips prodChips"></div>
+        <label>Franjas — 🟢 valle sugerido · 🔴 pico (no descontar)</label>
+        <div class="chips franjaChips"></div>
       </div>`;
     cont.appendChild(div);
     const on=div.querySelector(".diaOn"); on.addEventListener("change",()=>div.classList.toggle("on",on.checked));
@@ -177,7 +176,40 @@ function construirDias(){
         c.onclick=()=>c.classList.toggle("sel"); chips.appendChild(c); });
     };
     sel.addEventListener("change",pintarProd); pintarProd();
+    pintarFranjas(div);
   });
+  cargarValle(document.getElementById("tienda").value);
+}
+
+// ── Franjas + sugerencia valle (data-driven) ──
+const FRANJAS=[
+  {id:"desayuno", lbl:"Desayuno 8-12", rango:"08:00-12:00"},
+  {id:"almuerzo", lbl:"Almuerzo 12-3", rango:"12:00-15:00"},
+  {id:"onces",    lbl:"Onces 3-6",     rango:"15:00-18:00"},
+  {id:"cena",     lbl:"Cena 6-9",      rango:"18:00-21:00"},
+];
+let VALLE={};
+function pintarFranjas(div){
+  const dia=parseInt(div.dataset.dia);
+  const cont=div.querySelector(".franjaChips"); if(!cont) return;
+  const sel=[...cont.querySelectorAll(".chip.sel")].map(c=>c.dataset.rango);
+  cont.innerHTML="";
+  const v=VALLE[dia]||{};
+  FRANJAS.forEach(f=>{
+    const info=v[f.id]; let tag="";
+    if(info){ const ic = info.ranking===1?"🟢":(info.ranking===4?"🔴":""); tag=` <span style="font-size:.66rem;opacity:.75">${ic}${info.pct}%</span>`; }
+    const c=document.createElement("span"); c.className="chip"+(sel.includes(f.rango)?" sel":"");
+    c.dataset.rango=f.rango; c.innerHTML=f.lbl+tag;
+    c.onclick=()=>c.classList.toggle("sel"); cont.appendChild(c);
+  });
+}
+async function cargarValle(tienda){
+  VALLE={};
+  try{
+    const r=await jsonp(new URLSearchParams({accion:"sugerirFranjas",tienda}));
+    (r.franjas||[]).forEach(f=>{ (VALLE[f.dia_semana]=VALLE[f.dia_semana]||{})[f.franja]={pct:f.pct,ranking:f.ranking}; });
+  }catch(e){}
+  document.querySelectorAll(".dia").forEach(pintarFranjas);
 }
 
 function recogerConfig(){
@@ -185,9 +217,9 @@ function recogerConfig(){
   document.querySelectorAll(".dia.on").forEach(div=>{
     const dia=parseInt(div.dataset.dia);
     const descuentoId=div.querySelector(".descSel").value;
-    const ini=div.querySelector(".hIni").value, fin=div.querySelector(".hFin").value;
+    const ventanas=[...div.querySelectorAll(".franjaChips .chip.sel")].map(c=>c.dataset.rango).join(",");
     const productos=[...div.querySelectorAll(".prodChips .chip.sel")].map(c=>c.dataset.v);
-    cfg.push({dia, descuentoId, ventanas:`${ini}-${fin}`, productos});
+    cfg.push({dia, descuentoId, ventanas: ventanas||"08:00-12:00", productos});
   });
   return cfg;
 }
