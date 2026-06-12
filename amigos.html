@@ -117,6 +117,7 @@
        Reclama tu bowl en la tienda y pide que te inscriban en Loopy con este mismo
        correo o celular — así se cruzan y se activan tus descuentos.</div>
     <div class="benlist" id="okBenList"></div>
+    <a id="okBenLink" href="#" style="display:inline-block;margin-top:16px;background:var(--amarillo);color:var(--morado-osc);font-weight:800;padding:12px 20px;border-radius:12px;text-decoration:none;font-size:.85rem">Ver todos mis beneficios 🍓</a>
   </div>
 
   <div class="foot">Oakberry Colombia · Programa Amigos</div>
@@ -269,6 +270,7 @@ async function registrar(){
                   : "🎉 ¡Bienvenido al club!";
       document.getElementById("okBenef").textContent = benef;
       document.getElementById("okCode").textContent  = res.codigo || "—";
+      document.getElementById("okBenLink").href = "/amigos/beneficios?empresa=" + encodeURIComponent(EMPRESA) + "&c=" + encodeURIComponent(res.codigo || "");
       show("okScreen");
       renderBeneficios();
     } else {
