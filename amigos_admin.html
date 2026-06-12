@@ -202,8 +202,6 @@ function onMselChange(sc, checked){
     lab.querySelector("input").addEventListener("change", e=>onMselChange(sc, e.target.checked));
     panel.appendChild(lab);
   });
-  const def=panel.querySelector('input[value="BOG_TP_PlazaClaro"]');
-  if(def){ def.checked=true; TIENDAS_SEL=["BOG_TP_PlazaClaro"]; }
   renderMselLabel();
   construirDias();
 })();
