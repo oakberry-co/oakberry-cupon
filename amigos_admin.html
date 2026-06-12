@@ -78,12 +78,27 @@
       <div><label>Empresa / aliado</label><input id="empresa" placeholder="Ej: Claro"></div>
       <div><label>Centro comercial</label><input id="cc" placeholder="Ej: Plaza Claro"></div>
     </div>
-    <div class="row3">
-      <div><label>Tienda donde aplica</label><select id="tienda"></select></div>
-      <div><label>Cupo bienvenida (bowls 7oz gratis)</label><input id="cupoGratis" type="number" min="0" value="100"></div>
-      <div><label>Campeón interno (opcional)</label><input id="campeon" placeholder="Nombre / contacto"></div>
+    <label>Tienda principal (canje + lectura de valle)</label>
+    <select id="tienda"></select>
+    <label>Aplicar la misma estrategia también en (opcional)</label>
+    <div class="chips" id="tiendasExtra"></div>
+    <label>Contacto que difunde el QR (campeón interno, opcional)</label>
+    <input id="campeon" placeholder="Nombre / contacto de quien reparte el QR">
+    <p class="muted">El "campeón" es quien dentro de la empresa reparte el QR a sus compañeros. Puedes aplicar la estrategia a varias tiendas a la vez.</p>
+  </div>
+
+  <!-- Bienvenida (gancho) -->
+  <div class="card">
+    <h2><span class="n">★</span> Bienvenida — gancho del primer producto</h2>
+    <div class="row">
+      <div><label>Primeros N: bowl 7oz GRATIS</label><input id="cupoGratis" type="number" min="0" value="50"></div>
+      <div><label>Siguientes M: bowl 7oz con %</label><input id="cupo50" type="number" min="0" value="100"></div>
     </div>
-    <p class="muted">El bowl 7oz GRATIS es el gancho del primer producto (limitado por el cupo). La tienda asociada es el punto más cercano donde el colaborador canjea.</p>
+    <div class="row">
+      <div><label>% del segundo tramo</label><input id="desc50" type="number" min="0" max="100" value="50"></div>
+      <div><label>Vigencia del cupón (horas)</label><input id="vig" type="number" min="1" value="48"></div>
+    </div>
+    <p class="muted">Ej: primeros 50 → bowl 7oz <b>GRATIS</b>; siguientes 100 → bowl 7oz al <b>50%</b>. Ambos válidos por la vigencia. Se muestra en la landing con cuántos quedan.</p>
   </div>
 
   <!-- 2. Estrategia por día -->
@@ -143,6 +158,9 @@ function prettyTienda(sc){ const p=sc.split("_"); return p.slice(2).join(" ").re
   CAT.tiendas.forEach(sc=>{ const o=document.createElement("option"); o.value=sc; o.textContent=prettyTienda(sc); sel.appendChild(o); });
   sel.value="BOG_TP_PlazaClaro";
   sel.addEventListener("change", e=>cargarValle(e.target.value));
+  const extra=document.getElementById("tiendasExtra");
+  CAT.tiendas.forEach(sc=>{ const c=document.createElement("span"); c.className="chip"; c.dataset.sc=sc;
+    c.textContent=prettyTienda(sc); c.onclick=()=>c.classList.toggle("sel"); extra.appendChild(c); });
   construirDias();
 })();
 
@@ -230,26 +248,36 @@ document.getElementById("generar").addEventListener("click", async ()=>{
   const cc=document.getElementById("cc").value.trim();
   const tienda=document.getElementById("tienda").value;
   const cupoGratis=document.getElementById("cupoGratis").value||"0";
+  const cupo50=document.getElementById("cupo50").value||"0";
+  const desc50=document.getElementById("desc50").value||"50";
+  const vig=document.getElementById("vig").value||"48";
   const campeon=document.getElementById("campeon").value.trim();
+  const extras=[...document.querySelectorAll("#tiendasExtra .chip.sel")].map(c=>c.dataset.sc);
+  const tiendas=[...new Set([tienda, ...extras])];
   if(!empresa||!cc){ toast("Empresa y centro comercial son obligatorios","err"); return; }
   const cfg=recogerConfig();
   if(!cfg.length){ toast("Activa al menos un día con descuento","err"); return; }
-  const btn=document.getElementById("generar"); btn.disabled=true; btn.textContent="Generando…";
+  const btn=document.getElementById("generar"); const lbl="Crear empresa + guardar estrategia + generar QR";
+  btn.disabled=true; btn.textContent="Generando…";
 
-  // 1. crear empresa
-  const e=await jsonp(new URLSearchParams({accion:"crearEmpresa", empresa, centroComercial:cc, tienda,
-     tiendaNombre:prettyTienda(tienda), cupoGratis, cupo50:"0", campeonNombre:campeon}));
-  if(!e.ok){ toast("Error creando empresa: "+(e.mensaje||""),"err"); btn.disabled=false; btn.textContent="Crear empresa + guardar estrategia + generar QR"; return; }
-  // 2. guardar config
-  const g=await jsonp(new URLSearchParams({accion:"guardarConfigTienda", tienda, centroComercial:cc, config:JSON.stringify(cfg)}));
-  if(!g.ok){ toast("Error guardando estrategia: "+(g.mensaje||""),"err"); btn.disabled=false; btn.textContent="Crear empresa + guardar estrategia + generar QR"; return; }
+  // 1. crear empresa (bienvenida 2 capas + multi-tienda)
+  const e=await jsonp(new URLSearchParams({accion:"crearEmpresa", empresa, centroComercial:cc,
+     tiendas:tiendas.join(","), tiendaNombre:prettyTienda(tienda),
+     cupoGratis, cupo50, desc50pct:desc50, vigenciaWelcomeH:vig, campeonNombre:campeon}));
+  if(!e.ok){ toast("Error creando empresa: "+(e.mensaje||""),"err"); btn.disabled=false; btn.textContent=lbl; return; }
+  // 2. guardar la estrategia en cada tienda seleccionada
+  let totalDias=0;
+  for(const t of tiendas){
+    const g=await jsonp(new URLSearchParams({accion:"guardarConfigTienda", tienda:t, centroComercial:cc, config:JSON.stringify(cfg)}));
+    if(g.ok) totalDias+=(g.diasGuardados||0);
+  }
 
   LINK=e.link;
   document.getElementById("url").value=LINK;
   document.getElementById("qrimg").src="https://api.qrserver.com/v1/create-qr-code/?size=440x440&margin=10&data="+encodeURIComponent(LINK);
   document.getElementById("result").style.display="block";
-  toast(`✅ Campaña creada: ${empresa} · ${g.diasGuardados} día(s) configurados`,true);
-  btn.disabled=false; btn.textContent="Crear empresa + guardar estrategia + generar QR";
+  toast(`✅ Campaña creada: ${empresa} · ${tiendas.length} tienda(s) · ${cfg.length} día(s)`,true);
+  btn.disabled=false; btn.textContent=lbl;
   document.getElementById("result").scrollIntoView({behavior:"smooth"});
 });
 

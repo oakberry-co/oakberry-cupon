@@ -52,6 +52,10 @@
   .benlist .b .h{ color:#8a7fa3; font-size:.72rem; }
   .loopy{ background:#fff8e6; border:1.5px solid var(--amarillo); border-radius:12px; padding:12px 14px;
         margin:14px 0 4px; font-size:.79rem; color:var(--morado-osc); line-height:1.45; text-align:left; }
+  .oferta{ background:linear-gradient(135deg,var(--amarillo),#ffd966); border-radius:14px; padding:14px 16px;
+        margin-bottom:14px; font-size:.84rem; color:var(--morado-osc); line-height:1.5; }
+  .oferta .rest{ display:inline-block; margin-top:7px; font-weight:700; font-size:.76rem;
+        background:#fff; color:var(--morado); padding:3px 11px; border-radius:12px; }
 </style>
 </head>
 <body>
@@ -64,6 +68,7 @@
 
   <!-- Formulario -->
   <div class="body" id="formScreen">
+    <div class="oferta" id="ofertaBox" style="display:none"></div>
     <label for="inp-nombre">Nombre completo</label>
     <input id="inp-nombre" type="text" autocomplete="name" placeholder="Tu nombre">
 
@@ -162,6 +167,28 @@ async function cargarEmpresas(){
   }
 }
 cargarEmpresas();
+
+// ── Mostrar la oferta de bienvenida + cuántos cupos quedan ──
+async function cargarOferta(){
+  if(!EMPRESA) return;
+  try{
+    const r = await fetchGETSafe({ accion:"consultarCupos", empresa:EMPRESA });
+    if(!r || !r.existe) return;
+    const box = document.getElementById("ofertaBox");
+    let html = "🎁 <b>Beneficio de bienvenida</b><br>";
+    if(r.gratisRestante > 0){
+      html += `Eres de los primeros — <b>bowl 7oz GRATIS</b> 🍓 · válido ${r.vigenciaH}h`;
+      html += `<br><span class="rest">Quedan ${r.gratisRestante} gratis</span>`;
+    } else if(r.cincoRestante > 0){
+      html += `Bowl 7oz al <b>${r.desc50pct}% OFF</b> · válido ${r.vigenciaH}h`;
+      html += `<br><span class="rest">Quedan ${r.cincoRestante} cupos</span>`;
+    } else {
+      html += `Únete al club y disfruta los beneficios por día.`;
+    }
+    box.innerHTML = html; box.style.display = "block";
+  }catch(e){}
+}
+cargarOferta();
 // warmup backend
 (function(){ const s=document.createElement("script"); s.src=CFG.SCRIPT_URL+"?accion=ping&callback=_w"; document.body.appendChild(s); })();
 window._w = function(){};
