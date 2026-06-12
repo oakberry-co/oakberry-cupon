@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Amigos de Oakberry · Configuración de campañas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --morado:#5F4B8B; --morado-osc:#3d2b5e; --amarillo:#F5C842; --beige:#f6f1e4;
+         --ok:#1faa59; --err:#e0436b; --line:#e3dcce; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:'Montserrat',sans-serif; background:var(--beige); color:var(--morado-osc); padding:20px; }
+  .wrap{ max-width:860px; margin:0 auto; }
+  h1{ font-size:1.5rem; color:var(--morado-osc); }
+  h1 .pill{ background:var(--amarillo); color:var(--morado-osc); font-size:.62rem; font-weight:700;
+            padding:4px 10px; border-radius:20px; vertical-align:middle; margin-left:8px; }
+  .sub{ color:var(--morado); font-size:.85rem; margin:6px 0 18px; }
+  .card{ background:#fff; border-radius:18px; padding:20px 22px; box-shadow:0 10px 30px rgba(61,43,94,.10);
+         margin-bottom:18px; }
+  .card h2{ font-size:1rem; color:var(--morado); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .card h2 .n{ width:24px; height:24px; border-radius:50%; background:var(--morado); color:#fff;
+               font-size:.8rem; display:inline-flex; align-items:center; justify-content:center; }
+  label{ display:block; font-size:.72rem; font-weight:600; color:var(--morado); margin:10px 0 4px; }
+  input,select{ width:100%; padding:10px 12px; border:1.6px solid var(--line); border-radius:10px;
+                font-family:inherit; font-size:.92rem; background:#fff; color:var(--morado-osc); }
+  .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  /* grilla de días */
+  .dia{ border:1.6px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; }
+  .dia.on{ border-color:var(--morado); background:#faf8ff; }
+  .dia-head{ display:flex; align-items:center; gap:10px; }
+  .dia-head .nom{ font-weight:700; font-size:.92rem; flex:1; }
+  .dia-body{ display:none; margin-top:10px; }
+  .dia.on .dia-body{ display:block; }
+  .chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+  .chip{ border:1.4px solid var(--line); border-radius:18px; padding:5px 11px; font-size:.78rem;
+         cursor:pointer; user-select:none; }
+  .chip.sel{ background:var(--morado); color:#fff; border-color:var(--morado); }
+  .switch{ position:relative; width:42px; height:24px; flex:0 0 42px; }
+  .switch input{ display:none; }
+  .slider{ position:absolute; inset:0; background:#ccc; border-radius:24px; transition:.2s; cursor:pointer; }
+  .slider:before{ content:""; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff;
+                  border-radius:50%; transition:.2s; }
+  .switch input:checked + .slider{ background:var(--ok); }
+  .switch input:checked + .slider:before{ transform:translateX(18px); }
+  button.go{ width:100%; padding:15px; font-size:1rem; font-weight:800; color:#fff; border:0; border-radius:12px;
+             background:var(--morado); cursor:pointer; box-shadow:0 8px 20px rgba(95,75,139,.35); }
+  button.go:disabled{ opacity:.55; }
+  .muted{ font-size:.74rem; color:#9b8db0; margin-top:6px; }
+  /* resultado */
+  #result{ display:none; }
+  .qrbox{ text-align:center; }
+  .qrbox img{ width:220px; height:220px; border:8px solid #fff; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.12); }
+  .urlbox{ display:flex; gap:8px; margin-top:12px; }
+  .urlbox input{ flex:1; font-size:.82rem; }
+  .btns{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .btns button{ flex:1; min-width:140px; padding:11px; font-weight:700; font-size:.85rem; border:0; border-radius:10px;
+                cursor:pointer; background:var(--amarillo); color:var(--morado-osc); }
+  .btns button.alt{ background:var(--morado); color:#fff; }
+  .toast{ padding:11px 14px; border-radius:10px; font-size:.85rem; font-weight:600; margin-bottom:12px; display:none; }
+  .toast.ok{ background:#e7f7ee; color:var(--ok); display:block; }
+  .toast.err{ background:#fdeaf0; color:var(--err); display:block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Amigos de Oakberry <span class="pill">CONFIGURACIÓN</span></h1>
+  <p class="sub">Arma la estrategia de cupones de tu tienda, crea la empresa y genera el QR + link para enviar.</p>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- 1. Empresa + tienda -->
+  <div class="card">
+    <h2><span class="n">1</span> Empresa y tienda</h2>
+    <div class="row">
+      <div><label>Empresa / aliado</label><input id="empresa" placeholder="Ej: Claro"></div>
+      <div><label>Centro comercial</label><input id="cc" placeholder="Ej: Plaza Claro"></div>
+    </div>
+    <div class="row3">
+      <div><label>Tienda donde aplica</label><select id="tienda"></select></div>
+      <div><label>Cupo bienvenida (bowls 7oz gratis)</label><input id="cupoGratis" type="number" min="0" value="100"></div>
+      <div><label>Campeón interno (opcional)</label><input id="campeon" placeholder="Nombre / contacto"></div>
+    </div>
+    <p class="muted">El bowl 7oz GRATIS es el gancho del primer producto (limitado por el cupo). La tienda asociada es el punto más cercano donde el colaborador canjea.</p>
+  </div>
+
+  <!-- 2. Estrategia por día -->
+  <div class="card">
+    <h2><span class="n">2</span> Estrategia por día</h2>
+    <div id="dias"></div>
+    <p class="muted">Para cada día activo: elige un descuento del menú estándar, los productos que aplican y el horario (franja valle recomendada).</p>
+  </div>
+
+  <!-- 3. Generar -->
+  <div class="card">
+    <h2><span class="n">3</span> Generar campaña</h2>
+    <button class="go" id="generar">Crear empresa + guardar estrategia + generar QR</button>
+
+    <div id="result">
+      <div class="qrbox" style="margin-top:18px"><img id="qrimg" alt="QR"></div>
+      <label>Link de registro de la empresa</label>
+      <div class="urlbox"><input id="url" readonly><button class="btns" onclick="copiar()" style="background:var(--amarillo);border:0;border-radius:10px;padding:0 14px;font-weight:700;cursor:pointer">Copiar</button></div>
+      <div class="btns">
+        <button onclick="descargarQR()">⬇️ Descargar QR (PNG)</button>
+        <button class="alt" onclick="descargarPieza()">⬇️ Descargar pieza lista</button>
+        <button onclick="enviarWA()">📲 Enviar por WhatsApp</button>
+      </div>
+      <p class="muted">La pieza trae el QR + link listos para enviar a la empresa. También puedes copiar el link o mandarlo por WhatsApp.</p>
+    </div>
+  </div>
+</div>
+
+<canvas id="piezaCanvas" width="1080" height="1350" style="display:none"></canvas>
+<script>
+const API = "https://api.oakberry-cupones.com/";
+const DIAS = [[1,"Lunes"],[2,"Martes"],[3,"Miércoles"],[4,"Jueves"],[5,"Viernes"],[6,"Sábado"],[7,"Domingo"]];
+let CAT = { descuentos:[], toppings:[], tamanos:[], tiendas:[] };
+let LINK = "";
+
+function jsonp(params){
+  return new Promise((resolve)=>{
+    const cb = "__cb"+Math.random().toString(36).slice(2);
+    const to = setTimeout(()=>{ cleanup(); resolve({ok:false,mensaje:"timeout"}); }, 15000);
+    function cleanup(){ try{delete window[cb];}catch(e){} if(s.parentNode)s.parentNode.removeChild(s); clearTimeout(to); }
+    window[cb]=(r)=>{ cleanup(); resolve(r||{}); };
+    params.set("callback", cb);
+    const s=document.createElement("script");
+    s.src=API+"?"+params.toString(); s.onerror=()=>{cleanup();resolve({ok:false,mensaje:"network"});};
+    document.body.appendChild(s);
+  });
+}
+function toast(msg, ok){ const t=document.getElementById("toast"); t.textContent=msg; t.className="toast "+(ok?"ok":"err"); }
+function prettyTienda(sc){ const p=sc.split("_"); return p.slice(2).join(" ").replace(/([A-Z])/g," $1").trim()+" ("+p[0]+")"; }
+
+// ── cargar catálogos ──
+(async function init(){
+  const r = await jsonp(new URLSearchParams({accion:"obtenerCatalogos"}));
+  if(!r.ok){ toast("No se pudieron cargar los catálogos","err"); return; }
+  CAT = r;
+  const sel=document.getElementById("tienda");
+  CAT.tiendas.forEach(sc=>{ const o=document.createElement("option"); o.value=sc; o.textContent=prettyTienda(sc); sel.appendChild(o); });
+  document.getElementById("tienda").value="BOG_TP_PlazaClaro";
+  construirDias();
+})();
+
+// ── grilla de días ──
+function construirDias(){
+  const cont=document.getElementById("dias");
+  const descClub = CAT.descuentos.filter(d=>!d.es_bienvenida);
+  DIAS.forEach(([num,nom])=>{
+    const div=document.createElement("div"); div.className="dia"; div.dataset.dia=num;
+    let opts = descClub.map(d=>`<option value="${d.descuento_id}" data-tipo="${d.tipo}">${d.etiqueta}</option>`).join("");
+    div.innerHTML = `
+      <div class="dia-head">
+        <label class="switch"><input type="checkbox" class="diaOn"><span class="slider"></span></label>
+        <span class="nom">${nom}</span>
+      </div>
+      <div class="dia-body">
+        <div class="row3">
+          <div><label>Descuento</label><select class="descSel">${opts}</select></div>
+          <div><label>Desde</label><input type="time" class="hIni" value="08:00"></div>
+          <div><label>Hasta</label><input type="time" class="hFin" value="11:00"></div>
+        </div>
+        <label>Productos que aplican</label>
+        <div class="chips prodChips"></div>
+      </div>`;
+    cont.appendChild(div);
+    const on=div.querySelector(".diaOn"); on.addEventListener("change",()=>div.classList.toggle("on",on.checked));
+    const sel=div.querySelector(".descSel");
+    const pintarProd=()=>{
+      const tipo=sel.selectedOptions[0].dataset.tipo;
+      const chips=div.querySelector(".prodChips"); chips.innerHTML="";
+      const items = tipo==="topping" ? CAT.toppings.map(t=>({v:t,l:t})) : CAT.tamanos.map(t=>({v:t.toteat,l:t.etiqueta}));
+      items.forEach(it=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=it.l; c.dataset.v=it.v;
+        c.onclick=()=>c.classList.toggle("sel"); chips.appendChild(c); });
+    };
+    sel.addEventListener("change",pintarProd); pintarProd();
+  });
+}
+
+function recogerConfig(){
+  const cfg=[];
+  document.querySelectorAll(".dia.on").forEach(div=>{
+    const dia=parseInt(div.dataset.dia);
+    const descuentoId=div.querySelector(".descSel").value;
+    const ini=div.querySelector(".hIni").value, fin=div.querySelector(".hFin").value;
+    const productos=[...div.querySelectorAll(".prodChips .chip.sel")].map(c=>c.dataset.v);
+    cfg.push({dia, descuentoId, ventanas:`${ini}-${fin}`, productos});
+  });
+  return cfg;
+}
+
+// ── generar ──
+document.getElementById("generar").addEventListener("click", async ()=>{
+  const empresa=document.getElementById("empresa").value.trim();
+  const cc=document.getElementById("cc").value.trim();
+  const tienda=document.getElementById("tienda").value;
+  const cupoGratis=document.getElementById("cupoGratis").value||"0";
+  const campeon=document.getElementById("campeon").value.trim();
+  if(!empresa||!cc){ toast("Empresa y centro comercial son obligatorios","err"); return; }
+  const cfg=recogerConfig();
+  if(!cfg.length){ toast("Activa al menos un día con descuento","err"); return; }
+  const btn=document.getElementById("generar"); btn.disabled=true; btn.textContent="Generando…";
+
+  // 1. crear empresa
+  const e=await jsonp(new URLSearchParams({accion:"crearEmpresa", empresa, centroComercial:cc, tienda,
+     tiendaNombre:prettyTienda(tienda), cupoGratis, cupo50:"0", campeonNombre:campeon}));
+  if(!e.ok){ toast("Error creando empresa: "+(e.mensaje||""),"err"); btn.disabled=false; btn.textContent="Crear empresa + guardar estrategia + generar QR"; return; }
+  // 2. guardar config
+  const g=await jsonp(new URLSearchParams({accion:"guardarConfigTienda", tienda, centroComercial:cc, config:JSON.stringify(cfg)}));
+  if(!g.ok){ toast("Error guardando estrategia: "+(g.mensaje||""),"err"); btn.disabled=false; btn.textContent="Crear empresa + guardar estrategia + generar QR"; return; }
+
+  LINK=e.link;
+  document.getElementById("url").value=LINK;
+  document.getElementById("qrimg").src="https://api.qrserver.com/v1/create-qr-code/?size=440x440&margin=10&data="+encodeURIComponent(LINK);
+  document.getElementById("result").style.display="block";
+  toast(`✅ Campaña creada: ${empresa} · ${g.diasGuardados} día(s) configurados`,true);
+  btn.disabled=false; btn.textContent="Crear empresa + guardar estrategia + generar QR";
+  document.getElementById("result").scrollIntoView({behavior:"smooth"});
+});
+
+function copiar(){ const i=document.getElementById("url"); i.select(); document.execCommand("copy"); toast("Link copiado",true); }
+function enviarWA(){ window.open("https://wa.me/?text="+encodeURIComponent("Regístrate en Amigos de Oakberry: "+LINK),"_blank"); }
+function descargarQR(){ const a=document.createElement("a"); a.href=document.getElementById("qrimg").src; a.download="qr_amigos.png"; a.target="_blank"; a.click(); }
+
+// ── pieza compuesta (canvas) ──
+function descargarPieza(){
+  const c=document.getElementById("piezaCanvas"), x=c.getContext("2d");
+  const g=x.createLinearGradient(0,0,0,1350); g.addColorStop(0,"#5F4B8B"); g.addColorStop(1,"#3d2b5e");
+  x.fillStyle=g; x.fillRect(0,0,1080,1350);
+  x.fillStyle="#F5C842"; x.font="800 64px Montserrat,Arial"; x.textAlign="center";
+  x.fillText("AMIGOS DE OAKBERRY", 540, 150);
+  x.fillStyle="#fff"; x.font="600 40px Montserrat,Arial";
+  x.fillText(document.getElementById("empresa").value.trim().toUpperCase(), 540, 230);
+  x.font="700 46px Montserrat,Arial";
+  x.fillText("Escanea, regístrate", 540, 360);
+  x.fillText("y reclama tus beneficios", 540, 420);
+  const qr=new Image(); qr.crossOrigin="anonymous";
+  qr.onload=()=>{
+    x.fillStyle="#fff"; x.fillRect(290,490,500,500);
+    x.drawImage(qr,310,510,460,460);
+    x.fillStyle="#F5C842"; x.font="600 30px Montserrat,Arial";
+    x.fillText("Tu primer bowl 7oz GRATIS 🍓", 540, 1070);
+    x.fillStyle="#fff"; x.font="500 26px Montserrat,Arial";
+    const url=LINK.length>52?LINK.slice(0,52)+"…":LINK;
+    x.fillText(url, 540, 1150);
+    const a=document.createElement("a"); a.href=c.toDataURL("image/png"); a.download="pieza_amigos.png"; a.click();
+  };
+  qr.src="https://api.qrserver.com/v1/create-qr-code/?size=460x460&margin=0&data="+encodeURIComponent(LINK);
+}
+</script>
+</body>
+</html>
