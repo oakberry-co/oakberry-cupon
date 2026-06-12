@@ -12,8 +12,8 @@
          --ok:#1faa59; --err:#e0436b; --line:#e3dcce; }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{ font-family:'Montserrat',sans-serif; color:var(--morado-osc); padding:20px;
-        background:linear-gradient(rgba(246,241,228,.93),rgba(246,241,228,.96)),
-                   url('/amigos-config-bg.jpg') center top/cover fixed, var(--beige); }
+        background:linear-gradient(rgba(246,241,228,.85) 0%, rgba(246,241,228,.58) 42%, rgba(246,241,228,.72) 100%),
+                   url('/amigos-config-bg.jpg') center/cover fixed, var(--beige); }
   .wrap{ max-width:860px; margin:0 auto; }
   h1{ font-size:1.5rem; color:var(--morado-osc); }
   h1 .pill{ background:var(--amarillo); color:var(--morado-osc); font-size:.62rem; font-weight:700;
@@ -214,42 +214,44 @@ function construirDias(){
   const descClub = CAT.descuentos.filter(d=>!d.es_bienvenida);
   DIAS.forEach(([num,nom])=>{
     const div=document.createElement("div"); div.className="dia"; div.dataset.dia=num;
-    let opts = descClub.map(d=>`<option value="${d.descuento_id}" data-tipo="${d.tipo}">${d.etiqueta}</option>`).join("");
+    let optsPct = descClub.filter(d=>d.tipo==="pct")
+      .map(d=>`<option value="${d.descuento_id}">${d.etiqueta}</option>`).join("");
     div.innerHTML = `
       <div class="dia-head">
         <label class="switch"><input type="checkbox" class="diaOn"><span class="slider"></span></label>
         <span class="nom">${nom}</span>
       </div>
       <div class="dia-body">
-        <label>Descuento</label><select class="descSel">${opts}</select>
-        <label>¿Aplica a?</label>
+        <label>¿Qué das este día?</label>
         <div class="chips ptToggle">
-          <span class="chip pt sel" data-pt="producto">Producto (bowl)</span>
-          <span class="chip pt" data-pt="topping">Topping</span>
+          <span class="chip pt sel" data-pt="producto">Descuento en bowl</span>
+          <span class="chip pt" data-pt="topping">Topping gratis</span>
         </div>
-        <label>Selecciona</label>
-        <div class="chips prodChips"></div>
+        <div class="ptProducto">
+          <label>Descuento</label><select class="descSel">${optsPct}</select>
+          <label>Bowls que aplican</label>
+          <div class="chips prodChips"></div>
+        </div>
+        <div class="ptTopping" style="display:none">
+          <label>Toppings (el cliente elige 1 gratis)</label>
+          <div class="chips topChips"></div>
+        </div>
         <label>Franjas — 🟢 valle sugerido · 🔴 pico (no descontar)</label>
         <div class="chips franjaChips"></div>
       </div>`;
     cont.appendChild(div);
     const on=div.querySelector(".diaOn"); on.addEventListener("change",()=>div.classList.toggle("on",on.checked));
-    const sel=div.querySelector(".descSel");
+    const fill=(c2,items)=>items.forEach(it=>{ const c=document.createElement("span"); c.className="chip";
+      c.textContent=it.l; c.dataset.v=it.v; c.onclick=()=>c.classList.toggle("sel"); c2.appendChild(c); });
+    fill(div.querySelector(".prodChips"), CAT.tamanos.map(t=>({v:t.toteat,l:t.etiqueta})));
+    fill(div.querySelector(".topChips"), CAT.toppings.map(t=>({v:t,l:t})));
     const ptChips=[...div.querySelectorAll(".ptToggle .pt")];
-    const pintarProd=()=>{
-      const pt=(div.querySelector(".ptToggle .pt.sel")||{dataset:{}}).dataset.pt || "producto";
-      const chips=div.querySelector(".prodChips"); chips.innerHTML="";
-      const items = pt==="topping" ? CAT.toppings.map(t=>({v:t,l:t})) : CAT.tamanos.map(t=>({v:t.toteat,l:t.etiqueta}));
-      items.forEach(it=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=it.l; c.dataset.v=it.v;
-        c.onclick=()=>c.classList.toggle("sel"); chips.appendChild(c); });
-    };
-    ptChips.forEach(c=>c.addEventListener("click",()=>{ ptChips.forEach(x=>x.classList.remove("sel")); c.classList.add("sel"); pintarProd(); }));
-    sel.addEventListener("change",()=>{ // sugiere el tipo según el descuento; el usuario puede cambiarlo
-      const tipo=sel.selectedOptions[0].dataset.tipo;
-      ptChips.forEach(x=>x.classList.toggle("sel", x.dataset.pt===(tipo==="topping"?"topping":"producto")));
-      pintarProd();
-    });
-    pintarProd();
+    ptChips.forEach(c=>c.addEventListener("click",()=>{
+      ptChips.forEach(x=>x.classList.remove("sel")); c.classList.add("sel");
+      const isTop=c.dataset.pt==="topping";
+      div.querySelector(".ptProducto").style.display=isTop?"none":"block";
+      div.querySelector(".ptTopping").style.display=isTop?"block":"none";
+    }));
     pintarFranjas(div);
   });
   cargarValle(primaryTienda());
@@ -290,9 +292,11 @@ function recogerConfig(){
   const cfg=[];
   document.querySelectorAll(".dia.on").forEach(div=>{
     const dia=parseInt(div.dataset.dia);
-    const descuentoId=div.querySelector(".descSel").value;
+    const isTop = div.querySelector(".ptToggle .pt.sel").dataset.pt==="topping";
+    const descuentoId = isTop ? "topping" : div.querySelector(".descSel").value;
+    const prodSel = isTop ? ".topChips" : ".prodChips";
+    const productos=[...div.querySelectorAll(prodSel+" .chip.sel")].map(c=>c.dataset.v);
     const ventanas=[...div.querySelectorAll(".franjaChips .chip.sel")].map(c=>c.dataset.rango).join(",");
-    const productos=[...div.querySelectorAll(".prodChips .chip.sel")].map(c=>c.dataset.v);
     cfg.push({dia, descuentoId, ventanas: ventanas||"08:00-12:00", productos});
   });
   return cfg;
