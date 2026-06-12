@@ -760,6 +760,28 @@ async function validar() {
     return;
   }
 
+  // ── Routing AMG (Amigos de Oakberry): bienvenida o beneficio del club del día ──
+  //    Entrada única (código AMG o celular); el backend decide bienvenida-primero.
+  const esAmigo = /^AMG/.test(codigo);
+  if (esAmigo) {
+    try {
+      const res = await fetchGET({ accion: "canjearAmigo", codigo, tienda, ciudad, cajero: "" });
+      if (res.ok) {
+        document.getElementById("codigo").value = "";
+        const lineas = res.mensaje.split("\n");
+        mostrarResultado(true, lineas[0], lineas.slice(1));
+      } else {
+        mostrarError(res.mensaje || "no existe");
+      }
+    } catch(e) {
+      mostrarError("Error de conexión, intenta de nuevo");
+    } finally {
+      btn.classList.remove("loading");
+      btn.disabled = false;
+    }
+    return;
+  }
+
   try {
     const res = await fetchGET({
       accion: "canjearCodigo",

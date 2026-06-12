@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Amigos de Oakberry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --morado:#5F4B8B; --morado-osc:#3d2b5e; --amarillo:#F5C842; --beige:#f6f1e4; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:'Montserrat',sans-serif; background:var(--beige); color:var(--morado-osc);
+        min-height:100vh; display:flex; align-items:center; justify-content:center; padding:18px; }
+  .card{ width:100%; max-width:420px; background:#fff; border-radius:22px; overflow:hidden;
+         box-shadow:0 18px 50px rgba(61,43,94,.18); }
+  .hero{ background:linear-gradient(135deg,var(--morado) 0%,var(--morado-osc) 100%);
+         color:#fff; padding:28px 24px 22px; text-align:center; }
+  .hero h1{ font-size:1.45rem; font-weight:800; letter-spacing:-.5px; }
+  .hero .pill{ display:inline-block; background:var(--amarillo); color:var(--morado-osc);
+        font-weight:700; font-size:.72rem; padding:5px 12px; border-radius:20px; margin-bottom:10px; }
+  .hero p{ font-size:.86rem; opacity:.92; margin-top:8px; line-height:1.4; }
+  .body{ padding:22px 24px 26px; }
+  label{ display:block; font-size:.74rem; font-weight:600; margin:13px 0 5px; color:var(--morado); }
+  input,select{ width:100%; padding:12px 14px; border:1.6px solid #e3dcce; border-radius:12px;
+        font-family:inherit; font-size:.95rem; background:#fff; color:var(--morado-osc); }
+  input:focus,select:focus{ outline:none; border-color:var(--morado); }
+  .hint{ font-size:.68rem; color:#8a7fa3; margin-top:4px; }
+  .btn{ width:100%; margin-top:20px; padding:15px; border:0; border-radius:14px; cursor:pointer;
+        background:var(--amarillo); color:var(--morado-osc); font-family:inherit;
+        font-weight:800; font-size:1rem; transition:transform .1s, opacity .2s; }
+  .btn:active{ transform:scale(.98); }
+  .btn:disabled{ opacity:.55; cursor:default; }
+  .err{ color:#c0392b; font-size:.74rem; margin-top:6px; min-height:14px; }
+  .ok-screen,.loading-screen{ display:none; text-align:center; padding:30px 24px 36px; }
+  .ok-screen .code{ font-size:2rem; font-weight:800; letter-spacing:3px; color:var(--morado);
+        background:var(--beige); border:2px dashed var(--morado); border-radius:14px;
+        padding:14px; margin:16px 0; }
+  .ok-screen .benef{ font-size:1rem; font-weight:700; color:var(--morado-osc); margin:8px 0; }
+  .ok-screen .muted{ font-size:.8rem; color:#8a7fa3; line-height:1.5; }
+  .spinner{ width:42px; height:42px; border:4px solid #e3dcce; border-top-color:var(--morado);
+        border-radius:50%; margin:8px auto 14px; animation:spin .8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .foot{ text-align:center; font-size:.66rem; color:#a89ec0; padding:12px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="hero">
+    <span class="pill">CLUB DE BENEFICIOS</span>
+    <h1>Amigos de Oakberry</h1>
+    <p id="heroSub">Regístrate y reclama tu bowl. Quedas en el club con beneficios exclusivos en tu tienda.</p>
+  </div>
+
+  <!-- Formulario -->
+  <div class="body" id="formScreen">
+    <label for="inp-nombre">Nombre completo</label>
+    <input id="inp-nombre" type="text" autocomplete="name" placeholder="Tu nombre">
+
+    <label for="inp-email">Correo (el mismo de tu tarjeta Loopy)</label>
+    <input id="inp-email" type="email" autocomplete="email" placeholder="tucorreo@email.com">
+    <div class="hint">Usa el mismo correo de Loopy para sumar tus beneficios.</div>
+
+    <label for="inp-cel">Celular (WhatsApp)</label>
+    <input id="inp-cel" type="tel" inputmode="numeric" autocomplete="tel" placeholder="300 000 0000">
+
+    <label for="inp-edad">Edad</label>
+    <input id="inp-edad" type="number" inputmode="numeric" min="14" max="99" placeholder="Tu edad">
+
+    <label for="inp-empresa">Empresa</label>
+    <select id="inp-empresa"><option value="">Cargando…</option></select>
+
+    <div class="err" id="err"></div>
+    <button class="btn" id="btn" onclick="registrar()">Quiero ser Amigo</button>
+  </div>
+
+  <!-- Cargando -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <p class="muted">Registrándote en el club…</p>
+  </div>
+
+  <!-- Éxito -->
+  <div class="ok-screen" id="okScreen">
+    <h1 style="color:var(--morado);font-size:1.3rem;">¡Bienvenido al club! 🎉</h1>
+    <div class="benef" id="okBenef"></div>
+    <div class="code" id="okCode">—</div>
+    <p class="muted">Muestra este código en la tienda <b id="okCC">Plaza Claro</b> de Oakberry.<br>
+       Te lo enviamos también por WhatsApp. ¡Te esperamos!</p>
+  </div>
+
+  <div class="foot">Oakberry Colombia · Programa Amigos</div>
+</div>
+
+<script>
+const CFG = { SCRIPT_URL: "https://api.oakberry-cupones.com" };
+const Q = new URLSearchParams(location.search);
+const CC      = (Q.get("cc") || "Plaza Claro").trim();
+const EMPRESA = (Q.get("empresa") || "").trim();   // pre-carga por QR de empresa
+const ORIGEN  = (Q.get("origen") || "qr").trim();
+document.getElementById("okCC").textContent = CC;
+
+// ── Fingerprint ligero de dispositivo (anti-fraude por equipo) ──
+const DEVICE_FP = (() => {
+  try {
+    const c = document.createElement("canvas"); const ctx = c.getContext("2d");
+    ctx.textBaseline = "top"; ctx.font = "14px Arial"; ctx.fillText("oakberry-amigos", 2, 2);
+    const sig = [navigator.userAgent, screen.width+"x"+screen.height,
+                 navigator.language, new Date().getTimezoneOffset(), c.toDataURL()].join("|");
+    let h = 0; for (let i=0;i<sig.length;i++){ h = (h*31 + sig.charCodeAt(i)) | 0; }
+    return "fp" + Math.abs(h).toString(36);
+  } catch(e){ return "fp-na"; }
+})();
+
+// ── JSONP (mismo patrón que index.html) ──
+function fetchGET(params){
+  return new Promise((resolve, reject) => {
+    const cb = "cb_" + Math.random().toString(36).slice(2);
+    const s = document.createElement("script");
+    let done = false;
+    const clean = () => { done = true; clearTimeout(t); delete window[cb]; s.remove(); };
+    window[cb] = (d) => { if(!done){ clean(); resolve(d); } };
+    s.onerror = () => { if(!done){ clean(); reject(new Error("net")); } };
+    s.src = CFG.SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cb});
+    document.body.appendChild(s);
+    const t = setTimeout(() => { if(!done){ clean(); reject(new Error("timeout")); } }, 12000);
+  });
+}
+async function fetchGETSafe(p){ try{ return await fetchGET(p); }catch(e){ await new Promise(r=>setTimeout(r,400)); return await fetchGET(p); } }
+
+// ── Cargar empresas del CC en el dropdown ──
+async function cargarEmpresas(){
+  const sel = document.getElementById("inp-empresa");
+  try{
+    const r = await fetchGETSafe({ accion: "obtenerEmpresas", centroComercial: CC });
+    const empresas = (r && r.empresas) || [];
+    sel.innerHTML = '<option value="">Selecciona tu empresa</option>' +
+      empresas.map(e => `<option>${e}</option>`).join("");
+    if (EMPRESA){ sel.value = EMPRESA; if (sel.value === EMPRESA){ sel.disabled = true; } }
+  }catch(e){
+    sel.innerHTML = '<option value="">Escribe tu empresa</option>';
+  }
+}
+cargarEmpresas();
+// warmup backend
+(function(){ const s=document.createElement("script"); s.src=CFG.SCRIPT_URL+"?accion=ping&callback=_w"; document.body.appendChild(s); })();
+window._w = function(){};
+
+function show(id){ ["formScreen","loadingScreen","okScreen"].forEach(x=>{
+  document.getElementById(x).style.display = (x===id) ? "block" : "none"; }); }
+
+async function registrar(){
+  const nombre  = document.getElementById("inp-nombre").value.trim();
+  const email   = document.getElementById("inp-email").value.trim().toLowerCase();
+  const celRaw  = document.getElementById("inp-cel").value.replace(/\D/g,"");
+  const edad    = document.getElementById("inp-edad").value.trim();
+  const empresa = document.getElementById("inp-empresa").value.trim();
+  const err = document.getElementById("err");
+  err.textContent = "";
+
+  if (!nombre)               return err.textContent = "Escribe tu nombre.";
+  if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) return err.textContent = "Correo inválido.";
+  if (celRaw.length !== 10)  return err.textContent = "Celular debe tener 10 dígitos.";
+  if (!empresa)              return err.textContent = "Selecciona tu empresa.";
+
+  const btn = document.getElementById("btn");
+  btn.disabled = true;
+  show("loadingScreen");
+
+  try{
+    const res = await fetchGETSafe({
+      accion: "registrarAmigo",
+      nombre, email,
+      celular: "57" + celRaw,
+      edad,
+      empresa,
+      centroComercial: CC,
+      origen: ORIGEN,
+      fingerprint: DEVICE_FP,
+    });
+    if (res && res.ok){
+      const tier = res.tier;
+      const benef = tier === "gratis" ? "🎁 ¡Ganaste un BOWL GRATIS!"
+                  : tier === "50"     ? "🎁 Tu bowl al 50% OFF"
+                  : "🎁 Beneficios exclusivos del club";
+      document.getElementById("okBenef").textContent = benef;
+      document.getElementById("okCode").textContent  = res.codigo || "—";
+      show("okScreen");
+    } else {
+      btn.disabled = false; show("formScreen");
+      err.textContent = (res && res.mensaje) || "No se pudo registrar. Intenta de nuevo.";
+    }
+  }catch(e){
+    btn.disabled = false; show("formScreen");
+    err.textContent = "Error de conexión. Intenta de nuevo.";
+  }
+}
+</script>
+</body>
+</html>

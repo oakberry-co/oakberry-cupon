@@ -3,7 +3,7 @@
   "rewrites": [
     { "source": "/r/:codigo", "destination": "https://oakberry-reactivacion-api-664413392517.us-central1.run.app/r/:codigo?src=wa" },
     { "source": "/validar",        "destination": "/validar.html"             },
-    { "source": "/cc",             "destination": "/cc.html"                  },
+    { "source": "/amigos",         "destination": "/amigos.html"              },
     { "source": "/cupon",          "destination": "/cupon.html"               },
     { "source": "/links",          "destination": "/links.html"               },
     { "source": "/r",              "destination": "/r.html"                   },
