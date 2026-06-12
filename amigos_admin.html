@@ -11,7 +11,9 @@
   :root{ --morado:#5F4B8B; --morado-osc:#3d2b5e; --amarillo:#F5C842; --beige:#f6f1e4;
          --ok:#1faa59; --err:#e0436b; --line:#e3dcce; }
   *{ box-sizing:border-box; margin:0; padding:0; }
-  body{ font-family:'Montserrat',sans-serif; background:var(--beige); color:var(--morado-osc); padding:20px; }
+  body{ font-family:'Montserrat',sans-serif; color:var(--morado-osc); padding:20px;
+        background:linear-gradient(rgba(246,241,228,.93),rgba(246,241,228,.96)),
+                   url('/amigos-config-bg.jpg') center top/cover fixed, var(--beige); }
   .wrap{ max-width:860px; margin:0 auto; }
   h1{ font-size:1.5rem; color:var(--morado-osc); }
   h1 .pill{ background:var(--amarillo); color:var(--morado-osc); font-size:.62rem; font-weight:700;
@@ -62,10 +64,26 @@
   .toast{ padding:11px 14px; border-radius:10px; font-size:.85rem; font-weight:600; margin-bottom:12px; display:none; }
   .toast.ok{ background:#e7f7ee; color:var(--ok); display:block; }
   .toast.err{ background:#fdeaf0; color:var(--err); display:block; }
+  /* multi-select dropdown */
+  .msel{ position:relative; }
+  .msel-btn{ width:100%; padding:11px 13px; border:1.6px solid var(--line); border-radius:10px;
+    background:#fff; text-align:left; font-family:inherit; font-size:.92rem; color:var(--morado-osc); cursor:pointer; }
+  .msel-panel{ display:none; position:absolute; z-index:30; top:calc(100% + 4px); left:0; right:0; background:#fff;
+    border:1.6px solid var(--morado); border-radius:10px; max-height:260px; overflow:auto;
+    box-shadow:0 12px 28px rgba(61,43,94,.20); padding:6px; }
+  .msel-panel.open{ display:block; }
+  .msel-opt{ display:flex; align-items:center; gap:9px; padding:8px 9px; border-radius:8px; font-size:.86rem; cursor:pointer; }
+  .msel-opt:hover{ background:#faf8ff; }
+  .msel-opt input{ width:auto; }
+  .msel-opt .pri{ margin-left:auto; font-size:.6rem; font-weight:700; color:var(--morado);
+    background:#efe6fb; padding:2px 8px; border-radius:10px; }
+  /* toggle producto/topping */
+  .pt{ font-weight:700; }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <img src="/email-logo-purple.png" alt="Oakberry" style="height:30px;margin-bottom:8px;display:block">
   <h1>Amigos de Oakberry <span class="pill">CONFIGURACIÓN</span></h1>
   <p class="sub">Arma la estrategia de cupones de tu tienda, crea la empresa y genera el QR + link para enviar.</p>
 
@@ -78,10 +96,11 @@
       <div><label>Empresa / aliado</label><input id="empresa" placeholder="Ej: Claro"></div>
       <div><label>Centro comercial</label><input id="cc" placeholder="Ej: Plaza Claro"></div>
     </div>
-    <label>Tienda principal (canje + lectura de valle)</label>
-    <select id="tienda"></select>
-    <label>Aplicar la misma estrategia también en (opcional)</label>
-    <div class="chips" id="tiendasExtra"></div>
+    <label>Tiendas (multi-selección · la 1ª marcada es la principal — valle + canje)</label>
+    <div class="msel">
+      <button type="button" class="msel-btn" id="mselBtn" onclick="toggleMsel(event)">Selecciona tiendas ▾</button>
+      <div class="msel-panel" id="mselPanel"></div>
+    </div>
     <label>Contacto que difunde el QR (campeón interno, opcional)</label>
     <input id="campeon" placeholder="Nombre / contacto de quien reparte el QR">
     <p class="muted">El "campeón" es quien dentro de la empresa reparte el QR a sus compañeros. Puedes aplicar la estrategia a varias tiendas a la vez.</p>
@@ -133,6 +152,8 @@ const API = "https://api.oakberry-cupones.com/";
 const DIAS = [[1,"Lunes"],[2,"Martes"],[3,"Miércoles"],[4,"Jueves"],[5,"Viernes"],[6,"Sábado"],[7,"Domingo"]];
 let CAT = { descuentos:[], toppings:[], tamanos:[], tiendas:[] };
 let LINK = "";
+let TIENDAS_SEL = [];
+function primaryTienda(){ return TIENDAS_SEL[0] || ""; }
 
 function jsonp(params){
   return new Promise((resolve)=>{
@@ -149,18 +170,41 @@ function jsonp(params){
 function toast(msg, ok){ const t=document.getElementById("toast"); t.textContent=msg; t.className="toast "+(ok?"ok":"err"); }
 function prettyTienda(sc){ const p=sc.split("_"); return p.slice(2).join(" ").replace(/([A-Z])/g," $1").trim()+" ("+p[0]+")"; }
 
+// ── Multi-select de tiendas ──
+function toggleMsel(e){ if(e) e.stopPropagation(); document.getElementById("mselPanel").classList.toggle("open"); }
+document.addEventListener("click", ()=>{ const p=document.getElementById("mselPanel"); if(p) p.classList.remove("open"); });
+function renderMselLabel(){
+  const btn=document.getElementById("mselBtn");
+  if(!TIENDAS_SEL.length) btn.textContent="Selecciona tiendas ▾";
+  else if(TIENDAS_SEL.length===1) btn.textContent=prettyTienda(TIENDAS_SEL[0])+" ▾";
+  else btn.textContent=prettyTienda(TIENDAS_SEL[0])+" +"+(TIENDAS_SEL.length-1)+" más ▾";
+  document.querySelectorAll("#mselPanel .msel-opt").forEach(o=>{
+    o.querySelector(".pri").style.display = (TIENDAS_SEL[0]===o.querySelector("input").value) ? "inline-block" : "none";
+  });
+}
+function onMselChange(sc, checked){
+  if(checked){ if(!TIENDAS_SEL.includes(sc)) TIENDAS_SEL.push(sc); }
+  else TIENDAS_SEL = TIENDAS_SEL.filter(x=>x!==sc);
+  renderMselLabel();
+  cargarValle(primaryTienda());
+}
+
 // ── cargar catálogos ──
 (async function init(){
   const r = await jsonp(new URLSearchParams({accion:"obtenerCatalogos"}));
   if(!r.ok){ toast("No se pudieron cargar los catálogos","err"); return; }
   CAT = r;
-  const sel=document.getElementById("tienda");
-  CAT.tiendas.forEach(sc=>{ const o=document.createElement("option"); o.value=sc; o.textContent=prettyTienda(sc); sel.appendChild(o); });
-  sel.value="BOG_TP_PlazaClaro";
-  sel.addEventListener("change", e=>cargarValle(e.target.value));
-  const extra=document.getElementById("tiendasExtra");
-  CAT.tiendas.forEach(sc=>{ const c=document.createElement("span"); c.className="chip"; c.dataset.sc=sc;
-    c.textContent=prettyTienda(sc); c.onclick=()=>c.classList.toggle("sel"); extra.appendChild(c); });
+  const panel=document.getElementById("mselPanel");
+  panel.addEventListener("click", e=>e.stopPropagation());
+  CAT.tiendas.forEach(sc=>{
+    const lab=document.createElement("label"); lab.className="msel-opt";
+    lab.innerHTML=`<input type="checkbox" value="${sc}"><span>${prettyTienda(sc)}</span><span class="pri" style="display:none">principal</span>`;
+    lab.querySelector("input").addEventListener("change", e=>onMselChange(sc, e.target.checked));
+    panel.appendChild(lab);
+  });
+  const def=panel.querySelector('input[value="BOG_TP_PlazaClaro"]');
+  if(def){ def.checked=true; TIENDAS_SEL=["BOG_TP_PlazaClaro"]; }
+  renderMselLabel();
   construirDias();
 })();
 
@@ -178,7 +222,12 @@ function construirDias(){
       </div>
       <div class="dia-body">
         <label>Descuento</label><select class="descSel">${opts}</select>
-        <label>Productos que aplican</label>
+        <label>¿Aplica a?</label>
+        <div class="chips ptToggle">
+          <span class="chip pt sel" data-pt="producto">Producto (bowl)</span>
+          <span class="chip pt" data-pt="topping">Topping</span>
+        </div>
+        <label>Selecciona</label>
         <div class="chips prodChips"></div>
         <label>Franjas — 🟢 valle sugerido · 🔴 pico (no descontar)</label>
         <div class="chips franjaChips"></div>
@@ -186,17 +235,24 @@ function construirDias(){
     cont.appendChild(div);
     const on=div.querySelector(".diaOn"); on.addEventListener("change",()=>div.classList.toggle("on",on.checked));
     const sel=div.querySelector(".descSel");
+    const ptChips=[...div.querySelectorAll(".ptToggle .pt")];
     const pintarProd=()=>{
-      const tipo=sel.selectedOptions[0].dataset.tipo;
+      const pt=(div.querySelector(".ptToggle .pt.sel")||{dataset:{}}).dataset.pt || "producto";
       const chips=div.querySelector(".prodChips"); chips.innerHTML="";
-      const items = tipo==="topping" ? CAT.toppings.map(t=>({v:t,l:t})) : CAT.tamanos.map(t=>({v:t.toteat,l:t.etiqueta}));
+      const items = pt==="topping" ? CAT.toppings.map(t=>({v:t,l:t})) : CAT.tamanos.map(t=>({v:t.toteat,l:t.etiqueta}));
       items.forEach(it=>{ const c=document.createElement("span"); c.className="chip"; c.textContent=it.l; c.dataset.v=it.v;
         c.onclick=()=>c.classList.toggle("sel"); chips.appendChild(c); });
     };
-    sel.addEventListener("change",pintarProd); pintarProd();
+    ptChips.forEach(c=>c.addEventListener("click",()=>{ ptChips.forEach(x=>x.classList.remove("sel")); c.classList.add("sel"); pintarProd(); }));
+    sel.addEventListener("change",()=>{ // sugiere el tipo según el descuento; el usuario puede cambiarlo
+      const tipo=sel.selectedOptions[0].dataset.tipo;
+      ptChips.forEach(x=>x.classList.toggle("sel", x.dataset.pt===(tipo==="topping"?"topping":"producto")));
+      pintarProd();
+    });
+    pintarProd();
     pintarFranjas(div);
   });
-  cargarValle(document.getElementById("tienda").value);
+  cargarValle(primaryTienda());
 }
 
 // ── Franjas + sugerencia valle (data-driven) ──
@@ -246,15 +302,15 @@ function recogerConfig(){
 document.getElementById("generar").addEventListener("click", async ()=>{
   const empresa=document.getElementById("empresa").value.trim();
   const cc=document.getElementById("cc").value.trim();
-  const tienda=document.getElementById("tienda").value;
   const cupoGratis=document.getElementById("cupoGratis").value||"0";
   const cupo50=document.getElementById("cupo50").value||"0";
   const desc50=document.getElementById("desc50").value||"50";
   const vig=document.getElementById("vig").value||"48";
   const campeon=document.getElementById("campeon").value.trim();
-  const extras=[...document.querySelectorAll("#tiendasExtra .chip.sel")].map(c=>c.dataset.sc);
-  const tiendas=[...new Set([tienda, ...extras])];
+  const tiendas=TIENDAS_SEL.slice();
+  const tienda=tiendas[0]||"";
   if(!empresa||!cc){ toast("Empresa y centro comercial son obligatorios","err"); return; }
+  if(!tiendas.length){ toast("Selecciona al menos una tienda","err"); return; }
   const cfg=recogerConfig();
   if(!cfg.length){ toast("Activa al menos un día con descuento","err"); return; }
   const btn=document.getElementById("generar"); const lbl="Crear empresa + guardar estrategia + generar QR";
