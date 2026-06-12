@@ -56,6 +56,11 @@
         margin-bottom:14px; font-size:.84rem; color:var(--morado-osc); line-height:1.5; }
   .oferta .rest{ display:inline-block; margin-top:7px; font-weight:700; font-size:.76rem;
         background:#fff; color:var(--morado); padding:3px 11px; border-radius:12px; }
+  .oferta .soloen{ display:block; margin-top:9px; font-weight:800; font-size:.84rem; }
+  .check{ display:flex; gap:8px; align-items:flex-start; font-size:.73rem; font-weight:400;
+        color:#5a4a72; margin-top:14px; line-height:1.45; }
+  .check input{ width:auto; margin-top:2px; }
+  .check a{ color:var(--morado); font-weight:700; }
 </style>
 </head>
 <body>
@@ -85,6 +90,9 @@
 
     <label for="inp-empresa">Empresa</label>
     <select id="inp-empresa"><option value="">Cargando…</option></select>
+
+    <label class="check"><input type="checkbox" id="inp-acepta">
+      <span>Acepto los <a href="/tyc/amigos" target="_blank">términos y el tratamiento de mis datos</a>, y que Oakberry me contacte por WhatsApp y correo con mis beneficios.</span></label>
 
     <div class="err" id="err"></div>
     <button class="btn" id="btn" onclick="registrar()">Quiero ser Amigo</button>
@@ -186,6 +194,9 @@ async function cargarOferta(){
     } else {
       html += `Únete al club y disfruta los beneficios por día.`;
     }
+    const tienda = r.tienda || CC;
+    html += `<span class="soloen">📍 Válido SOLO en Oakberry ${tienda}</span>`;
+    if(r.tienda) document.getElementById("okCC").textContent = r.tienda;
     box.innerHTML = html; box.style.display = "block";
   }catch(e){}
 }
@@ -233,6 +244,7 @@ async function registrar(){
   if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) return err.textContent = "Correo inválido.";
   if (celRaw.length !== 10)  return err.textContent = "Celular debe tener 10 dígitos.";
   if (!empresa)              return err.textContent = "Selecciona tu empresa.";
+  if (!document.getElementById("inp-acepta").checked) return err.textContent = "Debes aceptar los términos y el contacto para registrarte.";
 
   const btn = document.getElementById("btn");
   btn.disabled = true;
@@ -248,6 +260,7 @@ async function registrar(){
       centroComercial: CC,
       origen: ORIGEN,
       fingerprint: DEVICE_FP,
+      acepta: "1",
     });
     if (res && res.ok){
       const tier = res.tier;

@@ -103,7 +103,11 @@
     </div>
     <label>Contacto que difunde el QR (campeón interno, opcional)</label>
     <input id="campeon" placeholder="Nombre / contacto de quien reparte el QR">
-    <p class="muted">El "campeón" es quien dentro de la empresa reparte el QR a sus compañeros. Puedes aplicar la estrategia a varias tiendas a la vez.</p>
+    <div class="row">
+      <div><label>Inicio del programa (opcional)</label><input id="fechaInicio" type="date"></div>
+      <div><label>Fin del programa (opcional)</label><input id="fechaFin" type="date"></div>
+    </div>
+    <p class="muted">El "campeón" reparte el QR a sus compañeros. Puedes aplicar la estrategia a varias tiendas. Fuera de las fechas, los canjes se bloquean.</p>
   </div>
 
   <!-- Bienvenida (gancho) -->
@@ -321,7 +325,9 @@ document.getElementById("generar").addEventListener("click", async ()=>{
   // 1. crear empresa (bienvenida 2 capas + multi-tienda)
   const e=await jsonp(new URLSearchParams({accion:"crearEmpresa", empresa, centroComercial:cc,
      tiendas:tiendas.join(","), tiendaNombre:prettyTienda(tienda),
-     cupoGratis, cupo50, desc50pct:desc50, vigenciaWelcomeH:vig, campeonNombre:campeon}));
+     cupoGratis, cupo50, desc50pct:desc50, vigenciaWelcomeH:vig, campeonNombre:campeon,
+     fechaInicio:document.getElementById("fechaInicio").value,
+     fechaFin:document.getElementById("fechaFin").value}));
   if(!e.ok){ toast("Error creando empresa: "+(e.mensaje||""),"err"); btn.disabled=false; btn.textContent=lbl; return; }
   // 2. guardar la estrategia en cada tienda seleccionada
   let totalDias=0;
