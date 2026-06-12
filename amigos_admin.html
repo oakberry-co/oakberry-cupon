@@ -79,6 +79,13 @@
     background:#efe6fb; padding:2px 8px; border-radius:10px; }
   /* toggle producto/topping */
   .pt{ font-weight:700; }
+  .md{ font-weight:700; }
+  .rung{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .rung .rnum{ font-weight:700; font-size:.85rem; min-width:90px; color:var(--morado); }
+  .rung .rsel{ flex:1; }
+  .rung .rdel{ cursor:pointer; color:var(--err); font-weight:700; padding:4px 8px; }
+  .addrung{ border:1.6px dashed var(--morado); background:#fff; color:var(--morado); font-weight:700;
+    border-radius:10px; padding:9px 14px; cursor:pointer; font-family:inherit; font-size:.85rem; }
 </style>
 </head>
 <body>
@@ -124,11 +131,25 @@
     <p class="muted">Ej: primeros 50 → bowl 7oz <b>GRATIS</b>; siguientes 100 → bowl 7oz al <b>50%</b>. Ambos válidos por la vigencia. Se muestra en la landing con cuántos quedan.</p>
   </div>
 
-  <!-- 2. Estrategia por día -->
+  <!-- 2. Estrategia -->
   <div class="card">
-    <h2><span class="n">2</span> Estrategia por día</h2>
+    <h2><span class="n">2</span> Estrategia</h2>
+    <label>Modelo</label>
+    <div class="chips" id="modoToggle">
+      <span class="chip md sel" data-modo="calendario">Calendario por día</span>
+      <span class="chip md" data-modo="escalado">Escalera por compra</span>
+    </div>
+
+    <div id="escaleraWrap" style="display:none">
+      <label>Escalera de descuento (sube con cada compra)</label>
+      <div id="escalera"></div>
+      <button type="button" class="addrung" id="addRung">+ Agregar paso</button>
+      <p class="muted">Compra 1 → X%, compra 2 → Y%… Al agotar la escalera, el cliente sigue con el calendario de abajo.</p>
+    </div>
+
+    <label>Calendario por día</label>
     <div id="dias"></div>
-    <p class="muted">Para cada día activo: elige un descuento del menú estándar, los productos que aplican y el horario (franja valle recomendada).</p>
+    <p class="muted">Por cada día activo: descuento o topping → productos → franjas (con sugerencia de valle 🟢).</p>
   </div>
 
   <!-- 3. Generar -->
@@ -290,6 +311,27 @@ async function cargarValle(tienda){
   document.querySelectorAll(".dia").forEach(pintarFranjas);
 }
 
+// ── Modo escalado (escalera por compra) ──
+const ESC_PCTS=[15,25,30,35,40];
+let modoSel="calendario";
+function renumRungs(){ [...document.querySelectorAll("#escalera .rung")].forEach((r,i)=>r.querySelector(".rnum").textContent="Compra #"+(i+1)); }
+function addRung(pct){
+  const cont=document.getElementById("escalera");
+  const opts=ESC_PCTS.map(p=>`<option value="${p}" ${p==pct?"selected":""}>${p}% OFF</option>`).join("");
+  const row=document.createElement("div"); row.className="rung";
+  row.innerHTML=`<span class="rnum"></span><select class="rsel">${opts}</select><span class="rdel">✕</span>`;
+  row.querySelector(".rdel").onclick=()=>{ row.remove(); renumRungs(); };
+  cont.appendChild(row); renumRungs();
+}
+function recogerEscalera(){ return [...document.querySelectorAll("#escalera .rsel")].map(s=>parseInt(s.value)); }
+document.querySelectorAll("#modoToggle .md").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll("#modoToggle .md").forEach(x=>x.classList.remove("sel")); c.classList.add("sel");
+  modoSel=c.dataset.modo;
+  document.getElementById("escaleraWrap").style.display = modoSel==="escalado"?"block":"none";
+}));
+document.getElementById("addRung").onclick=()=>addRung(30);
+addRung(15); addRung(25); addRung(30);   // escalera por defecto
+
 function recogerConfig(){
   const cfg=[];
   document.querySelectorAll(".dia.on").forEach(div=>{
@@ -318,7 +360,8 @@ document.getElementById("generar").addEventListener("click", async ()=>{
   if(!empresa||!cc){ toast("Empresa y centro comercial son obligatorios","err"); return; }
   if(!tiendas.length){ toast("Selecciona al menos una tienda","err"); return; }
   const cfg=recogerConfig();
-  if(!cfg.length){ toast("Activa al menos un día con descuento","err"); return; }
+  const escalera = modoSel==="escalado" ? recogerEscalera() : [];
+  if(!cfg.length && !escalera.length){ toast("Configura al menos un día o una escalera","err"); return; }
   const btn=document.getElementById("generar"); const lbl="Crear empresa + guardar estrategia + generar QR";
   btn.disabled=true; btn.textContent="Generando…";
 
@@ -327,7 +370,8 @@ document.getElementById("generar").addEventListener("click", async ()=>{
      tiendas:tiendas.join(","), tiendaNombre:prettyTienda(tienda),
      cupoGratis, cupo50, desc50pct:desc50, vigenciaWelcomeH:vig, campeonNombre:campeon,
      fechaInicio:document.getElementById("fechaInicio").value,
-     fechaFin:document.getElementById("fechaFin").value}));
+     fechaFin:document.getElementById("fechaFin").value,
+     modo:modoSel, escalera:JSON.stringify(escalera)}));
   if(!e.ok){ toast("Error creando empresa: "+(e.mensaje||""),"err"); btn.disabled=false; btn.textContent=lbl; return; }
   // 2. guardar la estrategia en cada tienda seleccionada
   let totalDias=0;

@@ -37,7 +37,9 @@
   .ok-screen .code{ font-size:2rem; font-weight:800; letter-spacing:3px; color:var(--morado);
         background:var(--beige); border:2px dashed var(--morado); border-radius:14px;
         padding:14px; margin:16px 0; }
-  .ok-screen .benef{ font-size:1rem; font-weight:700; color:var(--morado-osc); margin:8px 0; }
+  .ok-screen .benef{ font-size:1.1rem; font-weight:800; color:var(--morado); margin:10px 0;
+        animation:pop .55s cubic-bezier(.2,1.5,.4,1) both; }
+  @keyframes pop{ 0%{ transform:scale(.3); opacity:0; } 100%{ transform:scale(1); opacity:1; } }
   .ok-screen .muted{ font-size:.8rem; color:#8a7fa3; line-height:1.5; }
   .spinner{ width:42px; height:42px; border:4px solid #e3dcce; border-top-color:var(--morado);
         border-radius:50%; margin:8px auto 14px; animation:spin .8s linear infinite; }
@@ -184,13 +186,11 @@ async function cargarOferta(){
     const r = await fetchGETSafe({ accion:"consultarCupos", empresa:EMPRESA });
     if(!r || !r.existe) return;
     const box = document.getElementById("ofertaBox");
-    let html = "🎁 <b>Beneficio de bienvenida</b><br>";
-    if(r.gratisRestante > 0){
-      html += `Eres de los primeros — <b>bowl 7oz GRATIS</b> 🍓 · válido ${r.vigenciaH}h`;
-      html += `<br><span class="rest">Quedan ${r.gratisRestante} gratis</span>`;
-    } else if(r.cincoRestante > 0){
-      html += `Bowl 7oz al <b>${r.desc50pct}% OFF</b> · válido ${r.vigenciaH}h`;
-      html += `<br><span class="rest">Quedan ${r.cincoRestante} cupos</span>`;
+    const quedan = (r.gratisRestante||0) + (r.cincoRestante||0);
+    let html = "🎁 <b>¡Premio de bienvenida AL AZAR!</b><br>";
+    if(quedan > 0){
+      html += `Regístrate y descubre qué ganaste en tu <b>bowl 7oz</b> 🍓 · válido ${r.vigenciaH}h`;
+      html += `<br><span class="rest">⚡ Quedan solo ${quedan} premios</span>`;
     } else {
       html += `Únete al club y disfruta los beneficios por día.`;
     }
@@ -264,9 +264,9 @@ async function registrar(){
     });
     if (res && res.ok){
       const tier = res.tier;
-      const benef = tier === "gratis" ? "🎁 ¡Ganaste un BOWL GRATIS!"
-                  : tier === "50"     ? "🎁 Tu bowl al 50% OFF"
-                  : "🎁 Beneficios exclusivos del club";
+      const benef = tier === "gratis" ? "🎉 ¡GANASTE un BOWL 7oz GRATIS!"
+                  : tier === "50"     ? "🎉 ¡GANASTE tu bowl 7oz al 50% OFF!"
+                  : "🎉 ¡Bienvenido al club!";
       document.getElementById("okBenef").textContent = benef;
       document.getElementById("okCode").textContent  = res.codigo || "—";
       show("okScreen");
