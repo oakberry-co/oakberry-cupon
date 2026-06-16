@@ -192,7 +192,6 @@
       <div class="tabs">
         <button class="tab active" id="tab-cupon"    onclick="setModo('cupon')">🎟 Cupón</button>
         <button class="tab"        id="tab-sorteo"   onclick="setModo('sorteo')">🏆 Sorteo</button>
-        <button class="tab"        id="tab-reactiv"  onclick="setModo('reactivacion')">🔄 Reactivar</button>
       </div>
 
       <!-- ════════════════════════════════════════
@@ -454,144 +453,7 @@
         <button class="gen-btn" onclick="generar()">⚡ Generar link</button>
       </div>
 
-      <!-- ════════════════════════════════════════
-           MODO REACTIVACIÓN
-      ════════════════════════════════════════ -->
-      <div id="modoReactivWrap" style="display:none;">
-
-        <div class="divider">Campaña de reactivación</div>
-        <div class="reactiv-section">
-          <div class="reactiv-title">Esta campaña va a tu base existente — no a pauta</div>
-          <div class="field">
-            <label>Nombre interno de la campaña</label>
-            <input type="text" id="r-nombre" placeholder="Ej: Reactivacion Bogotá Bowl Abril26">
-          </div>
-          <div class="row">
-            <div class="field">
-              <label>Ciudad</label>
-              <select id="r-ciudad">
-                <option value="todas">Todas las ciudades</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Tienda</label>
-              <select id="r-tienda"><option value="general">Todas las tiendas</option></select>
-            </div>
-          </div>
-          <div class="field">
-            <label>Canal de envío</label>
-            <select id="r-fuente">
-              <option value="wa_reactivacion">WhatsApp (cuando esté activo)</option>
-              <option value="email_reactivacion">Email</option>
-              <option value="manual">Manual · Link directo</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="divider">Oferta de reactivación</div>
-        <div class="row">
-          <div class="field">
-            <label>Producto</label>
-            <select id="r-producto">
-              <option value="Bowl The One 9oz">Bowl The One 9oz · $21.900</option>
-              <option value="Bowl Classic 12oz" selected>Bowl Classic 12oz · $25.400</option>
-              <option value="Bowl Works 16oz">Bowl Works 16oz · $33.800</option>
-              <option value="Bowl The Oak 22oz">Bowl The Oak 22oz · $39.400</option>
-              <option value="Smoothie">Smoothie</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Descuento %</label>
-            <select id="r-descuento">
-              <option value="20">20%</option>
-              <option value="25">25%</option>
-              <option value="30">30%</option>
-              <option value="35" selected>35%</option>
-              <option value="40">40%</option>
-              <option value="45">45%</option>
-              <option value="50">50%</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label>Vigencia del cupón de reactivación</label>
-          <select id="r-vigencia">
-            <option value="24">24 horas · Alta urgencia</option>
-            <option value="48" selected>48 horas · Urgencia media</option>
-            <option value="72">72 horas · Estándar</option>
-            <option value="168">7 días · Sin presión</option>
-          </select>
-        </div>
-
-        <div class="divider">Momento de consumo</div>
-        <div class="timeline-wrap">
-          <div class="timeline-label">Cobertura horaria del cupón de reactivación</div>
-          <div class="timeline" id="r-timeline24h">
-            <div class="tl-seg tl-madrugada inactive" data-key="madrugada" style="width:29.17%">MADRUGADA</div>
-            <div class="tl-seg tl-desayuno inactive"  data-key="desayuno"  style="width:18.75%">DESAYUNO</div>
-            <div class="tl-seg tl-almuerzo inactive"  data-key="almuerzo"  style="width:16.67%">ALMUERZO</div>
-            <div class="tl-seg tl-onces inactive"     data-key="onces"     style="width:14.58%">ONCES</div>
-            <div class="tl-seg tl-cena inactive"      data-key="cena"      style="width:16.67%">CENA</div>
-            <div class="tl-seg tl-noche inactive"     data-key="noche"     style="width:4.17%">NOCHE</div>
-          </div>
-        </div>
-        <div class="momentos-grid" id="r-momentosGrid">
-          <div class="momento-btn todos-btn" id="r-btnTodos" onclick="rToggleTodos(this)">
-            <span class="momento-emoji">🕐</span>
-            <span class="momento-nombre">Todo el día</span>
-            <span class="momento-hora">Sin restricción · 24h</span>
-          </div>
-          <div class="momento-btn" data-rmomento="madrugada" onclick="rToggleMomento('madrugada',this)">
-            <span class="momento-emoji">🌃</span><span class="momento-nombre">Madrugada</span>
-            <span class="momento-hora">11:00 pm – 7:00 am</span>
-          </div>
-          <div class="momento-btn" data-rmomento="desayuno" onclick="rToggleMomento('desayuno',this)">
-            <span class="momento-emoji">☀️</span><span class="momento-nombre">Desayuno</span>
-            <span class="momento-hora">7:00 am – 11:30 am</span>
-          </div>
-          <div class="momento-btn" data-rmomento="almuerzo" onclick="rToggleMomento('almuerzo',this)">
-            <span class="momento-emoji">🍽️</span><span class="momento-nombre">Almuerzo</span>
-            <span class="momento-hora">11:30 am – 3:30 pm</span>
-          </div>
-          <div class="momento-btn" data-rmomento="onces" onclick="rToggleMomento('onces',this)">
-            <span class="momento-emoji">🧃</span><span class="momento-nombre">Onces</span>
-            <span class="momento-hora">3:30 pm – 7:00 pm</span>
-          </div>
-          <div class="momento-btn" data-rmomento="cena" onclick="rToggleMomento('cena',this)">
-            <span class="momento-emoji">🌙</span><span class="momento-nombre">Cena</span>
-            <span class="momento-hora">7:00 pm – 11:00 pm</span>
-          </div>
-          <div class="momento-btn" data-rmomento="noche" onclick="rToggleMomento('noche',this)">
-            <span class="momento-emoji">🌌</span><span class="momento-nombre">Noche</span>
-            <span class="momento-hora">11:00 pm – 12:00 am</span>
-          </div>
-        </div>
-        <div class="err-momento" id="r-errMomento">⚠ Selecciona al menos un momento</div>
-
-        <!-- Instrucciones de uso del link -->
-        <div class="uso-box">
-          <div class="uso-label">Cómo usar este link</div>
-          <div class="uso-step">
-            <span class="uso-num">1</span>
-            <span class="uso-text">Genera el link base de esta campaña con el botón de abajo</span>
-          </div>
-          <div class="uso-step">
-            <span class="uso-num">2</span>
-            <span class="uso-text">Copia el link y agrégale <code>&cel=XXXXXXXXXX</code> por cada persona de tu base</span>
-          </div>
-          <div class="uso-step">
-            <span class="uso-num">3</span>
-            <span class="uso-text">Envíalo por WhatsApp, email o el canal que prefieras</span>
-          </div>
-          <div class="uso-step">
-            <span class="uso-num">4</span>
-            <span class="uso-text">Cuando tengas WA Business activo, el envío masivo se hace automático desde Apps Script</span>
-          </div>
-          <div class="wa-pending-badge">⏳ Envío masivo automático · disponible cuando WA esté activo</div>
-        </div>
-
-        <button class="gen-btn gen-btn-coral" onclick="generarReactivacion()">🔄 Generar link de reactivación</button>
-      </div>
+      
 
     </div>
   </div>
@@ -609,19 +471,6 @@
       <div class="link-actions">
         <button class="action-btn" onclick="copiarLink()">📋 Copiar</button>
         <button class="action-btn primary" id="abrirBtn" onclick="abrirLink()">↗ Probar</button>
-      </div>
-    </div>
-
-    <!-- Panel extra reactivación: ejemplo con cel -->
-    <div class="link-card reactiv-card" id="reactivEjemploCard" style="display:none;">
-      <div class="link-card-title">Ejemplo con celular precargado</div>
-      <div class="link-display coral empty" id="reactivEjemploDisplay">Agrega &cel= al link base →</div>
-      <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:10px;line-height:1.6;">
-        Reemplaza <span style="color:var(--coral);">3213691318</span> por el número de cada cliente
-      </div>
-      <div class="link-actions">
-        <button class="action-btn coral" onclick="copiarEjemplo()">📋 Copiar ejemplo</button>
-        <button class="action-btn" onclick="abrirEjemplo()">↗ Probar</button>
       </div>
     </div>
 
@@ -730,48 +579,14 @@ async function cargarTiendas() {
   } catch(e) {}
 }
 
-async function cargarTiendasReactiv() {
-  const ciudad = document.getElementById("r-ciudad").value;
-  const sel    = document.getElementById("r-tienda");
-  sel.innerHTML = '<option value="general">Todas las tiendas</option>';
-  if (!ciudad || ciudad==="todas") return;
-  try {
-    const data    = await fetchGETCached({ accion:"obtenerTiendas", ciudad });
-    const tiendas = Array.isArray(data) ? data : (data.tiendas||[]);
-    tiendas.forEach(t => sel.add(new Option(t,t)));
-  } catch(e) {}
-}
 
 // ── MODO ──────────────────────────────────────────────────
 function setModo(modo) {
   modoActual = modo;
-
-  // Tabs
-  document.getElementById("tab-cupon").className   = "tab" + (modo==="cupon"       ? " active" : "");
-  document.getElementById("tab-sorteo").className  = "tab" + (modo==="sorteo"      ? " active" : "");
-  document.getElementById("tab-reactiv").className = "tab" + (modo==="reactivacion"? " active-coral" : "");
-
-  // Paneles
-  document.getElementById("modoPautaWrap").style.display  = modo !== "reactivacion" ? "block" : "none";
-  document.getElementById("modoReactivWrap").style.display = modo === "reactivacion" ? "block" : "none";
-
-  // Sub-paneles cupón/sorteo
-  if (modo !== "reactivacion") {
-    document.getElementById("modoCupon").style.display  = modo==="cupon"  ? "block" : "none";
-    document.getElementById("modeSorteo").style.display = modo==="sorteo" ? "block" : "none";
-  }
-
-  // Panel derecho
-  document.getElementById("reactivEjemploCard").style.display = modo==="reactivacion" ? "block" : "none";
-  if (modo === "reactivacion") {
-    document.getElementById("mainLinkCard").classList.add("reactiv-card");
-    document.getElementById("linkCardTitle").textContent = "Link base (sin celular)";
-    document.getElementById("linkFullTitle").textContent = "Link completo generado";
-  } else {
-    document.getElementById("mainLinkCard").classList.remove("reactiv-card");
-    document.getElementById("linkCardTitle").textContent = "Link corto (para compartir)";
-    document.getElementById("linkFullTitle").textContent = "Link completo (con todos los parámetros)";
-  }
+  document.getElementById("tab-cupon").className  = "tab" + (modo==="cupon"  ? " active" : "");
+  document.getElementById("tab-sorteo").className = "tab" + (modo==="sorteo" ? " active" : "");
+  document.getElementById("modoCupon").style.display  = modo==="cupon"  ? "block" : "none";
+  document.getElementById("modeSorteo").style.display = modo==="sorteo" ? "block" : "none";
 }
 
 // ── MOMENTOS CUPÓN ────────────────────────────────────────
@@ -799,28 +614,6 @@ function toggleMomento(key, el) {
   actualizarMetaUrl();
 }
 
-// ── MOMENTOS REACTIVACIÓN ─────────────────────────────────
-function rToggleTodos(el) {
-  const allSelected = TODOS_MOMENTOS.every(m => rMomentosSelected.has(m));
-  if (allSelected) {
-    TODOS_MOMENTOS.forEach(m => rMomentosSelected.delete(m));
-    document.querySelectorAll(".momento-btn[data-rmomento]").forEach(b => b.classList.remove("selected"));
-    el.classList.remove("selected");
-  } else {
-    TODOS_MOMENTOS.forEach(m => rMomentosSelected.add(m));
-    document.querySelectorAll(".momento-btn[data-rmomento]").forEach(b => b.classList.add("selected"));
-    el.classList.add("selected");
-  }
-  document.getElementById("r-errMomento").classList.remove("show");
-  actualizarTimeline("r-timeline24h", rMomentosSelected);
-}
-function rToggleMomento(key, el) {
-  if (rMomentosSelected.has(key)) { rMomentosSelected.delete(key); el.classList.remove("selected"); }
-  else { rMomentosSelected.add(key); el.classList.add("selected"); }
-  document.getElementById("r-btnTodos").classList.toggle("selected", TODOS_MOMENTOS.every(m=>rMomentosSelected.has(m)));
-  document.getElementById("r-errMomento").classList.remove("show");
-  actualizarTimeline("r-timeline24h", rMomentosSelected);
-}
 
 // ── TIMELINE ──────────────────────────────────────────────
 function actualizarTimeline(timelineId, selectedSet) {
@@ -974,55 +767,6 @@ function generar() {
   guardarEnSheet({ ...item, nombre });
 }
 
-// ── GENERAR LINK REACTIVACIÓN ─────────────────────────────
-function generarReactivacion() {
-  if (rMomentosSelected.size === 0) {
-    document.getElementById("r-errMomento").classList.add("show"); return;
-  }
-
-  const nombre   = document.getElementById("r-nombre").value.trim() || "Reactivacion-" + Date.now();
-  const ciudad   = document.getElementById("r-ciudad").value  || "todas";
-  const tienda   = document.getElementById("r-tienda").value  || "general";
-  const fuente   = document.getElementById("r-fuente").value  || "wa_reactivacion";
-  const producto = document.getElementById("r-producto").value;
-  const descuento= document.getElementById("r-descuento").value;
-  const vigencia = document.getElementById("r-vigencia").value;
-  const momentos = Array.from(rMomentosSelected).join(",");
-
-  const params = {
-    descuento, producto, vigencia, ciudad, tienda, momentos,
-    fase:   "reactivacion",
-    fuente: fuente,
-  };
-
-  const qs = Object.entries(params).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join("&");
-  reactivLinkActual = `${BASE}/reactivar?${qs}`;
-
-  // Mostrar link base (sin celular)
-  const display = document.getElementById("linkDisplay");
-  display.textContent = reactivLinkActual;
-  display.classList.remove("empty", "coral");
-  display.classList.add("coral");
-
-  // Ocultar link corto — no aplica para reactivación
-  document.getElementById("shortLinkDisplay").textContent = "No aplica para reactivación · Usa el link base";
-  document.getElementById("shortLinkDisplay").classList.remove("empty");
-
-  // Mostrar ejemplo con celular
-  const ejemplo = reactivLinkActual + "&cel=3213691318";
-  const ejDisplay = document.getElementById("reactivEjemploDisplay");
-  ejDisplay.textContent = ejemplo;
-  ejDisplay.classList.remove("empty");
-
-  mostrarResumen(params, nombre, true);
-
-  const item = { nombre, link: reactivLinkActual, params, ts: new Date(), tipo: "reactivacion" };
-  historial.unshift(item);
-  renderHistorial();
-  guardarEnSheet({ ...item, nombre });
-
-  showToast("🔄 Link de reactivación generado");
-}
 
 // ── RESUMEN ───────────────────────────────────────────────
 function mostrarResumen(params, nombre, esReactivacion) {
@@ -1090,14 +834,6 @@ function abrirLink() {
   if (!link) return;
   window.open(link, "_blank");
 }
-function copiarEjemplo() {
-  const ej = reactivLinkActual + "&cel=3213691318";
-  navigator.clipboard.writeText(ej).then(()=>showToast("✅ Ejemplo copiado"));
-}
-function abrirEjemplo() {
-  const ej = reactivLinkActual + "&cel=3213691318";
-  if (ej) window.open(ej, "_blank");
-}
 function showToast(msg) {
   const t = document.getElementById("toast");
   t.textContent = msg; t.classList.add("show");
@@ -1142,7 +878,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   document.getElementById("adset").addEventListener("input", actualizarMetaUrl);
   document.getElementById("anuncio").addEventListener("input", actualizarMetaUrl);
-  document.getElementById("r-ciudad").addEventListener("change", cargarTiendasReactiv);
 
   const todo = await cargarTodo();
   if (todo?.ciudades?.length) {
@@ -1151,12 +886,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     sel.innerHTML = "";
     sel.add(new Option("Todas las ciudades","todas"));
     todo.ciudades.forEach(c => sel.add(new Option(c,c)));
-
-    // Selector reactivación
-    const rSel = document.getElementById("r-ciudad");
-    rSel.innerHTML = "";
-    rSel.add(new Option("Todas las ciudades","todas"));
-    todo.ciudades.forEach(c => rSel.add(new Option(c,c)));
 
     await cargarTiendas();
     setStatus("Backend conectado · " + todo.ciudades.length + " ciudades", true);
