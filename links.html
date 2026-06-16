@@ -86,6 +86,19 @@
   .gen-btn:hover{transform:translateY(-1px);box-shadow:0 10px 32px rgba(245,200,66,0.35);}
   .gen-btn-coral{background:var(--coral);color:#fff;box-shadow:0 6px 24px rgba(232,89,60,0.25);}
   .gen-btn-coral:hover{background:#d44e32;box-shadow:0 10px 32px rgba(232,89,60,0.35);}
+  .gen-btn:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;transform:none;}
+
+  /* ── Generador de nombre de creativo ── */
+  .creativo-box{background:var(--card);border:1.5px solid var(--p);border-radius:16px;padding:18px;margin-bottom:20px;position:relative;overflow:hidden;}
+  .creativo-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--p),var(--y));}
+  .creativo-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+  .creativo-emoji{font-size:24px;line-height:1;}
+  .creativo-title{font-size:14px;font-weight:900;color:var(--text);text-transform:uppercase;letter-spacing:0.5px;}
+  .creativo-sub{font-size:11px;color:var(--muted);line-height:1.5;margin-top:3px;}
+  .creativo-out{background:var(--card2);border:1px dashed var(--border);border-radius:10px;padding:12px 14px;margin:6px 0 10px;}
+  .creativo-out-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:'Space Mono',monospace;}
+  .creativo-out-name{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--muted);word-break:break-all;margin-top:6px;font-style:italic;}
+  .creativo-out-name.ready{color:var(--y);font-style:normal;}
 
   /* ── Preview panel ── */
   .preview-panel{display:flex;flex-direction:column;gap:16px;}
@@ -178,6 +191,83 @@
            MODO CUPÓN + SORTEO (campos compartidos)
       ════════════════════════════════════════ -->
       <div id="modoPautaWrap">
+
+        <!-- ════ GENERADOR DE NOMBRE DE CREATIVO (úsalo en Meta antes de lanzar) ════ -->
+        <div class="creativo-box">
+          <div class="creativo-head">
+            <span class="creativo-emoji">🎬</span>
+            <div>
+              <div class="creativo-title">Nombre del creativo</div>
+              <div class="creativo-sub">Genéralo aquí y pégalo como <strong>nombre del anuncio</strong> en Meta. Así toda la pauta queda con la misma nomenclatura y podemos medir qué tipo de creativo funciona mejor.</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label>1 · Tipo de campaña</label>
+              <select id="cr-tipo" onchange="generarNombreCreativo()">
+                <option value="">—</option>
+                <option value="tra">Tráfico</option>
+                <option value="awa">Reconocimiento (Awareness)</option>
+                <option value="int">Interacción</option>
+                <option value="ven">Ventas / Conversión</option>
+                <option value="leads">Clientes potenciales</option>
+                <option value="alc">Alcance</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>2 · Formato</label>
+              <select id="cr-formato" onchange="generarNombreCreativo()">
+                <option value="">—</option>
+                <option value="ree">Reel</option>
+                <option value="car">Carrusel</option>
+                <option value="est">Imagen estática</option>
+                <option value="vid">Video</option>
+                <option value="col">Colección</option>
+                <option value="sto">Historia / Story</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label>3 · SKU (código interno)</label>
+              <input type="text" id="cr-sku" placeholder="Ej: CR042" oninput="generarNombreCreativo()">
+            </div>
+            <div class="field">
+              <label>4 · Nombre corto del creativo</label>
+              <input type="text" id="cr-nombre" placeholder="Ej: bowl antojo" oninput="generarNombreCreativo()">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label>5 · Producto</label>
+              <select id="cr-producto" onchange="generarNombreCreativo()">
+                <option value="">—</option>
+                <option value="9oz">Bowl 9 oz</option>
+                <option value="12oz">Bowl 12 oz</option>
+                <option value="16oz">Bowl 16 oz</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>6 · Descuento</label>
+              <select id="cr-descuento" onchange="generarNombreCreativo()">
+                <option value="">—</option>
+                <option value="15off">15%</option>
+                <option value="20off">20%</option>
+                <option value="25off">25%</option>
+                <option value="30off">30%</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="creativo-out">
+            <span class="creativo-out-label">Nombre generado</span>
+            <div class="creativo-out-name" id="cr-preview">Completa los 6 campos…</div>
+          </div>
+          <button class="gen-btn" id="cr-copy" onclick="copiarNombreCreativo()" disabled>📋 Copiar nombre y usarlo</button>
+        </div>
 
         <div class="divider">Campaña</div>
         <div class="row">
@@ -772,6 +862,45 @@ function copiarMetaUrl() {
   navigator.clipboard.writeText(metaUrlActual).then(() => showToast("✅ URL Meta copiada"));
 }
 function verAyudaMeta() { document.getElementById("modalMeta").style.display = "flex"; }
+
+// ── GENERADOR DE NOMBRE DE CREATIVO (nomenclatura unificada para Meta) ──
+// Salida: tipo_formato_sku_nombre_producto_descuento  (ej: tra_ree_cr042_bowl-antojo_12oz_20off)
+// El nombre va como nombre del anuncio en Meta → {{ad.name}} lo captura en cada cupón.
+let nombreCreativoActual = "";
+function _slugCr(s){
+  return (s||"").toString().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+}
+function generarNombreCreativo(){
+  const tipo      = document.getElementById("cr-tipo").value;
+  const formato   = document.getElementById("cr-formato").value;
+  const sku       = _slugCr(document.getElementById("cr-sku").value);
+  const nombre    = _slugCr(document.getElementById("cr-nombre").value);
+  const producto  = document.getElementById("cr-producto").value;
+  const descuento = document.getElementById("cr-descuento").value;
+  const prev = document.getElementById("cr-preview");
+  const btn  = document.getElementById("cr-copy");
+  if (!(tipo && formato && sku && nombre && producto && descuento)) {
+    nombreCreativoActual = "";
+    prev.textContent = "Completa los 6 campos…";
+    prev.classList.remove("ready");
+    btn.disabled = true;
+    return;
+  }
+  nombreCreativoActual = [tipo, formato, sku, nombre, producto, descuento].join("_");
+  prev.textContent = nombreCreativoActual;
+  prev.classList.add("ready");
+  btn.disabled = false;
+}
+function copiarNombreCreativo(){
+  if (!nombreCreativoActual) { showToast("⚠ Completa los 6 campos"); return; }
+  navigator.clipboard.writeText(nombreCreativoActual).then(() => {
+    // Unifica: usa el mismo nombre como 'anuncio' del link de cupón (no rompe la UTM).
+    const anuncioInput = document.getElementById("anuncio");
+    if (anuncioInput) { anuncioInput.value = nombreCreativoActual; }
+    showToast("✅ Nombre copiado — pégalo como nombre del anuncio en Meta");
+  });
+}
 
 // ── GENERAR LINK CUPÓN / SORTEO ───────────────────────────
 function generar() {
