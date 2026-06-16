@@ -100,6 +100,56 @@
     color:var(--morado-osc); white-space:pre-wrap; line-height:1.5;
   }
 
+  /* Productos dinámicos */
+  .prod-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .prod-row input.qty{ width:64px; flex-shrink:0; text-align:center; }
+  .prod-row select{ flex:1; }
+  .prod-row .del{
+    width:32px; height:32px; flex-shrink:0; border:0; border-radius:8px;
+    background:#fdeaf0; color:var(--err); font-weight:700; cursor:pointer;
+    font-size:1rem;
+  }
+  .prod-row .del:disabled{ opacity:.35; cursor:not-allowed; }
+  .add-prod{
+    margin-top:6px; border:1.6px dashed var(--morado); background:#fff;
+    color:var(--morado); font-weight:700; border-radius:10px;
+    padding:10px 14px; cursor:pointer; font-family:inherit; font-size:.85rem;
+    width:100%;
+  }
+
+  /* Toppings */
+  .topping-bar{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .topping-bar label.toggle{
+    position:relative; width:42px; height:24px; flex-shrink:0;
+    display:inline-block;
+  }
+  .topping-bar label.toggle input{ display:none; }
+  .topping-bar .slider{
+    position:absolute; inset:0; background:#ccc; border-radius:24px;
+    transition:.2s; cursor:pointer;
+  }
+  .topping-bar .slider:before{
+    content:""; position:absolute; width:18px; height:18px;
+    left:3px; top:3px; background:#fff; border-radius:50%;
+    transition:.2s;
+  }
+  .topping-bar input:checked + .slider{ background:var(--ok); }
+  .topping-bar input:checked + .slider:before{ transform:translateX(18px); }
+  .topping-bar .toggle-label{
+    font-size:.84rem; font-weight:700; color:var(--morado-osc);
+  }
+  .topping-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .topping-chips.hidden{ display:none; }
+  .topping-chip{
+    border:1.6px solid var(--line); border-radius:18px;
+    padding:6px 12px; font-size:.78rem; cursor:pointer;
+    user-select:none; font-weight:600; color:#888;
+    background:#fff;
+  }
+  .topping-chip.sel{
+    background:var(--morado); color:#fff; border-color:var(--morado);
+  }
+
   /* Tabla historial */
   .table-wrap{ overflow-x:auto; margin-top:8px; }
   table.hist{ width:100%; border-collapse:collapse; font-size:.78rem; }
@@ -255,28 +305,38 @@
   <!-- 3. Oferta -->
   <div class="card">
     <h2><span class="n">3</span> Qué reclama</h2>
-    <div class="row3">
+
+    <div class="row">
       <div>
         <label>Descuento (%)</label>
-        <input id="descuento" type="number" min="1" max="100" value="50">
-      </div>
-      <div>
-        <label>Producto</label>
-        <select id="producto">
-          <option value="Bowl 9oz">Bowl 9oz</option>
-          <option value="Bowl 12oz" selected>Bowl 12oz</option>
-          <option value="Bowl 16oz">Bowl 16oz</option>
-          <option value="Bowl 22oz">Bowl 22oz</option>
-          <option value="Smoothie">Smoothie</option>
-          <option value="Pote 800ml">Pote 800ml</option>
-        </select>
+        <input id="descuento" type="number" min="1" max="100" value="100">
       </div>
       <div>
         <label>Vigencia (días)</label>
         <input id="vigencia" type="number" min="1" max="365" value="7">
       </div>
     </div>
-    <p class="muted">Default: 50% en Bowl 12oz, vence en 7 días. Ajustá según el acuerdo con cada influencer.</p>
+    <p class="muted">Si el cupón cubre el producto 100% (gratis), dejá el 100. Si es descuento parcial, ajustá.</p>
+
+    <label>Productos que incluye el cupón</label>
+    <div id="productosList">
+      <!-- las filas se inyectan vía JS -->
+    </div>
+    <button type="button" class="add-prod" id="addProd">+ Agregar otro producto</button>
+    <p class="muted">Podés sumar varios bowls / smoothies. Ej: 2× Bowl 12oz + 1× Smoothie.</p>
+
+    <label style="margin-top:14px">Toppings incluidos</label>
+    <div class="topping-bar">
+      <label class="toggle">
+        <input type="checkbox" id="todosToppings" checked>
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">Todos los toppings incluidos (sin cobro extra)</span>
+    </div>
+    <div class="topping-chips hidden" id="toppingChips">
+      <!-- chips se inyectan vía JS; visible solo si el toggle de arriba está OFF -->
+    </div>
+    <p class="muted">Si apagás el toggle, podés seleccionar SOLO los toppings que van incluidos. Los demás los cobrará el cajero como extra.</p>
   </div>
 
   <!-- 4. Generar -->
@@ -382,6 +442,76 @@ async function cargarTiendas(ciudad){
 
 document.getElementById("ciudad").addEventListener("change", e => cargarTiendas(e.target.value));
 
+// ── Catálogos hardcoded (espejo de adquisicion/backend/actions/influencers.py) ──
+const CATALOGO_PRODUCTOS = ["Bowl 9oz", "Bowl 12oz", "Bowl 16oz", "Bowl 22oz", "Smoothie", "Pote 800ml"];
+const CATALOGO_TOPPINGS  = ["Arándano", "Fresa", "Mantequilla de maní", "Mantequilla de almendras", "Whey Protein"];
+
+// ── Productos dinámicos ──
+function nuevaFilaProducto(qty, prod){
+  const row = document.createElement("div");
+  row.className = "prod-row";
+  const opts = CATALOGO_PRODUCTOS.map(p =>
+    `<option value="${p}"${p===prod?" selected":""}>${p}</option>`
+  ).join("");
+  row.innerHTML = `
+    <input type="number" class="qty" min="1" max="20" value="${qty || 1}">
+    <select class="prod">${opts}</select>
+    <button type="button" class="del" title="Quitar">✕</button>
+  `;
+  row.querySelector(".del").addEventListener("click", ()=>{
+    row.remove();
+    actualizarBotonesDel();
+  });
+  return row;
+}
+
+function actualizarBotonesDel(){
+  // Si solo queda una fila, deshabilita su botón de borrar.
+  const filas = document.querySelectorAll("#productosList .prod-row");
+  filas.forEach((r, i)=>{ r.querySelector(".del").disabled = (filas.length === 1); });
+}
+
+document.getElementById("addProd").addEventListener("click", ()=>{
+  document.getElementById("productosList").appendChild(nuevaFilaProducto(1, "Bowl 12oz"));
+  actualizarBotonesDel();
+});
+
+function recogerProductos(){
+  const filas = document.querySelectorAll("#productosList .prod-row");
+  const items = [];
+  filas.forEach(r=>{
+    const qty = parseInt(r.querySelector(".qty").value || "1", 10);
+    const prod = r.querySelector(".prod").value;
+    if(qty > 0 && prod) items.push(`${qty}x ${prod}`);
+  });
+  return items.join(", ");
+}
+
+// ── Toppings ──
+function renderToppingChips(){
+  const cont = document.getElementById("toppingChips");
+  cont.innerHTML = "";
+  CATALOGO_TOPPINGS.forEach(t=>{
+    const c = document.createElement("span");
+    c.className = "topping-chip";
+    c.textContent = t;
+    c.dataset.topping = t;
+    c.addEventListener("click", ()=> c.classList.toggle("sel"));
+    cont.appendChild(c);
+  });
+}
+
+document.getElementById("todosToppings").addEventListener("change", e=>{
+  document.getElementById("toppingChips").classList.toggle("hidden", e.target.checked);
+});
+
+function recogerToppings(){
+  if(document.getElementById("todosToppings").checked) return "todos";
+  const sel = [...document.querySelectorAll("#toppingChips .topping-chip.sel")]
+                .map(c => c.dataset.topping);
+  return sel.length ? sel.join(",") : "";
+}
+
 // ── Normalización del @handle: minúscula, sin @ inicial ──
 document.getElementById("instagram").addEventListener("input", e=>{
   const raw = e.target.value;
@@ -397,20 +527,22 @@ document.getElementById("generar").addEventListener("click", async ()=>{
   const ciudad = document.getElementById("ciudad").value;
   const tienda = document.getElementById("tienda").value;
   const descuento = document.getElementById("descuento").value;
-  const producto = document.getElementById("producto").value;
+  const productos = recogerProductos();
+  const toppingsIncluidos = recogerToppings();
   const vigencia = document.getElementById("vigencia").value || "7";
 
   if(!instagram || !nombre){ toast("Completa @instagram y nombre","err"); return; }
   if(!celular || celular.length < 7){ toast("Completa el número de contacto (al menos 7 dígitos)","err"); return; }
   if(!ciudad || !tienda){ toast("Selecciona ciudad y tienda","err"); return; }
-  if(!descuento || !producto){ toast("Completa descuento y producto","err"); return; }
+  if(!descuento || !productos){ toast("Completa descuento y al menos un producto","err"); return; }
 
   const btn = document.getElementById("generar");
   btn.disabled = true; btn.textContent = "Generando…";
 
   const r = await jsonp(new URLSearchParams({
     accion: "crearCuponInfluencer",
-    instagram, nombre, celular, ciudad, tienda, descuento, producto, vigencia,
+    instagram, nombre, celular, ciudad, tienda, descuento,
+    productos, toppingsIncluidos, vigencia,
   }));
 
   btn.disabled = false; btn.textContent = "🎟️ Generar cupón";
@@ -529,6 +661,12 @@ function mostrarApp(sess){
   const bar = document.getElementById("sessionBar");
   bar.style.display = "flex";
   document.getElementById("sessionUser").textContent = "👤 " + (sess.nombre || sess.usuario);
+  // Una vez logueados, dejamos el form listo: 1 producto + chips de toppings (ocultos).
+  if(!document.querySelector("#productosList .prod-row")){
+    document.getElementById("productosList").appendChild(nuevaFilaProducto(1, "Bowl 12oz"));
+    actualizarBotonesDel();
+    renderToppingChips();
+  }
 }
 
 function cerrarSesion(){
