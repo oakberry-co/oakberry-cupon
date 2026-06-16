@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Oakberry · Tu cupón 🫐</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#5F4B8B; --pd:#4a3a6e; --yellow:#F5C842;
+    --green:#27ae60; --red:#e74c3c; --cream:#F5F0E8;
+  }
+  *,*::before,*::after{ margin:0; padding:0; box-sizing:border-box; }
+  body{
+    font-family:'Montserrat',sans-serif; min-height:100vh; padding:24px 16px;
+    background:linear-gradient(rgba(20,10,40,.55), rgba(20,10,40,.65)),
+               url('oakville-bg.jpg') center/cover no-repeat fixed;
+    display:flex; align-items:flex-start; justify-content:center;
+  }
+
+  /* Loading + error */
+  #loading,#error{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:18px; color:#fff; z-index:100;
+    background:linear-gradient(rgba(20,10,40,.85),rgba(20,10,40,.9)),
+               url('oakville-bg.jpg') center/cover no-repeat fixed;
+  }
+  #error{ display:none; padding:24px; text-align:center; }
+  .spinner{
+    width:36px; height:36px;
+    border:3px solid rgba(255,255,255,.2); border-top-color:var(--yellow);
+    border-radius:50%; animation:spin .7s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  #loading-text,#error-text{
+    font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+  }
+  #error-text{ font-size:14px; max-width:320px; letter-spacing:1px; line-height:1.6; }
+
+  /* Card */
+  .card{
+    background:rgba(255,255,255,.97); border-radius:28px;
+    width:100%; max-width:420px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35); overflow:hidden;
+    animation:fadeIn .4s ease;
+    display:none;
+  }
+  .card.show{ display:block; }
+  @keyframes fadeIn{
+    from{ opacity:0; transform:translateY(12px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  /* Header */
+  .card-header{
+    background:var(--primary); padding:28px 30px 24px;
+    text-align:center; position:relative; overflow:hidden;
+  }
+  .card-header::before{
+    content:'🫐'; position:absolute; font-size:140px; opacity:.10;
+    top:-28px; right:-22px; transform:rotate(15deg); pointer-events:none;
+  }
+  .brand{
+    font-size:24px; font-weight:900; color:#fff;
+    text-transform:uppercase; letter-spacing:3px;
+    position:relative; z-index:2;
+  }
+  .brand-sub{
+    font-size:10px; font-weight:700; color:rgba(255,255,255,.6);
+    text-transform:uppercase; letter-spacing:2.5px; margin-top:4px;
+    position:relative; z-index:2;
+  }
+  .saludo{
+    margin-top:18px; font-size:13px; font-weight:700; color:#fff;
+    text-transform:uppercase; letter-spacing:1px;
+    position:relative; z-index:2;
+  }
+  .saludo strong{ color:var(--yellow); font-weight:900; }
+
+  /* Bienvenida */
+  .welcome{
+    padding:22px 28px 4px; text-align:center;
+    background:linear-gradient(180deg, #fff, #fdfaf2);
+  }
+  .welcome p{
+    font-size:14px; font-weight:600; color:#3a2d52; line-height:1.55;
+    margin-bottom:8px;
+  }
+  .welcome .heart{ color:var(--primary); font-weight:900; }
+
+  /* Body */
+  .card-body{ padding:18px 28px 26px; }
+
+  .cupon-label{
+    font-size:9px; font-weight:900; text-transform:uppercase;
+    letter-spacing:3px; color:#999; text-align:center; margin-bottom:10px;
+  }
+  .codigo-box{
+    background:linear-gradient(135deg, #faf6ef, #fff);
+    border:2px dashed var(--yellow); border-radius:14px;
+    padding:22px 12px 18px; text-align:center; margin-bottom:14px;
+  }
+  .codigo{
+    font-size:30px; font-weight:900; color:var(--primary);
+    letter-spacing:4px; font-family:'Montserrat', monospace; line-height:1.1;
+  }
+  .copy-btn{
+    margin-top:14px;
+    background:var(--yellow); color:#5d4200; border:none;
+    padding:11px 24px; border-radius:100px;
+    font-family:'Montserrat',sans-serif; font-size:11px; font-weight:900;
+    cursor:pointer; text-transform:uppercase; letter-spacing:1px;
+    transition:all .18s; box-shadow:0 4px 12px rgba(245,200,66,.3);
+    width:100%;
+  }
+  .copy-btn:active{ transform:scale(.97); }
+  .copy-btn.copied{ background:var(--green); color:#fff; }
+
+  /* Info rows */
+  .info-block{
+    margin-top:18px; border-top:1.5px dashed #ddd; padding-top:16px;
+  }
+  .info-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:9px 0; border-bottom:1px solid #f4f4f4; gap:14px;
+  }
+  .info-row:last-child{ border-bottom:none; }
+  .info-label{
+    font-size:9px; font-weight:900; text-transform:uppercase;
+    letter-spacing:1.5px; color:#999;
+    display:flex; align-items:center; gap:6px; flex-shrink:0;
+  }
+  .info-value{
+    font-size:12px; font-weight:800; color:var(--primary);
+    text-align:right; text-transform:uppercase; letter-spacing:.5px;
+    line-height:1.4;
+  }
+
+  /* Cómo canjearlo */
+  .howto{
+    margin-top:18px; padding:14px 16px; background:#faf6ef;
+    border-radius:14px; border:1.5px dashed #e6dfc8;
+  }
+  .howto-title{
+    font-size:10px; font-weight:900; color:var(--primary);
+    text-transform:uppercase; letter-spacing:1.5px;
+    text-align:center; margin-bottom:10px;
+  }
+  .howto ol{ padding-left:20px; }
+  .howto li{
+    font-size:12px; font-weight:600; color:#444; line-height:1.55;
+    padding:3px 0;
+  }
+
+  /* Estado */
+  .estado-pill{
+    display:inline-block; margin-top:14px; padding:6px 14px;
+    border-radius:20px; font-size:10px; font-weight:900;
+    text-transform:uppercase; letter-spacing:1px;
+  }
+  .estado-pill.disp{ background:#eafaf1; color:var(--green); }
+  .estado-pill.canj{ background:#efe6fb; color:var(--primary); }
+  .estado-pill.venc{ background:#fdeaf0; color:var(--red); }
+
+  /* Footer */
+  .footer{
+    padding:14px 28px 24px; text-align:center; font-size:10px;
+    color:#888; font-weight:600;
+  }
+  .footer a{
+    color:var(--primary); text-decoration:none; font-weight:700;
+    border-bottom:1px dashed var(--primary);
+  }
+
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+    background:var(--green); color:#fff; padding:10px 18px; border-radius:20px;
+    font-size:12px; font-weight:700; opacity:0; transition:opacity .25s;
+    pointer-events:none; z-index:200;
+  }
+  .toast.show{ opacity:1; }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div id="loading-text">Cargando tu cupón…</div>
+</div>
+
+<!-- Error -->
+<div id="error">
+  <div style="font-size:48px; line-height:1; margin-bottom:8px">😕</div>
+  <div id="error-text">Cupón no encontrado.</div>
+</div>
+
+<!-- Card del cupón (oculto hasta cargar) -->
+<div class="card" id="card">
+  <div class="card-header">
+    <div class="brand">Oakberry</div>
+    <div class="brand-sub">Tu cupón</div>
+    <div class="saludo" id="saludo">¡Hola! 💜</div>
+  </div>
+
+  <div class="welcome">
+    <p>Nos encanta poder trabajar contigo. Sabemos que Oakberry te va a <span class="heart">encantar</span> (o te encanta ya 😉).</p>
+    <p>Queremos que hagas parte de esta gran familia — <strong>acá está todo</strong> para que tu experiencia sea genial.</p>
+  </div>
+
+  <div class="card-body">
+    <div class="cupon-label">Tu código</div>
+    <div class="codigo-box">
+      <div class="codigo" id="codigo">—</div>
+      <button class="copy-btn" id="copyBtn">📋 Copiar código</button>
+    </div>
+
+    <div class="info-block">
+      <div class="info-row">
+        <span class="info-label">🎁 Reclama</span>
+        <span class="info-value" id="oferta">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">📍 Tienda</span>
+        <span class="info-value" id="tienda">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">🏙️ Ciudad</span>
+        <span class="info-value" id="ciudad">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">⏰ Vence</span>
+        <span class="info-value" id="vence">—</span>
+      </div>
+      <div class="info-row" style="justify-content:center">
+        <span class="estado-pill" id="estadoPill">—</span>
+      </div>
+    </div>
+
+    <div class="howto">
+      <div class="howto-title">📌 Cómo canjearlo</div>
+      <ol>
+        <li>Anda a la tienda indicada arriba</li>
+        <li>Muéstrale este código al cajero antes de pagar</li>
+        <li>¡Listo, disfruta tu Oakberry! 🫐</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="footer">
+    ¿Dudas? Escríbenos por WhatsApp · <a href="/tyc">Términos y condiciones</a>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copiado</div>
+
+<script>
+const API = "https://api.oakberry-cupones.com/";
+
+function jsonp(params){
+  return new Promise((resolve)=>{
+    const cb = "__cb"+Math.random().toString(36).slice(2);
+    const to = setTimeout(()=>{ cleanup(); resolve({ok:false, mensaje:"timeout"}); }, 15000);
+    function cleanup(){
+      try{ delete window[cb]; }catch(e){}
+      if(s.parentNode) s.parentNode.removeChild(s);
+      clearTimeout(to);
+    }
+    window[cb] = (r)=>{ cleanup(); resolve(r||{}); };
+    params.set("callback", cb);
+    const s = document.createElement("script");
+    s.src = API + "?" + params.toString();
+    s.onerror = ()=>{ cleanup(); resolve({ok:false, mensaje:"network"}); };
+    document.body.appendChild(s);
+  });
+}
+
+function getCodigo(){
+  const url = new URL(window.location.href);
+  return (url.searchParams.get("c") || url.searchParams.get("codigo") || "").trim().toUpperCase();
+}
+
+function showError(msg){
+  document.getElementById("loading").style.display = "none";
+  const e = document.getElementById("error");
+  e.style.display = "flex";
+  document.getElementById("error-text").textContent = msg;
+}
+
+function primerNombre(n){ return (n||"").trim().split(" ")[0] || ""; }
+
+function badgeEstado(estado){
+  const e = (estado || "").toLowerCase();
+  const pill = document.getElementById("estadoPill");
+  if(e === "disponible"){ pill.textContent = "✅ Disponible"; pill.className = "estado-pill disp"; }
+  else if(e === "canjeado"){ pill.textContent = "✓ Ya canjeado"; pill.className = "estado-pill canj"; }
+  else if(e === "vencido"){ pill.textContent = "⏰ Vencido"; pill.className = "estado-pill venc"; }
+  else { pill.textContent = estado || "—"; pill.className = "estado-pill"; }
+}
+
+function render(d){
+  const nom = primerNombre(d.nombre);
+  document.getElementById("saludo").innerHTML =
+    nom ? `¡Hola <strong>${nom}</strong>! 💜` : "¡Hola! 💜";
+  document.getElementById("codigo").textContent = d.codigo || "—";
+  document.getElementById("oferta").textContent =
+    [(d.descuento || ""), (d.producto || "")].filter(Boolean).join(" en ") || "—";
+  document.getElementById("tienda").textContent = d.tienda || "—";
+  document.getElementById("ciudad").textContent = d.ciudad || "—";
+  document.getElementById("vence").textContent = d.fechaVenceHumano || "—";
+  badgeEstado(d.estado);
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("card").classList.add("show");
+}
+
+document.getElementById("copyBtn").addEventListener("click", ()=>{
+  const cod = document.getElementById("codigo").textContent;
+  if(!cod || cod === "—") return;
+  navigator.clipboard.writeText(cod).then(()=>{
+    const b = document.getElementById("copyBtn");
+    b.classList.add("copied"); b.textContent = "✓ Copiado!";
+    const t = document.getElementById("toast");
+    t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 1800);
+    setTimeout(()=>{ b.classList.remove("copied"); b.textContent = "📋 Copiar código"; }, 2200);
+  });
+});
+
+(async function init(){
+  const c = getCodigo();
+  if(!c){ showError("Falta el código en el enlace."); return; }
+  const r = await jsonp(new URLSearchParams({accion:"consultarCuponInfluencer", codigo:c}));
+  if(!r.ok){ showError(r.mensaje || "Cupón no encontrado."); return; }
+  render(r);
+})();
+</script>
+</body>
+</html>
