@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Influencers · Oakberry · Crear cupón</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --morado:#5F4B8B; --morado-osc:#3d2b5e; --amarillo:#F5C842;
+    --beige:#f6f1e4; --ok:#1faa59; --err:#e0436b; --line:#e3dcce;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    font-family:'Montserrat',sans-serif; color:var(--morado-osc); padding:20px;
+    background:linear-gradient(rgba(246,241,228,.85) 0%, rgba(246,241,228,.58) 42%, rgba(246,241,228,.72) 100%),
+               url('/amigos-config-bg.jpg') center/cover fixed, var(--beige);
+    min-height:100vh;
+  }
+  .wrap{ max-width:760px; margin:0 auto; }
+  h1{ font-size:1.5rem; color:var(--morado-osc); }
+  h1 .pill{
+    background:var(--amarillo); color:var(--morado-osc);
+    font-size:.62rem; font-weight:700; padding:4px 10px;
+    border-radius:20px; vertical-align:middle; margin-left:8px;
+  }
+  .sub{ color:var(--morado); font-size:.85rem; margin:6px 0 18px; }
+  .card{
+    background:#fff; border-radius:18px; padding:20px 22px;
+    box-shadow:0 10px 30px rgba(61,43,94,.10); margin-bottom:18px;
+  }
+  .card h2{
+    font-size:1rem; color:var(--morado); margin-bottom:14px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .card h2 .n{
+    width:24px; height:24px; border-radius:50%;
+    background:var(--morado); color:#fff; font-size:.8rem;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  label{
+    display:block; font-size:.72rem; font-weight:600;
+    color:var(--morado); margin:10px 0 4px;
+  }
+  input,select{
+    width:100%; padding:11px 13px; border:1.6px solid var(--line);
+    border-radius:10px; font-family:inherit; font-size:.95rem;
+    background:#fff; color:var(--morado-osc); outline:none;
+  }
+  input:focus,select:focus{ border-color:var(--morado); }
+  .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .muted{ font-size:.74rem; color:#9b8db0; margin-top:6px; }
+
+  button.go{
+    width:100%; padding:15px; font-size:1rem; font-weight:800;
+    color:#fff; border:0; border-radius:12px; background:var(--morado);
+    cursor:pointer; box-shadow:0 8px 20px rgba(95,75,139,.35);
+    transition:transform .12s, background .18s;
+  }
+  button.go:hover:not(:disabled){ background:var(--morado-osc); transform:translateY(-1px); }
+  button.go:disabled{ opacity:.55; cursor:not-allowed; }
+
+  .toast{
+    padding:11px 14px; border-radius:10px; font-size:.85rem;
+    font-weight:600; margin-bottom:12px; display:none;
+  }
+  .toast.ok{ background:#e7f7ee; color:var(--ok); display:block; }
+  .toast.err{ background:#fdeaf0; color:var(--err); display:block; }
+
+  /* Resultado */
+  #result{ display:none; }
+  .codigo-box{
+    background:#fff8e7; border:3px dashed var(--morado);
+    border-radius:14px; padding:24px 16px; text-align:center;
+    font-family:'Courier New', monospace; font-size:2.2rem;
+    font-weight:900; color:var(--morado-osc); letter-spacing:4px;
+    margin:14px 0 10px; user-select:all;
+  }
+  .vence-row{
+    font-size:.85rem; color:var(--morado); text-align:center;
+    margin-bottom:14px; font-weight:600;
+  }
+  .btns{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .btns button{
+    flex:1; min-width:140px; padding:12px; font-weight:700;
+    font-size:.9rem; border:0; border-radius:10px; cursor:pointer;
+    background:var(--amarillo); color:var(--morado-osc);
+    font-family:inherit; transition:transform .12s, background .18s;
+  }
+  .btns button:hover{ background:#e3b836; transform:translateY(-1px); }
+  .btns button.alt{ background:var(--morado); color:#fff; }
+  .btns button.alt:hover{ background:var(--morado-osc); }
+
+  .preview{
+    background:#faf8ff; border:1px solid #e0d8f0; border-radius:10px;
+    padding:14px 16px; margin-top:12px; font-size:.82rem;
+    color:var(--morado-osc); white-space:pre-wrap; line-height:1.5;
+  }
+
+  /* Tabla historial */
+  .table-wrap{ overflow-x:auto; margin-top:8px; }
+  table.hist{ width:100%; border-collapse:collapse; font-size:.78rem; }
+  table.hist th, table.hist td{
+    padding:8px 10px; text-align:left;
+    border-bottom:1px solid var(--line);
+  }
+  table.hist th{
+    color:var(--morado); font-weight:700;
+    text-transform:uppercase; font-size:.66rem; letter-spacing:.5px;
+  }
+  table.hist td.codigo{
+    font-family:'Courier New', monospace; font-weight:700;
+    color:var(--morado-osc); cursor:pointer;
+  }
+  table.hist td.codigo:hover{ background:#fff8e7; }
+  .badge{
+    display:inline-block; padding:2px 8px; border-radius:10px;
+    font-size:.66rem; font-weight:700; text-transform:uppercase;
+  }
+  .badge.disp{ background:#e7f7ee; color:var(--ok); }
+  .badge.canj{ background:#efe6fb; color:var(--morado); }
+  .badge.venc{ background:#fdeaf0; color:var(--err); }
+  .badge.otro{ background:#f1eee5; color:#7a6d50; }
+  .hist-empty{
+    color:#9b8db0; font-size:.82rem; text-align:center;
+    padding:24px 12px;
+  }
+
+  /* ── Login overlay ── */
+  #loginOverlay{
+    position:fixed; inset:0; z-index:1000;
+    background:linear-gradient(rgba(61,43,94,.92), rgba(61,43,94,.96)),
+               url('/amigos-config-bg.jpg') center/cover;
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  #loginOverlay.hidden{ display:none; }
+  .login-card{
+    background:#fff; border-radius:18px; padding:32px 28px;
+    max-width:380px; width:100%;
+    box-shadow:0 20px 50px rgba(0,0,0,.4);
+    text-align:center;
+  }
+  .login-card img{ height:36px; margin-bottom:18px; }
+  .login-card h2{
+    color:var(--morado-osc); font-size:1.15rem; font-weight:800;
+    margin-bottom:6px;
+  }
+  .login-card .sub{
+    color:var(--morado); font-size:.82rem; margin:0 0 18px;
+  }
+  .login-card label{
+    text-align:left; margin-top:12px;
+  }
+  .login-card .btn{
+    width:100%; padding:13px; margin-top:18px;
+    background:var(--morado); color:#fff; border:0; border-radius:10px;
+    font-weight:800; font-size:.95rem; cursor:pointer; font-family:inherit;
+    transition:background .18s, transform .12s;
+  }
+  .login-card .btn:hover:not(:disabled){
+    background:var(--morado-osc); transform:translateY(-1px);
+  }
+  .login-card .btn:disabled{ opacity:.55; cursor:not-allowed; }
+  .login-err{
+    background:#fdeaf0; color:var(--err); padding:10px 12px;
+    border-radius:8px; font-size:.82rem; font-weight:600;
+    margin-top:12px; display:none;
+  }
+  .login-err.show{ display:block; }
+
+  /* Logout chip arriba a la derecha */
+  .session-bar{
+    position:fixed; top:12px; right:14px; z-index:10;
+    background:rgba(255,255,255,.92); padding:6px 10px 6px 14px;
+    border-radius:20px; box-shadow:0 4px 12px rgba(61,43,94,.18);
+    font-size:.74rem; font-weight:600; color:var(--morado-osc);
+    display:flex; align-items:center; gap:8px;
+  }
+  .session-bar button{
+    background:var(--morado); color:#fff; border:0; border-radius:14px;
+    padding:5px 10px; font-size:.7rem; font-weight:700; cursor:pointer;
+    font-family:inherit;
+  }
+  .session-bar button:hover{ background:var(--morado-osc); }
+</style>
+</head>
+<body>
+
+<!-- ── Login overlay (visible si no hay sesión) ── -->
+<div id="loginOverlay">
+  <div class="login-card">
+    <img src="/email-logo-purple.png" alt="Oakberry">
+    <h2>Acceso interno</h2>
+    <p class="sub">Generador de cupones para influencers</p>
+    <label>Usuario</label>
+    <input id="loginUser" type="text" autocomplete="username" placeholder="usuario">
+    <label>Contraseña</label>
+    <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••">
+    <div id="loginErr" class="login-err">Usuario o contraseña incorrectos</div>
+    <button class="btn" id="loginBtn">Entrar</button>
+  </div>
+</div>
+
+<!-- ── Chip de sesión activa ── -->
+<div class="session-bar" id="sessionBar" style="display:none">
+  <span id="sessionUser">—</span>
+  <button onclick="cerrarSesion()">Salir</button>
+</div>
+
+<div class="wrap">
+  <img src="/email-logo-purple.png" alt="Oakberry" style="height:30px;margin-bottom:8px;display:block">
+  <h1>Influencers <span class="pill">CREAR CUPÓN</span></h1>
+  <p class="sub">Generá un cupón único para cada influencer. El código se entrega manualmente por DM/WhatsApp; el influencer lo redime en caja como cualquier cupón.</p>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- 1. Influencer -->
+  <div class="card">
+    <h2><span class="n">1</span> Influencer</h2>
+    <div class="row">
+      <div>
+        <label>@ de Instagram</label>
+        <input id="instagram" placeholder="ej: danielzg" autocomplete="off">
+      </div>
+      <div>
+        <label>Nombre real</label>
+        <input id="nombre" placeholder="ej: Daniel Zuluaga" autocomplete="off">
+      </div>
+    </div>
+    <p class="muted">El @ se guarda en minúscula y sin el símbolo. Lo usamos para identificar al influencer en reportería.</p>
+  </div>
+
+  <!-- 2. Dónde redime -->
+  <div class="card">
+    <h2><span class="n">2</span> Dónde se canjea</h2>
+    <div class="row">
+      <div>
+        <label>Ciudad</label>
+        <select id="ciudad"><option value="">Selecciona ciudad…</option></select>
+      </div>
+      <div>
+        <label>Tienda</label>
+        <select id="tienda"><option value="">Selecciona ciudad primero…</option></select>
+      </div>
+    </div>
+    <p class="muted">El cupón solo será válido en esta tienda. Si querés que aplique en varias, generá un código por cada una.</p>
+  </div>
+
+  <!-- 3. Oferta -->
+  <div class="card">
+    <h2><span class="n">3</span> Qué reclama</h2>
+    <div class="row3">
+      <div>
+        <label>Descuento (%)</label>
+        <input id="descuento" type="number" min="1" max="100" value="50">
+      </div>
+      <div>
+        <label>Producto</label>
+        <select id="producto">
+          <option value="Bowl 9oz">Bowl 9oz</option>
+          <option value="Bowl 12oz" selected>Bowl 12oz</option>
+          <option value="Bowl 16oz">Bowl 16oz</option>
+          <option value="Bowl 22oz">Bowl 22oz</option>
+          <option value="Smoothie">Smoothie</option>
+          <option value="Pote 800ml">Pote 800ml</option>
+        </select>
+      </div>
+      <div>
+        <label>Vigencia (días)</label>
+        <input id="vigencia" type="number" min="1" max="365" value="7">
+      </div>
+    </div>
+    <p class="muted">Default: 50% en Bowl 12oz, vence en 7 días. Ajustá según el acuerdo con cada influencer.</p>
+  </div>
+
+  <!-- 4. Generar -->
+  <div class="card">
+    <button class="go" id="generar">🎟️ Generar cupón</button>
+
+    <div id="result">
+      <div class="codigo-box" id="codigoBox">XXXXXXX</div>
+      <div class="vence-row" id="venceRow">Vence el —</div>
+      <div class="btns">
+        <button onclick="copiarCodigo()">🔗 Copiar código</button>
+        <button class="alt" onclick="compartirWA()">📲 Compartir por WhatsApp</button>
+        <button onclick="copiarTexto()">📋 Copiar texto completo</button>
+      </div>
+      <label style="margin-top:14px">Texto que se compartirá</label>
+      <div class="preview" id="textoPreview"></div>
+    </div>
+  </div>
+
+  <!-- 5. Historial -->
+  <div class="card">
+    <h2><span class="n">★</span> Últimos cupones creados</h2>
+    <div class="table-wrap">
+      <table class="hist" id="hist">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>@ Instagram</th>
+            <th>Nombre</th>
+            <th>Tienda / Ciudad</th>
+            <th>Oferta</th>
+            <th>Estado</th>
+            <th>Vence</th>
+          </tr>
+        </thead>
+        <tbody id="histBody">
+          <tr><td colspan="7" class="hist-empty">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Tap en un código para copiarlo. Se muestran los últimos 30 generados.</p>
+  </div>
+</div>
+
+<script>
+const API = "https://api.oakberry-cupones.com/";
+let LAST = null;  // último cupón generado: {codigo, textoWA, …}
+
+// ── JSONP helper (idéntico al de amigos_admin.html) ─────────────
+function jsonp(params){
+  return new Promise((resolve)=>{
+    const cb = "__cb"+Math.random().toString(36).slice(2);
+    const to = setTimeout(()=>{ cleanup(); resolve({ok:false, mensaje:"timeout"}); }, 15000);
+    function cleanup(){
+      try{ delete window[cb]; }catch(e){}
+      if(s.parentNode) s.parentNode.removeChild(s);
+      clearTimeout(to);
+    }
+    window[cb] = (r)=>{ cleanup(); resolve(r||{}); };
+    params.set("callback", cb);
+    const s = document.createElement("script");
+    s.src = API + "?" + params.toString();
+    s.onerror = ()=>{ cleanup(); resolve({ok:false, mensaje:"network"}); };
+    document.body.appendChild(s);
+  });
+}
+
+function toast(msg, ok){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast " + (ok ? "ok" : "err");
+  if(ok) setTimeout(()=>{ t.className = "toast"; }, 3000);
+}
+
+// ── Carga ciudades y tiendas (reuso obtenerCiudades / obtenerTiendasPorCiudad) ──
+async function cargarCiudades(){
+  const r = await jsonp(new URLSearchParams({accion:"obtenerCiudades"}));
+  const sel = document.getElementById("ciudad");
+  (r.ciudades||[]).forEach(c=>{
+    const opt = document.createElement("option");
+    opt.value = c; opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+async function cargarTiendas(ciudad){
+  const sel = document.getElementById("tienda");
+  sel.innerHTML = '<option value="">Cargando…</option>';
+  if(!ciudad){ sel.innerHTML = '<option value="">Selecciona ciudad primero…</option>'; return; }
+  const r = await jsonp(new URLSearchParams({accion:"obtenerTiendasPorCiudad", ciudad}));
+  sel.innerHTML = '<option value="">Selecciona tienda…</option>';
+  (r.tiendas||[]).forEach(t=>{
+    const opt = document.createElement("option");
+    opt.value = t; opt.textContent = t;
+    sel.appendChild(opt);
+  });
+}
+
+document.getElementById("ciudad").addEventListener("change", e => cargarTiendas(e.target.value));
+
+// ── Normalización del @handle: minúscula, sin @ inicial ──
+document.getElementById("instagram").addEventListener("input", e=>{
+  const raw = e.target.value;
+  const norm = raw.replace(/^@+/, "").trim().toLowerCase();
+  if(raw !== norm) e.target.value = norm;
+});
+
+// ── Generar cupón ──
+document.getElementById("generar").addEventListener("click", async ()=>{
+  const instagram = document.getElementById("instagram").value.trim();
+  const nombre = document.getElementById("nombre").value.trim();
+  const ciudad = document.getElementById("ciudad").value;
+  const tienda = document.getElementById("tienda").value;
+  const descuento = document.getElementById("descuento").value;
+  const producto = document.getElementById("producto").value;
+  const vigencia = document.getElementById("vigencia").value || "7";
+
+  if(!instagram || !nombre){ toast("Completa @instagram y nombre","err"); return; }
+  if(!ciudad || !tienda){ toast("Selecciona ciudad y tienda","err"); return; }
+  if(!descuento || !producto){ toast("Completa descuento y producto","err"); return; }
+
+  const btn = document.getElementById("generar");
+  btn.disabled = true; btn.textContent = "Generando…";
+
+  const r = await jsonp(new URLSearchParams({
+    accion: "crearCuponInfluencer",
+    instagram, nombre, ciudad, tienda, descuento, producto, vigencia,
+  }));
+
+  btn.disabled = false; btn.textContent = "🎟️ Generar cupón";
+
+  if(!r.ok){
+    toast("Error generando cupón: " + (r.mensaje || "desconocido"), false);
+    return;
+  }
+
+  LAST = r;
+  document.getElementById("codigoBox").textContent = r.codigo;
+  document.getElementById("venceRow").textContent = "Vence el " + (r.fechaVenceHumano || r.fechaVence || "—");
+  document.getElementById("textoPreview").textContent = r.textoWA || "";
+  document.getElementById("result").style.display = "block";
+  toast("✅ Cupón " + r.codigo + " generado", true);
+  document.getElementById("result").scrollIntoView({behavior:"smooth", block:"center"});
+
+  await cargarHistorial();
+});
+
+function copiarCodigo(){
+  if(!LAST) return;
+  navigator.clipboard.writeText(LAST.codigo).then(
+    ()=>toast("Código copiado: " + LAST.codigo, true),
+    ()=>toast("No se pudo copiar", false)
+  );
+}
+
+function copiarTexto(){
+  if(!LAST || !LAST.textoWA) return;
+  navigator.clipboard.writeText(LAST.textoWA).then(
+    ()=>toast("Texto completo copiado", true),
+    ()=>toast("No se pudo copiar", false)
+  );
+}
+
+function compartirWA(){
+  if(!LAST || !LAST.textoWA) return;
+  window.open("https://wa.me/?text=" + encodeURIComponent(LAST.textoWA), "_blank");
+}
+
+// ── Historial ──
+function badgeEstado(estado){
+  const e = (estado || "").toLowerCase();
+  if(e === "disponible") return '<span class="badge disp">Disponible</span>';
+  if(e === "canjeado")   return '<span class="badge canj">Canjeado</span>';
+  if(e === "vencido")    return '<span class="badge venc">Vencido</span>';
+  return '<span class="badge otro">' + (estado || "—") + '</span>';
+}
+
+function fmtFechaCorta(s){
+  if(!s) return "—";
+  try{
+    const d = new Date(s);
+    if(isNaN(d.getTime())) return s;
+    return d.toLocaleDateString("es-CO", {day:"2-digit", month:"2-digit", year:"2-digit"});
+  }catch(e){ return s; }
+}
+
+async function cargarHistorial(){
+  const tbody = document.getElementById("histBody");
+  tbody.innerHTML = '<tr><td colspan="7" class="hist-empty">Cargando…</td></tr>';
+  const r = await jsonp(new URLSearchParams({accion:"listarCuponesInfluencer", limit:"30"}));
+  if(!r.ok || !r.cupones || !r.cupones.length){
+    tbody.innerHTML = '<tr><td colspan="7" class="hist-empty">Sin cupones aún. Generá el primero arriba.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = "";
+  r.cupones.forEach(c=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="codigo" title="Click para copiar">${c.codigo || "—"}</td>
+      <td>${c.instagram ? "@"+c.instagram : "—"}</td>
+      <td>${c.nombre || "—"}</td>
+      <td>${(c.tienda || "—") + (c.ciudad ? " · " + c.ciudad : "")}</td>
+      <td>${(c.descuento || "") + (c.producto ? " · " + c.producto : "")}</td>
+      <td>${badgeEstado(c.estado)}</td>
+      <td>${fmtFechaCorta(c.vence)}</td>
+    `;
+    tr.querySelector(".codigo").addEventListener("click", ()=>{
+      navigator.clipboard.writeText(c.codigo).then(
+        ()=>toast("Copiado: " + c.codigo, true),
+        ()=>toast("No se pudo copiar", false)
+      );
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Login gate (reutiliza auth.login del backend de adquisición) ──
+const SESS_KEY = "influencers_sess";
+
+function sesionActiva(){
+  try{
+    const raw = sessionStorage.getItem(SESS_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+
+function mostrarApp(sess){
+  document.getElementById("loginOverlay").classList.add("hidden");
+  const bar = document.getElementById("sessionBar");
+  bar.style.display = "flex";
+  document.getElementById("sessionUser").textContent = "👤 " + (sess.nombre || sess.usuario);
+}
+
+function cerrarSesion(){
+  sessionStorage.removeItem(SESS_KEY);
+  location.reload();
+}
+
+async function intentarLogin(){
+  const user = document.getElementById("loginUser").value.trim();
+  const pass = document.getElementById("loginPass").value;
+  const err = document.getElementById("loginErr");
+  const btn = document.getElementById("loginBtn");
+  err.classList.remove("show");
+  if(!user || !pass){
+    err.textContent = "Completa usuario y contraseña";
+    err.classList.add("show");
+    return;
+  }
+  btn.disabled = true; btn.textContent = "Entrando…";
+  const r = await jsonp(new URLSearchParams({accion:"login", usuario:user, pass}));
+  btn.disabled = false; btn.textContent = "Entrar";
+  if(!r.ok){
+    err.textContent = r.mensaje || "Usuario o contraseña incorrectos";
+    err.classList.add("show");
+    return;
+  }
+  const sess = {usuario: r.usuario, rol: r.rol, nombre: r.nombre};
+  sessionStorage.setItem(SESS_KEY, JSON.stringify(sess));
+  mostrarApp(sess);
+  // Cargar datos AHORA que estamos autenticados.
+  await cargarCiudades();
+  await cargarHistorial();
+}
+
+document.getElementById("loginBtn").addEventListener("click", intentarLogin);
+document.getElementById("loginPass").addEventListener("keydown", e=>{
+  if(e.key === "Enter") intentarLogin();
+});
+document.getElementById("loginUser").addEventListener("keydown", e=>{
+  if(e.key === "Enter") document.getElementById("loginPass").focus();
+});
+
+// ── init ──
+(async function init(){
+  const sess = sesionActiva();
+  if(sess){
+    mostrarApp(sess);
+    await cargarCiudades();
+    await cargarHistorial();
+  } else {
+    // No cargamos ciudades/historial hasta que haya login (evita JSONP innecesarios).
+    document.getElementById("loginUser").focus();
+  }
+})();
+</script>
+</body>
+</html>

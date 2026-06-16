@@ -6,6 +6,7 @@
     { "source": "/amigos",         "destination": "/amigos.html"              },
     { "source": "/amigos-config",  "destination": "/amigos_admin.html"        },
     { "source": "/amigos/beneficios", "destination": "/mis_beneficios.html"     },
+    { "source": "/influencers",    "destination": "/influencers.html"         },
     { "source": "/tyc/amigos",     "destination": "/tyc_amigos.html"          },
     { "source": "/cupon",          "destination": "/cupon.html"               },
     { "source": "/links",          "destination": "/links.html"               },

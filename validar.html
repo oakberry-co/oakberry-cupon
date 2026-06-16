@@ -782,6 +782,32 @@ async function validar() {
     return;
   }
 
+  // ── Routing IG (Influencers): cupón pre-emitido a un @ de Instagram ──
+  //    Prefijo `IG` + 5 chars = 7 chars total. El backend valida tienda/ciudad
+  //    y marca canjeado igual que canjearCodigo.
+  const esInfluencer = /^IG/.test(codigo);
+  if (esInfluencer) {
+    try {
+      const res = await fetchGET({
+        accion: "canjearInfluencer",
+        codigo, tienda, ciudad, loopy: perfilCliente,
+      });
+      if (res.ok) {
+        document.getElementById("codigo").value = "";
+        const lineas = res.mensaje.split("\n");
+        mostrarResultado(true, lineas[0], lineas.slice(1));
+      } else {
+        mostrarError(res.mensaje || "no existe");
+      }
+    } catch(e) {
+      mostrarError("Error de conexión, intenta de nuevo");
+    } finally {
+      btn.classList.remove("loading");
+      btn.disabled = false;
+    }
+    return;
+  }
+
   try {
     const res = await fetchGET({
       accion: "canjearCodigo",
