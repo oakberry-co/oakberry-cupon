@@ -231,7 +231,9 @@
         <input id="nombre" placeholder="ej: Daniel Zuluaga" autocomplete="off">
       </div>
     </div>
-    <p class="muted">El @ se guarda en minúscula y sin el símbolo. Lo usamos para identificar al influencer en reportería.</p>
+    <label>Número de contacto (WhatsApp)</label>
+    <input id="celular" type="tel" inputmode="numeric" placeholder="ej: 3001234567" autocomplete="off">
+    <p class="muted">El @ se guarda en minúscula y sin el símbolo. El celular lo usamos para contactar al influencer y enviarle el cupón por WhatsApp.</p>
   </div>
 
   <!-- 2. Dónde redime -->
@@ -304,6 +306,7 @@
             <th>Código</th>
             <th>@ Instagram</th>
             <th>Nombre</th>
+            <th>Celular</th>
             <th>Tienda / Ciudad</th>
             <th>Oferta</th>
             <th>Estado</th>
@@ -311,7 +314,7 @@
           </tr>
         </thead>
         <tbody id="histBody">
-          <tr><td colspan="7" class="hist-empty">Cargando…</td></tr>
+          <tr><td colspan="8" class="hist-empty">Cargando…</td></tr>
         </tbody>
       </table>
     </div>
@@ -364,7 +367,8 @@ async function cargarTiendas(ciudad){
   const sel = document.getElementById("tienda");
   sel.innerHTML = '<option value="">Cargando…</option>';
   if(!ciudad){ sel.innerHTML = '<option value="">Selecciona ciudad primero…</option>'; return; }
-  const r = await jsonp(new URLSearchParams({accion:"obtenerTiendasPorCiudad", ciudad}));
+  // Misma acción que usa validar.html (catalog.obtener_tiendas_por_ciudad).
+  const r = await jsonp(new URLSearchParams({accion:"obtenerTiendas", ciudad}));
   sel.innerHTML = '<option value="">Selecciona tienda…</option>';
   (r.tiendas||[]).forEach(t=>{
     const opt = document.createElement("option");
@@ -386,6 +390,7 @@ document.getElementById("instagram").addEventListener("input", e=>{
 document.getElementById("generar").addEventListener("click", async ()=>{
   const instagram = document.getElementById("instagram").value.trim();
   const nombre = document.getElementById("nombre").value.trim();
+  const celular = document.getElementById("celular").value.replace(/\D/g, "");
   const ciudad = document.getElementById("ciudad").value;
   const tienda = document.getElementById("tienda").value;
   const descuento = document.getElementById("descuento").value;
@@ -393,6 +398,7 @@ document.getElementById("generar").addEventListener("click", async ()=>{
   const vigencia = document.getElementById("vigencia").value || "7";
 
   if(!instagram || !nombre){ toast("Completa @instagram y nombre","err"); return; }
+  if(!celular || celular.length < 7){ toast("Completa el número de contacto (al menos 7 dígitos)","err"); return; }
   if(!ciudad || !tienda){ toast("Selecciona ciudad y tienda","err"); return; }
   if(!descuento || !producto){ toast("Completa descuento y producto","err"); return; }
 
@@ -401,7 +407,7 @@ document.getElementById("generar").addEventListener("click", async ()=>{
 
   const r = await jsonp(new URLSearchParams({
     accion: "crearCuponInfluencer",
-    instagram, nombre, ciudad, tienda, descuento, producto, vigencia,
+    instagram, nombre, celular, ciudad, tienda, descuento, producto, vigencia,
   }));
 
   btn.disabled = false; btn.textContent = "🎟️ Generar cupón";
@@ -440,7 +446,11 @@ function copiarTexto(){
 
 function compartirWA(){
   if(!LAST || !LAST.textoWA) return;
-  window.open("https://wa.me/?text=" + encodeURIComponent(LAST.textoWA), "_blank");
+  // Si tenemos celular, abre el chat directo. Si no, dejamos elegir contacto.
+  const cel = (LAST.celular || "").replace(/\D/g, "");
+  const wa = cel ? ("https://wa.me/" + (cel.startsWith("57") ? cel : "57" + cel.slice(-10)))
+                 : "https://wa.me/";
+  window.open(wa + "?text=" + encodeURIComponent(LAST.textoWA), "_blank");
 }
 
 // ── Historial ──
@@ -476,6 +486,7 @@ async function cargarHistorial(){
       <td class="codigo" title="Click para copiar">${c.codigo || "—"}</td>
       <td>${c.instagram ? "@"+c.instagram : "—"}</td>
       <td>${c.nombre || "—"}</td>
+      <td>${c.celular || "—"}</td>
       <td>${(c.tienda || "—") + (c.ciudad ? " · " + c.ciudad : "")}</td>
       <td>${(c.descuento || "") + (c.producto ? " · " + c.producto : "")}</td>
       <td>${badgeEstado(c.estado)}</td>
