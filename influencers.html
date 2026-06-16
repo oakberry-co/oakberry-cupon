@@ -286,12 +286,15 @@
     <div id="result">
       <div class="codigo-box" id="codigoBox">XXXXXXX</div>
       <div class="vence-row" id="venceRow">Vence el —</div>
+      <div id="waBanner" style="display:none; background:#e7f7ee; border:1.5px solid var(--ok); color:#0f6b3a; padding:12px 14px; border-radius:10px; margin-bottom:12px; font-size:.85rem; font-weight:600; text-align:center; line-height:1.45">
+        ✅ WhatsApp oficial enviado desde Oakberry a <span id="waCel">—</span>
+      </div>
       <div class="btns">
         <button onclick="copiarCodigo()">🔗 Copiar código</button>
-        <button class="alt" onclick="compartirWA()">📲 Compartir por WhatsApp</button>
+        <button class="alt" onclick="compartirWA()">📲 Reenviar manualmente (fallback)</button>
         <button onclick="copiarTexto()">📋 Copiar texto completo</button>
       </div>
-      <label style="margin-top:14px">Texto que se compartirá</label>
+      <label style="margin-top:14px">Texto enviado / para reenviar</label>
       <div class="preview" id="textoPreview"></div>
     </div>
   </div>
@@ -421,8 +424,16 @@ document.getElementById("generar").addEventListener("click", async ()=>{
   document.getElementById("codigoBox").textContent = r.codigo;
   document.getElementById("venceRow").textContent = "Vence el " + (r.fechaVenceHumano || r.fechaVence || "—");
   document.getElementById("textoPreview").textContent = r.textoWA || "";
+  // Banner: WA oficial enviado en background al celular capturado.
+  const waBan = document.getElementById("waBanner");
+  if(r.waDisparado && r.celular){
+    document.getElementById("waCel").textContent = "+57 " + r.celular;
+    waBan.style.display = "block";
+  } else {
+    waBan.style.display = "none";
+  }
   document.getElementById("result").style.display = "block";
-  toast("✅ Cupón " + r.codigo + " generado", true);
+  toast("✅ Cupón " + r.codigo + " generado" + (r.waDisparado ? " · WA enviado" : ""), true);
   document.getElementById("result").scrollIntoView({behavior:"smooth", block:"center"});
 
   await cargarHistorial();
