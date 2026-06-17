@@ -782,10 +782,11 @@ async function validar() {
     return;
   }
 
-  // ── Routing IG (Influencers): cupón pre-emitido a un @ de Instagram ──
-  //    Prefijo `IG` + 5 chars = 7 chars total. El backend valida tienda/ciudad
-  //    y marca canjeado igual que canjearCodigo.
-  const esInfluencer = /^IG/.test(codigo);
+  // ── Routing Influencers: cupón pre-emitido a un @ de Instagram ──
+  //    Prefijo `INF` (nuevo, desde 2026-06-17) o `IG` (legacy, cupones ya
+  //    emitidos antes del cambio que siguen Disponible). 7 chars total.
+  //    El backend valida tienda/ciudad y marca canjeado igual que canjearCodigo.
+  const esInfluencer = /^(INF|IG)/.test(codigo);
   if (esInfluencer) {
     try {
       const res = await fetchGET({
