@@ -339,8 +339,12 @@
     <p class="muted">Si apagás el toggle, podés seleccionar SOLO los toppings que van incluidos. Los demás los cobrará el cajero como extra.</p>
   </div>
 
-  <!-- 4. Generar -->
+  <!-- 4. Resumen + Generar -->
   <div class="card">
+    <h2><span class="n">4</span> Resumen — qué se le va a dar</h2>
+    <div id="preview" style="background:#faf6ef; border:1.5px dashed var(--morado); border-radius:12px; padding:14px 18px; font-size:.88rem; line-height:1.6; color:var(--morado-osc); margin-bottom:14px; min-height:60px">
+      <em style="color:#9b8db0">Completá los campos arriba para ver el resumen…</em>
+    </div>
     <button class="go" id="generar">🎟️ Generar cupón</button>
 
     <div id="result">
@@ -512,6 +516,84 @@ function recogerToppings(){
   return sel.length ? sel.join(",") : "";
 }
 
+// ── Preview live: refleja exactamente lo que el cajero va a ver al canjear ──
+function actualizarPreview(){
+  const cont = document.getElementById("preview");
+  if(!cont) return;
+  const ig = document.getElementById("instagram").value.trim();
+  const nom = document.getElementById("nombre").value.trim();
+  const cel = document.getElementById("celular").value.replace(/\D/g, "");
+  const ciudad = document.getElementById("ciudad").value;
+  const tienda = document.getElementById("tienda").value;
+  const desc = (document.getElementById("descuento").value || "").trim();
+  const vig = (document.getElementById("vigencia").value || "7").trim();
+  const productosStr = recogerProductos();
+  const toppings = recogerToppings();
+
+  const productos = productosStr.split(",").map(s => s.trim()).filter(Boolean);
+  const partes = [];
+
+  if(nom){
+    partes.push(`<strong>👤 ${nom}</strong>` + (ig ? ` <span style="color:#9b8db0">(@${ig})</span>` : ""));
+  }
+  if(cel){
+    partes.push(`<span style="color:#9b8db0">📱 +57 ${cel}</span>`);
+  }
+  if(ciudad || tienda){
+    partes.push(`<span>📍 <strong>${tienda || "—"}</strong> · ${ciudad || "—"}</span>`);
+  }
+
+  if(productos.length){
+    partes.push(`<br><strong style="color:var(--morado)">🎁 PRODUCTOS A REGALAR:</strong>`);
+    productos.forEach(p => {
+      const norm = p.replace(/^(\d+)x\s+/i, "$1× ");
+      partes.push(`&nbsp;&nbsp;• ${norm}`);
+    });
+  }
+
+  if(toppings === "todos"){
+    partes.push(`<br><span style="color:var(--ok)">✓ <strong>TODOS los toppings INCLUIDOS</strong></span>`);
+  } else if(toppings){
+    partes.push(`<br><span style="color:var(--ok)">✓ Toppings incluidos: <strong>${toppings.split(",").join(", ")}</strong></span>`);
+    const pagos = CATALOGO_TOPPINGS.filter(t => !toppings.toLowerCase().includes(t.toLowerCase()));
+    if(pagos.length){
+      partes.push(`<span style="color:var(--err)">✗ Cobrar extra: ${pagos.join(", ")}</span>`);
+    }
+  } else {
+    partes.push(`<br><span style="color:var(--err)">✗ Toppings NO incluidos (cobrar todos extra)</span>`);
+  }
+
+  if(desc){
+    const num = desc.replace(/\D/g, "") || "100";
+    partes.push(`<br><strong style="color:var(--morado)">💳 APLICAR EN TOTEAT:</strong>`);
+    partes.push(`<span style="font-family:'Courier New', monospace; background:#fff; padding:6px 10px; border-radius:6px; border:1.5px dashed var(--morado); display:inline-block; font-weight:700">INFLUENCER ${num}% - ${num}% DE DESCUENTO DE LA ORDEN</span>`);
+  }
+
+  if(vig){
+    partes.push(`<br><span style="color:#9b8db0; font-size:.78rem">⏰ Vigencia: ${vig} día${vig === "1" ? "" : "s"}</span>`);
+  }
+
+  cont.innerHTML = partes.length
+    ? partes.join("<br>")
+    : '<em style="color:#9b8db0">Completá los campos arriba para ver el resumen…</em>';
+}
+
+// Engancha el preview a cada cambio del form.
+function bindPreview(){
+  ["instagram","nombre","celular","ciudad","tienda","descuento","vigencia"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){ el.addEventListener("input", actualizarPreview); el.addEventListener("change", actualizarPreview); }
+  });
+  // Productos dinámicos: delegar al contenedor.
+  document.getElementById("productosList").addEventListener("input", actualizarPreview);
+  document.getElementById("productosList").addEventListener("change", actualizarPreview);
+  // Toppings.
+  document.getElementById("todosToppings").addEventListener("change", actualizarPreview);
+  document.getElementById("toppingChips").addEventListener("click", ()=> setTimeout(actualizarPreview, 0));
+  // Botón "+ producto" agrega fila y re-pintamos.
+  document.getElementById("addProd").addEventListener("click", ()=> setTimeout(actualizarPreview, 0));
+}
+
 // ── Normalización del @handle: minúscula, sin @ inicial ──
 document.getElementById("instagram").addEventListener("input", e=>{
   const raw = e.target.value;
@@ -666,6 +748,8 @@ function mostrarApp(sess){
     document.getElementById("productosList").appendChild(nuevaFilaProducto(1, "Bowl 12oz"));
     actualizarBotonesDel();
     renderToppingChips();
+    bindPreview();
+    actualizarPreview();
   }
 }
 
