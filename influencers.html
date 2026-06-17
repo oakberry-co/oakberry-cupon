@@ -544,7 +544,8 @@ function actualizarPreview(){
   }
 
   if(productos.length){
-    partes.push(`<br><strong style="color:var(--morado)">🎁 PRODUCTOS A REGALAR:</strong>`);
+    const descNum = (desc || "").replace(/\D/g, "") || "100";
+    partes.push(`<br><strong style="color:var(--morado)">🎁 ${descNum}% DE DESCUENTO en:</strong>`);
     productos.forEach(p => {
       const norm = p.replace(/^(\d+)x\s+/i, "$1× ");
       partes.push(`&nbsp;&nbsp;• ${norm}`);
