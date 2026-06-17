@@ -18,9 +18,13 @@
     min-height:100vh; min-height:100dvh;
     padding:14px 12px;
     padding-bottom:calc(14px + env(safe-area-inset-bottom));
-    /* Background gradient SIN imagen fija para perf en iOS/Android.
-       (fixed background causa repaints fuertes al hacer scroll). */
-    background:linear-gradient(135deg, #5F4B8B 0%, #3d2b5e 60%, #2a1e44 100%);
+    /* Imagen Oakville (camión THE ONE AND ONLY) con overlay morado fuerte:
+       suma textura y reconocimiento de marca sin pelear con el contenido.
+       Sin background-attachment:fixed para perf en iOS/Android. */
+    background:
+      linear-gradient(135deg, rgba(95,75,139,.78) 0%, rgba(61,43,94,.88) 55%, rgba(42,30,68,.94) 100%),
+      url('/oakville-bg.jpg') center/cover no-repeat;
+    background-color:#3d2b5e;  /* fallback mientras carga la imagen */
     display:flex; align-items:flex-start; justify-content:center;
     -webkit-tap-highlight-color:transparent;
     overscroll-behavior-y:contain;
@@ -30,7 +34,10 @@
   #loading,#error{
     position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
     flex-direction:column; gap:18px; color:#fff; z-index:100;
-    background:linear-gradient(135deg, #3d2b5e 0%, #2a1e44 100%);
+    background:
+      linear-gradient(135deg, rgba(61,43,94,.90) 0%, rgba(42,30,68,.95) 100%),
+      url('/oakville-bg.jpg') center/cover no-repeat;
+    background-color:#3d2b5e;
     padding:0 20px;
   }
   #error{ display:none; text-align:center; }
