@@ -12,23 +12,30 @@
     --green:#27ae60; --red:#e74c3c; --cream:#F5F0E8;
   }
   *,*::before,*::after{ margin:0; padding:0; box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
   body{
-    font-family:'Montserrat',sans-serif; min-height:100vh; padding:24px 16px;
-    background:linear-gradient(rgba(20,10,40,.55), rgba(20,10,40,.65)),
-               url('oakville-bg.jpg') center/cover no-repeat fixed;
+    font-family:'Montserrat',sans-serif;
+    min-height:100vh; min-height:100dvh;
+    padding:14px 12px;
+    padding-bottom:calc(14px + env(safe-area-inset-bottom));
+    /* Background gradient SIN imagen fija para perf en iOS/Android.
+       (fixed background causa repaints fuertes al hacer scroll). */
+    background:linear-gradient(135deg, #5F4B8B 0%, #3d2b5e 60%, #2a1e44 100%);
     display:flex; align-items:flex-start; justify-content:center;
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior-y:contain;
   }
 
   /* Loading + error fullscreen */
   #loading,#error{
     position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
     flex-direction:column; gap:18px; color:#fff; z-index:100;
-    background:linear-gradient(rgba(20,10,40,.85),rgba(20,10,40,.9)),
-               url('oakville-bg.jpg') center/cover no-repeat fixed;
+    background:linear-gradient(135deg, #3d2b5e 0%, #2a1e44 100%);
+    padding:0 20px;
   }
-  #error{ display:none; padding:24px; text-align:center; }
+  #error{ display:none; text-align:center; }
   .spinner{
-    width:36px; height:36px;
+    width:38px; height:38px;
     border:3px solid rgba(255,255,255,.2); border-top-color:var(--yellow);
     border-radius:50%; animation:spin .7s linear infinite;
   }
@@ -36,100 +43,103 @@
   #loading-text,#error-text{
     font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
   }
-  #error-text{ font-size:14px; max-width:380px; letter-spacing:1px; line-height:1.6; }
+  #error-text{ font-size:14px; max-width:340px; letter-spacing:.5px; line-height:1.6; }
 
-  /* Card principal */
+  /* Card principal — mobile first */
   .card{
-    background:rgba(255,255,255,.97); border-radius:28px;
+    background:#fff; border-radius:22px;
     width:100%; max-width:460px;
-    box-shadow:0 20px 60px rgba(0,0,0,.35); overflow:hidden;
+    box-shadow:0 14px 40px rgba(0,0,0,.35); overflow:hidden;
     animation:fadeIn .4s ease;
     display:none;
   }
   .card.show{ display:block; }
   @keyframes fadeIn{
-    from{ opacity:0; transform:translateY(12px); }
+    from{ opacity:0; transform:translateY(8px); }
     to{ opacity:1; transform:translateY(0); }
   }
 
   /* Header */
   .card-header{
-    background:var(--primary); padding:28px 26px 24px;
+    background:linear-gradient(135deg, var(--primary), #4a3a6e);
+    padding:22px 20px 20px;
     text-align:center; position:relative; overflow:hidden;
   }
   .card-header::before{
-    content:'🫐'; position:absolute; font-size:160px; opacity:.10;
-    top:-32px; right:-28px; transform:rotate(15deg); pointer-events:none;
+    content:'🫐'; position:absolute; font-size:130px; opacity:.10;
+    top:-26px; right:-22px; transform:rotate(15deg); pointer-events:none;
   }
   .brand{
-    font-size:24px; font-weight:900; color:#fff;
-    text-transform:uppercase; letter-spacing:3px;
+    font-size:22px; font-weight:900; color:#fff;
+    text-transform:uppercase; letter-spacing:2.5px;
     position:relative; z-index:2;
   }
   .brand-sub{
-    font-size:10px; font-weight:700; color:rgba(255,255,255,.6);
-    text-transform:uppercase; letter-spacing:2.5px; margin-top:4px;
+    font-size:9.5px; font-weight:700; color:rgba(255,255,255,.65);
+    text-transform:uppercase; letter-spacing:2px; margin-top:3px;
     position:relative; z-index:2;
   }
   .hero-msg{
-    margin-top:16px; font-size:18px; font-weight:900; color:#fff;
+    margin-top:14px; font-size:17px; font-weight:900; color:#fff;
     line-height:1.3; position:relative; z-index:2;
   }
   .hero-msg .heart{ color:var(--yellow); }
 
-  .body{ padding:24px 26px 22px; }
+  .body{ padding:18px 18px 20px; }
 
-  /* Sección 1: Tu regalo */
+  /* Sección title divider */
   .sec-title{
-    font-size:11px; font-weight:900; color:var(--primary);
-    text-transform:uppercase; letter-spacing:2px;
-    text-align:center; margin:6px 0 14px;
-    display:flex; align-items:center; gap:10px;
+    font-size:10px; font-weight:900; color:var(--primary);
+    text-transform:uppercase; letter-spacing:1.8px;
+    text-align:center; margin:4px 0 10px;
+    display:flex; align-items:center; gap:8px;
   }
   .sec-title::before, .sec-title::after{
     content:''; flex:1; height:1.5px;
     background:linear-gradient(to right, transparent, #d8cdf0, transparent);
   }
+
+  /* Sección 1: Tu regalo */
   .gift-box{
     background:linear-gradient(135deg, #faf6ef, #fff);
     border:2px dashed var(--yellow); border-radius:14px;
-    padding:16px 18px; margin-bottom:18px;
+    padding:14px 16px; margin-bottom:14px;
   }
   .gift-row{
-    display:flex; align-items:flex-start; gap:10px;
-    padding:5px 0; font-size:13px; font-weight:700; color:#2b2b2b;
+    display:flex; align-items:flex-start; gap:8px;
+    padding:4px 0; font-size:13.5px; font-weight:700; color:#2b2b2b;
     line-height:1.5;
   }
   .gift-row strong{ color:var(--primary); }
   .gift-row span.label{
     font-size:9px; font-weight:900; color:#999;
-    text-transform:uppercase; letter-spacing:1.5px;
-    min-width:60px; padding-top:3px;
+    text-transform:uppercase; letter-spacing:1.2px;
+    min-width:54px; padding-top:3px; flex-shrink:0;
   }
 
   /* Sección 2: Club */
   .club-card{
     background:linear-gradient(135deg, #5F4B8B, #3d2b5e);
-    border-radius:18px; padding:22px 22px 20px; margin-bottom:20px;
+    border-radius:16px; padding:18px 18px 16px; margin-bottom:14px;
     color:#fff; position:relative; overflow:hidden;
   }
   .club-card::before{
-    content:'⭐'; position:absolute; font-size:110px; opacity:.06;
-    bottom:-20px; right:-20px; pointer-events:none;
+    content:'⭐'; position:absolute; font-size:90px; opacity:.06;
+    bottom:-18px; right:-16px; pointer-events:none;
   }
   .club-title{
-    font-size:14px; font-weight:900; color:var(--yellow);
-    text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;
+    font-size:13px; font-weight:900; color:var(--yellow);
+    text-transform:uppercase; letter-spacing:1.3px; margin-bottom:6px;
     position:relative; z-index:2;
   }
   .club-intro{
-    font-size:13px; font-weight:600; color:rgba(255,255,255,.9);
-    line-height:1.5; margin-bottom:14px; position:relative; z-index:2;
+    font-size:12.5px; font-weight:600; color:rgba(255,255,255,.92);
+    line-height:1.5; margin-bottom:12px; position:relative; z-index:2;
   }
-  .club-perks{ display:flex; flex-direction:column; gap:8px; position:relative; z-index:2; }
+  .club-perks{ display:flex; flex-direction:column; gap:7px; position:relative; z-index:2; }
   .club-perk{
     display:flex; align-items:center; gap:10px;
-    font-size:12px; font-weight:700; color:#fff;
+    font-size:12.5px; font-weight:700; color:#fff;
   }
   .club-perk .icon{
     width:28px; height:28px; flex-shrink:0;
@@ -138,55 +148,52 @@
     font-size:14px;
   }
 
-  /* Sección 3: Form de activación */
-  label{
-    display:block; font-size:10px; font-weight:800; color:var(--primary);
-    text-transform:uppercase; letter-spacing:1.5px;
-    margin:14px 0 5px;
-  }
-  label .opt{ color:#a89ec0; font-weight:600; text-transform:none; letter-spacing:0; margin-left:4px; }
-  input[type=text], input[type=email], input[type=number], input[type=date], select{
-    width:100%; padding:12px 14px; border:1.6px solid #e3dcce;
-    border-radius:10px; font-family:inherit; font-size:14px;
-    background:#fff; color:#2b2b2b; outline:none;
-  }
-  input:focus, select:focus{ border-color:var(--primary); }
-  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-
-  /* Checkboxes TyC */
+  /* Checkbox TyC — tap target grande (>=48px alto), font-size 16px en label
+     y enlace para evitar zoom al tocar en iOS. */
   .check{
-    display:flex; align-items:flex-start; gap:10px;
-    background:#faf6ef; border:1.5px solid #e6dfc8;
-    border-radius:12px; padding:14px 14px; margin-top:12px;
+    display:flex; align-items:flex-start; gap:12px;
+    background:#faf6ef; border:1.8px solid #e6dfc8;
+    border-radius:14px; padding:16px 14px; margin-top:12px;
     cursor:pointer; transition:border-color .18s, background .18s;
+    min-height:56px;
+    -webkit-tap-highlight-color:rgba(95,75,139,.08);
   }
   .check.checked{ border-color:var(--green); background:#eafaf1; }
-  .check input{ margin-top:3px; cursor:pointer; flex-shrink:0; width:18px; height:18px; }
+  .check input{
+    margin-top:2px; cursor:pointer; flex-shrink:0;
+    width:22px; height:22px; accent-color:var(--green);
+  }
   .check label{
-    margin:0; font-size:12px; font-weight:700; color:#444;
-    line-height:1.5; cursor:pointer; text-transform:none; letter-spacing:0;
-    text-align:left;
+    margin:0; font-size:14px; font-weight:700; color:#444;
+    line-height:1.45; cursor:pointer; text-transform:none; letter-spacing:0;
+    text-align:left; flex:1;
   }
   .check label a{ color:var(--primary); }
   .check.required label::after{ content:" *"; color:var(--red); }
 
   .btn{
-    width:100%; padding:16px; margin-top:18px;
+    width:100%; padding:18px 16px; margin-top:16px;
     background:var(--primary); color:#fff;
-    border:0; border-radius:12px; font-family:inherit;
-    font-size:14px; font-weight:900; cursor:pointer;
-    text-transform:uppercase; letter-spacing:1.5px;
-    box-shadow:0 6px 20px rgba(95,75,139,.35);
+    border:0; border-radius:14px; font-family:inherit;
+    font-size:15px; font-weight:900; cursor:pointer;
+    text-transform:uppercase; letter-spacing:1.2px;
+    box-shadow:0 8px 22px rgba(95,75,139,.4);
     transition:background .18s, transform .12s;
+    min-height:56px;
+    -webkit-tap-highlight-color:transparent;
   }
-  .btn:hover:not(:disabled){ background:var(--pd); transform:translateY(-1px); }
-  .btn:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+  .btn:active:not(:disabled){ transform:scale(.98); }
+  .btn:hover:not(:disabled){ background:var(--pd); }
+  .btn:disabled{ opacity:.42; cursor:not-allowed; box-shadow:none; }
 
   .toast{
-    position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
-    background:var(--red); color:#fff; padding:11px 18px; border-radius:20px;
-    font-size:12px; font-weight:700; opacity:0; transition:opacity .25s;
-    pointer-events:none; z-index:200; max-width:90vw; text-align:center;
+    position:fixed; left:50%; bottom:24px;
+    bottom:calc(24px + env(safe-area-inset-bottom));
+    transform:translateX(-50%);
+    background:var(--red); color:#fff; padding:12px 18px; border-radius:22px;
+    font-size:13px; font-weight:700; opacity:0; transition:opacity .25s;
+    pointer-events:none; z-index:200; max-width:92vw; text-align:center;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
   }
   .toast.show{ opacity:1; }
   .toast.ok{ background:var(--green); }
@@ -195,13 +202,13 @@
   #success{ display:none; }
   #success.show{ display:block; animation:fadeIn .4s ease; }
   .success-hero{
-    text-align:center; padding:34px 26px 22px;
+    text-align:center; padding:28px 20px 18px;
     background:linear-gradient(135deg, #eafaf1, #f5fff7);
   }
-  .success-hero .emoji{ font-size:54px; line-height:1; margin-bottom:10px; }
+  .success-hero .emoji{ font-size:50px; line-height:1; margin-bottom:8px; }
   .success-hero .title{
-    font-size:18px; font-weight:900; color:#1f7a3c;
-    text-transform:uppercase; letter-spacing:1px; line-height:1.2;
+    font-size:17px; font-weight:900; color:#1f7a3c;
+    text-transform:uppercase; letter-spacing:.8px; line-height:1.2;
   }
   .success-hero .sub{
     font-size:13px; font-weight:700; color:#2b2b2b;
@@ -210,13 +217,30 @@
   .success-code{
     background:linear-gradient(135deg, #faf6ef, #fff);
     border:2px dashed var(--yellow); border-radius:14px;
-    padding:22px 12px 18px; text-align:center; margin:18px 24px;
+    padding:20px 12px 16px; text-align:center; margin:16px 18px;
   }
   .success-code .codigo{
-    font-size:30px; font-weight:900; color:var(--primary);
-    letter-spacing:4px; font-family:'Montserrat',monospace;
+    font-size:28px; font-weight:900; color:var(--primary);
+    letter-spacing:3.5px; font-family:'Montserrat',monospace;
+    word-break:break-all;
   }
-  .success-actions{ padding:0 24px 26px; }
+  .success-actions{ padding:0 18px 22px; }
+
+  /* Pantallas un poco más grandes (tablet vertical / phablet) */
+  @media (min-width:480px){
+    body{ padding:24px 16px; }
+    .card-header{ padding:28px 26px 24px; }
+    .brand{ font-size:24px; letter-spacing:3px; }
+    .brand-sub{ font-size:10px; letter-spacing:2.5px; }
+    .hero-msg{ font-size:18px; }
+    .body{ padding:24px 26px 22px; }
+    .gift-box{ padding:16px 18px; }
+    .gift-row{ font-size:13px; }
+    .club-card{ padding:22px 22px 20px; }
+    .club-card::before{ font-size:110px; }
+    .success-code{ margin:18px 24px; }
+    .success-actions{ padding:0 24px 26px; }
+  }
 </style>
 </head>
 <body>
@@ -376,7 +400,14 @@ document.getElementById("tycRow").addEventListener("click", e=>{
 });
 document.getElementById("tyc").addEventListener("change", ()=>{
   toggleCheck("tycRow","tyc");
-  document.getElementById("activarBtn").disabled = !document.getElementById("tyc").checked;
+  const checked = document.getElementById("tyc").checked;
+  document.getElementById("activarBtn").disabled = !checked;
+  // En mobile, al aceptar TyC, traemos el botón a la vista (evita scroll extra).
+  if(checked){
+    setTimeout(()=> {
+      document.getElementById("activarBtn").scrollIntoView({behavior:"smooth", block:"center"});
+    }, 100);
+  }
 });
 
 // ── Submit ──
