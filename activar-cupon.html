@@ -264,18 +264,9 @@
     <!-- SECCIÓN 3: ACTIVAR -->
     <div class="sec-title">✅ Activar mi cupón</div>
 
-    <label>Email <span class="opt">(opcional, para news del Club)</span></label>
-    <input type="email" id="email" placeholder="ej: hola@email.com" autocomplete="email">
-
-    <!-- Consentimientos (ambos opt-in activo por Ley 1581 Colombia) -->
     <div class="check required" id="tycRow">
       <input type="checkbox" id="tyc">
-      <label for="tyc">Acepto los <a href="/tyc/influencers" target="_blank">Términos y Condiciones</a> del Programa Influencers y el Club de Creadores Oakberry.</label>
-    </div>
-
-    <div class="check" id="optRow">
-      <input type="checkbox" id="optIn">
-      <label for="optIn">Autorizo a Oakberry a contactarme por WhatsApp y correo con novedades del Club, promociones y nuevos productos. Puedo darme de baja cuando quiera.</label>
+      <label for="tyc">Acepto los <a href="/tyc/influencers" target="_blank">Términos y Condiciones</a> del Programa Influencers y el Club de Creadores Oakberry, y autorizo a Oakberry a contactarme por WhatsApp y correo con novedades del Club, promociones y nuevos productos (puedo darme de baja cuando quiera).</label>
     </div>
 
     <button class="btn" id="activarBtn" disabled>🎉 Activar mi cupón</button>
@@ -383,36 +374,29 @@ document.getElementById("tycRow").addEventListener("click", e=>{
     inp.dispatchEvent(new Event("change"));
   }
 });
-document.getElementById("optRow").addEventListener("click", e=>{
-  if(e.target.tagName !== "INPUT"){
-    const inp = document.getElementById("optIn");
-    inp.checked = !inp.checked;
-    inp.dispatchEvent(new Event("change"));
-  }
-});
 document.getElementById("tyc").addEventListener("change", ()=>{
   toggleCheck("tycRow","tyc");
   document.getElementById("activarBtn").disabled = !document.getElementById("tyc").checked;
 });
-document.getElementById("optIn").addEventListener("change", ()=>toggleCheck("optRow","optIn"));
 
 // ── Submit ──
 document.getElementById("activarBtn").addEventListener("click", async ()=>{
   const codigo = getCodigo();
   const tyc = document.getElementById("tyc").checked;
   if(!tyc){ toast("Debes aceptar los términos para activar"); return; }
-  const optIn = document.getElementById("optIn").checked;
-  const email = document.getElementById("email").value.trim();
 
   const btn = document.getElementById("activarBtn");
   btn.disabled = true; btn.textContent = "Activando…";
 
+  // Aceptar TyC = consentimiento bundle: incluye opt-in marketing.
+  // Esto está explícito en el texto del checkbox y en /tyc/influencers
+  // (Ley 1581 Colombia art. 9 permite consentimiento bundle si los fines
+  // están claramente disclosed).
   const r = await jsonp(new URLSearchParams({
     accion: "activarCuponInfluencer",
     codigo,
     tycAceptados: "true",
-    optInMarketing: optIn ? "true" : "false",
-    emailCreador: email,
+    optInMarketing: "true",
   }));
 
   btn.disabled = false; btn.textContent = "🎉 Activar mi cupón";
