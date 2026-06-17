@@ -261,64 +261,21 @@
       </div>
     </div>
 
-    <!-- SECCIÓN 3: FORM -->
-    <div class="sec-title">✨ Contanos un poco de vos</div>
+    <!-- SECCIÓN 3: ACTIVAR -->
+    <div class="sec-title">✅ Activar mi cupón</div>
 
-    <div class="row2">
-      <div>
-        <label>Talla de merch</label>
-        <select id="talla">
-          <option value="">—</option>
-          <option>XS</option><option>S</option><option selected>M</option>
-          <option>L</option><option>XL</option><option>XXL</option>
-        </select>
-      </div>
-      <div>
-        <label>Ciudad <span class="opt">(opcional)</span></label>
-        <input type="text" id="ciudadCreador" placeholder="ej: Bogotá">
-      </div>
-    </div>
-
-    <label>Tipo de contenido <span class="opt">(opcional)</span></label>
-    <select id="categoria">
-      <option value="">—</option>
-      <option>Lifestyle</option>
-      <option>Food &amp; Beverages</option>
-      <option>Fitness &amp; Wellness</option>
-      <option>Belleza</option>
-      <option>Viajes</option>
-      <option>Moda</option>
-      <option>Familia</option>
-      <option>Entretenimiento</option>
-      <option>Otro</option>
-    </select>
-
-    <label>Email <span class="opt">(opcional, para newsletters del Club)</span></label>
+    <label>Email <span class="opt">(opcional, para news del Club)</span></label>
     <input type="email" id="email" placeholder="ej: hola@email.com" autocomplete="email">
 
-    <div class="row2">
-      <div>
-        <label>Fecha de cumpleaños <span class="opt">(opcional)</span></label>
-        <input type="date" id="fechaNac">
-      </div>
-      <div>
-        <label># seguidores IG <span class="opt">(opcional)</span></label>
-        <input type="number" id="seguidoresIg" min="0" placeholder="ej: 15000">
-      </div>
-    </div>
-
-    <label>@ TikTok <span class="opt">(opcional)</span></label>
-    <input type="text" id="tiktok" placeholder="ej: tunick" autocomplete="off">
-
-    <!-- TyC -->
+    <!-- Consentimientos (ambos opt-in activo por Ley 1581 Colombia) -->
     <div class="check required" id="tycRow">
       <input type="checkbox" id="tyc">
       <label for="tyc">Acepto los <a href="/tyc/influencers" target="_blank">Términos y Condiciones</a> del Programa Influencers y el Club de Creadores Oakberry.</label>
     </div>
 
     <div class="check" id="optRow">
-      <input type="checkbox" id="optIn" checked>
-      <label for="optIn">Sí, autorizo a Oakberry a contactarme por WhatsApp y correo con novedades del Club, promociones y nuevos productos. Puedo darme de baja cuando quiera.</label>
+      <input type="checkbox" id="optIn">
+      <label for="optIn">Autorizo a Oakberry a contactarme por WhatsApp y correo con novedades del Club, promociones y nuevos productos. Puedo darme de baja cuando quiera.</label>
     </div>
 
     <button class="btn" id="activarBtn" disabled>🎉 Activar mi cupón</button>
@@ -438,7 +395,6 @@ document.getElementById("tyc").addEventListener("change", ()=>{
   document.getElementById("activarBtn").disabled = !document.getElementById("tyc").checked;
 });
 document.getElementById("optIn").addEventListener("change", ()=>toggleCheck("optRow","optIn"));
-toggleCheck("optRow","optIn");
 
 // ── Submit ──
 document.getElementById("activarBtn").addEventListener("click", async ()=>{
@@ -446,12 +402,7 @@ document.getElementById("activarBtn").addEventListener("click", async ()=>{
   const tyc = document.getElementById("tyc").checked;
   if(!tyc){ toast("Debes aceptar los términos para activar"); return; }
   const optIn = document.getElementById("optIn").checked;
-  const talla = document.getElementById("talla").value;
-  const categoria = document.getElementById("categoria").value;
   const email = document.getElementById("email").value.trim();
-  const fechaNac = document.getElementById("fechaNac").value;
-  const seguidoresIg = document.getElementById("seguidoresIg").value;
-  const tiktok = document.getElementById("tiktok").value.trim().replace(/^@+/, "");
 
   const btn = document.getElementById("activarBtn");
   btn.disabled = true; btn.textContent = "Activando…";
@@ -461,9 +412,7 @@ document.getElementById("activarBtn").addEventListener("click", async ()=>{
     codigo,
     tycAceptados: "true",
     optInMarketing: optIn ? "true" : "false",
-    talla, categoria, emailCreador: email,
-    fechaNacimiento: fechaNac,
-    seguidoresIg, tiktokHandle: tiktok,
+    emailCreador: email,
   }));
 
   btn.disabled = false; btn.textContent = "🎉 Activar mi cupón";
