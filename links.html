@@ -442,10 +442,15 @@
 
         <div class="divider">URL para Meta Ads</div>
         <div class="meta-url-box">
-          <div class="meta-url-label">URL para pegar en cada Ad Set · Meta rellena las variables</div>
-          <div class="meta-url-text" id="metaUrlPreview">Completa los campos para ver la URL...</div>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="action-btn primary" onclick="copiarMetaUrl()" style="flex:1;font-size:10px;">📋 Copiar URL Meta</button>
+          <div class="meta-url-label">① URL del sitio web (destino) · pégala en el campo "URL del sitio web"</div>
+          <div class="meta-url-text static" id="metaSitioPreview" style="color:var(--green);">Completa los campos…</div>
+          <button class="action-btn primary" onclick="copiarMetaSitio()" style="width:100%;margin-top:8px;font-size:10px;">📋 Copiar URL de destino</button>
+        </div>
+        <div class="meta-url-box">
+          <div class="meta-url-label">② Parámetros de URL (tracking) · pégalos en "Parámetros de URL"</div>
+          <div class="meta-url-text dynamic" id="metaParamsPreview" style="color:var(--accent);">Completa los campos…</div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="action-btn primary" onclick="copiarMetaParams()" style="flex:1;font-size:10px;">📋 Copiar parámetros</button>
             <button class="action-btn" onclick="verAyudaMeta()" style="font-size:10px;padding:10px 12px;">❓ Ayuda</button>
           </div>
         </div>
@@ -494,13 +499,13 @@
 <!-- Modal ayuda Meta -->
 <div id="modalMeta" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--card);border:1px solid rgba(95,75,139,0.4);border-radius:20px;padding:28px;max-width:500px;width:100%;">
-    <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:16px;">¿Cómo usar esta URL en Meta Ads?</div>
-    <ol style="font-size:12px;color:var(--text);line-height:2;padding-left:18px;">
-      <li>Ve al administrador de anuncios de Meta</li>
-      <li>Abre el Ad Set que quieres configurar</li>
-      <li>En el campo <strong style="color:var(--accent);">URL del sitio web</strong>, pega la URL copiada</li>
-      <li>Meta reemplazará automáticamente las partes en <strong style="color:var(--accent);">amarillo</strong> con los datos reales de cada clic</li>
-      <li>Los parámetros en <strong style="color:#39d98a;">verde</strong> son fijos — definen el producto y descuento</li>
+    <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:16px;">¿Cómo configurar el anuncio en Meta? (2 campos)</div>
+    <ol style="font-size:12px;color:var(--text);line-height:1.9;padding-left:18px;">
+      <li>En el anuncio, ve a <strong>Destino → Sitio web</strong>.</li>
+      <li>En <strong style="color:var(--green);">URL del sitio web</strong> pega el cuadro ① (destino limpio, con <code>www</code>). <strong>Nunca</strong> pegues los <code>{{tokens}}</code> aquí.</li>
+      <li>Abre <strong>Seguimiento → Parámetros de URL</strong> (o "Opciones del sitio web") y pega ahí el cuadro ② (los <strong style="color:var(--accent);">{{tokens}}</strong>).</li>
+      <li>Meta reemplaza los <strong style="color:var(--accent);">{{tokens}}</strong> con los datos reales de cada clic → atribución por campaña/adset/anuncio.</li>
+      <li>Así el destino queda limpio y verificado → Meta no lo marca como "engañoso".</li>
     </ol>
     <button onclick="document.getElementById('modalMeta').style.display='none'" style="margin-top:16px;width:100%;padding:12px;background:var(--p);border:none;border-radius:10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Entendido</button>
   </div>
@@ -525,7 +530,8 @@ let momentosSelected  = new Set();
 let rMomentosSelected = new Set(); // momentos del tab reactivación
 let historial         = [];
 let linkActual        = "";
-let metaUrlActual     = "";
+let urlSitioActual    = "";
+let urlParamsActual   = "";
 let reactivLinkActual = "";
 
 // ── CACHE + FETCH ─────────────────────────────────────────
@@ -629,8 +635,6 @@ function actualizarTimeline(timelineId, selectedSet) {
 // ── META URL ──────────────────────────────────────────────
 function actualizarMetaUrl() {
   const ciudad    = document.getElementById("ciudad").value || "todas";
-  const fase      = document.getElementById("fase").value;
-  const fuente    = document.getElementById("fuente").value;
   const descuento = document.getElementById("descuento")?.value || "30";
   const producto  = document.getElementById("producto")?.value || "Bowl+12oz";
   const momentos  = Array.from(momentosSelected).join(",");
@@ -638,29 +642,35 @@ function actualizarMetaUrl() {
   const placement = document.getElementById("placement")?.value || "{{placement}}";
   const tienda    = document.getElementById("tienda")?.value || "general";
 
+  // ① URL de destino LIMPIA (lo que necesita la landing) → campo "URL del sitio web".
+  //    www + slash, sin {{tokens}}, sin redirect → Meta no la marca como engañosa.
+  const estaticos = { modo: modoActual, ciudad, tienda, descuento, producto, momentos, vigencia };
+  urlSitioActual = BASE + "/?" + Object.entries(estaticos)
+    .map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join("&");
+
+  // ② Parámetros de TRACKING (Meta los rellena al hacer clic) → campo "Parámetros de URL".
   const dinamicos = {
-    fase: "{{campaign.name}}", adset: "{{adset.name}}", adset_id: "{{adset.id}}",
+    fuente: "{{site_source_name}}", fase: "{{campaign.name}}",
+    adset: "{{adset.name}}", adset_id: "{{adset.id}}",
     campaign_id: "{{campaign.id}}", anuncio: "{{ad.name}}",
     placement: placement === "{{placement}}" ? "{{placement}}" : placement,
-    fuente: "{{site_source_name}}",
-    fbclid: "{{fbclid}}",  // ← garantiza que Meta siempre inyecte el click ID
+    fbclid: "{{fbclid}}",
   };
-  const estaticos = { ciudad, tienda, descuento, producto, momentos, vigencia };
+  urlParamsActual = Object.entries(dinamicos).map(([k,v]) => `${k}=${v}`).join("&");
 
-  const partes = [
-    ...Object.entries(dinamicos).map(([k,v]) => `<span class="dynamic">${k}=${v}</span>`),
-    ...Object.entries(estaticos).map(([k,v]) => `<span class="static">${k}=${encodeURIComponent(v)}</span>`),
-  ];
-  metaUrlActual = BASE + "?" + [
-    ...Object.entries(dinamicos).map(([k,v])=>`${k}=${v}`),
-    ...Object.entries(estaticos).map(([k,v])=>`${k}=${encodeURIComponent(v)}`),
-  ].join("&");
-  document.getElementById("metaUrlPreview").innerHTML = BASE + "?<br>" + partes.join("<br>&amp;");
+  const sp = document.getElementById("metaSitioPreview");
+  const pp = document.getElementById("metaParamsPreview");
+  if (sp) sp.textContent = urlSitioActual;
+  if (pp) pp.textContent = urlParamsActual;
 }
 
-function copiarMetaUrl() {
-  if (!metaUrlActual) { showToast("⚠ Genera un link primero"); return; }
-  navigator.clipboard.writeText(metaUrlActual).then(() => showToast("✅ URL Meta copiada"));
+function copiarMetaSitio() {
+  if (!urlSitioActual) { showToast("⚠ Completa los campos primero"); return; }
+  navigator.clipboard.writeText(urlSitioActual).then(() => showToast("✅ URL de destino copiada"));
+}
+function copiarMetaParams() {
+  if (!urlParamsActual) { showToast("⚠ Completa los campos primero"); return; }
+  navigator.clipboard.writeText(urlParamsActual).then(() => showToast("✅ Parámetros de URL copiados"));
 }
 function verAyudaMeta() { document.getElementById("modalMeta").style.display = "flex"; }
 
@@ -746,7 +756,7 @@ function generar() {
   }
 
   const qs = Object.entries(params).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join("&");
-  linkActual = `${BASE}?${qs}`;
+  linkActual = `${BASE}/?${qs}`;
 
   const display = document.getElementById("linkDisplay");
   display.textContent = linkActual;
