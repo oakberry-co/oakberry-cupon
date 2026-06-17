@@ -440,6 +440,11 @@ document.getElementById("copyBtn").addEventListener("click", ()=>{
   if(!c){ showError("Falta el código en el enlace."); return; }
   const r = await jsonp(new URLSearchParams({accion:"consultarCuponInfluencer", codigo:c}));
   if(!r.ok){ showError(r.mensaje || "Cupón no encontrado."); return; }
+  // Si el cupón aún no está activado, lo mandamos a la landing de activación.
+  if(r.estado === "PendienteActivacion" || r.activado === false){
+    window.location.replace("/activar-cupon?c=" + encodeURIComponent(r.codigo || c));
+    return;
+  }
   render(r);
 })();
 </script>

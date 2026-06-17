@@ -173,6 +173,7 @@
   .badge.disp{ background:#e7f7ee; color:var(--ok); }
   .badge.canj{ background:#efe6fb; color:var(--morado); }
   .badge.venc{ background:#fdeaf0; color:var(--err); }
+  .badge.pend{ background:#fff4cc; color:#7d4f00; }
   .badge.otro{ background:#f1eee5; color:#7a6d50; }
   .hist-empty{
     color:#9b8db0; font-size:.82rem; text-align:center;
@@ -351,7 +352,8 @@
       <div class="codigo-box" id="codigoBox">XXXXXXX</div>
       <div class="vence-row" id="venceRow">Vence el —</div>
       <div id="waBanner" style="display:none; background:#e7f7ee; border:1.5px solid var(--ok); color:#0f6b3a; padding:12px 14px; border-radius:10px; margin-bottom:12px; font-size:.85rem; font-weight:600; text-align:center; line-height:1.45">
-        ✅ WhatsApp oficial enviado desde Oakberry a <span id="waCel">—</span>
+        ✅ WhatsApp de activación enviado desde Oakberry a <span id="waCel">—</span><br>
+        <span style="font-size:.78rem; font-weight:500; color:#0f6b3a; opacity:.85">El influencer tiene 7 días para activarlo + entrar al Club.</span>
       </div>
       <div class="btns">
         <button onclick="copiarCodigo()">🔗 Copiar código</button>
@@ -680,8 +682,9 @@ function compartirWA(){
 }
 
 // ── Historial ──
-function badgeEstado(estado){
+function badgeEstado(estado, activado){
   const e = (estado || "").toLowerCase();
+  if(e === "pendienteactivacion") return '<span class="badge pend" title="El influencer aún no activó su cupón">⏳ Pendiente activar</span>';
   if(e === "disponible") return '<span class="badge disp">Disponible</span>';
   if(e === "canjeado")   return '<span class="badge canj">Canjeado</span>';
   if(e === "vencido")    return '<span class="badge venc">Vencido</span>';
@@ -715,7 +718,7 @@ async function cargarHistorial(){
       <td>${c.celular || "—"}</td>
       <td>${(c.tienda || "—") + (c.ciudad ? " · " + c.ciudad : "")}</td>
       <td>${(c.descuento || "") + (c.producto ? " · " + c.producto : "")}</td>
-      <td>${badgeEstado(c.estado)}</td>
+      <td>${badgeEstado(c.estado, c.activado)}</td>
       <td>${fmtFechaCorta(c.vence)}</td>
     `;
     tr.querySelector(".codigo").addEventListener("click", ()=>{

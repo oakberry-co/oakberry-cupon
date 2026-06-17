@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Oakberry · Activá tu cupón 🫐</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#5F4B8B; --pd:#4a3a6e; --yellow:#F5C842;
+    --green:#27ae60; --red:#e74c3c; --cream:#F5F0E8;
+  }
+  *,*::before,*::after{ margin:0; padding:0; box-sizing:border-box; }
+  body{
+    font-family:'Montserrat',sans-serif; min-height:100vh; padding:24px 16px;
+    background:linear-gradient(rgba(20,10,40,.55), rgba(20,10,40,.65)),
+               url('oakville-bg.jpg') center/cover no-repeat fixed;
+    display:flex; align-items:flex-start; justify-content:center;
+  }
+
+  /* Loading + error fullscreen */
+  #loading,#error{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:18px; color:#fff; z-index:100;
+    background:linear-gradient(rgba(20,10,40,.85),rgba(20,10,40,.9)),
+               url('oakville-bg.jpg') center/cover no-repeat fixed;
+  }
+  #error{ display:none; padding:24px; text-align:center; }
+  .spinner{
+    width:36px; height:36px;
+    border:3px solid rgba(255,255,255,.2); border-top-color:var(--yellow);
+    border-radius:50%; animation:spin .7s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  #loading-text,#error-text{
+    font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+  }
+  #error-text{ font-size:14px; max-width:380px; letter-spacing:1px; line-height:1.6; }
+
+  /* Card principal */
+  .card{
+    background:rgba(255,255,255,.97); border-radius:28px;
+    width:100%; max-width:460px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35); overflow:hidden;
+    animation:fadeIn .4s ease;
+    display:none;
+  }
+  .card.show{ display:block; }
+  @keyframes fadeIn{
+    from{ opacity:0; transform:translateY(12px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  /* Header */
+  .card-header{
+    background:var(--primary); padding:28px 26px 24px;
+    text-align:center; position:relative; overflow:hidden;
+  }
+  .card-header::before{
+    content:'🫐'; position:absolute; font-size:160px; opacity:.10;
+    top:-32px; right:-28px; transform:rotate(15deg); pointer-events:none;
+  }
+  .brand{
+    font-size:24px; font-weight:900; color:#fff;
+    text-transform:uppercase; letter-spacing:3px;
+    position:relative; z-index:2;
+  }
+  .brand-sub{
+    font-size:10px; font-weight:700; color:rgba(255,255,255,.6);
+    text-transform:uppercase; letter-spacing:2.5px; margin-top:4px;
+    position:relative; z-index:2;
+  }
+  .hero-msg{
+    margin-top:16px; font-size:18px; font-weight:900; color:#fff;
+    line-height:1.3; position:relative; z-index:2;
+  }
+  .hero-msg .heart{ color:var(--yellow); }
+
+  .body{ padding:24px 26px 22px; }
+
+  /* Sección 1: Tu regalo */
+  .sec-title{
+    font-size:11px; font-weight:900; color:var(--primary);
+    text-transform:uppercase; letter-spacing:2px;
+    text-align:center; margin:6px 0 14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .sec-title::before, .sec-title::after{
+    content:''; flex:1; height:1.5px;
+    background:linear-gradient(to right, transparent, #d8cdf0, transparent);
+  }
+  .gift-box{
+    background:linear-gradient(135deg, #faf6ef, #fff);
+    border:2px dashed var(--yellow); border-radius:14px;
+    padding:16px 18px; margin-bottom:18px;
+  }
+  .gift-row{
+    display:flex; align-items:flex-start; gap:10px;
+    padding:5px 0; font-size:13px; font-weight:700; color:#2b2b2b;
+    line-height:1.5;
+  }
+  .gift-row strong{ color:var(--primary); }
+  .gift-row span.label{
+    font-size:9px; font-weight:900; color:#999;
+    text-transform:uppercase; letter-spacing:1.5px;
+    min-width:60px; padding-top:3px;
+  }
+
+  /* Sección 2: Club */
+  .club-card{
+    background:linear-gradient(135deg, #5F4B8B, #3d2b5e);
+    border-radius:18px; padding:22px 22px 20px; margin-bottom:20px;
+    color:#fff; position:relative; overflow:hidden;
+  }
+  .club-card::before{
+    content:'⭐'; position:absolute; font-size:110px; opacity:.06;
+    bottom:-20px; right:-20px; pointer-events:none;
+  }
+  .club-title{
+    font-size:14px; font-weight:900; color:var(--yellow);
+    text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;
+    position:relative; z-index:2;
+  }
+  .club-intro{
+    font-size:13px; font-weight:600; color:rgba(255,255,255,.9);
+    line-height:1.5; margin-bottom:14px; position:relative; z-index:2;
+  }
+  .club-perks{ display:flex; flex-direction:column; gap:8px; position:relative; z-index:2; }
+  .club-perk{
+    display:flex; align-items:center; gap:10px;
+    font-size:12px; font-weight:700; color:#fff;
+  }
+  .club-perk .icon{
+    width:28px; height:28px; flex-shrink:0;
+    background:rgba(245,200,66,.2); border:1.5px solid var(--yellow);
+    border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+  }
+
+  /* Sección 3: Form de activación */
+  label{
+    display:block; font-size:10px; font-weight:800; color:var(--primary);
+    text-transform:uppercase; letter-spacing:1.5px;
+    margin:14px 0 5px;
+  }
+  label .opt{ color:#a89ec0; font-weight:600; text-transform:none; letter-spacing:0; margin-left:4px; }
+  input[type=text], input[type=email], input[type=number], input[type=date], select{
+    width:100%; padding:12px 14px; border:1.6px solid #e3dcce;
+    border-radius:10px; font-family:inherit; font-size:14px;
+    background:#fff; color:#2b2b2b; outline:none;
+  }
+  input:focus, select:focus{ border-color:var(--primary); }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  /* Checkboxes TyC */
+  .check{
+    display:flex; align-items:flex-start; gap:10px;
+    background:#faf6ef; border:1.5px solid #e6dfc8;
+    border-radius:12px; padding:14px 14px; margin-top:12px;
+    cursor:pointer; transition:border-color .18s, background .18s;
+  }
+  .check.checked{ border-color:var(--green); background:#eafaf1; }
+  .check input{ margin-top:3px; cursor:pointer; flex-shrink:0; width:18px; height:18px; }
+  .check label{
+    margin:0; font-size:12px; font-weight:700; color:#444;
+    line-height:1.5; cursor:pointer; text-transform:none; letter-spacing:0;
+    text-align:left;
+  }
+  .check label a{ color:var(--primary); }
+  .check.required label::after{ content:" *"; color:var(--red); }
+
+  .btn{
+    width:100%; padding:16px; margin-top:18px;
+    background:var(--primary); color:#fff;
+    border:0; border-radius:12px; font-family:inherit;
+    font-size:14px; font-weight:900; cursor:pointer;
+    text-transform:uppercase; letter-spacing:1.5px;
+    box-shadow:0 6px 20px rgba(95,75,139,.35);
+    transition:background .18s, transform .12s;
+  }
+  .btn:hover:not(:disabled){ background:var(--pd); transform:translateY(-1px); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+    background:var(--red); color:#fff; padding:11px 18px; border-radius:20px;
+    font-size:12px; font-weight:700; opacity:0; transition:opacity .25s;
+    pointer-events:none; z-index:200; max-width:90vw; text-align:center;
+  }
+  .toast.show{ opacity:1; }
+  .toast.ok{ background:var(--green); }
+
+  /* Success screen */
+  #success{ display:none; }
+  #success.show{ display:block; animation:fadeIn .4s ease; }
+  .success-hero{
+    text-align:center; padding:34px 26px 22px;
+    background:linear-gradient(135deg, #eafaf1, #f5fff7);
+  }
+  .success-hero .emoji{ font-size:54px; line-height:1; margin-bottom:10px; }
+  .success-hero .title{
+    font-size:18px; font-weight:900; color:#1f7a3c;
+    text-transform:uppercase; letter-spacing:1px; line-height:1.2;
+  }
+  .success-hero .sub{
+    font-size:13px; font-weight:700; color:#2b2b2b;
+    margin-top:8px; line-height:1.5;
+  }
+  .success-code{
+    background:linear-gradient(135deg, #faf6ef, #fff);
+    border:2px dashed var(--yellow); border-radius:14px;
+    padding:22px 12px 18px; text-align:center; margin:18px 24px;
+  }
+  .success-code .codigo{
+    font-size:30px; font-weight:900; color:var(--primary);
+    letter-spacing:4px; font-family:'Montserrat',monospace;
+  }
+  .success-actions{ padding:0 24px 26px; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div id="loading-text">Cargando tu cupón…</div>
+</div>
+
+<div id="error">
+  <div style="font-size:48px; line-height:1; margin-bottom:8px">😕</div>
+  <div id="error-text">Cupón no encontrado.</div>
+</div>
+
+<div class="card" id="card">
+  <!-- HEADER -->
+  <div class="card-header">
+    <div class="brand">Oakberry</div>
+    <div class="brand-sub">Activación de cupón</div>
+    <div class="hero-msg" id="heroMsg">¡Hola! 💜<br>Tenés un regalo</div>
+  </div>
+
+  <div class="body">
+    <!-- SECCIÓN 1: TU REGALO -->
+    <div class="sec-title">🎁 Tu regalo</div>
+    <div class="gift-box">
+      <div class="gift-row"><span class="label">Reciben</span><span id="g-oferta">—</span></div>
+      <div class="gift-row"><span class="label">Tienda</span><span id="g-tienda">—</span></div>
+      <div class="gift-row"><span class="label">Vence</span><span id="g-vence">—</span></div>
+    </div>
+
+    <!-- SECCIÓN 2: CLUB -->
+    <div class="sec-title">⭐ Club de Creadores</div>
+    <div class="club-card">
+      <div class="club-title">Bienvenido(a) al Club Oakberry</div>
+      <div class="club-intro">Activá tu cupón y entrás automáticamente a nuestro Club de Creadores — un programa nuevo donde te llegan cosas geniales solo por ser parte.</div>
+      <div class="club-perks">
+        <div class="club-perk"><div class="icon">👕</div>Merch exclusivo del Club</div>
+        <div class="club-perk"><div class="icon">🫐</div>Productos y bowls de regalo</div>
+        <div class="club-perk"><div class="icon">🥄</div>Acceso anticipado a toppings nuevos</div>
+        <div class="club-perk"><div class="icon">🏆</div>Premios y sorpresas por ser del Club</div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 3: FORM -->
+    <div class="sec-title">✨ Contanos un poco de vos</div>
+
+    <div class="row2">
+      <div>
+        <label>Talla de merch</label>
+        <select id="talla">
+          <option value="">—</option>
+          <option>XS</option><option>S</option><option selected>M</option>
+          <option>L</option><option>XL</option><option>XXL</option>
+        </select>
+      </div>
+      <div>
+        <label>Ciudad <span class="opt">(opcional)</span></label>
+        <input type="text" id="ciudadCreador" placeholder="ej: Bogotá">
+      </div>
+    </div>
+
+    <label>Tipo de contenido <span class="opt">(opcional)</span></label>
+    <select id="categoria">
+      <option value="">—</option>
+      <option>Lifestyle</option>
+      <option>Food &amp; Beverages</option>
+      <option>Fitness &amp; Wellness</option>
+      <option>Belleza</option>
+      <option>Viajes</option>
+      <option>Moda</option>
+      <option>Familia</option>
+      <option>Entretenimiento</option>
+      <option>Otro</option>
+    </select>
+
+    <label>Email <span class="opt">(opcional, para newsletters del Club)</span></label>
+    <input type="email" id="email" placeholder="ej: hola@email.com" autocomplete="email">
+
+    <div class="row2">
+      <div>
+        <label>Fecha de cumpleaños <span class="opt">(opcional)</span></label>
+        <input type="date" id="fechaNac">
+      </div>
+      <div>
+        <label># seguidores IG <span class="opt">(opcional)</span></label>
+        <input type="number" id="seguidoresIg" min="0" placeholder="ej: 15000">
+      </div>
+    </div>
+
+    <label>@ TikTok <span class="opt">(opcional)</span></label>
+    <input type="text" id="tiktok" placeholder="ej: tunick" autocomplete="off">
+
+    <!-- TyC -->
+    <div class="check required" id="tycRow">
+      <input type="checkbox" id="tyc">
+      <label for="tyc">Acepto los <a href="/tyc/influencers" target="_blank">Términos y Condiciones</a> del Programa Influencers y el Club de Creadores Oakberry.</label>
+    </div>
+
+    <div class="check" id="optRow">
+      <input type="checkbox" id="optIn" checked>
+      <label for="optIn">Sí, autorizo a Oakberry a contactarme por WhatsApp y correo con novedades del Club, promociones y nuevos productos. Puedo darme de baja cuando quiera.</label>
+    </div>
+
+    <button class="btn" id="activarBtn" disabled>🎉 Activar mi cupón</button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="card" id="success">
+  <div class="success-hero">
+    <div class="emoji">🎉</div>
+    <div class="title">¡Cupón activado!</div>
+    <div class="sub">Ya estás dentro del Club de Creadores Oakberry. <strong>Mostrá este código en caja</strong> cuando vayas:</div>
+  </div>
+  <div class="success-code">
+    <div class="codigo" id="successCodigo">—</div>
+  </div>
+  <div class="success-actions">
+    <a href="#" id="verCuponLink" style="text-decoration:none">
+      <button class="btn" style="background:var(--yellow); color:#5d4200; margin-top:0">📋 Ver detalles de mi cupón</button>
+    </a>
+  </div>
+</div>
+
+<div class="toast" id="toast">—</div>
+
+<script>
+const API = "https://api.oakberry-cupones.com/";
+
+function jsonp(params){
+  return new Promise((resolve)=>{
+    const cb = "__cb"+Math.random().toString(36).slice(2);
+    const to = setTimeout(()=>{ cleanup(); resolve({ok:false, mensaje:"timeout"}); }, 15000);
+    function cleanup(){
+      try{ delete window[cb]; }catch(e){}
+      if(s.parentNode) s.parentNode.removeChild(s);
+      clearTimeout(to);
+    }
+    window[cb] = (r)=>{ cleanup(); resolve(r||{}); };
+    params.set("callback", cb);
+    const s = document.createElement("script");
+    s.src = API + "?" + params.toString();
+    s.onerror = ()=>{ cleanup(); resolve({ok:false, mensaje:"network"}); };
+    document.body.appendChild(s);
+  });
+}
+
+function getCodigo(){
+  const url = new URL(window.location.href);
+  return (url.searchParams.get("c") || url.searchParams.get("codigo") || "").trim().toUpperCase();
+}
+
+function showError(msg){
+  document.getElementById("loading").style.display = "none";
+  const e = document.getElementById("error");
+  e.style.display = "flex";
+  document.getElementById("error-text").textContent = msg;
+}
+
+function showCard(){
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("card").classList.add("show");
+}
+
+function showSuccess(codigo){
+  document.getElementById("card").classList.remove("show");
+  document.getElementById("card").style.display = "none";
+  document.getElementById("successCodigo").textContent = codigo;
+  document.getElementById("verCuponLink").href = "/mi-cupon?c=" + encodeURIComponent(codigo);
+  document.getElementById("success").classList.add("show");
+}
+
+function toast(msg, ok){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show " + (ok ? "ok" : "");
+  setTimeout(()=>{ t.className = "toast"; }, 3500);
+}
+
+function primerNombre(n){ return (n||"").trim().split(" ")[0] || ""; }
+
+function render(d){
+  const nom = primerNombre(d.nombre);
+  document.getElementById("heroMsg").innerHTML =
+    (nom ? `¡Hola <span class="heart">${nom}</span>! 💜<br>` : "¡Hola! 💜<br>") + "Tenés un regalo";
+
+  document.getElementById("g-oferta").innerHTML =
+    `<strong>${d.descuento || ""}</strong> en ${d.productosTexto || d.producto || "—"}`;
+  document.getElementById("g-tienda").innerHTML =
+    `<strong>${d.tienda || "—"}</strong>${d.ciudad ? " · " + d.ciudad : ""}`;
+  document.getElementById("g-vence").textContent = d.fechaVenceHumano || "—";
+
+  showCard();
+}
+
+// ── TyC checkbox enable button ──
+function toggleCheck(rowId, inputId){
+  const row = document.getElementById(rowId);
+  const input = document.getElementById(inputId);
+  row.classList.toggle("checked", input.checked);
+}
+document.getElementById("tycRow").addEventListener("click", e=>{
+  if(e.target.tagName !== "A" && e.target.tagName !== "INPUT"){
+    const inp = document.getElementById("tyc");
+    inp.checked = !inp.checked;
+    inp.dispatchEvent(new Event("change"));
+  }
+});
+document.getElementById("optRow").addEventListener("click", e=>{
+  if(e.target.tagName !== "INPUT"){
+    const inp = document.getElementById("optIn");
+    inp.checked = !inp.checked;
+    inp.dispatchEvent(new Event("change"));
+  }
+});
+document.getElementById("tyc").addEventListener("change", ()=>{
+  toggleCheck("tycRow","tyc");
+  document.getElementById("activarBtn").disabled = !document.getElementById("tyc").checked;
+});
+document.getElementById("optIn").addEventListener("change", ()=>toggleCheck("optRow","optIn"));
+toggleCheck("optRow","optIn");
+
+// ── Submit ──
+document.getElementById("activarBtn").addEventListener("click", async ()=>{
+  const codigo = getCodigo();
+  const tyc = document.getElementById("tyc").checked;
+  if(!tyc){ toast("Debes aceptar los términos para activar"); return; }
+  const optIn = document.getElementById("optIn").checked;
+  const talla = document.getElementById("talla").value;
+  const categoria = document.getElementById("categoria").value;
+  const email = document.getElementById("email").value.trim();
+  const fechaNac = document.getElementById("fechaNac").value;
+  const seguidoresIg = document.getElementById("seguidoresIg").value;
+  const tiktok = document.getElementById("tiktok").value.trim().replace(/^@+/, "");
+
+  const btn = document.getElementById("activarBtn");
+  btn.disabled = true; btn.textContent = "Activando…";
+
+  const r = await jsonp(new URLSearchParams({
+    accion: "activarCuponInfluencer",
+    codigo,
+    tycAceptados: "true",
+    optInMarketing: optIn ? "true" : "false",
+    talla, categoria, emailCreador: email,
+    fechaNacimiento: fechaNac,
+    seguidoresIg, tiktokHandle: tiktok,
+  }));
+
+  btn.disabled = false; btn.textContent = "🎉 Activar mi cupón";
+
+  if(!r.ok){
+    toast(r.mensaje || "No se pudo activar");
+    return;
+  }
+  showSuccess(r.codigo || codigo);
+});
+
+// ── init ──
+(async function init(){
+  const c = getCodigo();
+  if(!c){ showError("Falta el código en el enlace."); return; }
+  const r = await jsonp(new URLSearchParams({accion:"consultarCuponInfluencer", codigo:c}));
+  if(!r.ok){
+    showError(r.mensaje || "Cupón no encontrado.");
+    return;
+  }
+  // Si ya está activado → mostramos directo el success screen.
+  if(r.activado){
+    render(r);  // por consistencia visual
+    setTimeout(()=>showSuccess(r.codigo), 100);
+    return;
+  }
+  // Si está canjeado o vencido, error claro.
+  if(r.estado === "Canjeado"){
+    showError("Este cupón ya fue canjeado en tienda.");
+    return;
+  }
+  if(r.estado === "Vencido"){
+    showError("Este cupón expiró. Contactá al equipo de Oakberry para emitir uno nuevo.");
+    return;
+  }
+  render(r);
+})();
+</script>
+</body>
+</html>
