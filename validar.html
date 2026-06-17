@@ -550,6 +550,14 @@
       <div class="err-action">Tu cupón solo es válido en la tienda donde fue generado (programa Influencers).</div>
     </div>
 
+    <div class="err-card type-horario" id="errSinActivar">
+      <span class="err-icon">⏳</span>
+      <div class="err-reason">Cupón sin activar</div>
+      <div class="err-detail">Este cupón de Influencer todavía no fue activado por su dueño en el celular.</div>
+      <div class="err-action-label">Qué decirle al cliente</div>
+      <div class="err-action">Pídele que revise su WhatsApp de Oakberry, entre al enlace que recibió y acepte los términos para activar su cupón. Después puede volver y lo canjeás sin problema.</div>
+    </div>
+
     <div class="err-card type-horario" id="errHorario">
       <span class="err-icon">⏰</span>
       <div class="err-reason">Fuera del horario permitido</div>
@@ -1031,7 +1039,7 @@ function mostrarResultado(ok, titulo, filas, opts) {
 
 function ocultarTodosErrores() {
   document.getElementById("adidasNoActivado")?.classList.remove("show");
-  ["errCanjeado","errVencido","errCiudad","errTienda","errHorario","errFormato","errNoExiste"].forEach(id => {
+  ["errCanjeado","errVencido","errCiudad","errTienda","errSinActivar","errHorario","errFormato","errNoExiste"].forEach(id => {
     document.getElementById(id).classList.remove("show");
   });
   document.getElementById("resultado").className = "result";
@@ -1057,6 +1065,10 @@ function mostrarError(mensaje) {
     if (match) document.getElementById("errTiendaDetalle").textContent =
       "Este cupón solo aplica en: " + match[1].trim() + ". No se puede canjear en otra tienda.";
     document.getElementById("errTienda").classList.add("show");
+  } else if (mensaje.includes("sin activar") || mensaje.includes("Cupón sin activar")) {
+    // canjear_influencer responde con "Cupón sin activar\n..." cuando el
+    // influencer aún no entró a /activar-cupon (programa v2).
+    document.getElementById("errSinActivar").classList.add("show");
   } else if (mensaje.includes("fuera de horario") || mensaje.includes("Cupón fuera")) {
     const match = mensaje.match(/Solo válido en:\n(.+)/s);
     if (match) {
