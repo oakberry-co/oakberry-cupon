@@ -353,6 +353,8 @@ const esSorteo = P.modo === "sorteo";
 // ── LINK DE CAMPAÑA (URL completa que originó este cupón) ─────
 // Se captura al cargar la página — incluye todos los parámetros UTM
 const LINK_CAMP = window.location.href;
+// eventID único por registro — deduplica el Lead (píxel navegador + CAPI servidor) en Meta
+let _leadEventId = "";
 
 // ── MODO DEVELOPER (solo para pruebas internas) ───────────────
 // Agrega ?dev=dzuluaga a cualquier link para saltar todas las validaciones
@@ -742,10 +744,14 @@ async function solicitar() {
   const ahora    = new Date();
   const vence    = new Date(ahora.getTime() + P.vigencia * 3_600_000);
   const producto = esSorteo ? P.premio : P.producto;
+  _leadEventId = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : (Date.now().toString(36) + Math.random().toString(36).slice(2));
 
   try {
     const res = await fetchGETSafe({
       accion:      "registrarCupon",
+      eventId:     _leadEventId,        // dedup Lead píxel↔CAPI
       nombre, celular,
       ciudad:      P.ciudad,
       tienda:      P.tienda,
@@ -826,7 +832,7 @@ function mostrarMomentos(momentosStr) {
 
 function mostrarNuevo({ codigo, nombre, vence }) {
   show("stateSuccess");
-  try { fbq('track', 'Lead'); } catch(e) {}
+  try { fbq('track', 'Lead', {}, { eventID: _leadEventId }); } catch(e) {}
   document.getElementById("outCode").textContent     = codigo;
   document.getElementById("outNombre").textContent   = "Hola, " + nombre.split(" ")[0] + " 👋";
   document.getElementById("outValidity").textContent = "Válido hasta: " + fmt(vence);
