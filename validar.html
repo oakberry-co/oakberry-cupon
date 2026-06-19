@@ -406,12 +406,13 @@
     </div>
 
     <div class="loopy-banner" id="loopyBanner">
-      <div class="loopy-banner-title">⭐ ¡Invítalo a Loopy ahora!</div>
+      <div class="loopy-banner-title">⭐ ¡Descarga la tarjeta Loopy AHORA!</div>
       <div class="loopy-banner-body">
-        Este cliente no tiene tarjeta Loopy. Es el momento perfecto para inscribirlo — acumula sellos y gana productos gratis.
+        Sin tarjeta no puedes poner el sello. Antes de entregar el producto:
         <div class="loopy-steps">
-          <div class="loopy-step"><span class="loopy-step-num">1</span><span>Invítalo a escanear el código QR de Loopy</span></div>
-          <div class="loopy-step"><span class="loopy-step-num">2</span><span>Cuéntale: con 10 sellos gana un producto gratis 🫐</span></div>
+          <div class="loopy-step"><span class="loopy-step-num">1</span><span>Que escanee el QR de Loopy y descargue la tarjeta</span></div>
+          <div class="loopy-step"><span class="loopy-step-num">2</span><span>Ponle el sello de esta compra</span></div>
+          <div class="loopy-step"><span class="loopy-step-num">3</span><span>Cuéntale: con 10 sellos gana un producto gratis 🫐</span></div>
         </div>
       </div>
     </div>
@@ -426,6 +427,20 @@
         <br>· Si <strong>ya vino antes</strong> → marca <em>"Ya nos conoce"</em>.
         <br>· Si es la <strong>primera vez</strong> y NO tiene Loopy → marca <em>"No tiene"</em> y registra su tarjeta en caja.
       </div>
+    </div>
+
+    <div id="selloGate" style="background:#fff4e6;border:2px solid #e8593c;border-radius:14px;padding:16px;margin-top:14px;">
+      <div style="font-size:14px;font-weight:900;color:#e8593c;margin-bottom:8px;">🚨 ANTES DE ENTREGAR EL PRODUCTO</div>
+      <div style="font-size:13px;color:#3d2b5e;line-height:1.6;">
+        El cliente <strong>DEBE</strong> tener tarjeta Loopy <strong>con el sello</strong> de esta compra:
+        <br>• <strong>Sin tarjeta</strong> → que la <strong>descargue</strong> (QR) ahora mismo.
+        <br>• <strong>Con tarjeta</strong> → <strong>ponle el sello</strong>.
+        <br><strong style="color:#e8593c;">Sin sello, NO entregues el producto.</strong>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;font-weight:700;color:#3d2b5e;cursor:pointer;">
+        <input type="checkbox" id="selloConfirm" onchange="setSello(this.checked)" style="width:20px;height:20px;cursor:pointer;flex-shrink:0;">
+        <span>✅ Confirmo: tiene tarjeta Loopy y le puse el sello</span>
+      </label>
     </div>
     </div><!-- /form-section -->
 
@@ -604,6 +619,7 @@ const REACT_API = "https://oakberry-reactivacion-api-664413392517.us-central1.ru
 
 let _nuevo = "";
 let _loopy = "";
+let _sello = false;
 
 function setNuevo(val) {
   _nuevo = val;
@@ -618,6 +634,10 @@ function setLoopy(val) {
   document.getElementById("loopy-no").className = "toggle-btn" + (val === "NO" ? " selected-no" : "");
   document.getElementById("loopyBanner").classList.toggle("show", val === "NO");
   chequearPerfilInconsistente();
+}
+
+function setSello(val) {
+  _sello = val;
 }
 
 function chequearPerfilInconsistente() {
@@ -731,6 +751,7 @@ async function validar() {
   }
   if (!_nuevo) return mostrarResultado(false, "Indica si es la primera vez del cliente", []);
   if (!_loopy) return mostrarResultado(false, "Indica si el cliente tiene tarjeta Loopy", []);
+  if (!_sello) return mostrarResultado(false, "Antes de redimir: confirma que el cliente tiene tarjeta Loopy y le pusiste el sello", []);
 
   const perfilCliente = (_nuevo === "SI" ? "Cliente nuevo" : "Ya nos conocía")
                       + " · "
@@ -1091,6 +1112,9 @@ function resetForm() {
   ocultarTodosErrores();
   document.getElementById("postLoopyBanner").classList.remove("show");
   document.getElementById("loopyBanner").classList.remove("show");
+  _sello = false;
+  const _sc = document.getElementById("selloConfirm");
+  if (_sc) _sc.checked = false;
   document.getElementById("formSection").classList.remove("hidden");
   document.getElementById("mainBtn").style.display = "block";
   document.getElementById("resetBtn").style.display = "none";
