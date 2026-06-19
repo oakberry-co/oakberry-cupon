@@ -114,6 +114,9 @@
       <div><label>Inicio del programa (opcional)</label><input id="fechaInicio" type="date"></div>
       <div><label>Fin del programa (opcional)</label><input id="fechaFin" type="date"></div>
     </div>
+    <label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:.84rem;font-weight:600;color:var(--morado)">
+      <input type="checkbox" id="esControl" style="width:auto"> Grupo de control (sin misión ni recordatorios — para medir incrementalidad)
+    </label>
     <p class="muted">El "campeón" reparte el QR a sus compañeros. Puedes aplicar la estrategia a varias tiendas. Fuera de las fechas, los canjes se bloquean.</p>
   </div>
 
@@ -141,13 +144,16 @@
     </div>
 
     <div id="escaleraWrap" style="display:none">
-      <label>Escalera de descuento (sube con cada compra)</label>
+      <label>🎯 Misión "3 en 45" — la compra 1 es la bienvenida; define compra 2, 3…</label>
       <div id="escalera"></div>
       <button type="button" class="addrung" id="addRung">+ Agregar paso</button>
+      <div class="row" style="margin-top:12px">
+        <div><label>Días para completar la misión</label><input id="misionDias" type="number" min="7" value="45"></div>
+      </div>
       <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:.84rem;font-weight:600;color:var(--morado)">
-        <input type="checkbox" id="escaleraLuego" checked style="width:auto"> Al agotar la escalera, seguir con los descuentos por día (calendario)
+        <input type="checkbox" id="escaleraLuego" checked style="width:auto"> Al completar la misión, seguir con los descuentos por día (calendario)
       </label>
-      <p class="muted">Compra 1 → X%, compra 2 → Y%… Si desmarcas la casilla, al terminar la escalera el cliente ya no recibe más beneficios.</p>
+      <p class="muted">Meta: que completen la escalera dentro de la ventana (ej. 3 compras en 45 días). El último paso puede ser <b>🎁 Bowl GRATIS</b> como premio de cierre. Fuera de la ventana, ya no aplica la escalera.</p>
     </div>
 
     <label>Calendario por día</label>
@@ -315,12 +321,12 @@ async function cargarValle(tienda){
 }
 
 // ── Modo escalado (escalera por compra) ──
-const ESC_PCTS=[15,25,30,35,40];
+const ESC_OPTS=[{v:15,l:"15% OFF"},{v:25,l:"25% OFF"},{v:30,l:"30% OFF"},{v:35,l:"35% OFF"},{v:40,l:"40% OFF"},{v:100,l:"🎁 Bowl 7oz GRATIS"}];
 let modoSel="calendario";
-function renumRungs(){ [...document.querySelectorAll("#escalera .rung")].forEach((r,i)=>r.querySelector(".rnum").textContent="Compra #"+(i+1)); }
+function renumRungs(){ [...document.querySelectorAll("#escalera .rung")].forEach((r,i)=>r.querySelector(".rnum").textContent="Compra #"+(i+2)); }
 function addRung(pct){
   const cont=document.getElementById("escalera");
-  const opts=ESC_PCTS.map(p=>`<option value="${p}" ${p==pct?"selected":""}>${p}% OFF</option>`).join("");
+  const opts=ESC_OPTS.map(o=>`<option value="${o.v}" ${o.v==pct?"selected":""}>${o.l}</option>`).join("");
   const row=document.createElement("div"); row.className="rung";
   row.innerHTML=`<span class="rnum"></span><select class="rsel">${opts}</select><span class="rdel">✕</span>`;
   row.querySelector(".rdel").onclick=()=>{ row.remove(); renumRungs(); };
@@ -333,7 +339,7 @@ document.querySelectorAll("#modoToggle .md").forEach(c=>c.addEventListener("clic
   document.getElementById("escaleraWrap").style.display = modoSel==="escalado"?"block":"none";
 }));
 document.getElementById("addRung").onclick=()=>addRung(30);
-addRung(15); addRung(25); addRung(30);   // escalera por defecto
+addRung(30); addRung(100);   // misión por defecto: compra 2 = 30%, compra 3 = Bowl GRATIS
 
 function recogerConfig(){
   const cfg=[];
@@ -375,7 +381,9 @@ document.getElementById("generar").addEventListener("click", async ()=>{
      fechaInicio:document.getElementById("fechaInicio").value,
      fechaFin:document.getElementById("fechaFin").value,
      modo:modoSel, escalera:JSON.stringify(escalera),
-     escaleraLuego:document.getElementById("escaleraLuego").checked?"1":"0"}));
+     escaleraLuego:document.getElementById("escaleraLuego").checked?"1":"0",
+     misionDias:document.getElementById("misionDias").value||"45",
+     esControl:document.getElementById("esControl").checked?"1":"0"}));
   if(!e.ok){ toast("Error creando empresa: "+(e.mensaje||""),"err"); btn.disabled=false; btn.textContent=lbl; return; }
   // 2. guardar la estrategia en cada tienda seleccionada
   let totalDias=0;
