@@ -372,7 +372,7 @@
     <div class="form-section" id="formSection">
     <div class="field">
       <label>Código del cupón</label>
-      <input type="text" id="codigo" placeholder="Código del cupón" maxlength="10" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+      <input type="text" id="codigo" placeholder="Código del cupón" maxlength="10" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');toggleSelloGate(this.value)">
     </div>
     <div class="field">
       <label>Ciudad</label>
@@ -438,8 +438,8 @@
         <br><strong style="color:#e8593c;">Sin sello, NO entregues el producto.</strong>
       </div>
       <label style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;font-weight:700;color:#3d2b5e;cursor:pointer;">
-        <input type="checkbox" id="selloConfirm" onchange="setSello(this.checked)" style="width:20px;height:20px;cursor:pointer;flex-shrink:0;">
-        <span>✅ Confirmo: tiene tarjeta Loopy y le puse el sello</span>
+        <input type="checkbox" id="selloConfirm" onchange="setSello(this.checked)" style="width:22px;height:22px;cursor:pointer;flex-shrink:0;accent-color:#e8593c;">
+        <span>Marca aquí: el cliente tiene tarjeta Loopy y le puse el sello</span>
       </label>
     </div>
     </div><!-- /form-section -->
@@ -640,6 +640,13 @@ function setSello(val) {
   _sello = val;
 }
 
+// El gate de sello Loopy solo aplica a cupones de adquisición; se oculta para RET/BDY.
+function toggleSelloGate(codigo) {
+  const esReact = /^(RET|BDY)/.test(codigo || "");
+  const g = document.getElementById("selloGate");
+  if (g) g.style.display = esReact ? "none" : "";
+}
+
 function chequearPerfilInconsistente() {
   // Si el cliente es NUEVO y ya tiene Loopy → contradicción
   // (si nunca había venido, ¿cómo tiene tarjeta Loopy?)
@@ -751,7 +758,9 @@ async function validar() {
   }
   if (!_nuevo) return mostrarResultado(false, "Indica si es la primera vez del cliente", []);
   if (!_loopy) return mostrarResultado(false, "Indica si el cliente tiene tarjeta Loopy", []);
-  if (!_sello) return mostrarResultado(false, "Antes de redimir: confirma que el cliente tiene tarjeta Loopy y le pusiste el sello", []);
+  const esReactivacion = /^(RET|BDY)/.test(codigo);
+  // El gate de sello Loopy aplica SOLO a cupones de adquisición (no a RET/BDY de reactivación).
+  if (!esReactivacion && !_sello) return mostrarResultado(false, "⚠️ Marca la casilla 'Confirmo: tarjeta Loopy + sello' para poder validar", []);
 
   const perfilCliente = (_nuevo === "SI" ? "Cliente nuevo" : "Ya nos conocía")
                       + " · "
@@ -762,9 +771,7 @@ async function validar() {
   btn.disabled = true;
 
   // ── Routing por prefijo: códigos RET/BDY van DIRECTO al endpoint Reactivación
-  //    Esto evita que Apps Script (Adquisición) rechace 7-chars como "inválido"
-  //    y bloquee el fallback.
-  const esReactivacion = /^(RET|BDY)/.test(codigo);
+  //    (esReactivacion ya se calculó arriba).
   if (esReactivacion) {
     try {
       const reactRes = await fetch(
