@@ -23,6 +23,7 @@
     { "source": "/dashboard",         "destination": "https://dashboard.oakberry-cupones.com/dashboard/" },
     { "source": "/dashboard/:path*",  "destination": "https://dashboard.oakberry-cupones.com/dashboard/:path*" },
     { "source": "/adidas-activar", "destination": "/adidas-activar.html"      },
+    { "source": "/concurso-api",   "destination": "https://us-central1-project-oakberry-colombia-dw.cloudfunctions.net/concurso-api" },
     { "source": "/concurso",       "destination": "/concurso-v2.html"         },
     { "source": "/reglamento",     "destination": "/reglamento-concurso.html" },
     { "source": "/react",          "destination": "/react.html"               },
