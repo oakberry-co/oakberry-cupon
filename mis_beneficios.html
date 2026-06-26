@@ -29,6 +29,19 @@
   .esc .p{ background:var(--morado); color:#fff; font-weight:700; font-size:.74rem; padding:3px 9px; border-radius:10px; }
   .how{ background:#fff8e6; border:1.5px solid var(--amarillo); border-radius:12px; padding:13px 15px;
         margin-top:16px; font-size:.82rem; line-height:1.5; }
+  .perm{ background:var(--beige); border-radius:12px; padding:11px 13px; margin-top:12px;
+         font-size:.78rem; line-height:1.45; color:var(--morado-osc); }
+  .vig{ text-align:center; font-size:.82rem; color:var(--morado); font-weight:700; margin:10px 0 2px; }
+  .rec{ padding:6px 2px; }
+  .rec-msg{ background:#fff8e6; border:1.5px solid var(--amarillo); border-radius:12px;
+            padding:11px 13px; margin-bottom:16px; font-size:.82rem; line-height:1.4; }
+  .rec input{ width:100%; padding:13px 14px; font-size:1rem; font-family:inherit;
+              border:2px solid #e3dcf0; border-radius:12px; margin-bottom:10px; outline:none; }
+  .rec input:focus{ border-color:var(--morado); }
+  .rec button{ width:100%; padding:13px; font-size:.95rem; font-weight:800; font-family:inherit;
+               color:var(--morado-osc); background:var(--amarillo); border:0; border-radius:12px; cursor:pointer; }
+  .rec button:disabled{ opacity:.6; cursor:default; }
+  .rec-err{ color:#c0392b; font-size:.8rem; margin-top:8px; min-height:1em; }
   .loading{ text-align:center; padding:40px; color:#8a7fa3; }
   .foot{ text-align:center; font-size:.66rem; color:#a89ec0; padding:12px; }
 </style>
@@ -55,13 +68,18 @@ function jsonp(params){ return new Promise(res=>{ const cb="cb"+Math.random().to
   window[cb]=r=>{cl();res(r||{});}; params.set("callback",cb); s.src=API+"?"+params.toString();
   s.onerror=()=>{cl();res({});}; document.body.appendChild(s); }); }
 
-(async function(){
-  const r=await jsonp(new URLSearchParams({accion:"misBeneficios", empresa:EMPRESA, codigo:CODIGO}));
+function fmtFecha(iso){ if(!iso) return ""; const p=String(iso).slice(0,10).split("-");
+  return p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : iso; }
+
+function render(r){
   const body=document.getElementById("body");
-  if(!r.ok){ body.innerHTML="<div class='loading'>No encontramos tus beneficios. Revisa tu link.</div>"; return; }
   let h="";
-  if(r.codigo){ h+=`<p style="font-size:.8rem;color:#8a7fa3">Tu código:</p><div class="code">${r.codigo}</div>`; }
+  if(r.codigo){
+    h+=`<p style="font-size:.8rem;color:#8a7fa3">Tu código:</p><div class="code">${r.codigo}</div>`;
+    h+=`<div class="perm">🔒 <b>Este es tu código fijo</b> — guárdalo, es el mismo siempre. Lo usas en <b>cada visita</b> mientras el programa esté activo (no se gasta con cada compra).</div>`;
+  }
   h+=`<div class="store">📍 Válido SOLO en Oakberry ${r.tienda||""}</div>`;
+  if(r.fechaFin){ h+=`<div class="vig">⏳ Programa activo hasta el <b>${fmtFecha(r.fechaFin)}</b></div>`; }
   if(r.modo==="escalado" && (r.escalera||[]).length){
     h+="<h2>🔼 Escalera por compra</h2>";
     r.escalera.forEach(e=>{ h+=`<div class="esc"><span class="p">Compra #${e.paso}</span><span><b>${e.valor_pct}% OFF</b></span></div>`; });
@@ -75,6 +93,41 @@ function jsonp(params){ return new Promise(res=>{ const cb="cb"+Math.random().to
   }
   h+=`<div class="how"><b>¿Cómo reclamar?</b><br>Muestra tu código (o da tu celular) en la caja de Oakberry ${r.tienda||""}. Debes estar registrado en <b>Loopy</b> con tu mismo correo o celular para que aplique.</div>`;
   body.innerHTML=h;
+}
+
+function recoveryForm(msg){
+  const body=document.getElementById("body");
+  body.innerHTML=`
+    <div class="rec">
+      ${msg?`<p class="rec-msg">${msg}</p>`:""}
+      <h2 style="margin-top:0">¿Perdiste tu código?</h2>
+      <p style="font-size:.85rem;color:#8a7fa3;margin-bottom:12px">Ingresa el WhatsApp con el que te registraste y te mostramos tus beneficios.</p>
+      <input id="recCel" type="tel" inputmode="numeric" placeholder="Tu WhatsApp (10 dígitos)" />
+      <button id="recBtn">Ver mis beneficios</button>
+      <p id="recErr" class="rec-err"></p>
+    </div>`;
+  const inp=document.getElementById("recCel"), btn=document.getElementById("recBtn"), err=document.getElementById("recErr");
+  async function go(){
+    const cel=(inp.value||"").replace(/\D/g,"").slice(-10);
+    if(cel.length!==10){ err.textContent="Ingresa un WhatsApp válido de 10 dígitos."; return; }
+    err.textContent=""; btn.disabled=true; btn.textContent="Buscando…";
+    const params=new URLSearchParams({accion:"misBeneficios", celular:cel});
+    if(EMPRESA) params.set("empresa",EMPRESA);
+    const r=await jsonp(params);
+    btn.disabled=false; btn.textContent="Ver mis beneficios";
+    if(r.ok && r.codigo){ render(r); }
+    else{ err.textContent="No encontramos un registro con ese WhatsApp. ¿Aún no te registras?"; }
+  }
+  btn.addEventListener("click",go);
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+}
+
+(async function(){
+  const body=document.getElementById("body");
+  if(!CODIGO){ recoveryForm(""); return; }
+  const r=await jsonp(new URLSearchParams({accion:"misBeneficios", empresa:EMPRESA, codigo:CODIGO}));
+  if(r.ok && r.codigo){ render(r); }
+  else{ recoveryForm("No pudimos cargar tu link. Recupera tu código con tu WhatsApp:"); }
 })();
 </script>
 </body>
