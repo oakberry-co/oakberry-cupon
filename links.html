@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Oakberry · Generador de Links</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 <style>
   :root {
     --p:#5F4B8B; --pd:#3d2f66; --y:#F5C842; --bg:#0e0b16;
@@ -536,7 +536,7 @@
         <!-- QR generado -->
         <div id="qrBox" style="display:none;margin-top:20px;background:var(--card2);border:1px dashed rgba(57,217,138,0.35);border-radius:14px;padding:20px;text-align:center;">
           <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:14px;">QR para pantalla · escanear y ganar</div>
-          <div style="background:#fff;display:inline-block;padding:16px;border-radius:12px;"><canvas id="qrCanvas"></canvas></div>
+          <div style="background:#fff;display:inline-block;padding:16px;border-radius:12px;"><canvas id="qrCanvas" style="max-width:280px;width:100%;height:auto;display:block;"></canvas></div>
           <div class="link-actions" style="margin-top:16px;">
             <button class="action-btn primary" style="background:var(--green);border-color:var(--green);color:#0e3320;" onclick="descargarQR()">⬇ Descargar QR (PNG)</button>
           </div>
@@ -724,12 +724,11 @@ function generarFisico() {
   const shortDisplay = document.getElementById("shortLinkDisplay");
   shortDisplay.textContent = linkActual; shortDisplay.classList.remove("empty");
 
-  // QR
+  // QR — morado de marca, con logo Oakberry al centro
   const box = document.getElementById("qrBox");
   const canvas = document.getElementById("qrCanvas");
-  if (window.QRCode && QRCode.toCanvas) {
-    QRCode.toCanvas(canvas, linkActual, { width: 900, margin: 2,
-      color: { dark: "#3d2f66", light: "#ffffff" } }, err => { if (err) console.error(err); });
+  if (window.QRious) {
+    dibujarQR(canvas, linkActual);
     box.style.display = "block";
   } else {
     showToast("⚠ No cargó la librería de QR (revisa conexión)");
@@ -743,6 +742,34 @@ function generarFisico() {
   renderHistorial();
   guardarEnSheet({ ...item, nombre });
   showToast("✅ Link + QR generados");
+}
+
+// Dibuja el QR en morado de marca y superpone el logo Oakberry al centro
+// (nivel de corrección H → tolera ~30% oculto, el logo no rompe el escaneo).
+const QR_SIZE = 900;
+function dibujarQR(canvas, texto) {
+  new QRious({ element: canvas, value: texto, size: QR_SIZE,
+    foreground: "#3d2f66", background: "#ffffff", level: "H" });
+  const ctx = canvas.getContext("2d");
+  const logo = new Image(); // mismo origen → no contamina el canvas (toDataURL sigue funcionando)
+  logo.onload = () => {
+    const lw = QR_SIZE * 0.20;
+    const lh = lw * (logo.height / logo.width);
+    const pad = QR_SIZE * 0.028, r = QR_SIZE * 0.03;
+    const bw = lw + pad*2, bh = lh + pad*2;
+    const bx = (QR_SIZE - bw)/2, by = (QR_SIZE - bh)/2;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.moveTo(bx+r, by);
+    ctx.arcTo(bx+bw, by, bx+bw, by+bh, r);
+    ctx.arcTo(bx+bw, by+bh, bx, by+bh, r);
+    ctx.arcTo(bx, by+bh, bx, by, r);
+    ctx.arcTo(bx, by, bx+bw, by, r);
+    ctx.closePath(); ctx.fill();
+    ctx.drawImage(logo, (QR_SIZE - lw)/2, (QR_SIZE - lh)/2, lw, lh);
+  };
+  logo.onerror = () => {}; // sin logo si no carga, el QR igual sirve
+  logo.src = "/email-logo-purple.png";
 }
 
 function descargarQR() {
