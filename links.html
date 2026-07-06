@@ -41,6 +41,26 @@
   input:focus,select:focus,textarea:focus{border-color:rgba(95,75,139,0.6);box-shadow:0 0 0 3px rgba(95,75,139,0.15);}
   select option{background:var(--card2);color:var(--text);}
   textarea{resize:none;font-size:11px;font-family:'Space Mono',monospace;line-height:1.6;color:var(--accent);}
+  /* ── Multi-select tiendas (canal físico) ── */
+  .ms-box{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:12px 16px;background:var(--card2);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--text);min-height:44px;transition:border-color 0.18s,box-shadow 0.18s;}
+  .ms-box.open{border-color:rgba(95,75,139,0.6);box-shadow:0 0 0 3px rgba(95,75,139,0.15);}
+  .ms-box .ms-chips{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0;}
+  .ms-box .ms-placeholder{color:var(--muted);font-weight:700;}
+  .ms-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(95,75,139,0.22);border:1px solid rgba(95,75,139,0.45);color:var(--text);border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;max-width:100%;}
+  .ms-chip b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ms-chip .x{cursor:pointer;opacity:0.7;font-size:12px;line-height:1;}
+  .ms-chip .x:hover{opacity:1;}
+  .ms-caret{color:var(--muted);font-size:12px;flex-shrink:0;}
+  .ms-panel{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;background:var(--card2);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.35);padding:10px;max-height:320px;overflow:auto;}
+  .ms-search{width:100%;padding:9px 12px;margin-bottom:8px;font-size:12px;}
+  .ms-actions{display:flex;gap:8px;margin-bottom:8px;}
+  .ms-actions button{flex:1;padding:7px 8px;background:rgba(95,75,139,0.12);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;}
+  .ms-actions button:hover{background:rgba(95,75,139,0.25);}
+  .ms-city{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-family:'Space Mono',monospace;padding:8px 6px 4px;}
+  .ms-item{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text);}
+  .ms-item:hover{background:rgba(95,75,139,0.12);}
+  .ms-item input{width:auto;margin:0;flex-shrink:0;accent-color:var(--p);}
+  .ms-empty{padding:14px 8px;color:var(--muted);font-size:11px;text-align:center;}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .divider{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-family:'Space Mono',monospace;margin:20px 0 16px;display:flex;align-items:center;gap:10px;}
   .divider::after{content:'';flex:1;height:1px;background:var(--border);}
@@ -476,15 +496,26 @@
             → <strong>nunca se confunde con tráfico de Meta.</strong>
           </div>
 
-          <div class="row">
-            <div class="field">
-              <label>Ciudad</label>
-              <select id="f-ciudad" onchange="cargarTiendasF()"><option value="todas">Todas las ciudades</option></select>
+          <div class="field">
+            <label>Ciudad <span style="color:var(--muted);font-weight:700;text-transform:none;letter-spacing:0;">· filtra la lista de tiendas</span></label>
+            <select id="f-ciudad" onchange="filtrarPanelTiendas()"><option value="todas">Todas las ciudades</option></select>
+          </div>
+
+          <div class="field" style="position:relative;">
+            <label>Tiendas <span id="f-tienda-count" style="color:var(--muted);font-weight:700;text-transform:none;letter-spacing:0;">· podés elegir varias</span></label>
+            <div id="f-tienda-box" class="ms-box" onclick="togglePanelTiendas(event)">
+              <div class="ms-chips" id="f-tienda-chips"><span class="ms-placeholder">Todas las tiendas</span></div>
+              <span class="ms-caret">▾</span>
             </div>
-            <div class="field">
-              <label>Tienda</label>
-              <select id="f-tienda"><option value="general">Todas las tiendas</option></select>
+            <div id="f-tienda-panel" class="ms-panel" style="display:none;">
+              <input type="text" id="f-tienda-search" class="ms-search" placeholder="🔎 Buscar tienda..." oninput="filtrarPanelTiendas()" onclick="event.stopPropagation()">
+              <div class="ms-actions">
+                <button type="button" onclick="tiendasFSetAll(true)">Marcar visibles</button>
+                <button type="button" onclick="tiendasFSetAll(false)">Limpiar</button>
+              </div>
+              <div id="f-tienda-list" class="ms-list"></div>
             </div>
+            <div class="hint" style="margin-top:8px;">Si no marcás ninguna, el link aplica a <strong>todas las tiendas</strong>. Al elegir varias, todas comparten un mismo link/QR.</div>
           </div>
 
           <div class="field">
@@ -680,21 +711,102 @@ const CANALES_FISICO = {
 };
 let qrLinkActual = "";
 
-async function cargarTiendasF() {
-  const ciudad = document.getElementById("f-ciudad").value;
-  const sel    = document.getElementById("f-tienda");
-  sel.innerHTML = '<option value="general">Todas las tiendas</option>';
-  if (!ciudad || ciudad==="todas") return;
-  try {
-    const data    = await fetchGETCached({ accion:"obtenerTiendas", ciudad });
-    const tiendas = Array.isArray(data) ? data : (data.tiendas||[]);
-    tiendas.forEach(t => sel.add(new Option(t,t)));
-  } catch(e) {}
+// ── Multi-select de tiendas (cross-ciudad, 1 link/QR para todas) ──
+let TIENDAS_POR_CIUDAD = {};          // { "Bogota": ["Zona T", ...], ... }
+let tiendasFSelected   = new Set();   // nombres de tienda marcados
+
+function renderPanelTiendas() {
+  const cont = document.getElementById("f-tienda-list");
+  if (!cont) return;
+  const ciudadFiltro = document.getElementById("f-ciudad").value || "todas";
+  const q = (document.getElementById("f-tienda-search").value || "")
+    .toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim();
+
+  const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+  let html = "", total = 0;
+  Object.keys(TIENDAS_POR_CIUDAD).sort().forEach(ciudad => {
+    if (ciudadFiltro !== "todas" && ciudad !== ciudadFiltro) return;
+    const items = (TIENDAS_POR_CIUDAD[ciudad] || [])
+      .filter(t => !q || norm(t).includes(q));
+    if (!items.length) return;
+    html += `<div class="ms-city">${ciudad}</div>`;
+    items.forEach(t => {
+      total++;
+      const checked = tiendasFSelected.has(t) ? "checked" : "";
+      const safe = t.replace(/"/g,"&quot;");
+      html += `<label class="ms-item"><input type="checkbox" ${checked}
+        onchange="tiendasFToggle(this.value,this.checked)" value="${safe}">
+        <span>${t}</span></label>`;
+    });
+  });
+  cont.innerHTML = total ? html : '<div class="ms-empty">Sin tiendas para ese filtro/búsqueda</div>';
 }
+
+function filtrarPanelTiendas() { renderPanelTiendas(); }
+
+function tiendasFToggle(nombre, checked) {
+  if (checked) tiendasFSelected.add(nombre); else tiendasFSelected.delete(nombre);
+  actualizarChipsTiendas();
+}
+
+function tiendasFSetAll(marcar) {
+  // opera solo sobre las tiendas VISIBLES en el panel (respeta ciudad + búsqueda)
+  document.querySelectorAll('#f-tienda-list .ms-item input').forEach(inp => {
+    inp.checked = marcar;
+    if (marcar) tiendasFSelected.add(inp.value); else tiendasFSelected.delete(inp.value);
+  });
+  actualizarChipsTiendas();
+}
+
+function actualizarChipsTiendas() {
+  const chips = document.getElementById("f-tienda-chips");
+  const count = document.getElementById("f-tienda-count");
+  const arr = Array.from(tiendasFSelected);
+  if (!arr.length) {
+    chips.innerHTML = '<span class="ms-placeholder">Todas las tiendas</span>';
+    count.textContent = "· podés elegir varias";
+    return;
+  }
+  chips.innerHTML = arr.map(t => {
+    const safe = t.replace(/"/g,"&quot;");
+    return `<span class="ms-chip"><b>${t}</b><span class="x" onclick="quitarChipTienda(event,'${safe.replace(/'/g,"\\'")}')">✕</span></span>`;
+  }).join("");
+  count.textContent = `· ${arr.length} seleccionada${arr.length>1?"s":""}`;
+}
+
+function quitarChipTienda(ev, nombre) {
+  ev.stopPropagation();
+  tiendasFSelected.delete(nombre);
+  actualizarChipsTiendas();
+  renderPanelTiendas();
+}
+
+function togglePanelTiendas(ev) {
+  ev.stopPropagation();
+  const panel = document.getElementById("f-tienda-panel");
+  const box   = document.getElementById("f-tienda-box");
+  const abrir = panel.style.display === "none";
+  panel.style.display = abrir ? "block" : "none";
+  box.classList.toggle("open", abrir);
+  if (abrir) renderPanelTiendas();
+}
+
+// cerrar panel al clicar fuera
+document.addEventListener("click", (e) => {
+  const panel = document.getElementById("f-tienda-panel");
+  if (!panel || panel.style.display === "none") return;
+  const box = document.getElementById("f-tienda-box");
+  if (!panel.contains(e.target) && !box.contains(e.target)) {
+    panel.style.display = "none";
+    box.classList.remove("open");
+  }
+});
 
 function generarFisico() {
   const ciudad = document.getElementById("f-ciudad").value || "todas";
-  const tienda = document.getElementById("f-tienda").value || "general";
+  const tiendasArr = Array.from(tiendasFSelected);
+  // 1 solo link/QR para todas: tienda = lista separada por comas (o "general" si no marcó ninguna)
+  const tienda = tiendasArr.length ? tiendasArr.join(",") : "general";
   const canal  = document.getElementById("f-canal").value || "otro";
   const descuento = document.getElementById("f-descuento").value || "20";
   const producto  = document.getElementById("f-producto").value || "Bowl+12oz";
@@ -735,7 +847,10 @@ function generarFisico() {
   }
 
   const nombreCanal = CANALES_FISICO[canal] || canal;
-  const nombre = `FISICO ${nombreCanal} · ${tienda==="general"?ciudad:tienda}`;
+  const destino = tiendasArr.length === 0 ? ciudad
+                : tiendasArr.length === 1 ? tiendasArr[0]
+                : `${tiendasArr.length} tiendas`;
+  const nombre = `FISICO ${nombreCanal} · ${destino}`;
   mostrarResumen(params, nombre, false);
   const item = { nombre, link: linkActual, params, ts: new Date(), tipo: "fisico" };
   historial.unshift(item);
@@ -776,7 +891,10 @@ function descargarQR() {
   const canvas = document.getElementById("qrCanvas");
   if (!canvas || !qrLinkActual) return;
   const canal  = document.getElementById("f-canal").value || "otro";
-  const tienda = document.getElementById("f-tienda").value || "general";
+  const arr    = Array.from(tiendasFSelected);
+  const tienda = arr.length === 0 ? "general"
+               : arr.length === 1 ? arr[0]
+               : arr.length + "-tiendas";
   const slug = (tienda + "-" + canal).toLowerCase().normalize("NFD")
     .replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
   const a = document.createElement("a");
@@ -1111,6 +1229,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       selF.add(new Option("Todas las ciudades","todas"));
       todo.ciudades.forEach(c => selF.add(new Option(c,c)));
     }
+
+    // Multi-select de tiendas (canal físico): todas las tiendas de todas las ciudades
+    TIENDAS_POR_CIUDAD = todo.tiendas || {};
+    renderPanelTiendas();
+    actualizarChipsTiendas();
 
     await cargarTiendas();
     setStatus("Backend conectado · " + todo.ciudades.length + " ciudades", true);
