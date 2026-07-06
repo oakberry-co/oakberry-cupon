@@ -167,10 +167,10 @@ function renderWinners(list){
 function renderStats(s){
   if(!s)return;
   const box=document.getElementById("stats");
-  const v=s.valor||0;
-  const val=v>=1000000?("$"+(v/1000000).toFixed(1).replace(/\.0$/,"")+"M"):("$"+Math.round(v/1000)+"k");
-  box.innerHTML=`<div class="stat"><b>${s.giros||0}</b> giros 🎡</div>`+
-                `<div class="stat"><b>${s.premios||0}</b> premios 🎁</div>`+
+  const nf=n=>(n||0).toLocaleString("es-CO");
+  const val="$"+((s.valor||0)/1000000).toFixed(1)+"M";
+  box.innerHTML=`<div class="stat"><b>${nf(s.giros)}</b> giros 🎡</div>`+
+                `<div class="stat"><b>${nf(s.premios)}</b> premios 🎁</div>`+
                 `<div class="stat"><b>${val}</b> entregado 💰</div>`;
 }
 function setCola(n){
