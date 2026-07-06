@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruleta Oakberry — Pantalla de tienda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{--beige:#f6f1e4;--morado:#3d2b5e;--morado-claro:#9b85c4;--dorado:#b8860b}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:'Montserrat',sans-serif;background:radial-gradient(circle at 50% 25%,#4a3470,#241a3c);
+       color:var(--beige);height:100vh;display:flex;flex-direction:column;align-items:center}
+  /* login */
+  #login{position:fixed;inset:0;z-index:50;background:#241a3c;display:flex;flex-direction:column;
+         align-items:center;justify-content:center;padding:24px}
+  #login .box{background:var(--beige);color:var(--morado);border-radius:20px;padding:28px;width:min(90vw,360px);text-align:center}
+  #login h2{font-size:22px;font-weight:800;margin-bottom:4px}
+  #login p{font-size:13px;color:#7a6f5c;font-weight:600;margin-bottom:16px}
+  #login input{width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;
+        font-family:inherit;font-size:16px;font-weight:600;color:var(--morado)}
+  #login button{width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:var(--dorado);
+        color:#fff;font-family:inherit;font-weight:800;font-size:16px;cursor:pointer}
+  #login .err{color:#c0392b;font-weight:700;font-size:13px;margin-top:10px;min-height:16px}
+  /* show */
+  .top{width:100%;text-align:center;padding:2.2vh 0 1vh}
+  .top h1{font-size:3.4vh;font-weight:800}.top h1 span{color:var(--dorado)}
+  .top .store{font-size:1.7vh;color:var(--morado-claro);font-weight:700;margin-top:.3vh}
+  .cola{display:inline-block;margin-top:.6vh;background:rgba(184,134,11,.25);color:var(--dorado);
+        font-weight:800;font-size:1.5vh;padding:.4vh 1.4vh;border-radius:99px}
+  .wheel-wrap{position:relative;width:min(82vw,58vh);height:min(82vw,58vh);margin:1vh auto}
+  canvas{width:100%;height:100%;border-radius:50%;box-shadow:0 0 0 1.1vh var(--morado),0 0 0 1.6vh var(--dorado),0 2vh 5vh rgba(0,0,0,.5)}
+  .pointer{position:absolute;top:-1vh;left:50%;transform:translateX(-50%);z-index:3;width:0;height:0;
+        border-left:1.8vh solid transparent;border-right:1.8vh solid transparent;border-top:3vh solid var(--dorado)}
+  .hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;width:8vh;height:8vh;border-radius:50%;
+        background:var(--morado);color:var(--beige);display:flex;align-items:center;justify-content:center;
+        font-weight:800;font-size:1.3vh;border:.5vh solid var(--dorado);text-align:center}
+  .bottom{flex:1;width:100%;display:flex;gap:2vw;padding:1.5vh 4vw 3vh;align-items:center;justify-content:center}
+  .qr-card{background:var(--beige);border-radius:1.6vh;padding:1.8vh;text-align:center}
+  #qrcode img,#qrcode canvas{display:block;width:18vh!important;height:18vh!important}
+  .qr-card .t{color:var(--morado);font-weight:800;font-size:1.8vh;margin-top:1vh}
+  .qr-card .s{color:#6b4e9e;font-weight:700;font-size:1.3vh}
+  .winners{flex:1;max-width:44vw}
+  .winners h3{font-size:1.5vh;color:var(--morado-claro);text-transform:uppercase;letter-spacing:1px;margin-bottom:1vh;text-align:center}
+  .win{background:rgba(255,255,255,.08);border-radius:1vh;padding:1vh 1.4vh;margin-bottom:.7vh;font-size:1.5vh;display:flex;justify-content:space-between;gap:1vh}
+  .win b{color:var(--dorado)}
+  /* overlay ganador */
+  .overlay{position:fixed;inset:0;background:rgba(36,26,60,.94);z-index:20;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+  .overlay.show{opacity:1}
+  .overlay .confetti{font-size:12vh}
+  .overlay .who{font-size:4vh;font-weight:800;margin:1vh 0}
+  .overlay .big{font-size:6vh;font-weight:800;color:var(--dorado);text-align:center;line-height:1.05;padding:0 6vw}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+  <!-- LOGIN del cajero + selección del punto -->
+  <div id="login">
+    <div class="box">
+      <h2>🎡 Ruleta Oakberry</h2>
+      <!-- paso 1: credenciales -->
+      <div id="step-cred">
+        <p>Ingresa con tu usuario de cajero</p>
+        <input id="lg-user" type="text" placeholder="Usuario" autocomplete="username">
+        <input id="lg-pass" type="password" placeholder="Contraseña" autocomplete="current-password">
+        <button id="lg-btn">Continuar</button>
+      </div>
+      <!-- paso 2: elegir tienda -->
+      <div id="step-store" class="hidden">
+        <p>¿En qué punto estás?</p>
+        <select id="sel-ciudad" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e"></select>
+        <select id="sel-tienda" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e"></select>
+        <button id="st-btn">Abrir ruleta 🎡</button>
+      </div>
+      <div class="err" id="lg-err"></div>
+    </div>
+  </div>
+
+  <!-- SHOW -->
+  <div class="top">
+    <h1>🎡 Ruleta <span>Oakberry</span></h1>
+    <div class="store" id="store"></div>
+    <div class="cola hidden" id="cola"></div>
+  </div>
+  <div class="wheel-wrap">
+    <div class="pointer"></div>
+    <canvas id="wheel" width="900" height="900"></canvas>
+    <div class="hub">OAK<br>BERRY</div>
+  </div>
+  <div class="bottom">
+    <div class="qr-card"><div id="qrcode"></div>
+      <div class="t">Escanea y juega 👆</div>
+      <div class="s">Regístrate desde tu celular</div>
+    </div>
+    <div class="winners"><h3>✨ Ganadores de hoy</h3><div id="win-list"></div></div>
+  </div>
+
+  <!-- overlay ganador -->
+  <div class="overlay" id="overlay">
+    <div class="confetti" id="ov-emoji">🎉</div>
+    <div class="who" id="ov-who"></div>
+    <div class="big" id="ov-prize"></div>
+  </div>
+
+<script>
+const CFG={SCRIPT_URL:"https://api.oakberry-cupones.com",SITE:"https://oakberry-cupones.com"};
+let SEGMENTS=[],SPINNING=false,STORE="";
+
+function fetchGET(params){
+  return new Promise((resolve,reject)=>{
+    const cb="cb_"+Math.random().toString(36).slice(2);
+    const url=CFG.SCRIPT_URL+"?"+new URLSearchParams({...params,callback:cb});
+    const s=document.createElement("script");let done=false;
+    const clean=()=>{done=true;clearTimeout(t);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
+    window[cb]=d=>{if(done)return;clean();resolve(d);};
+    s.onerror=()=>{if(done)return;clean();reject(new Error("e"));};
+    s.src=url;document.body.appendChild(s);
+    const t=setTimeout(()=>{if(!done){clean();reject(new Error("t"));}},12000);
+  });
+}
+async function api(p){try{return await fetchGET(p);}catch(e){return null;}}
+
+function isLight(hex){const c=hex.replace('#','');const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);return(0.299*r+0.587*g+0.114*b)>150;}
+function drawWheel(rot){
+  const cv=document.getElementById("wheel"),ctx=cv.getContext("2d");
+  const N=SEGMENTS.length,R=cv.width/2,cx=R,cy=R,ang=2*Math.PI/N;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  for(let i=0;i<N;i++){
+    const a0=rot+i*ang,a1=a0+ang;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,a0,a1);ctx.closePath();
+    ctx.fillStyle=SEGMENTS[i].color||"#6b4e9e";ctx.fill();
+    ctx.strokeStyle="rgba(61,43,94,.25)";ctx.lineWidth=3;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(a0+ang/2);ctx.textAlign="right";
+    ctx.fillStyle=isLight(SEGMENTS[i].color||"#6b4e9e")?"#3d2b5e":"#f6f1e4";
+    ctx.font="700 "+(N>12?24:30)+"px Montserrat";
+    const l=SEGMENTS[i].label.length>24?SEGMENTS[i].label.slice(0,23)+"…":SEGMENTS[i].label;
+    ctx.fillText(l,R-24,9);ctx.restore();
+  }
+}
+function spinTo(key){
+  return new Promise(resolve=>{
+    const N=SEGMENTS.length,ang=2*Math.PI/N;
+    let idx=SEGMENTS.findIndex(s=>s.key===key);if(idx<0)idx=0;
+    const center=idx*ang+ang/2,turns=6+Math.floor(Math.random()*2);
+    const finalRot=(turns*2*Math.PI)+(-Math.PI/2-center);
+    const dur=4600,t0=performance.now();
+    function frame(t){const p=Math.min(1,(t-t0)/dur);const e=1-Math.pow(1-p,3);drawWheel(e*finalRot);
+      if(p<1)requestAnimationFrame(frame);else resolve();}
+    requestAnimationFrame(frame);
+  });
+}
+function overlay(nombre,resultado,premio){
+  const ov=document.getElementById("overlay");
+  document.getElementById("ov-emoji").textContent=resultado==="premio"?"🎉":"🍓";
+  document.getElementById("ov-who").textContent=resultado==="premio"?("¡"+nombre+" ganó!"):(nombre+"…");
+  document.getElementById("ov-prize").textContent=resultado==="premio"?premio:"¡Sigue intentando! 💜";
+  ov.classList.add("show");
+  return new Promise(r=>setTimeout(()=>{ov.classList.remove("show");r();},4200));
+}
+function renderWinners(list){
+  const box=document.getElementById("win-list");
+  if(!list||!list.length){box.innerHTML='<div class="win" style="justify-content:center;opacity:.6">Sé el primero en ganar 🎁</div>';return;}
+  box.innerHTML=list.map(w=>`<div class="win"><span>${w.nombre}</span><b>${w.premio}</b></div>`).join("");
+}
+function setCola(n){
+  const c=document.getElementById("cola");
+  if(n>0){c.textContent="🎟️ "+n+" en cola";c.classList.remove("hidden");}else c.classList.add("hidden");
+}
+
+async function poll(){
+  if(SPINNING){setTimeout(poll,1000);return;}
+  const r=await api({accion:"ruletaPantallaEstado",screen:STORE});
+  if(r&&r.ok){
+    renderWinners(r.ganadores); setCola(r.cola||0);
+    if(r.giro){
+      SPINNING=true;
+      await spinTo(r.giro.premioKey);
+      await overlay(r.giro.nombre,r.giro.resultado,r.giro.premioLabel);
+      SPINNING=false;
+    }
+  }
+  setTimeout(poll,1200);
+}
+
+async function abrir(tienda){
+  STORE=tienda;
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("store").textContent=tienda;
+  new QRCode(document.getElementById("qrcode"),{
+    text:CFG.SITE+"/ruleta?screen="+encodeURIComponent(tienda),
+    width:220,height:220,colorDark:"#3d2b5e",colorLight:"#f6f1e4",correctLevel:QRCode.CorrectLevel.M
+  });
+  const c=await api({accion:"ruletaCatalogo"});
+  if(c&&c.ok){SEGMENTS=c.segmentos||[];drawWheel(-Math.PI/2);}
+  poll();
+}
+
+let CATALOGO_TIENDAS={};
+async function irAPasoTienda(){
+  const r=await api({accion:"obtenerTodo"});
+  const ciudades=(r&&r.ciudades)||[]; CATALOGO_TIENDAS=(r&&r.tiendas)||{};
+  const selC=document.getElementById("sel-ciudad");
+  selC.innerHTML=ciudades.map(c=>`<option value="${c}">${c}</option>`).join("");
+  llenarTiendas();
+  document.getElementById("step-cred").classList.add("hidden");
+  document.getElementById("step-store").classList.remove("hidden");
+}
+function llenarTiendas(){
+  const c=document.getElementById("sel-ciudad").value;
+  const ts=CATALOGO_TIENDAS[c]||[];
+  document.getElementById("sel-tienda").innerHTML=ts.map(t=>`<option value="${t}">${t}</option>`).join("");
+}
+document.getElementById("sel-ciudad").addEventListener("change",llenarTiendas);
+
+document.getElementById("lg-btn").addEventListener("click",async()=>{
+  const err=document.getElementById("lg-err");err.textContent="";
+  const usuario=document.getElementById("lg-user").value.trim();
+  const pass=document.getElementById("lg-pass").value;
+  if(!usuario||!pass){err.textContent="Completa usuario y contraseña.";return;}
+  const btn=document.getElementById("lg-btn");btn.disabled=true;btn.textContent="Entrando…";
+  const r=await api({accion:"login",usuario,pass});
+  if(!r||!r.ok){err.textContent=(r&&r.mensaje)||"Usuario o contraseña incorrectos.";btn.disabled=false;btn.textContent="Continuar";return;}
+  await irAPasoTienda();
+});
+document.getElementById("st-btn").addEventListener("click",()=>{
+  const tienda=document.getElementById("sel-tienda").value;
+  if(!tienda){document.getElementById("lg-err").textContent="Elige un punto.";return;}
+  abrir(tienda);
+});
+document.getElementById("lg-pass").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("lg-btn").click();});
+</script>
+</body>
+</html>

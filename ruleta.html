@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ruleta Oakberry — ¡Regístrate y gana!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--beige:#f6f1e4;--morado:#3d2b5e;--morado-claro:#9b85c4;--dorado:#b8860b}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Montserrat',sans-serif;background:var(--morado);color:var(--beige);
+       min-height:100vh;display:flex;flex-direction:column;align-items:center;
+       padding:24px 18px 40px;text-align:center}
+  .logo{font-weight:800;letter-spacing:2px;font-size:20px}.logo span{color:var(--dorado)}
+  h1{font-size:24px;font-weight:800;margin:14px 0 4px;line-height:1.15}
+  p.sub{color:var(--morado-claro);font-weight:600;font-size:14px;margin-bottom:18px}
+  .card{background:var(--beige);color:var(--morado);border-radius:22px;padding:22px 18px;
+        width:100%;max-width:420px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  label{display:block;text-align:left;font-weight:700;font-size:13px;margin:12px 2px 5px}
+  input{width:100%;padding:13px 14px;border:2px solid #d8cdb5;border-radius:12px;
+        font-family:inherit;font-size:16px;font-weight:600;color:var(--morado);background:#fff}
+  input:focus{outline:none;border-color:var(--morado-claro)}
+  .tyc{display:flex;align-items:flex-start;gap:8px;margin:16px 2px 4px;text-align:left;font-size:12px;font-weight:600}
+  .tyc input{width:auto;margin-top:2px}.tyc a{color:var(--dorado)}
+  button.cta{width:100%;margin-top:18px;padding:15px;border:none;border-radius:14px;
+        background:var(--dorado);color:#fff;font-family:inherit;font-weight:800;font-size:17px;cursor:pointer;transition:transform .1s,opacity .2s}
+  button.cta:active{transform:scale(.98)}button.cta:disabled{opacity:.5;cursor:not-allowed}
+  button.wallet{background:var(--morado)}
+  .err{color:#c0392b;font-weight:700;font-size:13px;margin-top:10px;min-height:16px}
+  .hidden{display:none!important}
+  .wheel-wrap{position:relative;width:min(80vw,320px);height:min(80vw,320px);margin:8px auto}
+  canvas{width:100%;height:100%;border-radius:50%;box-shadow:0 0 0 8px var(--morado),0 0 0 12px var(--dorado),0 12px 30px rgba(0,0,0,.35)}
+  .pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:3;width:0;height:0;
+        border-left:14px solid transparent;border-right:14px solid transparent;border-top:24px solid var(--dorado)}
+  .hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;width:54px;height:54px;
+        border-radius:50%;background:var(--morado);color:var(--beige);display:flex;align-items:center;justify-content:center;
+        font-weight:800;font-size:10px;border:3px solid var(--dorado)}
+  .prize{font-size:26px;font-weight:800;color:var(--dorado);margin:8px 0;line-height:1.1}
+  .code{font-size:34px;font-weight:800;letter-spacing:5px;color:var(--morado);background:#fff;
+        border:2px dashed var(--morado-claro);border-radius:12px;padding:12px;margin:12px 0}
+  .muted{font-size:12px;color:#7a6f5c;font-weight:600}
+  .look{margin-top:8px;font-size:15px;font-weight:800;color:var(--dorado)}
+</style>
+</head>
+<body>
+  <div class="logo">OAK<span>BERRY</span></div>
+
+  <!-- registro -->
+  <div id="view-reg">
+    <h1>🎡 ¡Regístrate y gana!</h1>
+    <p class="sub">Llena tus datos y la ruleta gira sola. Tu premio sale en la pantalla y te llega al WhatsApp.</p>
+    <div class="card">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" type="text" autocomplete="name" placeholder="Tu nombre">
+      <label for="celular">Celular (WhatsApp)</label>
+      <input id="celular" type="tel" inputmode="numeric" autocomplete="tel" placeholder="3001234567" maxlength="13">
+      <label for="email">Email <span style="font-weight:600;color:#9a8e76">(opcional)</span></label>
+      <input id="email" type="email" autocomplete="email" placeholder="tu@correo.com">
+      <div class="tyc">
+        <input id="tyc" type="checkbox">
+        <span>Acepto los <a href="/tyc" target="_blank">Términos</a> y recibir mi cupón y tarjeta Oakberry por WhatsApp.</span>
+      </div>
+      <button class="cta" id="btn-reg">Registrarme y girar 🎡</button>
+      <div class="err" id="err-reg"></div>
+    </div>
+  </div>
+
+  <!-- girando (suspenso) -->
+  <div id="view-spin" class="hidden">
+    <h1 id="spin-title">¡Va tu giro!</h1>
+    <p class="sub">👀 Mira la pantalla de la tienda…</p>
+    <div class="wheel-wrap">
+      <div class="pointer"></div>
+      <canvas id="wheel" width="600" height="600"></canvas>
+      <div class="hub">OAK<br>BERRY</div>
+    </div>
+  </div>
+
+  <!-- resultado -->
+  <div id="view-result" class="hidden">
+    <div class="card">
+      <div id="res-headline" style="font-weight:800;font-size:18px"></div>
+      <div class="prize" id="res-prize"></div>
+      <div id="res-code-wrap" class="hidden">
+        <div class="muted">Tu código</div>
+        <div class="code" id="res-code"></div>
+        <div class="muted">Te lo enviamos al WhatsApp. Muéstralo en caja.</div>
+      </div>
+      <div class="look" id="res-look"></div>
+      <a id="btn-wallet" class="hidden"><button class="cta wallet" type="button" style="margin-top:14px">📲 Agregar mi tarjeta Oakberry a Wallet</button></a>
+    </div>
+  </div>
+
+<script>
+const CFG={SCRIPT_URL:"https://api.oakberry-cupones.com"};
+const QS=new URLSearchParams(location.search);
+const SCREEN=QS.get("screen")||QS.get("tienda")||"";
+let SEGMENTS=[],WALLET_URL="";
+
+function fetchGET(params){
+  return new Promise((resolve,reject)=>{
+    const cb="cb_"+Math.random().toString(36).slice(2);
+    const url=CFG.SCRIPT_URL+"?"+new URLSearchParams({...params,callback:cb});
+    const s=document.createElement("script");let done=false;
+    const clean=()=>{done=true;clearTimeout(t);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
+    window[cb]=d=>{if(done)return;clean();resolve(d);};
+    s.onerror=()=>{if(done)return;clean();reject(new Error("e"));};
+    s.src=url;document.body.appendChild(s);
+    const t=setTimeout(()=>{if(!done){clean();reject(new Error("t"));}},12000);
+  });
+}
+async function api(p){try{return await fetchGET(p);}catch(e){await new Promise(r=>setTimeout(r,400));return await fetchGET(p);}}
+
+function isLight(hex){const c=hex.replace('#','');const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);return(0.299*r+0.587*g+0.114*b)>150;}
+function drawWheel(rot){
+  const cv=document.getElementById("wheel"),ctx=cv.getContext("2d");
+  const N=SEGMENTS.length,R=cv.width/2,cx=R,cy=R,ang=2*Math.PI/N;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  for(let i=0;i<N;i++){
+    const a0=rot+i*ang,a1=a0+ang;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,a0,a1);ctx.closePath();
+    ctx.fillStyle=SEGMENTS[i].color||"#6b4e9e";ctx.fill();
+    ctx.strokeStyle="rgba(61,43,94,.25)";ctx.lineWidth=2;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(a0+ang/2);ctx.textAlign="right";
+    ctx.fillStyle=isLight(SEGMENTS[i].color||"#6b4e9e")?"#3d2b5e":"#f6f1e4";
+    ctx.font="700 "+(N>12?15:18)+"px Montserrat";
+    const l=SEGMENTS[i].label.length>22?SEGMENTS[i].label.slice(0,21)+"…":SEGMENTS[i].label;
+    ctx.fillText(l,R-16,6);ctx.restore();
+  }
+}
+function spinTo(key){
+  return new Promise(resolve=>{
+    const N=SEGMENTS.length,ang=2*Math.PI/N;
+    let idx=SEGMENTS.findIndex(s=>s.key===key);if(idx<0)idx=0;
+    const center=idx*ang+ang/2,turns=6+Math.floor(Math.random()*2);
+    const finalRot=(turns*2*Math.PI)+(-Math.PI/2-center);
+    const dur=4000,t0=performance.now();
+    function frame(t){const p=Math.min(1,(t-t0)/dur);const e=1-Math.pow(1-p,3);drawWheel(e*finalRot);
+      if(p<1)requestAnimationFrame(frame);else resolve();}
+    requestAnimationFrame(frame);
+  });
+}
+function show(v){["view-reg","view-spin","view-result"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==v));}
+
+document.getElementById("btn-reg").addEventListener("click",async()=>{
+  const err=document.getElementById("err-reg");err.textContent="";
+  const nombre=document.getElementById("nombre").value.trim();
+  const celular=document.getElementById("celular").value.replace(/\D/g,"");
+  const email=document.getElementById("email").value.trim();
+  if(!nombre){err.textContent="Escribe tu nombre.";return;}
+  if(celular.replace(/^57/,"").length!==10){err.textContent="Celular inválido (10 dígitos).";return;}
+  if(!document.getElementById("tyc").checked){err.textContent="Acepta los términos para continuar.";return;}
+  const btn=document.getElementById("btn-reg");btn.disabled=true;btn.textContent="Girando…";
+  try{
+    const r=await api({accion:"ruletaRegistrar",nombre,celular,email,screen:SCREEN});
+    if(!r||!r.ok){err.textContent=(r&&r.mensaje)||"Error, intenta de nuevo.";btn.disabled=false;btn.textContent="Registrarme y girar 🎡";return;}
+    WALLET_URL=r.walletUrl||"";
+    if(SEGMENTS.length){ show("view-spin"); await spinTo(r.premioKey); }
+    mostrarResultado(r);
+  }catch(e){err.textContent="Sin conexión, intenta de nuevo.";btn.disabled=false;btn.textContent="Registrarme y girar 🎡";}
+});
+
+function mostrarResultado(r){
+  const gano=r.resultado==="premio";
+  document.getElementById("res-headline").textContent=gano?"🎉 ¡Felicitaciones!":"¡Casi! Gracias por jugar 💜";
+  document.getElementById("res-prize").textContent=gano?r.premioLabel:"Sigue intentando";
+  const cw=document.getElementById("res-code-wrap");
+  if(gano&&r.codigo){document.getElementById("res-code").textContent=r.codigo;cw.classList.remove("hidden");}
+  else cw.classList.add("hidden");
+  document.getElementById("res-look").textContent=r.yaGiro?"Ya habías jugado 🙂":"¡Míralo también en la pantalla! 📺";
+  if(WALLET_URL){const w=document.getElementById("btn-wallet");w.href=WALLET_URL;w.classList.remove("hidden");}
+  show("view-result");
+}
+
+(async()=>{const c=await api({accion:"ruletaCatalogo"});if(c&&c.ok){SEGMENTS=c.segmentos||[];drawWheel(-Math.PI/2);}})();
+</script>
+</body>
+</html>
