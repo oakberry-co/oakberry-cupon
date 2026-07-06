@@ -97,6 +97,7 @@
 const CFG={SCRIPT_URL:"https://api.oakberry-cupones.com"};
 const QS=new URLSearchParams(location.search);
 const SCREEN=QS.get("screen")||QS.get("tienda")||"";
+const OP=QS.get("op")||"";
 let SEGMENTS=[],WALLET_URL="";
 
 function fetchGET(params){
@@ -166,7 +167,7 @@ document.getElementById("btn-reg").addEventListener("click",async()=>{
   if(!document.getElementById("tyc").checked){err.textContent="Acepta los términos para continuar.";return;}
   const btn=document.getElementById("btn-reg");btn.disabled=true;btn.textContent="Girando…";
   try{
-    const r=await api({accion:"ruletaRegistrar",nombre,celular,email,screen:SCREEN,fingerprint:fingerprint()});
+    const r=await api({accion:"ruletaRegistrar",nombre,celular,email,screen:SCREEN,op:OP,fingerprint:fingerprint()});
     if(!r||!r.ok){err.textContent=(r&&r.mensaje)||"Error, intenta de nuevo.";btn.disabled=false;btn.textContent="Registrarme y girar 🎡";return;}
     WALLET_URL=r.walletUrl||"";
     if(SEGMENTS.length){ show("view-spin"); await spinTo(r.premioKey); }

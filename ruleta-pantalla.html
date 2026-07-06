@@ -74,6 +74,7 @@
         <p>¿En qué punto estás?</p>
         <select id="sel-ciudad" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e"></select>
         <select id="sel-tienda" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e"></select>
+        <input id="sel-operador" type="text" placeholder="Nombre de quien opera" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e">
         <button id="st-btn">Abrir ruleta 🎡</button>
       </div>
       <div class="err" id="lg-err"></div>
@@ -187,12 +188,12 @@ async function poll(){
   setTimeout(poll,1200);
 }
 
-async function abrir(tienda){
+async function abrir(tienda,operador){
   STORE=tienda;
   document.getElementById("login").classList.add("hidden");
-  document.getElementById("store").textContent=tienda;
+  document.getElementById("store").textContent=tienda+(operador?" · "+operador:"");
   new QRCode(document.getElementById("qrcode"),{
-    text:CFG.SITE+"/ruleta?screen="+encodeURIComponent(tienda),
+    text:CFG.SITE+"/ruleta?screen="+encodeURIComponent(tienda)+"&op="+encodeURIComponent(operador||""),
     width:220,height:220,colorDark:"#3d2b5e",colorLight:"#f6f1e4",correctLevel:QRCode.CorrectLevel.M
   });
   const c=await api({accion:"ruletaCatalogo"});
@@ -229,8 +230,10 @@ document.getElementById("lg-btn").addEventListener("click",async()=>{
 });
 document.getElementById("st-btn").addEventListener("click",()=>{
   const tienda=document.getElementById("sel-tienda").value;
+  const operador=document.getElementById("sel-operador").value.trim();
   if(!tienda){document.getElementById("lg-err").textContent="Elige un punto.";return;}
-  abrir(tienda);
+  if(!operador){document.getElementById("lg-err").textContent="Escribe el nombre de quien opera.";return;}
+  abrir(tienda,operador);
 });
 document.getElementById("lg-pass").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("lg-btn").click();});
 </script>
