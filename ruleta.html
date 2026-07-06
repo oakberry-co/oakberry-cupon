@@ -55,7 +55,7 @@
       <input id="nombre" type="text" autocomplete="name" placeholder="Tu nombre">
       <label for="celular">Celular (WhatsApp)</label>
       <input id="celular" type="tel" inputmode="numeric" autocomplete="tel" placeholder="3001234567" maxlength="13">
-      <label for="email">Email <span style="font-weight:600;color:#9a8e76">(opcional)</span></label>
+      <label for="email">Email <span style="font-weight:600;color:#9a8e76">(para tu tarjeta Oakberry)</span></label>
       <input id="email" type="email" autocomplete="email" placeholder="tu@correo.com">
       <div class="tyc">
         <input id="tyc" type="checkbox">
@@ -150,6 +150,7 @@ document.getElementById("btn-reg").addEventListener("click",async()=>{
   const email=document.getElementById("email").value.trim();
   if(!nombre){err.textContent="Escribe tu nombre.";return;}
   if(celular.replace(/^57/,"").length!==10){err.textContent="Celular inválido (10 dígitos).";return;}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){err.textContent="Escribe un email válido (lo necesita tu tarjeta Oakberry).";return;}
   if(!document.getElementById("tyc").checked){err.textContent="Acepta los términos para continuar.";return;}
   const btn=document.getElementById("btn-reg");btn.disabled=true;btn.textContent="Girando…";
   try{
