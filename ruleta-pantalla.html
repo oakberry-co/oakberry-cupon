@@ -31,7 +31,7 @@
   .top .store{font-size:1.7vh;color:var(--morado-claro);font-weight:700;margin-top:.3vh}
   .cola{display:inline-block;margin-top:.6vh;background:rgba(184,134,11,.25);color:var(--dorado);
         font-weight:800;font-size:1.5vh;padding:.4vh 1.4vh;border-radius:99px}
-  .wheel-wrap{position:relative;width:min(82vw,58vh);height:min(82vw,58vh);margin:1vh auto}
+  .wheel-wrap{position:relative;width:min(92vw,48vh);height:min(92vw,48vh);margin:1vh auto}
   canvas{width:100%;height:100%;border-radius:50%;box-shadow:0 0 0 1.1vh var(--morado),0 0 0 1.6vh var(--dorado),0 2vh 5vh rgba(0,0,0,.5)}
   .pointer{position:absolute;top:-1vh;left:50%;transform:translateX(-50%);z-index:3;width:0;height:0;
         border-left:1.8vh solid transparent;border-right:1.8vh solid transparent;border-top:3vh solid var(--dorado)}
@@ -40,12 +40,12 @@
         font-weight:800;font-size:1.3vh;border:.5vh solid var(--dorado);text-align:center}
   .bottom{flex:1;width:100%;display:flex;gap:2vw;padding:1.5vh 4vw 3vh;align-items:center;justify-content:center}
   .qr-card{background:var(--beige);border-radius:1.6vh;padding:1.8vh;text-align:center}
-  #qrcode img,#qrcode canvas{display:block;width:18vh!important;height:18vh!important}
-  .qr-card .t{color:var(--morado);font-weight:800;font-size:1.8vh;margin-top:1vh}
-  .qr-card .s{color:#6b4e9e;font-weight:700;font-size:1.3vh}
-  .winners{flex:1;max-width:44vw}
-  .winners h3{font-size:1.5vh;color:var(--morado-claro);text-transform:uppercase;letter-spacing:1px;margin-bottom:1vh;text-align:center}
-  .win{background:rgba(255,255,255,.08);border-radius:1vh;padding:1vh 1.4vh;margin-bottom:.7vh;font-size:1.5vh;display:flex;justify-content:space-between;gap:1vh}
+  #qrcode img,#qrcode canvas{display:block;width:24vh!important;height:24vh!important}
+  .qr-card .t{color:var(--morado);font-weight:800;font-size:2.3vh;margin-top:1vh}
+  .qr-card .s{color:#6b4e9e;font-weight:700;font-size:1.6vh}
+  .winners{flex:1;max-width:46vw}
+  .winners h3{font-size:2vh;color:var(--morado-claro);text-transform:uppercase;letter-spacing:1px;margin-bottom:1.2vh;text-align:center}
+  .win{background:rgba(255,255,255,.08);border-radius:1vh;padding:1.2vh 1.6vh;margin-bottom:.9vh;font-size:1.9vh;display:flex;justify-content:space-between;gap:1vh}
   .win b{color:var(--dorado)}
   /* overlay ganador */
   .overlay{position:fixed;inset:0;background:rgba(36,26,60,.94);z-index:20;display:flex;flex-direction:column;
@@ -147,11 +147,12 @@ function spinTo(key){
   return new Promise(resolve=>{
     const N=SEGMENTS.length,ang=2*Math.PI/N;
     let idx=SEGMENTS.findIndex(s=>s.key===key);if(idx<0)idx=0;
-    const center=idx*ang+ang/2,turns=6+Math.floor(Math.random()*2);
+    const center=idx*ang+ang/2,turns=10+Math.floor(Math.random()*3);
     const finalRot=(turns*2*Math.PI)+(-Math.PI/2-center);
-    const dur=4600,t0=performance.now();
-    function frame(t){const p=Math.min(1,(t-t0)/dur);const e=1-Math.pow(1-p,3);drawWheel(e*finalRot);
-      if(p<1)requestAnimationFrame(frame);else resolve();}
+    const dur=8000,t0=performance.now();
+    const ease=p=>1-Math.pow(1-p,4); // easeOutQuart: cola larga, se ve el premio aterrizar
+    function frame(t){const p=Math.min(1,(t-t0)/dur);drawWheel(ease(p)*finalRot);
+      if(p<1)requestAnimationFrame(frame);else{setTimeout(resolve,700);}}
     requestAnimationFrame(frame);
   });
 }
@@ -161,7 +162,7 @@ function overlay(nombre,resultado,premio){
   document.getElementById("ov-who").textContent=resultado==="premio"?("¡"+nombre+" ganó!"):(nombre+"…");
   document.getElementById("ov-prize").textContent=resultado==="premio"?premio:"¡Sigue intentando! 💜";
   ov.classList.add("show");
-  return new Promise(r=>setTimeout(()=>{ov.classList.remove("show");r();},4200));
+  return new Promise(r=>setTimeout(()=>{ov.classList.remove("show");r();},5200));
 }
 function renderWinners(list){
   const box=document.getElementById("win-list");

@@ -29,7 +29,7 @@
   button.wallet{background:var(--morado)}
   .err{color:#c0392b;font-weight:700;font-size:13px;margin-top:10px;min-height:16px}
   .hidden{display:none!important}
-  .wheel-wrap{position:relative;width:min(80vw,320px);height:min(80vw,320px);margin:8px auto}
+  .wheel-wrap{position:relative;width:min(90vw,380px);height:min(90vw,380px);margin:10px auto}
   canvas{width:100%;height:100%;border-radius:50%;box-shadow:0 0 0 8px var(--morado),0 0 0 12px var(--dorado),0 12px 30px rgba(0,0,0,.35)}
   .pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:3;width:0;height:0;
         border-left:14px solid transparent;border-right:14px solid transparent;border-top:24px solid var(--dorado)}
@@ -146,11 +146,12 @@ function spinTo(key){
   return new Promise(resolve=>{
     const N=SEGMENTS.length,ang=2*Math.PI/N;
     let idx=SEGMENTS.findIndex(s=>s.key===key);if(idx<0)idx=0;
-    const center=idx*ang+ang/2,turns=6+Math.floor(Math.random()*2);
+    const center=idx*ang+ang/2,turns=9+Math.floor(Math.random()*3);
     const finalRot=(turns*2*Math.PI)+(-Math.PI/2-center);
-    const dur=4000,t0=performance.now();
-    function frame(t){const p=Math.min(1,(t-t0)/dur);const e=1-Math.pow(1-p,3);drawWheel(e*finalRot);
-      if(p<1)requestAnimationFrame(frame);else resolve();}
+    const dur=7200,t0=performance.now();
+    const ease=p=>1-Math.pow(1-p,4); // easeOutQuart: arranca fuerte, cola larga y lenta
+    function frame(t){const p=Math.min(1,(t-t0)/dur);drawWheel(ease(p)*finalRot);
+      if(p<1)requestAnimationFrame(frame);else{setTimeout(resolve,650);}}
     requestAnimationFrame(frame);
   });
 }
