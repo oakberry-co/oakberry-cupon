@@ -31,19 +31,19 @@
   .top .store{font-size:1.7vh;color:var(--morado-claro);font-weight:700;margin-top:.3vh}
   .cola{display:inline-block;margin-top:.6vh;background:rgba(184,134,11,.25);color:var(--dorado);
         font-weight:800;font-size:1.5vh;padding:.4vh 1.4vh;border-radius:99px}
-  .wheel-wrap{position:relative;width:min(92vw,48vh);height:min(92vw,48vh);margin:1vh auto}
+  .wheel-wrap{position:relative;width:min(96vw,54vh);height:min(96vw,54vh);margin:1.5vh auto}
   canvas{width:100%;height:100%;border-radius:50%;box-shadow:0 0 0 1.1vh var(--morado),0 0 0 1.6vh var(--dorado),0 2vh 5vh rgba(0,0,0,.5)}
   .pointer{position:absolute;top:-1vh;left:50%;transform:translateX(-50%);z-index:3;width:0;height:0;
         border-left:1.8vh solid transparent;border-right:1.8vh solid transparent;border-top:3vh solid var(--dorado)}
-  .hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;width:8vh;height:8vh;border-radius:50%;
-        background:var(--morado);color:var(--beige);display:flex;align-items:center;justify-content:center;
-        font-weight:800;font-size:1.3vh;border:.5vh solid var(--dorado);text-align:center}
-  .bottom{flex:1;width:100%;display:flex;gap:2vw;padding:1.5vh 4vw 3vh;align-items:center;justify-content:center}
-  .qr-card{background:var(--beige);border-radius:1.6vh;padding:1.8vh;text-align:center}
-  #qrcode img,#qrcode canvas{display:block;width:24vh!important;height:24vh!important}
-  .qr-card .t{color:var(--morado);font-weight:800;font-size:2.3vh;margin-top:1vh}
-  .qr-card .s{color:#6b4e9e;font-weight:700;font-size:1.6vh}
-  .winners{flex:1;max-width:46vw}
+  /* QR al CENTRO de la rueda (fijo, no gira) */
+  .qr-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;
+        width:34%;height:34%;border-radius:12px;background:var(--beige);padding:1.4%;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 0 0 .5vh var(--dorado),0 4px 16px rgba(0,0,0,.45)}
+  #qrcode{width:100%;height:100%;line-height:0}
+  #qrcode img,#qrcode canvas{display:block;width:100%!important;height:100%!important;border-radius:4px}
+  .scan-hint{text-align:center;font-weight:800;color:var(--dorado);font-size:2.4vh;margin:.6vh 0 1.2vh}
+  .winners{width:92vw;max-width:820px;margin:0 auto;padding-bottom:2vh}
   .winners h3{font-size:2vh;color:var(--morado-claro);text-transform:uppercase;letter-spacing:1px;margin-bottom:1.2vh;text-align:center}
   .win{background:rgba(255,255,255,.08);border-radius:1vh;padding:1.2vh 1.6vh;margin-bottom:.9vh;font-size:1.9vh;display:flex;justify-content:space-between;gap:1vh}
   .win b{color:var(--dorado)}
@@ -91,15 +91,10 @@
   <div class="wheel-wrap">
     <div class="pointer"></div>
     <canvas id="wheel" width="900" height="900"></canvas>
-    <div class="hub">OAK<br>BERRY</div>
+    <div class="qr-hub"><div id="qrcode"></div></div>
   </div>
-  <div class="bottom">
-    <div class="qr-card"><div id="qrcode"></div>
-      <div class="t">Escanea y juega 👆</div>
-      <div class="s">Regístrate desde tu celular</div>
-    </div>
-    <div class="winners"><h3>✨ Ganadores de hoy</h3><div id="win-list"></div></div>
-  </div>
+  <div class="scan-hint">📲 Escanea el QR del centro y juega</div>
+  <div class="winners"><h3>✨ Ganadores de hoy</h3><div id="win-list"></div></div>
 
   <!-- overlay ganador -->
   <div class="overlay" id="overlay">
@@ -197,7 +192,7 @@ async function abrir(tienda,operador){
   document.getElementById("store").textContent=tienda+(operador?" · "+operador:"");
   new QRCode(document.getElementById("qrcode"),{
     text:CFG.SITE+"/ruleta?screen="+encodeURIComponent(tienda)+"&op="+encodeURIComponent(operador||""),
-    width:220,height:220,colorDark:"#3d2b5e",colorLight:"#f6f1e4",correctLevel:QRCode.CorrectLevel.M
+    width:340,height:340,colorDark:"#3d2b5e",colorLight:"#f6f1e4",correctLevel:QRCode.CorrectLevel.M
   });
   const c=await api({accion:"ruletaCatalogo"});
   if(c&&c.ok){SEGMENTS=c.segmentos||[];drawWheel(-Math.PI/2);}
