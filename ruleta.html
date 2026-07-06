@@ -85,7 +85,7 @@
       <div id="res-code-wrap" class="hidden">
         <div class="muted">Tu código</div>
         <div class="code" id="res-code"></div>
-        <div class="muted">Te lo enviamos al WhatsApp. Muéstralo en caja.</div>
+        <div class="muted">Te lo enviamos al WhatsApp. Muéstralo en caja de <b>esta tienda</b> · válido <b>5 horas</b>.</div>
       </div>
       <div class="look" id="res-look"></div>
       <a id="btn-wallet" class="hidden"><button class="cta wallet" type="button" style="margin-top:14px">📲 Agregar mi tarjeta Oakberry a Wallet</button></a>
@@ -111,6 +111,17 @@ function fetchGET(params){
   });
 }
 async function api(p){try{return await fetchGET(p);}catch(e){await new Promise(r=>setTimeout(r,400));return await fetchGET(p);}}
+
+// Huella de dispositivo (anti-farmeo): canvas + tamaño de pantalla → hash corto.
+function fingerprint(){
+  try{
+    const c=document.createElement("canvas"),ctx=c.getContext("2d");
+    ctx.textBaseline="top";ctx.font="14px Arial";ctx.fillStyle="#f60";ctx.fillRect(0,0,60,20);
+    ctx.fillStyle="#069";ctx.fillText("oakberry-ruleta",2,2);
+    const d=c.toDataURL();let h=0;for(let i=0;i<d.length;i++){h=(h*31+d.charCodeAt(i))>>>0;}
+    return "fp"+h.toString(36)+"_"+screen.width+"x"+screen.height;
+  }catch(e){return "";}
+}
 
 function isLight(hex){const c=hex.replace('#','');const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);return(0.299*r+0.587*g+0.114*b)>150;}
 function drawWheel(rot){
@@ -154,7 +165,7 @@ document.getElementById("btn-reg").addEventListener("click",async()=>{
   if(!document.getElementById("tyc").checked){err.textContent="Acepta los términos para continuar.";return;}
   const btn=document.getElementById("btn-reg");btn.disabled=true;btn.textContent="Girando…";
   try{
-    const r=await api({accion:"ruletaRegistrar",nombre,celular,email,screen:SCREEN});
+    const r=await api({accion:"ruletaRegistrar",nombre,celular,email,screen:SCREEN,fingerprint:fingerprint()});
     if(!r||!r.ok){err.textContent=(r&&r.mensaje)||"Error, intenta de nuevo.";btn.disabled=false;btn.textContent="Registrarme y girar 🎡";return;}
     WALLET_URL=r.walletUrl||"";
     if(SEGMENTS.length){ show("view-spin"); await spinTo(r.premioKey); }
