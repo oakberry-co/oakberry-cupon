@@ -30,6 +30,8 @@
     { "source": "/encuesta",       "destination": "/encuesta.html"            },
     { "source": "/cuentanos",      "destination": "/cuentanos.html"           },
     { "source": "/uet",            "destination": "/uet.html"                 },
+    { "source": "/ruleta-pantalla", "destination": "/ruleta-pantalla.html"    },
+    { "source": "/ruleta",         "destination": "/ruleta.html"              },
     { "source": "/api/(.*)",       "destination": "/api/$1"                   }
   ]
 }
