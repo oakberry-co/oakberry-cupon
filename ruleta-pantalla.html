@@ -67,21 +67,11 @@
   <div id="login">
     <div class="box">
       <h2>🎡 Ruleta Oakberry</h2>
-      <!-- paso 1: credenciales -->
-      <div id="step-cred">
-        <p>Ingresa con tu usuario de cajero</p>
-        <input id="lg-user" type="text" placeholder="Usuario" autocomplete="username">
-        <input id="lg-pass" type="password" placeholder="Contraseña" autocomplete="current-password">
-        <button id="lg-btn">Continuar</button>
-      </div>
-      <!-- paso 2: elegir tienda -->
-      <div id="step-store" class="hidden">
-        <p>¿En qué punto estás?</p>
-        <select id="sel-ciudad" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e"></select>
-        <select id="sel-tienda" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e"></select>
-        <input id="sel-operador" type="text" placeholder="Nombre de quien opera" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e">
-        <button id="st-btn">Abrir ruleta 🎡</button>
-      </div>
+      <p>Elige el punto y quién la inicia</p>
+      <select id="sel-ciudad" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e"></select>
+      <select id="sel-tienda" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e"></select>
+      <input id="sel-operador" type="text" placeholder="Tu nombre" style="width:100%;padding:13px;margin-top:10px;border:2px solid #d8cdb5;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;color:#3d2b5e">
+      <button id="st-btn">Abrir ruleta 🎡</button>
       <div class="err" id="lg-err"></div>
     </div>
   </div>
@@ -217,14 +207,11 @@ async function abrir(tienda,operador){
 }
 
 let CATALOGO_TIENDAS={};
-async function irAPasoTienda(){
+async function cargarTiendas(){
   const r=await api({accion:"obtenerTodo"});
   const ciudades=(r&&r.ciudades)||[]; CATALOGO_TIENDAS=(r&&r.tiendas)||{};
-  const selC=document.getElementById("sel-ciudad");
-  selC.innerHTML=ciudades.map(c=>`<option value="${c}">${c}</option>`).join("");
+  document.getElementById("sel-ciudad").innerHTML=ciudades.map(c=>`<option value="${c}">${c}</option>`).join("");
   llenarTiendas();
-  document.getElementById("step-cred").classList.add("hidden");
-  document.getElementById("step-store").classList.remove("hidden");
 }
 function llenarTiendas(){
   const c=document.getElementById("sel-ciudad").value;
@@ -233,24 +220,15 @@ function llenarTiendas(){
 }
 document.getElementById("sel-ciudad").addEventListener("change",llenarTiendas);
 
-document.getElementById("lg-btn").addEventListener("click",async()=>{
-  const err=document.getElementById("lg-err");err.textContent="";
-  const usuario=document.getElementById("lg-user").value.trim();
-  const pass=document.getElementById("lg-pass").value;
-  if(!usuario||!pass){err.textContent="Completa usuario y contraseña.";return;}
-  const btn=document.getElementById("lg-btn");btn.disabled=true;btn.textContent="Entrando…";
-  const r=await api({accion:"login",usuario,pass});
-  if(!r||!r.ok){err.textContent=(r&&r.mensaje)||"Usuario o contraseña incorrectos.";btn.disabled=false;btn.textContent="Continuar";return;}
-  await irAPasoTienda();
-});
 document.getElementById("st-btn").addEventListener("click",()=>{
+  const err=document.getElementById("lg-err");err.textContent="";
   const tienda=document.getElementById("sel-tienda").value;
   const operador=document.getElementById("sel-operador").value.trim();
-  if(!tienda){document.getElementById("lg-err").textContent="Elige un punto.";return;}
-  if(!operador){document.getElementById("lg-err").textContent="Escribe el nombre de quien opera.";return;}
+  if(!tienda){err.textContent="Elige un punto.";return;}
+  if(!operador){err.textContent="Escribe tu nombre.";return;}
   abrir(tienda,operador);
 });
-document.getElementById("lg-pass").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("lg-btn").click();});
+cargarTiendas();
 </script>
 </body>
 </html>
