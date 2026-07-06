@@ -36,12 +36,13 @@
   .pointer{position:absolute;top:-1vh;left:50%;transform:translateX(-50%);z-index:3;width:0;height:0;
         border-left:1.8vh solid transparent;border-right:1.8vh solid transparent;border-top:3vh solid var(--dorado)}
   /* QR al CENTRO de la rueda (fijo, no gira) */
+  /* Medallón redondo: QR cuadrado inscrito en un círculo beige con anillo dorado */
   .qr-hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;
-        width:34%;height:34%;border-radius:12px;background:var(--beige);padding:1.4%;
+        width:42%;height:42%;border-radius:50%;background:var(--beige);
         display:flex;align-items:center;justify-content:center;
-        box-shadow:0 0 0 .5vh var(--dorado),0 4px 16px rgba(0,0,0,.45)}
-  #qrcode{width:100%;height:100%;line-height:0}
-  #qrcode img,#qrcode canvas{display:block;width:100%!important;height:100%!important;border-radius:4px}
+        box-shadow:0 0 0 .6vh var(--dorado),0 4px 18px rgba(0,0,0,.45)}
+  #qrcode{width:66%;height:66%;line-height:0}
+  #qrcode img,#qrcode canvas{display:block;width:100%!important;height:100%!important}
   .scan-hint{text-align:center;font-weight:800;color:var(--dorado);font-size:2.4vh;margin:.6vh 0 1.2vh}
   .winners{width:92vw;max-width:820px;margin:0 auto;padding-bottom:2vh}
   .winners h3{font-size:2vh;color:var(--morado-claro);text-transform:uppercase;letter-spacing:1px;margin-bottom:1.2vh;text-align:center}
