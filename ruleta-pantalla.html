@@ -124,7 +124,7 @@ function fetchGET(params){
     const t=setTimeout(()=>{if(!done){clean();reject(new Error("t"));}},12000);
   });
 }
-async function api(p){try{return await fetchGET(p);}catch(e){return null;}}
+async function api(p){try{return await fetchGET(p);}catch(e){try{await new Promise(r=>setTimeout(r,400));return await fetchGET(p);}catch(e2){return null;}}}
 
 function isLight(hex){const c=hex.replace('#','');const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);return(0.299*r+0.587*g+0.114*b)>150;}
 function drawWheel(rot){
@@ -145,7 +145,8 @@ function drawWheel(rot){
 }
 function spinTo(key){
   return new Promise(resolve=>{
-    const N=SEGMENTS.length,ang=2*Math.PI/N;
+    const N=SEGMENTS.length; if(!N){resolve();return;}
+    const ang=2*Math.PI/N;
     let idx=SEGMENTS.findIndex(s=>s.key===key);if(idx<0)idx=0;
     const center=idx*ang+ang/2,turns=10+Math.floor(Math.random()*3);
     const finalRot=(turns*2*Math.PI)+(-Math.PI/2-center);
@@ -175,18 +176,19 @@ function setCola(n){
 }
 
 async function poll(){
-  if(SPINNING){setTimeout(poll,1000);return;}
+  if(SPINNING){setTimeout(poll,800);return;}
   const r=await api({accion:"ruletaPantallaEstado",screen:STORE});
   if(r&&r.ok){
     renderWinners(r.ganadores); setCola(r.cola||0);
     if(r.giro){
       SPINNING=true;
+      if(!SEGMENTS.length){const c=await api({accion:"ruletaCatalogo"});if(c&&c.ok){SEGMENTS=c.segmentos||[];drawWheel(-Math.PI/2);}}
       await spinTo(r.giro.premioKey);
       await overlay(r.giro.nombre,r.giro.resultado,r.giro.premioLabel);
       SPINNING=false;
     }
   }
-  setTimeout(poll,1200);
+  setTimeout(poll,900);
 }
 
 async function abrir(tienda,operador){
