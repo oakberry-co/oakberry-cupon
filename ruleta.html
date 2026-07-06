@@ -87,7 +87,11 @@
       <div id="res-code-wrap" class="hidden">
         <div class="muted">Tu código</div>
         <div class="code" id="res-code"></div>
-        <div class="muted">Te lo enviamos al WhatsApp. Muéstralo en caja de <b>esta tienda</b> · válido <b>5 horas</b>.</div>
+        <div class="muted" id="res-vig">Te lo enviamos al WhatsApp. Muéstralo en caja de <b>esta tienda</b> · válido <b>5 horas</b>.</div>
+      </div>
+      <div id="res-cond" class="hidden" style="background:#fff;border:2px solid var(--dorado);border-radius:12px;padding:12px;margin:10px 2px;font-size:13px;font-weight:600;color:var(--morado);text-align:left;line-height:1.45">
+        🤑 <b>Condiciones del mes de açaí gratis</b><br>
+        Hasta <b>6 bowls de 9 oz</b> (sin toppings extra) durante el mes. Presenta <b>este mismo código</b> hasta 6 veces en esta tienda. Válido 30 días.
       </div>
       <div class="look" id="res-look"></div>
       <a id="btn-wallet" class="hidden"><button class="cta wallet" type="button" style="margin-top:14px">📲 Agregar mi tarjeta Oakberry a Wallet</button></a>
@@ -180,11 +184,18 @@ document.getElementById("btn-reg").addEventListener("click",async()=>{
 
 function mostrarResultado(r){
   const gano=r.resultado==="premio";
-  document.getElementById("res-headline").textContent=gano?"🎉 ¡Felicitaciones!":"¡Casi! Gracias por jugar 💜";
+  const jackpot=r.premioKey==="jackpot";
+  document.getElementById("res-headline").textContent=gano?(jackpot?"🤑 ¡JACKPOT!":"🎉 ¡Felicitaciones!"):"¡Casi! Gracias por jugar 💜";
   document.getElementById("res-prize").textContent=gano?r.premioLabel:"Sigue intentando";
   const cw=document.getElementById("res-code-wrap");
   if(gano&&r.codigo){document.getElementById("res-code").textContent=r.codigo;cw.classList.remove("hidden");}
   else cw.classList.add("hidden");
+  document.getElementById("res-cond").classList.toggle("hidden",!jackpot);
+  if(gano&&r.codigo){
+    document.getElementById("res-vig").innerHTML=jackpot
+      ?"Te lo enviamos al WhatsApp. <b>Guárdalo</b>: sirve hasta 6 veces 👇"
+      :"Te lo enviamos al WhatsApp. Muéstralo en caja de <b>esta tienda</b> · válido <b>5 horas</b>.";
+  }
   document.getElementById("res-look").textContent=r.yaGiro?"Ya habías jugado 🙂":"¡Míralo también en la pantalla! 📺";
   if(WALLET_URL){const w=document.getElementById("btn-wallet");w.href=WALLET_URL;w.classList.remove("hidden");}
   show("view-result");
