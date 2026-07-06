@@ -11,7 +11,8 @@
   :root{--beige:#f6f1e4;--morado:#3d2b5e;--morado-claro:#9b85c4;--dorado:#b8860b}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
-  body{font-family:'Montserrat',sans-serif;background:radial-gradient(circle at 50% 25%,#4a3470,#241a3c);
+  body{font-family:'Montserrat',sans-serif;
+       background:linear-gradient(rgba(36,26,60,.84),rgba(36,26,60,.93)),url('/bg.png') center/cover fixed;
        color:var(--beige);height:100vh;display:flex;flex-direction:column;align-items:center}
   /* login */
   #login{position:fixed;inset:0;z-index:50;background:#241a3c;display:flex;flex-direction:column;
@@ -81,7 +82,8 @@
 
   <!-- SHOW -->
   <div class="top">
-    <h1>🎡 Ruleta <span>Oakberry</span></h1>
+    <img src="/email-logo-cream.png" alt="Oakberry" style="height:4.4vh;margin-bottom:.6vh;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))">
+    <h1 style="font-size:2.6vh;letter-spacing:3px;color:var(--dorado)">🎡 RULETA</h1>
     <div class="store" id="store"></div>
     <div class="cola hidden" id="cola"></div>
   </div>
