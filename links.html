@@ -182,6 +182,36 @@
   .tl-onces{background:#5F4B8B;color:#e8e0ff;}
   .tl-cena{background:#1a3a2a;color:#39d98a;}
   .tl-noche{background:#0e0b16;color:#6680cc;border:1px solid rgba(102,128,204,0.3);}
+
+  /* ── Tab Amigos (programa AMG) ── */
+  .amigos-section{background:rgba(245,200,66,0.05);border:1px solid rgba(245,200,66,0.18);border-radius:14px;padding:18px;margin-bottom:16px;}
+  .amigos-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:rgba(245,200,66,0.85);font-family:'Space Mono',monospace;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+  .amigos-title::before{content:'';display:block;width:3px;height:12px;background:var(--y);border-radius:2px;}
+  .amg-chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px;}
+  .amg-chip{display:inline-block;border:1.4px solid var(--border);border-radius:18px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;user-select:none;color:var(--text);background:var(--card2);transition:all 0.15s;}
+  .amg-chip:hover{border-color:rgba(95,75,139,0.6);}
+  .amg-chip.sel{background:var(--p);color:#fff;border-color:var(--p);}
+  .amg-dia{border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--card2);}
+  .amg-dia.on{border-color:rgba(95,75,139,0.7);box-shadow:0 0 0 2px rgba(95,75,139,0.15);}
+  .amg-dia .dia-body{display:none;margin-top:10px;}
+  .amg-dia.on .dia-body{display:block;}
+  .amg-dia-head{display:flex;align-items:center;gap:10px;}
+  .amg-dia-head .nom{font-weight:700;font-size:13px;flex:1;}
+  .amg-switch{position:relative;width:42px;height:24px;flex:0 0 42px;}
+  .amg-switch input{display:none;width:auto;}
+  .amg-switch .slider{position:absolute;inset:0;background:rgba(128,128,160,0.45);border-radius:24px;transition:.2s;cursor:pointer;}
+  .amg-switch .slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+  .amg-switch input:checked + .slider{background:var(--green);}
+  .amg-switch input:checked + .slider:before{transform:translateX(18px);}
+  .amg-rung{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .amg-rung .rnum{font-weight:700;font-size:10px;min-width:86px;color:var(--accent);font-family:'Space Mono',monospace;}
+  .amg-rung select{flex:1;min-width:0;width:auto;}
+  .amg-rung .rdel{cursor:pointer;color:var(--red);font-weight:700;padding:4px 8px;}
+  .amg-addrung{border:1.5px dashed var(--p);background:transparent;color:var(--text);font-weight:700;border-radius:10px;padding:9px 14px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;width:100%;text-transform:uppercase;letter-spacing:1px;}
+  .amg-addrung:hover{background:rgba(95,75,139,0.12);}
+  .history-badge.amigos{background:rgba(245,200,66,0.15);color:var(--accent);}
+  input[type="date"]{color-scheme:dark;}
+  :root[data-theme="light"] input[type="date"]{color-scheme:light;}
 </style>
 </head>
 <body>
@@ -192,7 +222,7 @@
       <div class="logo-icon">🫐</div>
       <div>
         <div class="logo-text">Oakberry</div>
-        <div class="logo-sub">Generador de Links · Pauta & Reactivación</div>
+        <div class="logo-sub">Generador de Links · Pauta · Físico · Amigos</div>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
@@ -215,6 +245,7 @@
         <button class="tab active" id="tab-cupon"    onclick="setModo('cupon')">🎟 Cupón</button>
         <button class="tab"        id="tab-sorteo"   onclick="setModo('sorteo')">🏆 Sorteo</button>
         <button class="tab"        id="tab-fisico"   onclick="setModo('fisico')">📺 Canal físico</button>
+        <button class="tab"        id="tab-amigos"   onclick="setModo('amigos')">🤝 Amigos</button>
       </div>
 
       <!-- ════════════════════════════════════════
@@ -574,6 +605,106 @@
         </div>
       </div>
 
+      <!-- ════════════════════════════════════════
+           MODO AMIGOS (programa AMG · empresas B2B2C)
+      ════════════════════════════════════════ -->
+      <div id="modoAmigos" style="display:none;">
+
+        <div class="amigos-section">
+          <div class="amigos-title">Amigos de Oakberry · empresa + QR de registro</div>
+          <div class="hint" style="margin-top:0;">
+            Crea (o edita) una <strong>empresa aliada</strong> del programa Amigos: bienvenida,
+            estrategia de descuentos y tiendas donde aplica. Al generar se crea la empresa en el
+            backend y sale el <strong>link de registro + QR</strong> para repartir a los colaboradores.
+          </div>
+        </div>
+
+        <div class="divider">Editar empresa existente</div>
+        <div class="field">
+          <label>Carga una empresa creada para cambiar su estrategia · el QR/link no cambia</label>
+          <div style="display:flex;gap:8px;">
+            <select id="amg-editSel" style="flex:1;min-width:0;"><option value="">— Nueva empresa —</option></select>
+            <button type="button" class="action-btn" style="flex:0 0 auto;" onclick="amgCargarSeleccionada()">Cargar</button>
+          </div>
+          <div id="amg-editBanner" class="hint" style="display:none;margin-top:8px;color:var(--accent);"></div>
+        </div>
+
+        <div class="divider">Empresa y tiendas</div>
+        <div class="row">
+          <div class="field"><label>Empresa / aliado</label><input id="amg-empresa" placeholder="Ej: Claro"></div>
+          <div class="field"><label>Centro comercial</label><input id="amg-cc" placeholder="Ej: Plaza Claro"></div>
+        </div>
+        <div class="field" style="position:relative;">
+          <label>Tiendas · la 1ª marcada es la principal (valle + canje)</label>
+          <div class="ms-box" id="amg-mselBox" onclick="amgToggleMsel(event)">
+            <div class="ms-chips" id="amg-mselChips"><span class="ms-placeholder">Selecciona tiendas</span></div>
+            <span class="ms-caret">▾</span>
+          </div>
+          <div id="amg-mselPanel" class="ms-panel" style="display:none;"></div>
+        </div>
+        <div class="field">
+          <label>Campeón interno (quien reparte el QR · opcional)</label>
+          <input id="amg-campeon" placeholder="Nombre / contacto">
+        </div>
+        <div class="row">
+          <div class="field"><label>Inicio del programa (opcional)</label><input id="amg-fechaInicio" type="date"></div>
+          <div class="field"><label>Fin del programa (opcional)</label><input id="amg-fechaFin" type="date"></div>
+        </div>
+        <div class="field">
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-bottom:0;">
+            <input type="checkbox" id="amg-esControl" style="width:auto;"> Grupo de control (sin misión ni recordatorios — mide incrementalidad)
+          </label>
+        </div>
+
+        <div class="divider">Bienvenida · gancho del primer producto</div>
+        <div class="row">
+          <div class="field"><label>Primeros N · bowl 7oz gratis</label><input id="amg-cupoGratis" type="number" min="0" value="50"></div>
+          <div class="field"><label>Siguientes M · bowl 7oz con %</label><input id="amg-cupo50" type="number" min="0" value="100"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>% del segundo tramo</label><input id="amg-desc50" type="number" min="0" max="100" value="50"></div>
+          <div class="field"><label>Vigencia del cupón (horas)</label><input id="amg-vig" type="number" min="1" value="48"></div>
+        </div>
+        <div class="hint" style="margin-bottom:4px;">Ej: primeros 50 → bowl 7oz <strong>GRATIS</strong>; siguientes 100 → al <strong>50%</strong>. La landing muestra cuántos quedan.</div>
+
+        <div class="divider">Estrategia</div>
+        <div class="amg-chips" id="amg-modoToggle">
+          <span class="amg-chip sel" data-modo="calendario">Calendario por día</span>
+          <span class="amg-chip" data-modo="escalado">Escalera por compra</span>
+        </div>
+
+        <div id="amg-escaleraWrap" style="display:none;margin-bottom:16px;">
+          <label>🎯 Misión "3 en 45" — la compra 1 es la bienvenida; define compra 2, 3…</label>
+          <div id="amg-escalera" style="margin-top:8px;"></div>
+          <button type="button" class="amg-addrung" onclick="amgAddRung(30)">+ Agregar paso</button>
+          <div class="row" style="margin-top:12px;">
+            <div class="field"><label>Días para completar la misión</label><input id="amg-misionDias" type="number" min="7" value="45"></div>
+          </div>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer;">
+            <input type="checkbox" id="amg-escaleraLuego" checked style="width:auto;"> Al completar la misión, seguir con el calendario
+          </label>
+          <div class="hint">El último paso puede ser 🎁 Bowl GRATIS como premio de cierre. Fuera de la ventana no aplica la escalera.</div>
+        </div>
+
+        <label>Calendario por día</label>
+        <div id="amg-dias" style="margin-top:8px;"></div>
+        <div class="hint" style="margin-bottom:14px;">Por día activo: descuento o topping → productos → franjas (🟢 valle sugerido · 🔴 pico, no descontar).</div>
+
+        <button class="gen-btn" id="amg-generar" onclick="amgGenerar()">⚡ Crear empresa + generar QR</button>
+
+        <!-- QR + pieza generados -->
+        <div id="amg-result" style="display:none;margin-top:20px;background:var(--card2);border:1px dashed rgba(245,200,66,0.4);border-radius:14px;padding:20px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--accent);font-family:'Space Mono',monospace;margin-bottom:14px;">QR de registro · repartir a colaboradores</div>
+          <div style="background:#fff;display:inline-block;padding:16px;border-radius:12px;"><canvas id="amg-qrCanvas" style="max-width:280px;width:100%;height:auto;display:block;"></canvas></div>
+          <div class="link-actions" style="margin-top:16px;">
+            <button class="action-btn primary" onclick="amgDescargarQR()">⬇ QR (PNG)</button>
+            <button class="action-btn" onclick="amgDescargarPieza()">⬇ Pieza lista</button>
+            <button class="action-btn" onclick="amgEnviarWA()">📲 WhatsApp</button>
+          </div>
+        </div>
+        <canvas id="amg-piezaCanvas" width="1080" height="1350" style="display:none;"></canvas>
+      </div>
+
     </div>
   </div>
 
@@ -905,17 +1036,398 @@ function descargarQR() {
 }
 
 
+// ── AMIGOS (programa AMG · empresas B2B2C) ────────────────
+// Backend propio del programa (Flask · api.oakberry-cupones.com), distinto al
+// Apps Script de pauta. Catálogos y empresas viven en Postgres oakberry_adq.
+const AMIGOS_API = "https://api.oakberry-cupones.com/";
+const AMG_DIAS = [[1,"Lunes"],[2,"Martes"],[3,"Miércoles"],[4,"Jueves"],[5,"Viernes"],[6,"Sábado"],[7,"Domingo"]];
+const AMG_FRANJAS = [
+  {id:"desayuno", lbl:"Desayuno 8-12", rango:"08:00-12:00"},
+  {id:"almuerzo", lbl:"Almuerzo 12-3", rango:"12:00-15:00"},
+  {id:"onces",    lbl:"Onces 3-6",     rango:"15:00-18:00"},
+  {id:"cena",     lbl:"Cena 6-9",      rango:"18:00-21:00"},
+];
+const AMG_ESC_OPTS = [{v:15,l:"15% OFF"},{v:25,l:"25% OFF"},{v:30,l:"30% OFF"},{v:35,l:"35% OFF"},{v:40,l:"40% OFF"},{v:100,l:"🎁 Bowl 7oz GRATIS"}];
+let AMG_CAT = null, AMG_LINK = "", AMG_TIENDAS_SEL = [], AMG_EDIT = "", AMG_VALLE = {}, amgModoSel = "calendario";
+
+function amgJsonp(params) {
+  return new Promise(resolve => {
+    const cb = "__amg" + Math.random().toString(36).slice(2);
+    const s  = document.createElement("script");
+    const to = setTimeout(() => { cleanup(); resolve({ok:false, mensaje:"timeout"}); }, 15000);
+    function cleanup(){ try{delete window[cb];}catch(e){} if(s.parentNode) s.parentNode.removeChild(s); clearTimeout(to); }
+    window[cb] = r => { cleanup(); resolve(r||{}); };
+    params.set("callback", cb);
+    s.src = AMIGOS_API + "?" + params.toString();
+    s.onerror = () => { cleanup(); resolve({ok:false, mensaje:"network"}); };
+    document.body.appendChild(s);
+  });
+}
+function amgPretty(sc){ const p=sc.split("_"); return p.slice(2).join(" ").replace(/([A-Z])/g," $1").trim()+" ("+p[0]+")"; }
+
+// Init perezoso: solo carga catálogos/empresas la primera vez que se abre el tab
+let _amgInitPromise = null;
+function amgInit(){ if (!_amgInitPromise) _amgInitPromise = _amgInitReal(); return _amgInitPromise; }
+async function _amgInitReal() {
+  const r = await amgJsonp(new URLSearchParams({accion:"obtenerCatalogos"}));
+  if (!r.ok || !r.tiendas) { showToast("⚠ No cargaron los catálogos de Amigos"); _amgInitPromise = null; return; }
+  AMG_CAT = r;
+  const panel = document.getElementById("amg-mselPanel");
+  panel.addEventListener("click", e => e.stopPropagation());
+  AMG_CAT.tiendas.forEach(sc => {
+    const lab = document.createElement("label"); lab.className = "ms-item";
+    lab.innerHTML = `<input type="checkbox" value="${sc}"><span>${amgPretty(sc)}</span>` +
+      `<span class="pri" style="display:none;margin-left:auto;font-size:9px;font-weight:700;color:var(--accent);font-family:'Space Mono',monospace;">PRINCIPAL</span>`;
+    lab.querySelector("input").addEventListener("change", e => amgMselChange(sc, e.target.checked));
+    panel.appendChild(lab);
+  });
+  amgConstruirDias();
+  amgAddRung(30); amgAddRung(100);   // misión por defecto: compra 2 = 30%, compra 3 = Bowl GRATIS
+  document.querySelectorAll("#amg-modoToggle .amg-chip").forEach(c => c.addEventListener("click", () => {
+    document.querySelectorAll("#amg-modoToggle .amg-chip").forEach(x => x.classList.remove("sel"));
+    c.classList.add("sel"); amgModoSel = c.dataset.modo;
+    document.getElementById("amg-escaleraWrap").style.display = amgModoSel === "escalado" ? "block" : "none";
+  }));
+  const sel = document.getElementById("amg-editSel");
+  const le  = await amgJsonp(new URLSearchParams({accion:"listarEmpresas"}));
+  (le.empresas||[]).forEach(e => {
+    const o = document.createElement("option"); o.value = e.empresa;
+    o.textContent = e.empresa + " · " + (e.centro_comercial||"") + " (" + (e.registrados||0) + " reg.)";
+    sel.appendChild(o);
+  });
+}
+
+// ── Multi-select de tiendas del programa ──
+function amgToggleMsel(ev) {
+  ev.stopPropagation();
+  const p = document.getElementById("amg-mselPanel"), b = document.getElementById("amg-mselBox");
+  const abrir = p.style.display === "none";
+  p.style.display = abrir ? "block" : "none";
+  b.classList.toggle("open", abrir);
+}
+document.addEventListener("click", e => {
+  const panel = document.getElementById("amg-mselPanel");
+  if (!panel || panel.style.display === "none") return;
+  const box = document.getElementById("amg-mselBox");
+  if (!panel.contains(e.target) && !box.contains(e.target)) { panel.style.display = "none"; box.classList.remove("open"); }
+});
+function amgMselChange(sc, checked) {
+  if (checked) { if (!AMG_TIENDAS_SEL.includes(sc)) AMG_TIENDAS_SEL.push(sc); }
+  else AMG_TIENDAS_SEL = AMG_TIENDAS_SEL.filter(x => x !== sc);
+  amgRenderMsel();
+  amgCargarValle(AMG_TIENDAS_SEL[0] || "");
+}
+function amgRenderMsel() {
+  const chips = document.getElementById("amg-mselChips");
+  if (!AMG_TIENDAS_SEL.length) chips.innerHTML = '<span class="ms-placeholder">Selecciona tiendas</span>';
+  else chips.innerHTML = AMG_TIENDAS_SEL.map((sc,i) =>
+    `<span class="ms-chip"><b>${i===0?"★ ":""}${amgPretty(sc)}</b></span>`).join("");
+  document.querySelectorAll("#amg-mselPanel .ms-item").forEach(o => {
+    o.querySelector(".pri").style.display = (AMG_TIENDAS_SEL[0] === o.querySelector("input").value) ? "inline-block" : "none";
+  });
+}
+
+// ── Grilla de días (calendario) ──
+function amgConstruirDias() {
+  const cont = document.getElementById("amg-dias");
+  cont.innerHTML = "";
+  const descClub = (AMG_CAT.descuentos||[]).filter(d => !d.es_bienvenida);
+  const optsPct  = descClub.filter(d => d.tipo === "pct")
+    .map(d => `<option value="${d.descuento_id}">${d.etiqueta}</option>`).join("");
+  AMG_DIAS.forEach(([num, nom]) => {
+    const div = document.createElement("div"); div.className = "amg-dia"; div.dataset.dia = num;
+    div.innerHTML = `
+      <div class="amg-dia-head">
+        <label class="amg-switch"><input type="checkbox" class="diaOn"><span class="slider"></span></label>
+        <span class="nom">${nom}</span>
+      </div>
+      <div class="dia-body">
+        <label>¿Qué das este día?</label>
+        <div class="amg-chips ptToggle">
+          <span class="amg-chip pt sel" data-pt="producto">Descuento en bowl</span>
+          <span class="amg-chip pt" data-pt="topping">Topping gratis</span>
+        </div>
+        <div class="ptProducto">
+          <div class="field"><label>Descuento</label><select class="descSel">${optsPct}</select></div>
+          <label>Bowls que aplican</label>
+          <div class="amg-chips prodChips"></div>
+        </div>
+        <div class="ptTopping" style="display:none">
+          <label>Toppings (el cliente elige 1 gratis)</label>
+          <div class="amg-chips topChips"></div>
+        </div>
+        <label>Franjas — 🟢 valle sugerido · 🔴 pico</label>
+        <div class="amg-chips franjaChips"></div>
+      </div>`;
+    cont.appendChild(div);
+    const on = div.querySelector(".diaOn");
+    on.addEventListener("change", () => div.classList.toggle("on", on.checked));
+    const fill = (c2, items) => items.forEach(it => {
+      const c = document.createElement("span"); c.className = "amg-chip";
+      c.textContent = it.l; c.dataset.v = it.v; c.onclick = () => c.classList.toggle("sel");
+      c2.appendChild(c);
+    });
+    fill(div.querySelector(".prodChips"), (AMG_CAT.tamanos||[]).map(t => ({v:t.toteat, l:t.etiqueta})));
+    fill(div.querySelector(".topChips"),  (AMG_CAT.toppings||[]).map(t => ({v:t, l:t})));
+    const ptChips = [...div.querySelectorAll(".ptToggle .pt")];
+    ptChips.forEach(c => c.addEventListener("click", () => {
+      ptChips.forEach(x => x.classList.remove("sel")); c.classList.add("sel");
+      const isTop = c.dataset.pt === "topping";
+      div.querySelector(".ptProducto").style.display = isTop ? "none" : "block";
+      div.querySelector(".ptTopping").style.display  = isTop ? "block" : "none";
+    }));
+    amgPintarFranjas(div);
+  });
+}
+
+// ── Franjas + sugerencia valle (data-driven) ──
+function amgPintarFranjas(div) {
+  const dia  = parseInt(div.dataset.dia);
+  const cont = div.querySelector(".franjaChips"); if (!cont) return;
+  const sel  = [...cont.querySelectorAll(".amg-chip.sel")].map(c => c.dataset.rango);
+  cont.innerHTML = "";
+  const v = AMG_VALLE[dia] || {};
+  AMG_FRANJAS.forEach(f => {
+    const info = v[f.id]; let tag = "";
+    if (info) { const ic = info.ranking===1 ? "🟢" : (info.ranking===4 ? "🔴" : ""); tag = ` <span style="font-size:9px;opacity:.75">${ic}${info.pct}%</span>`; }
+    const c = document.createElement("span");
+    c.className = "amg-chip" + (sel.includes(f.rango) ? " sel" : "");
+    c.dataset.rango = f.rango; c.innerHTML = f.lbl + tag;
+    c.onclick = () => c.classList.toggle("sel");
+    cont.appendChild(c);
+  });
+}
+async function amgCargarValle(tienda) {
+  AMG_VALLE = {};
+  try {
+    const r = await amgJsonp(new URLSearchParams({accion:"sugerirFranjas", tienda}));
+    (r.franjas||[]).forEach(f => { (AMG_VALLE[f.dia_semana] = AMG_VALLE[f.dia_semana]||{})[f.franja] = {pct:f.pct, ranking:f.ranking}; });
+  } catch(e) {}
+  document.querySelectorAll("#amg-dias .amg-dia").forEach(amgPintarFranjas);
+}
+
+// ── Escalera por compra (misión 3-en-45) ──
+function amgRenumRungs(){ [...document.querySelectorAll("#amg-escalera .amg-rung")].forEach((r,i) => r.querySelector(".rnum").textContent = "Compra #" + (i+2)); }
+function amgAddRung(pct) {
+  const opts = AMG_ESC_OPTS.map(o => `<option value="${o.v}" ${o.v==pct?"selected":""}>${o.l}</option>`).join("");
+  const row  = document.createElement("div"); row.className = "amg-rung";
+  row.innerHTML = `<span class="rnum"></span><select class="rsel">${opts}</select><span class="rdel">✕</span>`;
+  row.querySelector(".rdel").onclick = () => { row.remove(); amgRenumRungs(); };
+  document.getElementById("amg-escalera").appendChild(row);
+  amgRenumRungs();
+}
+function amgRecogerEscalera(){ return [...document.querySelectorAll("#amg-escalera .rsel")].map(s => parseInt(s.value)); }
+
+function amgRecogerConfig() {
+  const cfg = [];
+  document.querySelectorAll("#amg-dias .amg-dia.on").forEach(div => {
+    const dia   = parseInt(div.dataset.dia);
+    const isTop = div.querySelector(".ptToggle .pt.sel").dataset.pt === "topping";
+    const descuentoId = isTop ? "topping" : div.querySelector(".descSel").value;
+    const prodSel   = isTop ? ".topChips" : ".prodChips";
+    const productos = [...div.querySelectorAll(prodSel + " .amg-chip.sel")].map(c => c.dataset.v);
+    const ventanas  = [...div.querySelectorAll(".franjaChips .amg-chip.sel")].map(c => c.dataset.rango).join(",");
+    cfg.push({dia, descuentoId, ventanas: ventanas || "08:00-12:00", productos});
+  });
+  return cfg;
+}
+
+// ── Modo edición: cargar empresa existente y prellenar ──
+function amgCargarSeleccionada() {
+  const nombre = document.getElementById("amg-editSel").value;
+  if (!nombre) { amgResetEdit(); showToast("Modo nueva empresa"); return; }
+  amgCargarEmpresa(nombre);
+}
+function amgResetEdit() {
+  AMG_EDIT = "";
+  document.getElementById("amg-editBanner").style.display = "none";
+  document.getElementById("amg-generar").textContent = "⚡ Crear empresa + generar QR";
+}
+function amgSetChip(cont, valores){ cont.querySelectorAll(".amg-chip").forEach(c => c.classList.toggle("sel", valores.includes(c.dataset.v))); }
+function amgResetCalendario() {
+  document.querySelectorAll("#amg-dias .amg-dia").forEach(div => {
+    const on = div.querySelector(".diaOn"); on.checked = false; div.classList.remove("on");
+    div.querySelectorAll(".amg-chip.sel").forEach(c => c.classList.remove("sel"));
+    const pts = [...div.querySelectorAll(".ptToggle .pt")];
+    pts.forEach((x,i) => x.classList.toggle("sel", i===0));   // default: producto
+    div.querySelector(".ptProducto").style.display = "block";
+    div.querySelector(".ptTopping").style.display  = "none";
+  });
+}
+async function amgCargarEmpresa(nombre) {
+  const r = await amgJsonp(new URLSearchParams({accion:"cargarConfigEmpresa", empresa:nombre}));
+  if (!r.ok || !r.existe) { showToast("⚠ No se pudo cargar: " + (r.mensaje||nombre)); return; }
+  const c = r.config;
+  document.getElementById("amg-empresa").value     = c.empresa || "";
+  document.getElementById("amg-cc").value          = c.centroComercial || "";
+  document.getElementById("amg-campeon").value     = c.campeonNombre || c.campeonContacto || "";
+  document.getElementById("amg-fechaInicio").value = c.fechaInicio || "";
+  document.getElementById("amg-fechaFin").value    = c.fechaFin || "";
+  document.getElementById("amg-esControl").checked = !!c.esControl;
+  document.getElementById("amg-cupoGratis").value  = c.cupoGratis ?? 0;
+  document.getElementById("amg-cupo50").value      = c.cupo50 ?? 0;
+  document.getElementById("amg-desc50").value      = c.desc50pct ?? 50;
+  document.getElementById("amg-vig").value         = c.vigenciaWelcomeH ?? 48;
+  AMG_TIENDAS_SEL = (c.tiendas||[]).slice();
+  document.querySelectorAll("#amg-mselPanel .ms-item input").forEach(i => { i.checked = AMG_TIENDAS_SEL.includes(i.value); });
+  amgRenderMsel(); await amgCargarValle(AMG_TIENDAS_SEL[0] || "");
+  amgModoSel = c.modo || "calendario";
+  document.querySelectorAll("#amg-modoToggle .amg-chip").forEach(x => x.classList.toggle("sel", x.dataset.modo === amgModoSel));
+  document.getElementById("amg-escaleraWrap").style.display = amgModoSel === "escalado" ? "block" : "none";
+  document.getElementById("amg-escalera").innerHTML = "";
+  (c.escalera||[]).forEach(p => amgAddRung(p));
+  if (!(c.escalera||[]).length) { amgAddRung(30); amgAddRung(100); }
+  document.getElementById("amg-misionDias").value = c.misionDias ?? 45;
+  document.getElementById("amg-escaleraLuego").checked = c.escaleraLuego !== false;
+  amgResetCalendario();
+  (c.calendario||[]).forEach(d => {
+    const div = document.querySelector('#amg-dias .amg-dia[data-dia="' + d.dia + '"]'); if (!div) return;
+    const on = div.querySelector(".diaOn"); on.checked = true; div.classList.add("on");
+    const isTop = (d.descuentoId === "topping");
+    const pts = [...div.querySelectorAll(".ptToggle .pt")];
+    pts.forEach(x => x.classList.toggle("sel", x.dataset.pt === (isTop ? "topping" : "producto")));
+    div.querySelector(".ptProducto").style.display = isTop ? "none" : "block";
+    div.querySelector(".ptTopping").style.display  = isTop ? "block" : "none";
+    if (isTop) { amgSetChip(div.querySelector(".topChips"), d.productos||[]); }
+    else {
+      if (d.descuentoId) { div.querySelector(".descSel").value = d.descuentoId; }
+      amgSetChip(div.querySelector(".prodChips"), d.productos||[]);
+    }
+    const rangos = (d.ventanas||"").split(",").map(s => s.trim());
+    div.querySelectorAll(".franjaChips .amg-chip").forEach(ch => ch.classList.toggle("sel", rangos.includes(ch.dataset.rango)));
+  });
+  AMG_EDIT = c.empresa;
+  const b = document.getElementById("amg-editBanner");
+  b.style.display = "block";
+  b.innerHTML = "✏️ Editando <strong>" + c.empresa + "</strong> — al guardar se actualiza la estrategia y el QR/link no cambia.";
+  document.getElementById("amg-generar").textContent = "⚡ Guardar cambios (mismo QR)";
+  showToast("✅ Empresa cargada: " + c.empresa);
+}
+
+// ── Generar: crear/actualizar empresa + estrategia + QR ──
+async function amgGenerar() {
+  if (!AMG_CAT) { showToast("⚠ Catálogos aún cargando, intenta de nuevo"); return; }
+  const empresa    = document.getElementById("amg-empresa").value.trim();
+  const cc         = document.getElementById("amg-cc").value.trim();
+  const cupoGratis = document.getElementById("amg-cupoGratis").value || "0";
+  const cupo50     = document.getElementById("amg-cupo50").value || "0";
+  const desc50     = document.getElementById("amg-desc50").value || "50";
+  const vig        = document.getElementById("amg-vig").value || "48";
+  const campeon    = document.getElementById("amg-campeon").value.trim();
+  const tiendas    = AMG_TIENDAS_SEL.slice();
+  if (!empresa || !cc)   { showToast("⚠ Empresa y centro comercial son obligatorios"); return; }
+  if (!tiendas.length)   { showToast("⚠ Selecciona al menos una tienda"); return; }
+  const cfg      = amgRecogerConfig();
+  const escalera = amgModoSel === "escalado" ? amgRecogerEscalera() : [];
+  if (!cfg.length && !escalera.length) { showToast("⚠ Configura al menos un día o una escalera"); return; }
+  const btn = document.getElementById("amg-generar");
+  const lbl = AMG_EDIT ? "⚡ Guardar cambios (mismo QR)" : "⚡ Crear empresa + generar QR";
+  btn.disabled = true; btn.textContent = "Guardando…";
+
+  // 1. crear/actualizar empresa (bienvenida 2 capas + multi-tienda)
+  const e = await amgJsonp(new URLSearchParams({accion:"crearEmpresa", empresa, centroComercial:cc,
+    tiendas: tiendas.join(","), tiendaNombre: amgPretty(tiendas[0]),
+    cupoGratis, cupo50, desc50pct:desc50, vigenciaWelcomeH:vig, campeonNombre:campeon,
+    fechaInicio: document.getElementById("amg-fechaInicio").value,
+    fechaFin:    document.getElementById("amg-fechaFin").value,
+    modo: amgModoSel, escalera: JSON.stringify(escalera),
+    escaleraLuego: document.getElementById("amg-escaleraLuego").checked ? "1" : "0",
+    misionDias: document.getElementById("amg-misionDias").value || "45",
+    esControl: document.getElementById("amg-esControl").checked ? "1" : "0"}));
+  if (!e.ok) { showToast("⚠ Error creando empresa: " + (e.mensaje||"")); btn.disabled = false; btn.textContent = lbl; return; }
+
+  // 2. guardar la estrategia en cada tienda seleccionada
+  for (const t of tiendas) {
+    await amgJsonp(new URLSearchParams({accion:"guardarConfigTienda", tienda:t, centroComercial:cc, config: JSON.stringify(cfg)}));
+  }
+
+  AMG_LINK = e.link; linkActual = AMG_LINK;   // habilita copiar/abrir del panel derecho
+  const d1 = document.getElementById("shortLinkDisplay"); d1.textContent = AMG_LINK; d1.classList.remove("empty");
+  const d2 = document.getElementById("linkDisplay");      d2.textContent = AMG_LINK; d2.classList.remove("empty");
+  if (window.QRious) {
+    dibujarQR(document.getElementById("amg-qrCanvas"), AMG_LINK);   // QR morado de marca + logo
+    document.getElementById("amg-result").style.display = "block";
+  }
+  amgResumen(empresa, cc, tiendas, {cupoGratis, cupo50, desc50, vig});
+  const item = { nombre: `AMIGOS ${empresa}`, link: AMG_LINK,
+    params: {cc, tiendas: tiendas.length, cupoGratis}, ts: new Date(), tipo: "amigos" };
+  historial.unshift(item); renderHistorial();
+  showToast(`✅ ${AMG_EDIT ? "Cambios guardados" : "Empresa creada"}: ${empresa} · ${tiendas.length} tienda(s)`);
+  btn.disabled = false; btn.textContent = lbl;
+  document.getElementById("amg-result").scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function amgResumen(empresa, cc, tiendas, b) {
+  document.getElementById("summaryCard").style.display = "block";
+  const rows = [
+    ["Programa", "Amigos de Oakberry"],
+    ["Empresa", empresa],
+    ["Centro comercial", cc],
+    ["Tiendas", tiendas.map(amgPretty).join(" · ")],
+    ["Modelo", amgModoSel === "escalado" ? "Escalera por compra" : "Calendario por día"],
+    ["Bienvenida", `${b.cupoGratis} gratis + ${b.cupo50} al ${b.desc50}%`],
+    ["Vigencia cupón", b.vig + " h"],
+  ];
+  document.getElementById("summaryRows").innerHTML = rows.map(([k,v]) =>
+    `<div class="summary-row"><span class="summary-key">${k}</span><span class="summary-val highlight">${v}</span></div>`).join("");
+}
+
+function amgDescargarQR() {
+  const canvas = document.getElementById("amg-qrCanvas");
+  if (!canvas || !AMG_LINK) return;
+  const a = document.createElement("a");
+  a.href = canvas.toDataURL("image/png");
+  a.download = "qr-amigos-" + (_slugCr(document.getElementById("amg-empresa").value) || "empresa") + ".png";
+  a.click();
+  showToast("⬇ QR descargado");
+}
+function amgEnviarWA() {
+  if (!AMG_LINK) return;
+  window.open("https://wa.me/?text=" + encodeURIComponent("Regístrate en Amigos de Oakberry: " + AMG_LINK), "_blank");
+}
+// Pieza lista para enviar (1080×1350): gradiente de marca + QR local (mismo origen, no
+// contamina el canvas) + gancho de bienvenida.
+function amgDescargarPieza() {
+  if (!AMG_LINK) return;
+  const c = document.getElementById("amg-piezaCanvas"), x = c.getContext("2d");
+  const g = x.createLinearGradient(0,0,0,1350); g.addColorStop(0,"#5F4B8B"); g.addColorStop(1,"#3d2b5e");
+  x.fillStyle = g; x.fillRect(0,0,1080,1350);
+  x.fillStyle = "#F5C842"; x.font = "800 64px Montserrat,Arial"; x.textAlign = "center";
+  x.fillText("AMIGOS DE OAKBERRY", 540, 150);
+  x.fillStyle = "#fff"; x.font = "600 40px Montserrat,Arial";
+  x.fillText(document.getElementById("amg-empresa").value.trim().toUpperCase(), 540, 230);
+  x.font = "700 46px Montserrat,Arial";
+  x.fillText("Escanea, regístrate", 540, 360);
+  x.fillText("y reclama tus beneficios", 540, 420);
+  x.fillStyle = "#fff"; x.fillRect(290,490,500,500);
+  x.drawImage(document.getElementById("amg-qrCanvas"), 310, 510, 460, 460);
+  x.fillStyle = "#F5C842"; x.font = "600 30px Montserrat,Arial";
+  x.fillText("Tu primer bowl 7oz GRATIS 🍓", 540, 1070);
+  x.fillStyle = "#fff"; x.font = "500 26px Montserrat,Arial";
+  const url = AMG_LINK.length > 52 ? AMG_LINK.slice(0,52) + "…" : AMG_LINK;
+  x.fillText(url, 540, 1150);
+  const a = document.createElement("a");
+  a.href = c.toDataURL("image/png");
+  a.download = "pieza_amigos_" + (_slugCr(document.getElementById("amg-empresa").value) || "empresa") + ".png";
+  a.click();
+  showToast("⬇ Pieza descargada");
+}
+
+
 // ── MODO ──────────────────────────────────────────────────
 function setModo(modo) {
   modoActual = modo;
   document.getElementById("tab-cupon").className  = "tab" + (modo==="cupon"  ? " active" : "");
   document.getElementById("tab-sorteo").className = "tab" + (modo==="sorteo" ? " active" : "");
   document.getElementById("tab-fisico").className = "tab" + (modo==="fisico" ? " active" : "");
+  document.getElementById("tab-amigos").className = "tab" + (modo==="amigos" ? " active" : "");
   // El bloque de pauta (nombre de creativo + UTM Meta) solo aplica a cupón/sorteo
-  document.getElementById("modoPautaWrap").style.display = modo==="fisico" ? "none"  : "block";
+  document.getElementById("modoPautaWrap").style.display = (modo==="fisico"||modo==="amigos") ? "none" : "block";
   document.getElementById("modoFisico").style.display    = modo==="fisico" ? "block" : "none";
+  document.getElementById("modoAmigos").style.display    = modo==="amigos" ? "block" : "none";
   document.getElementById("modoCupon").style.display  = modo==="cupon"  ? "block" : "none";
   document.getElementById("modeSorteo").style.display = modo==="sorteo" ? "block" : "none";
+  if (modo === "amigos") amgInit();
 }
 
 // ── MOMENTOS CUPÓN ────────────────────────────────────────
@@ -1134,14 +1646,16 @@ function renderHistorial() {
   list.innerHTML = historial.slice(0,10).map((item,i) => {
     const hora = item.ts.toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"});
     const tipo = item.tipo || "cupon";
-    const badge = `<span class="history-badge ${tipo}">${tipo==="reactivacion"?"🔄 Reactiv":tipo==="sorteo"?"🏆 Sorteo":tipo==="fisico"?"📺 Físico":"🎟 Cupón"}</span>`;
+    const badge = `<span class="history-badge ${tipo}">${tipo==="reactivacion"?"🔄 Reactiv":tipo==="sorteo"?"🏆 Sorteo":tipo==="fisico"?"📺 Físico":tipo==="amigos"?"🤝 Amigos":"🎟 Cupón"}</span>`;
     const det = tipo === "reactivacion"
       ? `${item.params.descuento}% · ${decodeURIComponent((item.params.producto||"").replace(/\+/g," "))}`
       : tipo === "sorteo"
         ? `Sorteo · ${item.params.ciudad}`
         : tipo === "fisico"
           ? `${CANALES_FISICO[(item.params.fuente||"").replace("fisico_","")]||"Externo"} · ${item.params.descuento}%`
-          : `${item.params.descuento}% · ${decodeURIComponent((item.params.producto||"").replace(/\+/g," "))}`;
+          : tipo === "amigos"
+            ? `${item.params.cc||""} · ${item.params.tiendas||0} tienda(s)`
+            : `${item.params.descuento}% · ${decodeURIComponent((item.params.producto||"").replace(/\+/g," "))}`;
     return `<div class="history-item">
       <div class="history-meta">
         <div class="history-name">${item.nombre}${badge}</div>
