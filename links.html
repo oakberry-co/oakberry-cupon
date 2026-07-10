@@ -735,6 +735,25 @@
             <button class="action-btn" onclick="amgEnviarWA()">📲 WhatsApp</button>
           </div>
         </div>
+
+        <!-- Mensaje listo para la empresa + link corto -->
+        <div id="amg-mensajeWrap" style="display:none;margin-top:16px;background:var(--card2);border:1px dashed rgba(95,75,139,0.5);border-radius:14px;padding:20px;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--accent);font-family:'Space Mono',monospace;margin-bottom:14px;">📩 Manda este mensaje a la empresa</div>
+          <div class="field">
+            <label>Link corto de la empresa</label>
+            <div class="link-display" id="amg-shortLink" style="min-height:0;margin-bottom:8px;"></div>
+            <button class="action-btn primary" style="width:100%;" onclick="amgCopiarShort()">📋 Copiar link corto</button>
+          </div>
+          <div class="field">
+            <label>Mensaje listo · edítalo si quieres antes de copiar</label>
+            <textarea id="amg-mensaje" rows="10" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--text);line-height:1.6;"></textarea>
+          </div>
+          <div class="link-actions">
+            <button class="action-btn primary" onclick="amgCopiarMensaje()">📋 Copiar mensaje</button>
+            <button class="action-btn" onclick="amgMensajeWA()">📲 Abrir en WhatsApp</button>
+          </div>
+          <div class="hint" style="margin-top:10px;">Flujo: copia el mensaje → pégalo en el chat del contacto de la empresa → adjunta el flyer descargado. El link corto redirige al registro de la empresa (el QR no cambia).</div>
+        </div>
         <canvas id="amg-piezaCanvas" width="1080" height="1350" style="display:none;"></canvas>
       </div>
 
@@ -1378,7 +1397,9 @@ async function amgGenerar() {
   }
 
   AMG_LINK = e.link; linkActual = AMG_LINK;   // habilita copiar/abrir del panel derecho
-  const d1 = document.getElementById("shortLinkDisplay"); d1.textContent = AMG_LINK; d1.classList.remove("empty");
+  await amgCrearShort(empresa);               // alias con el nombre de la empresa → /r#claro
+  amgMostrarMensaje(empresa, cc);             // mensaje listo para mandar al contacto
+  const d1 = document.getElementById("shortLinkDisplay"); d1.textContent = AMG_SHORT || AMG_LINK; d1.classList.remove("empty");
   const d2 = document.getElementById("linkDisplay");      d2.textContent = AMG_LINK; d2.classList.remove("empty");
   if (window.QRious) {
     dibujarQR(document.getElementById("amg-qrCanvas"), AMG_LINK);   // QR morado de marca + logo
@@ -1419,6 +1440,55 @@ function amgResumen(empresa, cc, tiendas, b) {
     `<div class="summary-row"><span class="summary-key">${k}</span><span class="summary-val highlight">${v}</span></div>`).join("");
 }
 
+// ── Link corto por empresa + mensaje listo para enviar ────
+// Reusa el acortador del backend (tabla links + r.html): alias = slug del
+// nombre de la empresa → https://www.oakberry-cupones.com/r#claro
+let AMG_SHORT = "";
+async function amgCrearShort(empresa) {
+  AMG_SHORT = "";
+  const r = await amgJsonp(new URLSearchParams({accion:"guardarLink", nombre:empresa,
+    modo:"amigos", fuente:"amigos", fase:"programa", link:AMG_LINK}));
+  if (r.ok && r.alias) AMG_SHORT = BASE + "/r#" + r.alias;
+  return AMG_SHORT;
+}
+function amgArmarMensaje(empresa, cc) {
+  const n = document.getElementById("amg-cupoGratis").value || "0";
+  const m = document.getElementById("amg-cupo50").value || "0";
+  const x = document.getElementById("amg-desc50").value || "50";
+  const link = AMG_SHORT || AMG_LINK;
+  return `Hola 👋 Somos Oakberry ${cc}.
+
+Este es el beneficio exclusivo para el equipo de ${empresa}:
+
+🫐 Los primeros ${n} que se registren reciben un bowl 7oz GRATIS
+🍓 Los siguientes ${m}, bowl al ${x}% OFF
+🎁 Y después: descuentos y sorpresas toda la semana
+
+Registro (toma 1 minuto): ${link}
+
+Les adjuntamos la pieza para reenviar al equipo. ¡Bienvenidos a Amigos de Oakberry!`;
+}
+function amgMostrarMensaje(empresa, cc) {
+  document.getElementById("amg-shortLink").textContent = AMG_SHORT || AMG_LINK;
+  document.getElementById("amg-mensaje").value = amgArmarMensaje(empresa, cc);
+  document.getElementById("amg-mensajeWrap").style.display = "block";
+}
+function amgCopiarShort() {
+  const link = AMG_SHORT || AMG_LINK;
+  if (!link) return;
+  navigator.clipboard.writeText(link).then(() => showToast("✅ Link corto copiado"));
+}
+function amgCopiarMensaje() {
+  const msg = document.getElementById("amg-mensaje").value;
+  if (!msg) return;
+  navigator.clipboard.writeText(msg).then(() => showToast("✅ Mensaje copiado — pégalo en el chat"));
+}
+function amgMensajeWA() {
+  const msg = document.getElementById("amg-mensaje").value;
+  if (!msg) return;
+  window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+}
+
 function amgDescargarQR() {
   const canvas = document.getElementById("amg-qrCanvas");
   if (!canvas || !AMG_LINK) return;
@@ -1429,8 +1499,10 @@ function amgDescargarQR() {
   showToast("⬇ QR descargado");
 }
 function amgEnviarWA() {
+  const msg = document.getElementById("amg-mensaje").value;
+  if (msg) return amgMensajeWA();   // si ya hay mensaje armado, manda ese
   if (!AMG_LINK) return;
-  window.open("https://wa.me/?text=" + encodeURIComponent("Regístrate en Amigos de Oakberry: " + AMG_LINK), "_blank");
+  window.open("https://wa.me/?text=" + encodeURIComponent("Regístrate en Amigos de Oakberry: " + (AMG_SHORT || AMG_LINK)), "_blank");
 }
 // Pieza lista para enviar (1080×1350): gradiente de marca + QR local (mismo origen, no
 // contamina el canvas) + gancho de bienvenida.
