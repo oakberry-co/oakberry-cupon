@@ -693,8 +693,19 @@
         <div id="amg-dias" style="margin-top:8px;"></div>
         <div class="hint" style="margin-bottom:14px;">Por día activo: descuento o topping → productos → franjas (🟢 valle sugerido · 🔴 pico, no descontar).</div>
 
-        <div class="divider">Flyer propio con QR (opcional)</div>
+        <div class="divider">Flyer con QR (opcional)</div>
         <div class="field">
+          <label>Plantilla del flyer</label>
+          <select id="amg-flyerTpl" onchange="amgFlyerTplChange()">
+            <option value="manual">— Subir flyer manual —</option>
+          </select>
+          <div class="hint">La <strong>plantilla oficial</strong> es siempre la misma: al crear la campaña se le pega el QR (y el párrafo de cupos) en su sitio y se descargan los 3 formatos solos. <strong>Manual</strong>: subes cualquier imagen y acomodas el QR a mano.</div>
+        </div>
+        <div id="amg-tplPreviewWrap" style="display:none;margin-bottom:16px;">
+          <canvas id="amg-tplPreview" style="width:100%;border-radius:12px;border:1px solid var(--border);display:block;"></canvas>
+          <div class="hint">Preview con QR de muestra · el QR real (y los cupos actuales) se pegan al crear la campaña.</div>
+        </div>
+        <div class="field" id="amg-flyerUploadField">
           <label>Sube tu flyer ya diseñado · el QR se pega encima</label>
           <input type="file" id="amg-flyerFile" accept="image/*" onchange="amgFlyerUpload(this)">
           <div class="hint">Al crear la campaña se descargan solos: <strong>PNG alta</strong> + <strong>JPG WhatsApp</strong> + <strong>Story 1080×1920</strong>. Si no subes flyer, sale la pieza genérica de siempre.</div>
@@ -1110,6 +1121,9 @@ async function _amgInitReal() {
     c.classList.add("sel"); amgModoSel = c.dataset.modo;
     document.getElementById("amg-escaleraWrap").style.display = amgModoSel === "escalado" ? "block" : "none";
   }));
+  const tplSel = document.getElementById("amg-flyerTpl");
+  Object.entries(AMG_FLYER_TEMPLATES).forEach(([k,t]) => tplSel.add(new Option("🖼 " + t.nombre, k)));
+  if (Object.keys(AMG_FLYER_TEMPLATES).length) { tplSel.value = Object.keys(AMG_FLYER_TEMPLATES)[0]; amgFlyerTplChange(); }
   const sel = document.getElementById("amg-editSel");
   const le  = await amgJsonp(new URLSearchParams({accion:"listarEmpresas"}));
   (le.empresas||[]).forEach(e => {
@@ -1370,9 +1384,12 @@ async function amgGenerar() {
     dibujarQR(document.getElementById("amg-qrCanvas"), AMG_LINK);   // QR morado de marca + logo
     document.getElementById("amg-result").style.display = "block";
   }
-  // Flyer propio: repinta el preview con el QR real y descarga los 3 formatos solos.
+  // Flyer: plantilla oficial (QR + cupos en su sitio, 3 formatos solos) o manual.
   // Delays: el logo del QR se dibuja async (logo.onload) — se le da aire antes de exportar.
-  if (AMG_FLYER_IMG) {
+  const tplActiva = AMG_FLYER_TEMPLATES[document.getElementById("amg-flyerTpl").value];
+  if (tplActiva) {
+    setTimeout(() => { amgFlyerTplChange(); amgTplDescargarTodos(tplActiva); }, 800);
+  } else if (AMG_FLYER_IMG) {
     setTimeout(amgFlyerRedraw, 600);
     setTimeout(() => amgFlyerDescargar("png"),   900);
     setTimeout(() => amgFlyerDescargar("jpg"),  1500);
@@ -1443,9 +1460,104 @@ function amgDescargarPieza() {
   showToast("⬇ Pieza descargada");
 }
 
-// ── Flyer propio + QR (formatos listos para enviar) ──────
-// El usuario sube su flyer ya diseñado, arrastra el QR a su lugar y al crear
-// la campaña se descargan solos PNG alta + JPG WhatsApp + Story 1080×1920.
+// ── Plantillas oficiales de flyer ─────────────────────────
+// El flyer es SIEMPRE el mismo (hasta estrenar uno nuevo): vive en /flyers/ del
+// repo con el QR y el párrafo de cupos pegándose encima al crear la campaña.
+// Para estrenar plantilla: subir los 3 archivos a /flyers/ y añadir la entrada
+// aquí. Coordenadas relativas 0-1: qr = cuadro blanco donde va el QR (x,y =
+// esquina superior izquierda, w = ancho); txt (opcional) = centro del párrafo
+// de cupos ("Solo N unidades gratis y M al X% OFF") — si el texto va horneado
+// en el arte, omitir txt.
+const AMG_FLYER_TEMPLATES = {
+  // oficial_v1: {
+  //   nombre: "Bowl gratis bienvenida · v1",
+  //   formatos: [
+  //     {id:"story", src:"/flyers/amigos_v1_story.png", qr:{x:0.26, y:0.46, w:0.24},
+  //      txt:{x:0.28, y:0.845, size:0.030, color:"#ffffff", align:"center"}},
+  //     {id:"feed",  src:"/flyers/amigos_v1_feed.png",  qr:{x:0.38, y:0.55, w:0.24}},
+  //     {id:"wa",    src:"/flyers/amigos_v1_wa.png",    qr:{x:0.38, y:0.55, w:0.24}},
+  //   ]
+  // },
+};
+
+function amgLoadImg(src) {
+  return new Promise((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i); i.onerror = rej;
+    i.src = src;
+  });
+}
+function amgTextoCupos() {
+  const n = document.getElementById("amg-cupoGratis").value || "0";
+  const m = document.getElementById("amg-cupo50").value || "0";
+  const x = document.getElementById("amg-desc50").value || "50";
+  return `Solo ${n} unidades gratis y ${m} al ${x}% OFF. Aplican T&C*`;
+}
+// Pega QR (+ párrafo de cupos si la plantilla lo pide) sobre el arte a resolución completa
+function amgTplCompose(ctx, img, fmt) {
+  const W = img.width, H = img.height;
+  ctx.drawImage(img, 0, 0);
+  const qw = fmt.qr.w * W, x = fmt.qr.x * W, y = fmt.qr.y * H, pad = qw * 0.06;
+  _amgRoundRect(ctx, x-pad, y-pad, qw+pad*2, qw+pad*2, qw*0.06);
+  ctx.fillStyle = "#fff"; ctx.fill();
+  const qr = document.getElementById("amg-qrCanvas");
+  if (AMG_LINK && qr.width > 1) ctx.drawImage(qr, x, y, qw, qw);
+  else {
+    ctx.fillStyle = "#e8e2f4"; ctx.fillRect(x, y, qw, qw);
+    ctx.fillStyle = "#5F4B8B"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `700 ${Math.max(10, qw*0.12)}px Montserrat,Arial`;
+    ctx.fillText("QR", x+qw/2, y+qw/2);
+    ctx.textBaseline = "alphabetic";
+  }
+  if (fmt.txt) {
+    const t = fmt.txt;
+    ctx.fillStyle = t.color || "#ffffff";
+    ctx.textAlign = t.align || "center";
+    ctx.font = `700 ${Math.round((t.size || 0.03) * W)}px Montserrat,Arial`;
+    ctx.fillText(amgTextoCupos(), t.x * W, t.y * H);
+    ctx.textAlign = "left";
+  }
+}
+async function amgFlyerTplChange() {
+  const key = document.getElementById("amg-flyerTpl").value;
+  const tpl = AMG_FLYER_TEMPLATES[key];
+  document.getElementById("amg-flyerUploadField").style.display = tpl ? "none" : "block";
+  document.getElementById("amg-flyerWrap").style.display = (!tpl && AMG_FLYER_IMG) ? "block" : "none";
+  const wrap = document.getElementById("amg-tplPreviewWrap");
+  if (!tpl) { wrap.style.display = "none"; return; }
+  try {
+    const fmt = tpl.formatos[0];
+    const img = await amgLoadImg(fmt.src);
+    const cv = document.getElementById("amg-tplPreview");
+    const scale = Math.min(1, 680 / img.width);
+    cv.width = img.width * scale; cv.height = img.height * scale;
+    const ctx = cv.getContext("2d");
+    ctx.scale(scale, scale);          // componer en coords del arte original
+    amgTplCompose(ctx, img, fmt);
+    ctx.setTransform(1,0,0,1,0,0);
+    wrap.style.display = "block";
+  } catch(e) { wrap.style.display = "none"; showToast("⚠ No cargó la plantilla (" + key + ")"); }
+}
+async function amgTplDescargarTodos(tpl) {
+  const slug = _slugCr(document.getElementById("amg-empresa").value) || "empresa";
+  let i = 0;
+  for (const fmt of tpl.formatos) {
+    try {
+      const img = await amgLoadImg(fmt.src);
+      const c = document.createElement("canvas");
+      c.width = img.width; c.height = img.height;
+      amgTplCompose(c.getContext("2d"), img, fmt);
+      const jpg = /\.jpe?g$/i.test(fmt.src);
+      const a = document.createElement("a");
+      a.href = jpg ? c.toDataURL("image/jpeg", 0.9) : c.toDataURL("image/png");
+      a.download = `flyer_amigos_${slug}_${fmt.id}.${jpg ? "jpg" : "png"}`;
+      setTimeout(() => a.click(), i * 700); i++;
+    } catch(e) { showToast("⚠ No cargó el formato " + fmt.id); }
+  }
+  if (i) showToast(`⬇ ${i} formato(s) del flyer descargándose`);
+}
+
+// ── Flyer manual + QR arrastrable (fallback / diseños one-off) ──
 let AMG_FLYER_IMG = null;                       // Image original a resolución completa
 let AMG_QR_POS    = {x:0.70, y:0.70, w:0.22};   // posición/tamaño relativos al flyer
 let _amgDrag      = null;
