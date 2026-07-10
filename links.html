@@ -210,6 +210,9 @@
   .amg-addrung{border:1.5px dashed var(--p);background:transparent;color:var(--text);font-weight:700;border-radius:10px;padding:9px 14px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;width:100%;text-transform:uppercase;letter-spacing:1px;}
   .amg-addrung:hover{background:rgba(95,75,139,0.12);}
   .history-badge.amigos{background:rgba(245,200,66,0.15);color:var(--accent);}
+  input[type="range"]{padding:0;height:auto;background:transparent;border:none;accent-color:var(--p);}
+  input[type="file"]{font-weight:600;font-size:11px;}
+  input[type="file"]::file-selector-button{background:var(--p);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;cursor:pointer;margin-right:10px;}
   input[type="date"]{color-scheme:dark;}
   :root[data-theme="light"] input[type="date"]{color-scheme:light;}
 </style>
@@ -689,6 +692,25 @@
         <label>Calendario por día</label>
         <div id="amg-dias" style="margin-top:8px;"></div>
         <div class="hint" style="margin-bottom:14px;">Por día activo: descuento o topping → productos → franjas (🟢 valle sugerido · 🔴 pico, no descontar).</div>
+
+        <div class="divider">Flyer propio con QR (opcional)</div>
+        <div class="field">
+          <label>Sube tu flyer ya diseñado · el QR se pega encima</label>
+          <input type="file" id="amg-flyerFile" accept="image/*" onchange="amgFlyerUpload(this)">
+          <div class="hint">Al crear la campaña se descargan solos: <strong>PNG alta</strong> + <strong>JPG WhatsApp</strong> + <strong>Story 1080×1920</strong>. Si no subes flyer, sale la pieza genérica de siempre.</div>
+        </div>
+        <div id="amg-flyerWrap" style="display:none;margin-bottom:16px;">
+          <canvas id="amg-flyerPreview" style="width:100%;border-radius:12px;border:1px solid var(--border);cursor:grab;touch-action:none;display:block;"></canvas>
+          <div class="field" style="margin-top:10px;">
+            <label>Arrastra el QR a su lugar · tamaño: <span id="amg-qrSizeLbl">22%</span> del ancho</label>
+            <input type="range" id="amg-qrSize" min="10" max="45" value="22" oninput="amgFlyerRedraw()">
+          </div>
+          <div class="link-actions">
+            <button class="action-btn primary" onclick="amgFlyerDescargar('png')">⬇ PNG alta</button>
+            <button class="action-btn" onclick="amgFlyerDescargar('jpg')">⬇ JPG WhatsApp</button>
+            <button class="action-btn" onclick="amgFlyerDescargar('story')">⬇ Story 1080×1920</button>
+          </div>
+        </div>
 
         <button class="gen-btn" id="amg-generar" onclick="amgGenerar()">⚡ Crear empresa + generar QR</button>
 
@@ -1348,6 +1370,14 @@ async function amgGenerar() {
     dibujarQR(document.getElementById("amg-qrCanvas"), AMG_LINK);   // QR morado de marca + logo
     document.getElementById("amg-result").style.display = "block";
   }
+  // Flyer propio: repinta el preview con el QR real y descarga los 3 formatos solos.
+  // Delays: el logo del QR se dibuja async (logo.onload) — se le da aire antes de exportar.
+  if (AMG_FLYER_IMG) {
+    setTimeout(amgFlyerRedraw, 600);
+    setTimeout(() => amgFlyerDescargar("png"),   900);
+    setTimeout(() => amgFlyerDescargar("jpg"),  1500);
+    setTimeout(() => amgFlyerDescargar("story"),2100);
+  }
   amgResumen(empresa, cc, tiendas, {cupoGratis, cupo50, desc50, vig});
   const item = { nombre: `AMIGOS ${empresa}`, link: AMG_LINK,
     params: {cc, tiendas: tiendas.length, cupoGratis}, ts: new Date(), tipo: "amigos" };
@@ -1411,6 +1441,131 @@ function amgDescargarPieza() {
   a.download = "pieza_amigos_" + (_slugCr(document.getElementById("amg-empresa").value) || "empresa") + ".png";
   a.click();
   showToast("⬇ Pieza descargada");
+}
+
+// ── Flyer propio + QR (formatos listos para enviar) ──────
+// El usuario sube su flyer ya diseñado, arrastra el QR a su lugar y al crear
+// la campaña se descargan solos PNG alta + JPG WhatsApp + Story 1080×1920.
+let AMG_FLYER_IMG = null;                       // Image original a resolución completa
+let AMG_QR_POS    = {x:0.70, y:0.70, w:0.22};   // posición/tamaño relativos al flyer
+let _amgDrag      = null;
+
+function amgFlyerUpload(inp) {
+  const f = inp.files && inp.files[0]; if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    AMG_FLYER_IMG = img;
+    AMG_QR_POS = {x:0.70, y:0.70, w:0.22};
+    document.getElementById("amg-qrSize").value = 22;
+    document.getElementById("amg-flyerWrap").style.display = "block";
+    amgFlyerRedraw();
+    showToast("✅ Flyer cargado — arrastra el QR a su lugar");
+  };
+  img.onerror = () => showToast("⚠ No se pudo leer la imagen");
+  img.src = URL.createObjectURL(f);
+}
+
+function _amgRoundRect(ctx,x,y,w,h,r) {
+  ctx.beginPath(); ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+
+// Dibuja flyer + placa blanca + QR (o placeholder si aún no hay link) en un ctx de W×H
+function amgFlyerCompose(ctx, W, H) {
+  ctx.fillStyle = "#fff"; ctx.fillRect(0,0,W,H);   // PNG con alpha → JPG sin fondo negro
+  ctx.drawImage(AMG_FLYER_IMG, 0, 0, W, H);
+  const qw = AMG_QR_POS.w * W;
+  const x = AMG_QR_POS.x * W, y = AMG_QR_POS.y * H;
+  const pad = qw * 0.06;
+  _amgRoundRect(ctx, x-pad, y-pad, qw+pad*2, qw+pad*2, qw*0.06);
+  ctx.fillStyle = "#fff"; ctx.fill();
+  const qr = document.getElementById("amg-qrCanvas");
+  if (AMG_LINK && qr.width > 1) ctx.drawImage(qr, x, y, qw, qw);
+  else {
+    ctx.fillStyle = "#e8e2f4"; ctx.fillRect(x, y, qw, qw);
+    ctx.fillStyle = "#5F4B8B"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `700 ${Math.max(10, qw*0.12)}px Montserrat,Arial`;
+    ctx.fillText("QR", x+qw/2, y+qw/2);
+    ctx.textBaseline = "alphabetic";
+  }
+}
+
+function amgFlyerRedraw() {
+  if (!AMG_FLYER_IMG) return;
+  AMG_QR_POS.w = parseInt(document.getElementById("amg-qrSize").value, 10) / 100;
+  document.getElementById("amg-qrSizeLbl").textContent = Math.round(AMG_QR_POS.w*100) + "%";
+  const cv = document.getElementById("amg-flyerPreview");
+  const scale = Math.min(1, 680 / AMG_FLYER_IMG.width);
+  cv.width  = AMG_FLYER_IMG.width  * scale;
+  cv.height = AMG_FLYER_IMG.height * scale;
+  amgFlyerCompose(cv.getContext("2d"), cv.width, cv.height);
+}
+
+// Drag del QR sobre el preview (pointer events → funciona con mouse y touch)
+function _amgFlyerXY(cv, ev) {
+  const r = cv.getBoundingClientRect();
+  return { x: (ev.clientX - r.left) / r.width, y: (ev.clientY - r.top) / r.height };
+}
+(function amgFlyerDragInit() {
+  const cv = document.getElementById("amg-flyerPreview");
+  if (!cv) return;
+  cv.addEventListener("pointerdown", ev => {
+    if (!AMG_FLYER_IMG) return;
+    const p = _amgFlyerXY(cv, ev);
+    _amgDrag = { dx: p.x - AMG_QR_POS.x, dy: p.y - AMG_QR_POS.y };
+    cv.setPointerCapture(ev.pointerId);
+    cv.style.cursor = "grabbing";
+  });
+  cv.addEventListener("pointermove", ev => {
+    if (!_amgDrag || !AMG_FLYER_IMG) return;
+    const p = _amgFlyerXY(cv, ev);
+    const hRel = AMG_QR_POS.w * (AMG_FLYER_IMG.width / AMG_FLYER_IMG.height); // QR cuadrado en px
+    AMG_QR_POS.x = Math.min(Math.max(p.x - _amgDrag.dx, 0.01), 0.99 - AMG_QR_POS.w);
+    AMG_QR_POS.y = Math.min(Math.max(p.y - _amgDrag.dy, 0.01), 0.99 - hRel);
+    amgFlyerRedraw();
+  });
+  const fin = () => { _amgDrag = null; cv.style.cursor = "grab"; };
+  cv.addEventListener("pointerup", fin);
+  cv.addEventListener("pointercancel", fin);
+})();
+
+// Compone flyer + QR a resolución completa del flyer original
+function amgFlyerCanvasFull() {
+  const c = document.createElement("canvas");
+  c.width = AMG_FLYER_IMG.width; c.height = AMG_FLYER_IMG.height;
+  amgFlyerCompose(c.getContext("2d"), c.width, c.height);
+  return c;
+}
+
+function amgFlyerDescargar(formato) {
+  if (!AMG_FLYER_IMG) { showToast("⚠ Sube primero el flyer"); return; }
+  if (!AMG_LINK)      { showToast("⚠ Crea la campaña primero — el QR sale del link"); return; }
+  const slug = _slugCr(document.getElementById("amg-empresa").value) || "empresa";
+  const a = document.createElement("a");
+  if (formato === "story") {
+    // 1080×1920: fondo = flyer difuminado a cover, flyer completo centrado encima
+    const c = document.createElement("canvas"); c.width = 1080; c.height = 1920;
+    const x = c.getContext("2d");
+    const cover = Math.max(1080/AMG_FLYER_IMG.width, 1920/AMG_FLYER_IMG.height);
+    const bw = AMG_FLYER_IMG.width*cover, bh = AMG_FLYER_IMG.height*cover;
+    x.filter = "blur(36px)";
+    x.drawImage(AMG_FLYER_IMG, (1080-bw)/2, (1920-bh)/2, bw, bh);
+    x.filter = "none";
+    const fit = Math.min(1080/AMG_FLYER_IMG.width, 1920/AMG_FLYER_IMG.height) * 0.94;
+    const fw = AMG_FLYER_IMG.width*fit, fh = AMG_FLYER_IMG.height*fit;
+    x.drawImage(amgFlyerCanvasFull(), (1080-fw)/2, (1920-fh)/2, fw, fh);
+    a.href = c.toDataURL("image/jpeg", 0.9);
+    a.download = `flyer_amigos_${slug}_story.jpg`;
+  } else if (formato === "jpg") {
+    a.href = amgFlyerCanvasFull().toDataURL("image/jpeg", 0.85);
+    a.download = `flyer_amigos_${slug}_wa.jpg`;
+  } else {
+    a.href = amgFlyerCanvasFull().toDataURL("image/png");
+    a.download = `flyer_amigos_${slug}.png`;
+  }
+  a.click();
+  showToast("⬇ Flyer " + formato.toUpperCase() + " descargado");
 }
 
 
