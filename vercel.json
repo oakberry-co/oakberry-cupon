@@ -5,6 +5,7 @@
     { "source": "/validar",        "destination": "/validar.html"             },
     { "source": "/amigos",         "destination": "/amigos.html"              },
     { "source": "/amigos-config",  "destination": "/amigos_admin.html"        },
+    { "source": "/amigos-panel",   "destination": "/amigos_panel.html"        },
     { "source": "/amigos/beneficios", "destination": "/mis_beneficios.html"     },
     { "source": "/influencers",    "destination": "/influencers.html"         },
     { "source": "/mi-cupon",       "destination": "/mi-cupon.html"            },

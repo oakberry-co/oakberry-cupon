@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Panel · Amigos de Oakberry</title>
+<style>
+  :root{ --morado:#5F4B8B; --morado2:#3d2b5e; --crema:#f6f1e4; --amarillo:#F5C842; --ok:#2e7d32; --err:#c62828; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:Arial,Helvetica,sans-serif; background:var(--crema); color:var(--morado2); padding:18px;}
+  .wrap{max-width:980px; margin:auto;}
+  h1{font-size:22px; color:var(--morado);}
+  .sub{font-size:13px; color:#8a7fa3; margin:4px 0 16px;}
+  .card{background:#fff; border:1px solid #e8e2d4; border-radius:14px; padding:18px; margin-bottom:16px;}
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px;}
+  .kpi{background:var(--crema); border-radius:12px; padding:12px 14px; text-align:center;}
+  .kpi b{display:block; font-size:26px; color:var(--morado);}
+  .kpi span{font-size:12px; color:#6d5f8f;}
+  .kpi small{display:block; font-size:11px; color:#8a7fa3; margin-top:2px;}
+  h2{font-size:16px; margin-bottom:10px; color:var(--morado);}
+  .bars{display:flex; align-items:flex-end; gap:3px; height:120px; margin-top:8px;}
+  .bar{flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%;}
+  .bar .b1{width:100%; background:var(--morado); border-radius:3px 3px 0 0; min-height:1px;}
+  .bar .b2{width:100%; background:var(--amarillo); border-radius:3px 3px 0 0; min-height:1px;}
+  .bar i{font-style:normal; font-size:9px; color:#8a7fa3; margin-top:3px; white-space:nowrap;}
+  .leyenda{font-size:11px; color:#6d5f8f; margin-top:6px;}
+  .dot{display:inline-block; width:9px; height:9px; border-radius:2px; margin:0 4px 0 10px;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th,td{padding:8px 10px; text-align:left; border-bottom:1px solid #f0ead9;}
+  th{color:#6d5f8f; font-size:11px; text-transform:uppercase; letter-spacing:.5px;}
+  select,input[type=text]{padding:8px 10px; border:1px solid #d9d0bd; border-radius:9px; font-size:13px; background:#fff; color:var(--morado2);}
+  .dia-row{display:grid; grid-template-columns:86px 1fr 1fr 150px; gap:8px; align-items:center; padding:8px 0; border-bottom:1px dashed #eee;}
+  .dia-row .nom{font-weight:700; font-size:13px;}
+  .chips{display:flex; flex-wrap:wrap; gap:5px;}
+  .chip{font-size:11px; border:1px solid #d9d0bd; border-radius:20px; padding:4px 9px; cursor:pointer; user-select:none; background:#fff;}
+  .chip.on{background:var(--morado); color:#fff; border-color:var(--morado);}
+  .btn{background:var(--amarillo); color:var(--morado2); font-weight:800; border:0; border-radius:10px; padding:12px 22px; font-size:14px; cursor:pointer; margin-top:14px;}
+  .btn:disabled{opacity:.5;}
+  .toast{margin-top:10px; font-size:13px; font-weight:700; min-height:18px;}
+  .toast.ok{color:var(--ok);} .toast.err{color:var(--err);}
+  .hint{font-size:11px; color:#8a7fa3; margin-top:6px;}
+  .pill{display:inline-block; background:var(--crema); border-radius:20px; padding:3px 10px; font-size:11px; margin-left:6px;}
+  @media(max-width:640px){ .dia-row{grid-template-columns:1fr; gap:5px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🫐 Panel Amigos de Oakberry</h1>
+  <div class="sub">
+    Empresa: <select id="selEmpresa" onchange="cargar()"></select>
+    <span id="infoEmpresa"></span>
+  </div>
+
+  <div class="card">
+    <h2>Funnel del programa</h2>
+    <div class="kpis" id="kpis"></div>
+  </div>
+
+  <div class="card">
+    <h2>Registros y canjes — últimos 30 días</h2>
+    <div class="bars" id="chart"></div>
+    <div class="leyenda"><span class="dot" style="background:var(--morado)"></span>Registros
+      <span class="dot" style="background:var(--amarillo)"></span>Canjes</div>
+  </div>
+
+  <div class="card">
+    <h2>Canjes por día de semana</h2>
+    <table id="tblDow"><thead><tr><th>Día</th><th>Bienvenida</th><th>Club (recompra)</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>Calendario de beneficios <span class="pill" id="pillTienda"></span></h2>
+    <div class="hint" style="margin-bottom:8px">Cambia el descuento, los productos o el horario por día y guarda.
+      Recuerda: el descuento debe existir en Toteat como <b>AMG ·</b> para que el cajero lo aplique.</div>
+    <div id="editor"></div>
+    <button class="btn" id="btnGuardar" onclick="guardar()">Guardar calendario</button>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+const API = "https://api.oakberry-cupones.com/";
+const DIAS = [[1,"Lunes"],[2,"Martes"],[3,"Miércoles"],[4,"Jueves"],[5,"Viernes"]];
+let CAT = {descuentos:[], toppings:[], tamanos:[]};
+let EMP = null;   // empresa actual (objeto de resumenAmigos)
+let SEL = {};     // por día: {descuentoId, productos:Set, ventanas}
+
+function jsonp(params){
+  return new Promise((resolve)=>{
+    const cb = "__cb"+Math.random().toString(36).slice(2);
+    const to = setTimeout(()=>{ cleanup(); resolve({ok:false,mensaje:"timeout"}); }, 15000);
+    function cleanup(){ try{delete window[cb];}catch(e){} if(s.parentNode)s.parentNode.removeChild(s); clearTimeout(to); }
+    window[cb]=(r)=>{ cleanup(); resolve(r||{}); };
+    params.set("callback", cb);
+    const s=document.createElement("script");
+    s.src=API+"?"+params.toString(); s.onerror=()=>{cleanup();resolve({ok:false,mensaje:"network"});};
+    document.body.appendChild(s);
+  });
+}
+const $=id=>document.getElementById(id);
+function toast(msg, ok){ const t=$("toast"); t.textContent=msg; t.className="toast "+(ok?"ok":"err"); }
+function pct(a,b){ return b? Math.round(a*100/b)+"%" : "—"; }
+
+async function init(){
+  const [cat, emps] = await Promise.all([
+    jsonp(new URLSearchParams({accion:"obtenerCatalogos"})),
+    jsonp(new URLSearchParams({accion:"listarEmpresas"}))
+  ]);
+  if(cat.ok) CAT = cat;
+  const lista = (emps.empresas||[]).map(e=>e.empresa||e);
+  const sel = $("selEmpresa");
+  lista.forEach(n=>{ const o=document.createElement("option"); o.value=o.textContent=n; sel.appendChild(o); });
+  const urlEmp = new URLSearchParams(location.search).get("empresa");
+  if(urlEmp && lista.includes(urlEmp)) sel.value = urlEmp;
+  cargar();
+}
+
+async function cargar(){
+  const empresa = $("selEmpresa").value;
+  if(!empresa) return;
+  const r = await jsonp(new URLSearchParams({accion:"resumenAmigos", empresa}));
+  if(!r.ok){ toast(r.mensaje||"Error cargando", false); return; }
+  EMP = r.empresa;
+  $("infoEmpresa").innerHTML = `<span class="pill">${EMP.tienda_nombre||EMP.tienda}</span>` +
+    `<span class="pill">modo ${EMP.modo}</span>` +
+    (EMP.fecha_fin? `<span class="pill">vigente hasta ${EMP.fecha_fin}</span>` : "");
+  $("pillTienda").textContent = EMP.tienda;
+
+  const reg=r.registros||{}, can=r.canjes||{}, rec=r.recompra||{};
+  $("kpis").innerHTML = [
+    ["Registros", reg.total||0, `gratis ${reg.tier_gratis||0} · 50% ${reg.tier_50||0}`],
+    ["Welcome canjeados", can.bienvenida||0, pct(can.bienvenida||0, reg.total||0)+" de la base"],
+    ["Canjes club", can.club||0, `${can.amigos_club||0} amigos distintos`],
+    ["Recompra (2+ canjes)", rec.amigos_2omas||0, pct(rec.amigos_2omas||0, can.amigos_unicos||0)+" de quienes canjearon"],
+    ["En Loopy", reg.en_loopy||0, pct(reg.en_loopy||0, reg.total||0)+" de la base"],
+  ].map(k=>`<div class="kpi"><b>${k[1]}</b><span>${k[0]}</span><small>${k[2]}</small></div>`).join("");
+
+  // Chart 30 días
+  const dias=r.porDia||[];
+  const max=Math.max(1, ...dias.map(d=>Math.max(d.registros,d.canjes)));
+  $("chart").innerHTML = dias.map(d=>{
+    const f=d.fecha.slice(5).replace("-","/");
+    return `<div class="bar" title="${d.fecha}: ${d.registros} reg · ${d.canjes} canjes">
+      <div class="b1" style="height:${d.registros*100/max}%"></div>
+      <div class="b2" style="height:${d.canjes*100/max}%"></div>
+      <i>${(dias.indexOf(d)%5===0)?f:""}</i></div>`;
+  }).join("");
+
+  // Dow
+  const dowMap={}; (r.porDow||[]).forEach(x=>{ (dowMap[x.dia_semana]=dowMap[x.dia_semana]||{})[x.tipo_canje==="bienvenida"?"b":"c"]= (dowMap[x.dia_semana]?.[x.tipo_canje==="bienvenida"?"b":"c"]||0)+x.canjes; });
+  const NOM={1:"Lunes",2:"Martes",3:"Miércoles",4:"Jueves",5:"Viernes",6:"Sábado",7:"Domingo"};
+  $("tblDow").querySelector("tbody").innerHTML = Object.keys(NOM).map(d=>
+    `<tr><td>${NOM[d]}</td><td>${dowMap[d]?.b||0}</td><td><b>${dowMap[d]?.c||0}</b></td></tr>`).join("");
+
+  await cargarCalendario();
+}
+
+async function cargarCalendario(){
+  const b = await jsonp(new URLSearchParams({accion:"obtenerBeneficios", tienda:EMP.tienda}));
+  const actuales={}; (b.beneficios||[]).forEach(x=>{ actuales[x.dia_semana]=x; });
+  SEL={};
+  $("editor").innerHTML = DIAS.map(([d,nom])=>{
+    const act = actuales[d];
+    // matchear beneficio actual → descuentoId del catálogo (por tipo y pct)
+    let descId="";
+    if(act){
+      const m = CAT.descuentos.find(c=>!c.es_bienvenida && c.tipo===act.tipo &&
+        (c.tipo==="topping" || String(c.valor_pct)===String(act.valor_pct)));
+      descId = m? m.descuento_id : "";
+    }
+    const prods = new Set((act?.productos_aplica||"").split(",").map(s=>s.trim()).filter(Boolean));
+    SEL[d] = {descuentoId:descId, productos:prods, ventanas:(act?.ventanas)||"08:00-12:00,12:00-15:00,15:00-18:00,18:00-21:00"};
+    const opts = ['<option value="">— sin beneficio —</option>'].concat(
+      CAT.descuentos.filter(c=>!c.es_bienvenida).map(c=>
+        `<option value="${c.descuento_id}" ${c.descuento_id===descId?"selected":""}>${c.etiqueta}</option>`));
+    return `<div class="dia-row" data-dia="${d}">
+      <div class="nom">${nom}</div>
+      <select onchange="SEL[${d}].descuentoId=this.value; renderChips(${d})">${opts.join("")}</select>
+      <div class="chips" id="chips${d}"></div>
+      <input type="text" value="${SEL[d].ventanas}" title="Ventanas HH:MM-HH:MM separadas por coma"
+             onchange="SEL[${d}].ventanas=this.value">
+    </div>`;
+  }).join("");
+  DIAS.forEach(([d])=>renderChips(d));
+}
+
+function renderChips(d){
+  const sel=SEL[d]; const cont=$("chips"+d); if(!cont) return;
+  const desc = CAT.descuentos.find(c=>c.descuento_id===sel.descuentoId);
+  const esTopping = desc && desc.tipo==="topping";
+  const fuente = esTopping ? CAT.toppings.map(t=>({v:t,l:t}))
+                           : CAT.tamanos.map(t=>({v:t.toteat,l:t.etiqueta}));
+  cont.innerHTML = !desc ? '<span class="hint">elige un descuento</span>' :
+    fuente.map(o=>`<span class="chip ${sel.productos.has(o.v)?"on":""}"
+      onclick="tgl(${d},'${o.v.replace(/'/g,"\\'")}')">${o.l}</span>`).join("");
+}
+function tgl(d,v){ const s=SEL[d].productos; s.has(v)? s.delete(v): s.add(v); renderChips(d); }
+
+async function guardar(){
+  $("btnGuardar").disabled=true; toast("Guardando…", true);
+  const cfg = DIAS.filter(([d])=>SEL[d].descuentoId).map(([d])=>({
+    dia:d, descuentoId:SEL[d].descuentoId,
+    productos:[...SEL[d].productos], ventanas:SEL[d].ventanas
+  }));
+  const r = await jsonp(new URLSearchParams({accion:"guardarConfigTienda",
+    tienda:EMP.tienda, centroComercial:EMP.tienda, config:JSON.stringify(cfg)}));
+  $("btnGuardar").disabled=false;
+  if(r.ok){ toast(`✅ Guardado (${r.diasGuardados} días). Los Amigos lo ven ya en "Mis beneficios".`, true); cargarCalendario(); }
+  else toast("❌ "+(r.mensaje||"Error al guardar"), false);
+}
+
+init();
+</script>
+</body>
+</html>
