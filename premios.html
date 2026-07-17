@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Premios · Oakberry · Crear cupón</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --morado:#5F4B8B; --morado-osc:#3d2b5e; --amarillo:#F5C842;
+    --beige:#f6f1e4; --ok:#1faa59; --err:#e0436b; --line:#e3dcce;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    font-family:'Montserrat',sans-serif; color:var(--morado-osc); padding:20px;
+    background:linear-gradient(rgba(246,241,228,.85) 0%, rgba(246,241,228,.58) 42%, rgba(246,241,228,.72) 100%),
+               url('/amigos-config-bg.jpg') center/cover fixed, var(--beige);
+    min-height:100vh;
+  }
+  .wrap{ max-width:760px; margin:0 auto; }
+  h1{ font-size:1.5rem; color:var(--morado-osc); }
+  h1 .pill{
+    background:var(--amarillo); color:var(--morado-osc);
+    font-size:.62rem; font-weight:700; padding:4px 10px;
+    border-radius:20px; vertical-align:middle; margin-left:8px;
+  }
+  .sub{ color:var(--morado); font-size:.85rem; margin:6px 0 18px; }
+  .card{
+    background:#fff; border-radius:18px; padding:20px 22px;
+    box-shadow:0 10px 30px rgba(61,43,94,.10); margin-bottom:18px;
+  }
+  .card h2{
+    font-size:1rem; color:var(--morado); margin-bottom:14px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .card h2 .n{
+    width:24px; height:24px; border-radius:50%;
+    background:var(--morado); color:#fff; font-size:.8rem;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  label{
+    display:block; font-size:.72rem; font-weight:600;
+    color:var(--morado); margin:10px 0 4px;
+  }
+  input,select{
+    width:100%; padding:11px 13px; border:1.6px solid var(--line);
+    border-radius:10px; font-family:inherit; font-size:.95rem;
+    background:#fff; color:var(--morado-osc); outline:none;
+  }
+  input:focus,select:focus{ border-color:var(--morado); }
+  .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .muted{ font-size:.74rem; color:#9b8db0; margin-top:6px; }
+
+  .nacional-banner{
+    background:#efe6fb; border:1.5px solid var(--morado); color:var(--morado-osc);
+    padding:12px 14px; border-radius:10px; font-size:.84rem; font-weight:600;
+    margin-top:12px; line-height:1.5;
+  }
+
+  button.go{
+    width:100%; padding:15px; font-size:1rem; font-weight:800;
+    color:#fff; border:0; border-radius:12px; background:var(--morado);
+    cursor:pointer; box-shadow:0 8px 20px rgba(95,75,139,.35);
+    transition:transform .12s, background .18s;
+  }
+  button.go:hover:not(:disabled){ background:var(--morado-osc); transform:translateY(-1px); }
+  button.go:disabled{ opacity:.55; cursor:not-allowed; }
+
+  .toast{
+    padding:11px 14px; border-radius:10px; font-size:.85rem;
+    font-weight:600; margin-bottom:12px; display:none;
+  }
+  .toast.ok{ background:#e7f7ee; color:var(--ok); display:block; }
+  .toast.err{ background:#fdeaf0; color:var(--err); display:block; }
+
+  /* Resultado */
+  #result{ display:none; }
+  .codigo-box{
+    background:#fff8e7; border:3px dashed var(--morado);
+    border-radius:14px; padding:24px 16px; text-align:center;
+    font-family:'Courier New', monospace; font-size:2.2rem;
+    font-weight:900; color:var(--morado-osc); letter-spacing:4px;
+    margin:14px 0 10px; user-select:all;
+  }
+  .vence-row{
+    font-size:.85rem; color:var(--morado); text-align:center;
+    margin-bottom:14px; font-weight:600;
+  }
+  .btns{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .btns button{
+    flex:1; min-width:140px; padding:12px; font-weight:700;
+    font-size:.9rem; border:0; border-radius:10px; cursor:pointer;
+    background:var(--amarillo); color:var(--morado-osc);
+    font-family:inherit; transition:transform .12s, background .18s;
+  }
+  .btns button:hover{ background:#e3b836; transform:translateY(-1px); }
+  .btns button.alt{ background:var(--morado); color:#fff; }
+  .btns button.alt:hover{ background:var(--morado-osc); }
+
+  .preview{
+    background:#faf8ff; border:1px solid #e0d8f0; border-radius:10px;
+    padding:14px 16px; margin-top:12px; font-size:.82rem;
+    color:var(--morado-osc); white-space:pre-wrap; line-height:1.5;
+  }
+
+  /* Productos dinámicos */
+  .prod-row{ display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .prod-row input.qty{ width:64px; flex-shrink:0; text-align:center; }
+  .prod-row select{ flex:1; }
+  .prod-row .del{
+    width:32px; height:32px; flex-shrink:0; border:0; border-radius:8px;
+    background:#fdeaf0; color:var(--err); font-weight:700; cursor:pointer;
+    font-size:1rem;
+  }
+  .prod-row .del:disabled{ opacity:.35; cursor:not-allowed; }
+  .add-prod{
+    margin-top:6px; border:1.6px dashed var(--morado); background:#fff;
+    color:var(--morado); font-weight:700; border-radius:10px;
+    padding:10px 14px; cursor:pointer; font-family:inherit; font-size:.85rem;
+    width:100%;
+  }
+
+  /* Toppings */
+  .topping-bar{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .topping-bar label.toggle{
+    position:relative; width:42px; height:24px; flex-shrink:0;
+    display:inline-block;
+  }
+  .topping-bar label.toggle input{ display:none; }
+  .topping-bar .slider{
+    position:absolute; inset:0; background:#ccc; border-radius:24px;
+    transition:.2s; cursor:pointer;
+  }
+  .topping-bar .slider:before{
+    content:""; position:absolute; width:18px; height:18px;
+    left:3px; top:3px; background:#fff; border-radius:50%;
+    transition:.2s;
+  }
+  .topping-bar input:checked + .slider{ background:var(--ok); }
+  .topping-bar input:checked + .slider:before{ transform:translateX(18px); }
+  .topping-bar .toggle-label{
+    font-size:.84rem; font-weight:700; color:var(--morado-osc);
+  }
+  .topping-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .topping-chips.hidden{ display:none; }
+  .topping-chip{
+    border:1.6px solid var(--line); border-radius:18px;
+    padding:6px 12px; font-size:.78rem; cursor:pointer;
+    user-select:none; font-weight:600; color:#888;
+    background:#fff;
+  }
+  .topping-chip.sel{
+    background:var(--morado); color:#fff; border-color:var(--morado);
+  }
+
+  /* Tabla historial */
+  .table-wrap{ overflow-x:auto; margin-top:8px; }
+  table.hist{ width:100%; border-collapse:collapse; font-size:.78rem; }
+  table.hist th, table.hist td{
+    padding:8px 10px; text-align:left;
+    border-bottom:1px solid var(--line);
+  }
+  table.hist th{
+    color:var(--morado); font-weight:700;
+    text-transform:uppercase; font-size:.66rem; letter-spacing:.5px;
+  }
+  table.hist td.codigo{
+    font-family:'Courier New', monospace; font-weight:700;
+    color:var(--morado-osc); cursor:pointer;
+  }
+  table.hist td.codigo:hover{ background:#fff8e7; }
+  .badge{
+    display:inline-block; padding:2px 8px; border-radius:10px;
+    font-size:.66rem; font-weight:700; text-transform:uppercase;
+  }
+  .badge.disp{ background:#e7f7ee; color:var(--ok); }
+  .badge.canj{ background:#efe6fb; color:var(--morado); }
+  .badge.venc{ background:#fdeaf0; color:var(--err); }
+  .badge.otro{ background:#f1eee5; color:#7a6d50; }
+  .hist-empty{
+    color:#9b8db0; font-size:.82rem; text-align:center;
+    padding:24px 12px;
+  }
+
+  /* ── Login overlay ── */
+  #loginOverlay{
+    position:fixed; inset:0; z-index:1000;
+    background:linear-gradient(rgba(61,43,94,.92), rgba(61,43,94,.96)),
+               url('/amigos-config-bg.jpg') center/cover;
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  #loginOverlay.hidden{ display:none; }
+  .login-card{
+    background:#fff; border-radius:18px; padding:32px 28px;
+    max-width:380px; width:100%;
+    box-shadow:0 20px 50px rgba(0,0,0,.4);
+    text-align:center;
+  }
+  .login-card img{ height:36px; margin-bottom:18px; }
+  .login-card h2{
+    color:var(--morado-osc); font-size:1.15rem; font-weight:800;
+    margin-bottom:6px;
+  }
+  .login-card .sub{
+    color:var(--morado); font-size:.82rem; margin:0 0 18px;
+  }
+  .login-card label{
+    text-align:left; margin-top:12px;
+  }
+  .login-card .btn{
+    width:100%; padding:13px; margin-top:18px;
+    background:var(--morado); color:#fff; border:0; border-radius:10px;
+    font-weight:800; font-size:.95rem; cursor:pointer; font-family:inherit;
+    transition:background .18s, transform .12s;
+  }
+  .login-card .btn:hover:not(:disabled){
+    background:var(--morado-osc); transform:translateY(-1px);
+  }
+  .login-card .btn:disabled{ opacity:.55; cursor:not-allowed; }
+  .login-err{
+    background:#fdeaf0; color:var(--err); padding:10px 12px;
+    border-radius:8px; font-size:.82rem; font-weight:600;
+    margin-top:12px; display:none;
+  }
+  .login-err.show{ display:block; }
+
+  /* Logout chip arriba a la derecha */
+  .session-bar{
+    position:fixed; top:12px; right:14px; z-index:10;
+    background:rgba(255,255,255,.92); padding:6px 10px 6px 14px;
+    border-radius:20px; box-shadow:0 4px 12px rgba(61,43,94,.18);
+    font-size:.74rem; font-weight:600; color:var(--morado-osc);
+    display:flex; align-items:center; gap:8px;
+  }
+  .session-bar button{
+    background:var(--morado); color:#fff; border:0; border-radius:14px;
+    padding:5px 10px; font-size:.7rem; font-weight:700; cursor:pointer;
+    font-family:inherit;
+  }
+  .session-bar button:hover{ background:var(--morado-osc); }
+</style>
+</head>
+<body>
+
+<!-- ── Login overlay (visible si no hay sesión) ── -->
+<div id="loginOverlay">
+  <div class="login-card">
+    <img src="/email-logo-purple.png" alt="Oakberry">
+    <h2>Acceso interno</h2>
+    <p class="sub">Generador de cupones de premios</p>
+    <label>Usuario</label>
+    <input id="loginUser" type="text" autocomplete="username" placeholder="usuario">
+    <label>Contraseña</label>
+    <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••">
+    <div id="loginErr" class="login-err">Usuario o contraseña incorrectos</div>
+    <button class="btn" id="loginBtn">Entrar</button>
+  </div>
+</div>
+
+<!-- ── Chip de sesión activa ── -->
+<div class="session-bar" id="sessionBar" style="display:none">
+  <span id="sessionUser">—</span>
+  <button onclick="cerrarSesion()">Salir</button>
+</div>
+
+<div class="wrap">
+  <img src="/email-logo-purple.png" alt="Oakberry" style="height:30px;margin-bottom:8px;display:block">
+  <h1>Premios <span class="pill">CREAR CUPÓN</span></h1>
+  <p class="sub">Generá un cupón único para el ganador de un premio grande. El código le llega por WhatsApp y lo redime en caja en cualquier tienda del país.</p>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- 1. Ganador -->
+  <div class="card">
+    <h2><span class="n">1</span> Ganador del premio</h2>
+    <div class="row">
+      <div>
+        <label>Nombre completo</label>
+        <input id="nombre" placeholder="ej: Daniel Zuluaga" autocomplete="off">
+      </div>
+      <div>
+        <label>Celular (WhatsApp)</label>
+        <input id="celular" type="tel" inputmode="numeric" placeholder="ej: 3001234567" autocomplete="off">
+      </div>
+    </div>
+    <label>Premio / campaña</label>
+    <input id="premio" placeholder="ej: Giveaway Instagram julio" autocomplete="off">
+    <p class="muted">Al celular le llega el WhatsApp oficial con el código. El nombre del premio queda registrado para saber de qué campaña salió cada cupón.</p>
+    <div class="nacional-banner">
+      📍 Este cupón es válido en <strong>CUALQUIER tienda Oakberry del país</strong> — no se restringe a una ciudad ni tienda.
+    </div>
+  </div>
+
+  <!-- 2. Oferta -->
+  <div class="card">
+    <h2><span class="n">2</span> Qué reclama</h2>
+
+    <div class="row">
+      <div>
+        <label>Descuento (%)</label>
+        <input id="descuento" type="number" min="1" max="100" value="100">
+      </div>
+      <div>
+        <label>Vigencia (días)</label>
+        <input id="vigencia" type="number" min="1" max="365" value="7">
+      </div>
+    </div>
+    <p class="muted">Si el premio cubre el producto 100% (gratis), dejá el 100. Si es descuento parcial, ajustá.</p>
+
+    <label>Productos que incluye el cupón</label>
+    <div id="productosList">
+      <!-- las filas se inyectan vía JS -->
+    </div>
+    <button type="button" class="add-prod" id="addProd">+ Agregar otro producto</button>
+    <p class="muted">Podés sumar varios bowls / smoothies. Ej: 2× Bowl 12oz + 1× Smoothie.</p>
+
+    <label style="margin-top:14px">Toppings incluidos</label>
+    <div class="topping-bar">
+      <label class="toggle">
+        <input type="checkbox" id="todosToppings" checked>
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">Todos los toppings incluidos (sin cobro extra)</span>
+    </div>
+    <div class="topping-chips hidden" id="toppingChips">
+      <!-- chips se inyectan vía JS; visible solo si el toggle de arriba está OFF -->
+    </div>
+    <p class="muted">Si apagás el toggle, podés seleccionar SOLO los toppings que van incluidos. Los demás los cobrará el cajero como extra.</p>
+  </div>
+
+  <!-- 3. Resumen + Generar -->
+  <div class="card">
+    <h2><span class="n">3</span> Resumen — qué se le va a dar</h2>
+    <div id="preview" style="background:#faf6ef; border:1.5px dashed var(--morado); border-radius:12px; padding:14px 18px; font-size:.88rem; line-height:1.6; color:var(--morado-osc); margin-bottom:14px; min-height:60px">
+      <em style="color:#9b8db0">Completá los campos arriba para ver el resumen…</em>
+    </div>
+    <button class="go" id="generar">🎟️ Generar cupón</button>
+
+    <div id="result">
+      <div class="codigo-box" id="codigoBox">XXXXXXX</div>
+      <div class="vence-row" id="venceRow">Vence el —</div>
+      <div id="waBanner" style="display:none; background:#e7f7ee; border:1.5px solid var(--ok); color:#0f6b3a; padding:12px 14px; border-radius:10px; margin-bottom:12px; font-size:.85rem; font-weight:600; text-align:center; line-height:1.45">
+        ✅ WhatsApp con el código enviado desde Oakberry a <span id="waCel">—</span><br>
+        <span style="font-size:.78rem; font-weight:500; color:#0f6b3a; opacity:.85">El cupón ya está Disponible — el ganador solo lo muestra en caja.</span>
+      </div>
+      <div class="btns">
+        <button onclick="copiarCodigo()">🔗 Copiar código</button>
+        <button class="alt" onclick="compartirWA()">📲 Reenviar manualmente (fallback)</button>
+        <button onclick="copiarTexto()">📋 Copiar texto completo</button>
+      </div>
+      <label style="margin-top:14px">Texto enviado / para reenviar</label>
+      <div class="preview" id="textoPreview"></div>
+    </div>
+  </div>
+
+  <!-- 4. Historial -->
+  <div class="card">
+    <h2><span class="n">★</span> Últimos cupones creados</h2>
+    <div class="table-wrap">
+      <table class="hist" id="hist">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Celular</th>
+            <th>Premio</th>
+            <th>Oferta</th>
+            <th>Estado</th>
+            <th>Vence</th>
+            <th>Canjeado en</th>
+          </tr>
+        </thead>
+        <tbody id="histBody">
+          <tr><td colspan="8" class="hist-empty">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Tap en un código para copiarlo. Se muestran los últimos 30 generados.</p>
+  </div>
+</div>
+
+<script>
+const API = "https://api.oakberry-cupones.com/";
+let LAST = null;  // último cupón generado: {codigo, textoWA, …}
+
+// ── JSONP helper (idéntico al de influencers.html) ─────────────
+function jsonp(params){
+  return new Promise((resolve)=>{
+    const cb = "__cb"+Math.random().toString(36).slice(2);
+    const to = setTimeout(()=>{ cleanup(); resolve({ok:false, mensaje:"timeout"}); }, 15000);
+    function cleanup(){
+      try{ delete window[cb]; }catch(e){}
+      if(s.parentNode) s.parentNode.removeChild(s);
+      clearTimeout(to);
+    }
+    window[cb] = (r)=>{ cleanup(); resolve(r||{}); };
+    params.set("callback", cb);
+    const s = document.createElement("script");
+    s.src = API + "?" + params.toString();
+    s.onerror = ()=>{ cleanup(); resolve({ok:false, mensaje:"network"}); };
+    document.body.appendChild(s);
+  });
+}
+
+function toast(msg, ok){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast " + (ok ? "ok" : "err");
+  if(ok) setTimeout(()=>{ t.className = "toast"; }, 3000);
+}
+
+// ── Catálogos hardcoded (espejo de adquisicion/backend/actions/premios.py) ──
+const CATALOGO_PRODUCTOS = ["Bowl 9oz", "Bowl 12oz", "Bowl 16oz", "Bowl 22oz", "Smoothie", "Pote 800ml"];
+const CATALOGO_TOPPINGS  = ["Arándano", "Fresa", "Mantequilla de maní", "Mantequilla de almendras", "Whey Protein"];
+
+// ── Productos dinámicos ──
+function nuevaFilaProducto(qty, prod){
+  const row = document.createElement("div");
+  row.className = "prod-row";
+  const opts = CATALOGO_PRODUCTOS.map(p =>
+    `<option value="${p}"${p===prod?" selected":""}>${p}</option>`
+  ).join("");
+  row.innerHTML = `
+    <input type="number" class="qty" min="1" max="20" value="${qty || 1}">
+    <select class="prod">${opts}</select>
+    <button type="button" class="del" title="Quitar">✕</button>
+  `;
+  row.querySelector(".del").addEventListener("click", ()=>{
+    row.remove();
+    actualizarBotonesDel();
+  });
+  return row;
+}
+
+function actualizarBotonesDel(){
+  const filas = document.querySelectorAll("#productosList .prod-row");
+  filas.forEach((r)=>{ r.querySelector(".del").disabled = (filas.length === 1); });
+}
+
+document.getElementById("addProd").addEventListener("click", ()=>{
+  document.getElementById("productosList").appendChild(nuevaFilaProducto(1, "Bowl 12oz"));
+  actualizarBotonesDel();
+});
+
+function recogerProductos(){
+  const filas = document.querySelectorAll("#productosList .prod-row");
+  const items = [];
+  filas.forEach(r=>{
+    const qty = parseInt(r.querySelector(".qty").value || "1", 10);
+    const prod = r.querySelector(".prod").value;
+    if(qty > 0 && prod) items.push(`${qty}x ${prod}`);
+  });
+  return items.join(", ");
+}
+
+// ── Toppings ──
+function renderToppingChips(){
+  const cont = document.getElementById("toppingChips");
+  cont.innerHTML = "";
+  CATALOGO_TOPPINGS.forEach(t=>{
+    const c = document.createElement("span");
+    c.className = "topping-chip";
+    c.textContent = t;
+    c.dataset.topping = t;
+    c.addEventListener("click", ()=> c.classList.toggle("sel"));
+    cont.appendChild(c);
+  });
+}
+
+document.getElementById("todosToppings").addEventListener("change", e=>{
+  document.getElementById("toppingChips").classList.toggle("hidden", e.target.checked);
+});
+
+function recogerToppings(){
+  if(document.getElementById("todosToppings").checked) return "todos";
+  const sel = [...document.querySelectorAll("#toppingChips .topping-chip.sel")]
+                .map(c => c.dataset.topping);
+  return sel.length ? sel.join(",") : "";
+}
+
+// ── Preview live: refleja exactamente lo que el cajero va a ver al canjear ──
+function actualizarPreview(){
+  const cont = document.getElementById("preview");
+  if(!cont) return;
+  const nom = document.getElementById("nombre").value.trim();
+  const cel = document.getElementById("celular").value.replace(/\D/g, "");
+  const premio = document.getElementById("premio").value.trim();
+  const desc = (document.getElementById("descuento").value || "").trim();
+  const vig = (document.getElementById("vigencia").value || "7").trim();
+  const productosStr = recogerProductos();
+  const toppings = recogerToppings();
+
+  const productos = productosStr.split(",").map(s => s.trim()).filter(Boolean);
+  const partes = [];
+
+  if(nom){
+    partes.push(`<strong>👤 ${nom}</strong>` + (premio ? ` <span style="color:#9b8db0">· ${premio}</span>` : ""));
+  }
+  if(cel){
+    partes.push(`<span style="color:#9b8db0">📱 +57 ${cel}</span>`);
+  }
+  partes.push(`<span>📍 Válido en <strong>cualquier tienda del país</strong></span>`);
+
+  if(productos.length){
+    const descNum = (desc || "").replace(/\D/g, "") || "100";
+    partes.push(`<br><strong style="color:var(--morado)">🎁 ${descNum}% DE DESCUENTO en:</strong>`);
+    productos.forEach(p => {
+      const norm = p.replace(/^(\d+)x\s+/i, "$1× ");
+      partes.push(`&nbsp;&nbsp;• ${norm}`);
+    });
+  }
+
+  if(toppings === "todos"){
+    partes.push(`<br><span style="color:var(--ok)">✓ <strong>TODOS los toppings INCLUIDOS</strong></span>`);
+  } else if(toppings){
+    partes.push(`<br><span style="color:var(--ok)">✓ Toppings incluidos: <strong>${toppings.split(",").join(", ")}</strong></span>`);
+    const pagos = CATALOGO_TOPPINGS.filter(t => !toppings.toLowerCase().includes(t.toLowerCase()));
+    if(pagos.length){
+      partes.push(`<span style="color:var(--err)">✗ Cobrar extra: ${pagos.join(", ")}</span>`);
+    }
+  } else {
+    partes.push(`<br><span style="color:var(--err)">✗ Toppings NO incluidos (cobrar todos extra)</span>`);
+  }
+
+  if(desc){
+    const num = desc.replace(/\D/g, "") || "100";
+    partes.push(`<br><strong style="color:var(--morado)">💳 APLICAR EN TOTEAT:</strong>`);
+    partes.push(`<span style="font-family:'Courier New', monospace; background:#fff; padding:6px 10px; border-radius:6px; border:1.5px dashed var(--morado); display:inline-block; font-weight:700">PREMIO ${num}% - ${num}% DE DESCUENTO DE LA ORDEN</span>`);
+  }
+
+  if(vig){
+    partes.push(`<br><span style="color:#9b8db0; font-size:.78rem">⏰ Vigencia: ${vig} día${vig === "1" ? "" : "s"}</span>`);
+  }
+
+  cont.innerHTML = partes.length
+    ? partes.join("<br>")
+    : '<em style="color:#9b8db0">Completá los campos arriba para ver el resumen…</em>';
+}
+
+// Engancha el preview a cada cambio del form.
+function bindPreview(){
+  ["nombre","celular","premio","descuento","vigencia"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){ el.addEventListener("input", actualizarPreview); el.addEventListener("change", actualizarPreview); }
+  });
+  document.getElementById("productosList").addEventListener("input", actualizarPreview);
+  document.getElementById("productosList").addEventListener("change", actualizarPreview);
+  document.getElementById("todosToppings").addEventListener("change", actualizarPreview);
+  document.getElementById("toppingChips").addEventListener("click", ()=> setTimeout(actualizarPreview, 0));
+  document.getElementById("addProd").addEventListener("click", ()=> setTimeout(actualizarPreview, 0));
+}
+
+// ── Generar cupón ──
+document.getElementById("generar").addEventListener("click", async ()=>{
+  const nombre = document.getElementById("nombre").value.trim();
+  const celular = document.getElementById("celular").value.replace(/\D/g, "");
+  const premio = document.getElementById("premio").value.trim();
+  const descuento = document.getElementById("descuento").value;
+  const productos = recogerProductos();
+  const toppingsIncluidos = recogerToppings();
+  const vigencia = document.getElementById("vigencia").value || "7";
+  const sess = sesionActiva() || {};
+
+  if(!nombre){ toast("Completa el nombre del ganador","err"); return; }
+  if(!celular || celular.length < 7){ toast("Completa el celular (al menos 7 dígitos)","err"); return; }
+  if(!descuento || !productos){ toast("Completa descuento y al menos un producto","err"); return; }
+
+  const btn = document.getElementById("generar");
+  btn.disabled = true; btn.textContent = "Generando…";
+
+  const r = await jsonp(new URLSearchParams({
+    accion: "crearCuponPremio",
+    nombre, celular, premio, descuento,
+    productos, toppingsIncluidos, vigencia,
+    creadoPor: sess.usuario || "",
+  }));
+
+  btn.disabled = false; btn.textContent = "🎟️ Generar cupón";
+
+  if(!r.ok){
+    toast("Error generando cupón: " + (r.mensaje || "desconocido"), false);
+    return;
+  }
+
+  LAST = r;
+  document.getElementById("codigoBox").textContent = r.codigo;
+  document.getElementById("venceRow").textContent = "Vence el " + (r.fechaVenceHumano || r.fechaVence || "—");
+  document.getElementById("textoPreview").textContent = r.textoWA || "";
+  const waBan = document.getElementById("waBanner");
+  if(r.waDisparado && r.celular){
+    document.getElementById("waCel").textContent = "+57 " + r.celular;
+    waBan.style.display = "block";
+  } else {
+    waBan.style.display = "none";
+  }
+  document.getElementById("result").style.display = "block";
+  toast("✅ Cupón " + r.codigo + " generado" + (r.waDisparado ? " · WA enviado" : ""), true);
+  document.getElementById("result").scrollIntoView({behavior:"smooth", block:"center"});
+
+  await cargarHistorial();
+});
+
+function copiarCodigo(){
+  if(!LAST) return;
+  navigator.clipboard.writeText(LAST.codigo).then(
+    ()=>toast("Código copiado: " + LAST.codigo, true),
+    ()=>toast("No se pudo copiar", false)
+  );
+}
+
+function copiarTexto(){
+  if(!LAST || !LAST.textoWA) return;
+  navigator.clipboard.writeText(LAST.textoWA).then(
+    ()=>toast("Texto completo copiado", true),
+    ()=>toast("No se pudo copiar", false)
+  );
+}
+
+function compartirWA(){
+  if(!LAST || !LAST.textoWA) return;
+  const cel = (LAST.celular || "").replace(/\D/g, "");
+  const wa = cel ? ("https://wa.me/" + (cel.startsWith("57") ? cel : "57" + cel.slice(-10)))
+                 : "https://wa.me/";
+  window.open(wa + "?text=" + encodeURIComponent(LAST.textoWA), "_blank");
+}
+
+// ── Historial ──
+function badgeEstado(estado){
+  const e = (estado || "").toLowerCase();
+  if(e === "disponible") return '<span class="badge disp">Disponible</span>';
+  if(e === "canjeado")   return '<span class="badge canj">Canjeado</span>';
+  if(e === "vencido")    return '<span class="badge venc">Vencido</span>';
+  return '<span class="badge otro">' + (estado || "—") + '</span>';
+}
+
+function fmtFechaCorta(s){
+  if(!s) return "—";
+  try{
+    const d = new Date(s);
+    if(isNaN(d.getTime())) return s;
+    return d.toLocaleDateString("es-CO", {day:"2-digit", month:"2-digit", year:"2-digit"});
+  }catch(e){ return s; }
+}
+
+async function cargarHistorial(){
+  const tbody = document.getElementById("histBody");
+  tbody.innerHTML = '<tr><td colspan="8" class="hist-empty">Cargando…</td></tr>';
+  const r = await jsonp(new URLSearchParams({accion:"listarCuponesPremio", limit:"30"}));
+  if(!r.ok || !r.cupones || !r.cupones.length){
+    tbody.innerHTML = '<tr><td colspan="8" class="hist-empty">Sin cupones aún. Generá el primero arriba.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = "";
+  r.cupones.forEach(c=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="codigo" title="Click para copiar">${c.codigo || "—"}</td>
+      <td>${c.nombre || "—"}</td>
+      <td>${c.celular || "—"}</td>
+      <td>${c.premio || "—"}</td>
+      <td>${(c.descuento || "") + (c.producto ? " · " + c.producto : "")}</td>
+      <td>${badgeEstado(c.estado)}</td>
+      <td>${fmtFechaCorta(c.vence)}</td>
+      <td>${c.puntoVenta || "—"}</td>
+    `;
+    tr.querySelector(".codigo").addEventListener("click", ()=>{
+      navigator.clipboard.writeText(c.codigo).then(
+        ()=>toast("Copiado: " + c.codigo, true),
+        ()=>toast("No se pudo copiar", false)
+      );
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Login gate (reutiliza auth.login del backend de adquisición) ──
+const SESS_KEY = "premios_sess";
+
+function sesionActiva(){
+  try{
+    const raw = sessionStorage.getItem(SESS_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+
+function mostrarApp(sess){
+  document.getElementById("loginOverlay").classList.add("hidden");
+  const bar = document.getElementById("sessionBar");
+  bar.style.display = "flex";
+  document.getElementById("sessionUser").textContent = "👤 " + (sess.nombre || sess.usuario);
+  if(!document.querySelector("#productosList .prod-row")){
+    document.getElementById("productosList").appendChild(nuevaFilaProducto(1, "Bowl 12oz"));
+    actualizarBotonesDel();
+    renderToppingChips();
+    bindPreview();
+    actualizarPreview();
+  }
+}
+
+function cerrarSesion(){
+  sessionStorage.removeItem(SESS_KEY);
+  location.reload();
+}
+
+async function intentarLogin(){
+  const user = document.getElementById("loginUser").value.trim();
+  const pass = document.getElementById("loginPass").value;
+  const err = document.getElementById("loginErr");
+  const btn = document.getElementById("loginBtn");
+  err.classList.remove("show");
+  if(!user || !pass){
+    err.textContent = "Completa usuario y contraseña";
+    err.classList.add("show");
+    return;
+  }
+  btn.disabled = true; btn.textContent = "Entrando…";
+  const r = await jsonp(new URLSearchParams({accion:"login", usuario:user, pass}));
+  btn.disabled = false; btn.textContent = "Entrar";
+  if(!r.ok){
+    err.textContent = r.mensaje || "Usuario o contraseña incorrectos";
+    err.classList.add("show");
+    return;
+  }
+  const sess = {usuario: r.usuario, rol: r.rol, nombre: r.nombre};
+  sessionStorage.setItem(SESS_KEY, JSON.stringify(sess));
+  mostrarApp(sess);
+  await cargarHistorial();
+}
+
+document.getElementById("loginBtn").addEventListener("click", intentarLogin);
+document.getElementById("loginPass").addEventListener("keydown", e=>{
+  if(e.key === "Enter") intentarLogin();
+});
+document.getElementById("loginUser").addEventListener("keydown", e=>{
+  if(e.key === "Enter") document.getElementById("loginPass").focus();
+});
+
+// ── init ──
+(async function init(){
+  const sess = sesionActiva();
+  if(sess){
+    mostrarApp(sess);
+    await cargarHistorial();
+  } else {
+    document.getElementById("loginUser").focus();
+  }
+})();
+</script>
+</body>
+</html>

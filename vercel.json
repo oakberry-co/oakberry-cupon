@@ -8,6 +8,7 @@
     { "source": "/amigos-panel",   "destination": "/amigos_panel.html"        },
     { "source": "/amigos/beneficios", "destination": "/mis_beneficios.html"     },
     { "source": "/influencers",    "destination": "/influencers.html"         },
+    { "source": "/premios",        "destination": "/premios.html"             },
     { "source": "/mi-cupon",       "destination": "/mi-cupon.html"            },
     { "source": "/activar-cupon",  "destination": "/activar-cupon.html"       },
     { "source": "/tyc/amigos",     "destination": "/tyc_amigos.html"          },

@@ -826,6 +826,33 @@ async function validar() {
     return;
   }
 
+  // ── Routing Premios: cupón de premio grande emitido desde /premios ──
+  //    Prefijo `PRE`, 7 chars total (la tabla es premios_codigos, separada
+  //    de codigos). Válido en cualquier tienda: el backend NO valida
+  //    ciudad/tienda, solo estado y vencimiento.
+  const esPremio = /^PRE/.test(codigo) && codigo.length === 7;
+  if (esPremio) {
+    try {
+      const res = await fetchGET({
+        accion: "canjearPremio",
+        codigo, tienda, ciudad, loopy: perfilCliente,
+      });
+      if (res.ok) {
+        document.getElementById("codigo").value = "";
+        const lineas = res.mensaje.split("\n");
+        mostrarResultado(true, lineas[0], lineas.slice(1));
+      } else {
+        mostrarError(res.mensaje || "no existe");
+      }
+    } catch(e) {
+      mostrarError("Error de conexión, intenta de nuevo");
+    } finally {
+      btn.classList.remove("loading");
+      btn.disabled = false;
+    }
+    return;
+  }
+
   // ── Routing Influencers: cupón pre-emitido a un @ de Instagram ──
   //    Prefijo `INF` (nuevo, desde 2026-06-17) o `IG` (legacy, cupones ya
   //    emitidos antes del cambio que siguen Disponible). 7 chars total.
