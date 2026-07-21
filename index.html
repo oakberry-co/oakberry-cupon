@@ -243,6 +243,10 @@ fbq('track', 'PageView');
           <button class="copy-btn" onclick="copiar('outCode',this)">📋 Copiar</button>
         </div>
       </div>
+      <a id="btnWallet" class="copy-btn-solid" href="#" target="_blank" rel="noopener"
+         style="display:none;text-decoration:none;text-align:center;margin-top:12px;">
+        🫐 Descargar tu tarjeta Oakberry
+      </a>
       <div id="infoCupon">
         <div class="info-pill green">
           <span class="icon">📧</span>
@@ -834,9 +838,29 @@ function mostrarMomentos(momentosStr) {
   pill.style.display = "flex";
 }
 
+// Polling de la tarjeta Loopy: la inscripción va en background tras crear el cupón;
+// cuando el card_id está listo, revela el botón de descarga. Best-effort (si nunca
+// llega, el link también va por correo). ~10 intentos × 2s.
+function pollWalletCard(codigo, intento) {
+  if (!codigo || intento > 10) return;
+  fetchGETSafe({ accion: "walletCupon", codigo })
+    .then((r) => {
+      if (r && r.listo && r.walletUrl) {
+        const b = document.getElementById("btnWallet");
+        if (b) { b.href = r.walletUrl; b.style.display = "block"; }
+      } else {
+        setTimeout(() => pollWalletCard(codigo, intento + 1), 2000);
+      }
+    })
+    .catch(() => setTimeout(() => pollWalletCard(codigo, intento + 1), 2000));
+}
+
 function mostrarNuevo({ codigo, nombre, vence }) {
   show("stateSuccess");
   try { fbq('track', 'Lead', {}, { eventID: _leadEventId }); } catch(e) {}
+  const _btnW = document.getElementById("btnWallet");
+  if (_btnW) { _btnW.style.display = "none"; _btnW.href = "#"; }
+  pollWalletCard(codigo, 0);
   document.getElementById("outCode").textContent     = codigo;
   document.getElementById("outNombre").textContent   = "Hola, " + nombre.split(" ")[0] + " 👋";
   document.getElementById("outValidity").textContent = "Válido hasta: " + fmt(vence);
