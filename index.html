@@ -54,6 +54,10 @@ fbq('track', 'PageView');
   input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(95,75,139,0.12);}
   input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(192,57,43,0.1);}
   .phone-prefix{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--primary);pointer-events:none;}
+  .phone-row{display:flex;gap:8px;}
+  .phone-row input[type=tel]{flex:1;padding-left:16px;}
+  .cc-select{flex:0 0 auto;padding:15px 8px;border-radius:12px;border:2px solid var(--border);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--primary);background:#fff;outline:none;-webkit-appearance:none;cursor:pointer;}
+  .cc-select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(95,75,139,0.12);}
   .err-msg{font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.3px;margin-top:5px;display:none;padding-left:4px;}
   .err-msg.show{display:block;}
   .validity-pill{display:flex;align-items:center;justify-content:center;gap:7px;background:#f5f0ff;border:1.5px solid #d4c8f5;border-radius:50px;padding:8px 16px;margin-bottom:18px;font-size:10px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;}
@@ -172,9 +176,24 @@ fbq('track', 'PageView');
         <div class="err-msg" id="err-email">⚠ Ingresa un email válido</div>
       </div>
       <div class="form-group">
-        <span class="phone-prefix">+57</span>
-        <input type="tel" id="inp-cel" placeholder="300 000 0000" inputmode="numeric" maxlength="10" autocomplete="tel">
-        <div class="err-msg" id="err-cel">⚠ Celular colombiano inválido — 10 dígitos, empieza en 3</div>
+        <div class="phone-row">
+          <select id="cc-prefix" class="cc-select" aria-label="Código de país">
+            <option value="57" selected>🇨🇴 +57</option>
+            <option value="1">🇺🇸 +1</option>
+            <option value="52">🇲🇽 +52</option>
+            <option value="34">🇪🇸 +34</option>
+            <option value="54">🇦🇷 +54</option>
+            <option value="56">🇨🇱 +56</option>
+            <option value="51">🇵🇪 +51</option>
+            <option value="593">🇪🇨 +593</option>
+            <option value="58">🇻🇪 +58</option>
+            <option value="55">🇧🇷 +55</option>
+            <option value="507">🇵🇦 +507</option>
+            <option value="506">🇨🇷 +506</option>
+          </select>
+          <input type="tel" id="inp-cel" placeholder="300 000 0000" inputmode="numeric" maxlength="15" autocomplete="tel">
+        </div>
+        <div class="err-msg" id="err-cel">⚠ Número de celular inválido</div>
       </div>
 
       <div class="validity-pill" id="validityPill">
@@ -560,7 +579,10 @@ function validar() {
     document.getElementById("err-email").classList.remove("show");
   }
   const cel = document.getElementById("inp-cel").value.replace(/\D/g,"");
-  if (!/^3\d{9}$/.test(cel)) {
+  const cc  = (document.getElementById("cc-prefix") || {}).value || "57";
+  // +57 (Colombia): 10 dígitos, empieza en 3. Otros países: 6-14 dígitos.
+  const celOk = cc === "57" ? /^3\d{9}$/.test(cel) : /^\d{6,14}$/.test(cel);
+  if (!celOk) {
     document.getElementById("inp-cel").classList.add("err");
     document.getElementById("err-cel").classList.add("show");
     ok = false;
@@ -702,8 +724,8 @@ async function solicitar() {
   const nombre     = document.getElementById("inp-nombre").value.trim();
   const email      = document.getElementById("inp-email").value.trim().toLowerCase();
   const celularRaw = document.getElementById("inp-cel").value.replace(/\D/g,"");
-  const esColombia = celularRaw.length === 10;
-  const celular    = esColombia ? "57" + celularRaw : celularRaw;
+  const ccPrefix   = (document.getElementById("cc-prefix") || {}).value || "57";
+  const celular    = ccPrefix + celularRaw;   // código de país + número
 
   // Mostrar pantalla de carga con barra de progreso
   show("stateLoading");
@@ -714,7 +736,7 @@ async function solicitar() {
   // - Cupón Disponible y NO vencido → mostrar cupón existente
   // - Cupón Canjeado → mostrar cupón canjeado
   // - Cupón Disponible y VENCIDO → permitir generar uno nuevo
-  if (!DEV_MODE) {
+  if (!DEV_MODE && !ES_WL) {
     try {
       const check = await fetchGETSafe({ accion: "verificarCelular", celular });
       if (check.existe) {
