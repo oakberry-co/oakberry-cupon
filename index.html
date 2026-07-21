@@ -245,29 +245,16 @@ fbq('track', 'PageView');
       </div>
       <a id="btnWallet" class="copy-btn-solid" href="#" target="_blank" rel="noopener"
          style="display:none;text-decoration:none;text-align:center;margin-top:12px;">
-        🫐 Descargar tu tarjeta Oakberry
+        🫐 Gana Açaí gratis, en un clic
       </a>
       <div id="infoCupon">
-        <div class="info-pill green">
-          <span class="icon">📧</span>
-          <span>Te enviamos tu código por <strong>correo electrónico</strong>. Revísalo (también la carpeta de promociones/spam).</span>
-        </div>
-        <div class="info-pill yellow">
-          <span class="icon">📱</span>
-          <span>Por ahora <strong>WhatsApp está temporalmente fuera de servicio</strong> mientras lo restablecemos — guarda tu código de esta pantalla o del correo.</span>
-        </div>
-        <div class="info-pill purple">
+        <a class="info-pill purple" href="/tiendas" target="_blank" rel="noopener" style="text-decoration:none;">
           <span class="icon">📍</span>
-          <span>Muestra este código al cajero en cualquier tienda Oakberry de <strong id="outCiudad">tu ciudad</strong>.</span>
-        </div>
-        <div class="info-pill yellow">
-          <span class="icon">⚠️</span>
-          <span>Uso único. Una vez canjeado en tienda no podrá volver a usarse.</span>
-        </div>
-        <div class="info-pill purple">
-          <span class="icon">🫐</span>
-          <span>Al reclamarlo, pídele al cajero que te <strong>inscriba en Loopy</strong> — empieza a sumar para tu próximo bowl <strong>gratis</strong>.</span>
-        </div>
+          <span>Muéstralo al cajero en tienda · <strong>Encuentra tu tienda más cercana →</strong></span>
+        </a>
+        <p style="text-align:center;font-size:12px;opacity:.65;margin-top:12px;">
+          Uso único · <a href="/tyc" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Términos y Condiciones</a>
+        </p>
       </div>
       <div id="infoSorteo" style="display:none;">
         <div class="info-pill green">
@@ -876,7 +863,7 @@ function mostrarNuevo({ codigo, nombre, vence }) {
   } else {
     document.getElementById("outProducto").textContent    = "🫐 " + P.producto;
     document.getElementById("outDescuento").textContent   = P.descuento + "% OFF";
-    document.getElementById("outCiudad").textContent      = P.ciudad !== "No especificada" ? P.ciudad : "tu ciudad";
+    const _oc = document.getElementById("outCiudad"); if (_oc) _oc.textContent = P.ciudad !== "No especificada" ? P.ciudad : "tu ciudad";
     mostrarMomentos(P.momentos);
   }
 }
