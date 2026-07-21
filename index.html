@@ -594,44 +594,23 @@ function validar() {
 // promesa quedaba colgada 35 segundos antes de mostrar error.
 // Fix: onerror rechaza inmediatamente + reintento automático con delay.
 function fetchGET(params) {
-  return new Promise((resolve, reject) => {
-    const cbName = "cb_" + Math.random().toString(36).slice(2);
-    const url = CFG.SCRIPT_URL + "?" + new URLSearchParams({...params, callback: cbName});
-    const script = document.createElement("script");
-    let settled = false;
-
-    function cleanup() {
-      settled = true;
-      clearTimeout(timer);
-      delete window[cbName];
-      if (script.parentNode) script.parentNode.removeChild(script);
-    }
-
-    window[cbName] = (data) => {
-      if (settled) return;
-      cleanup();
-      resolve(data);
-    };
-
-    // CORRECCIÓN CLAVE: rechazar en onerror para no dejar la promesa colgada
-    // en Safari/iOS donde los redirects 302 disparan onerror
-    script.onerror = () => {
-      if (settled) return;
-      cleanup();
-      reject(new Error("script-error"));
-    };
-
-    script.src = url;
-    document.body.appendChild(script);
-
-    // Timeout reducido de 35s → 12s para mejor UX en móvil
-    const timer = setTimeout(() => {
-      if (!settled) {
-        cleanup();
-        reject(new Error("timeout"));
-      }
-    }, 12000);
-  });
+  // fetch() + CORS reemplaza el JSONP <script>. El JSONP disparaba script-error
+  // fantasma (redirects/webview de IG) mostrando "error de conexión" aunque el
+  // server respondiera 200. El backend devuelve JSON directo cuando NO va callback.
+  const url = CFG.SCRIPT_URL + "?" + new URLSearchParams(params);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 12000);  // mismo timeout de 12s
+  return fetch(url, {
+      method: "GET",
+      signal: ctrl.signal,
+      credentials: "omit",   // sin cookies (coincide con CORS Origin '*')
+      cache: "no-store",     // nunca cachear respuestas de cupón
+    })
+    .then((res) => {
+      if (!res.ok) throw new Error("http-" + res.status);
+      return res.json();
+    })
+    .finally(() => clearTimeout(timer));
 }
 
 // Wrapper con reintento automático — en móvil el primer intento puede
