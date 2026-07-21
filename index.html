@@ -704,6 +704,11 @@ function setStep(n, estado) {
 }
 
 async function solicitar() {
+  // ── Instrumentación embudo: intento de envío (antes de validar) ──
+  // Cuenta cada clic en el botón. La brecha con 'Lead' revela pérdidas por
+  // validación (email/celular) + reglas anti-fraude (dispositivo/1-cupón).
+  try { fbq('trackCustom','FormSubmitAttempt'); } catch(e){}
+
   if (!validar()) return;
 
   // ── Whitelist de pruebas ─────────────────────────────────────
@@ -945,6 +950,23 @@ function copiar(elId, btn) {
 document.getElementById("inp-cel").addEventListener("input", function() {
   this.value = this.value.replace(/\D/g,"");
 });
+
+// ── Instrumentación embudo: form_started (una sola vez por sesión) ──
+// Mide cuánta gente que CARGA la landing EMPIEZA a llenar el formulario.
+// Dispara al primer foco en cualquier campo. Solo navegador (fbq); no toca
+// backend ni CAPI → riesgo mínimo, puramente diagnóstico.
+let _formStarted = false;
+function _marcarFormStarted(){
+  if (_formStarted) return;
+  _formStarted = true;
+  try { fbq('track','InitiateCheckout'); } catch(e){}
+}
+["inp-nombre","inp-email","inp-cel"].forEach(function(id){
+  var el = document.getElementById(id);
+  if (el) el.addEventListener("focus", _marcarFormStarted, { once:true });
+});
+var _chkTyc = document.getElementById("chk-tyc");
+if (_chkTyc) _chkTyc.addEventListener("change", _marcarFormStarted, { once:true });
 </script>
 </body>
 </html>
