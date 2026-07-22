@@ -89,9 +89,9 @@
 
 <script>
 const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
-// Serverless function same-origin (api/mapa.js → backend). Evita CORS y los
-// timeouts de los rewrites externos de Vercel.
-const API = '/api/mapa';
+// Directo al backend (sin Vercel en el medio). Token va en header Authorization;
+// CORS habilitado en el backend (ACAO * + Allow-Headers Authorization).
+const API = 'https://api.oakberry-cupones.com/?accion=mapaCalorDatos';
 let map, heat, storeLayer, DATA, ID_TOKEN;
 let MODE = 0, CITY = '';
 // Centros aproximados para hacer zoom al elegir ciudad
@@ -133,9 +133,8 @@ async function loadData(intento){
   let res, d;
   try {
     res = await fetch(API, {
-      method:'POST', credentials:'omit', cache:'no-store',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ idtoken: ID_TOKEN }),
+      method:'GET', credentials:'omit', cache:'no-store',
+      headers:{ 'Authorization': 'Bearer ' + ID_TOKEN },
     });
     d = await res.json();   // parseamos el body aunque el status no sea 2xx
   } catch(e){
