@@ -89,8 +89,9 @@
 
 <script>
 const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
-// Proxy same-origin (Vercel rewrite → api.oakberry-cupones.com). Evita CORS.
-const API = '/apimapa';
+// Serverless function same-origin (api/mapa.js → backend). Evita CORS y los
+// timeouts de los rewrites externos de Vercel.
+const API = '/api/mapa';
 let map, heat, storeLayer, DATA, ID_TOKEN;
 let MODE = 0, CITY = '';
 // Centros aproximados para hacer zoom al elegir ciudad
