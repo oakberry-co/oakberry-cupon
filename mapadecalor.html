@@ -132,8 +132,11 @@ async function loadData(intento){
   intento = intento || 1;
   let res, d;
   try {
-    res = await fetch(API + '?idtoken=' + encodeURIComponent(ID_TOKEN),
-      { method:'GET', credentials:'omit', cache:'no-store' });
+    res = await fetch(API, {
+      method:'POST', credentials:'omit', cache:'no-store',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ idtoken: ID_TOKEN }),
+    });
     d = await res.json();   // parseamos el body aunque el status no sea 2xx
   } catch(e){
     if(intento < 3){ setTimeout(()=>loadData(intento+1), 600*intento); return; }

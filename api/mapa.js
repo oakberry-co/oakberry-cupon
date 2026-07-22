@@ -1,12 +1,18 @@
 // api/mapa.js — proxy server-side al backend de adquisición.
-// Corre en el runtime Node de Vercel (same-origin, sin CORS). Reenvía el
-// idtoken de Google; el backend verifica token + allowlist. Con reintentos
-// y auto-diagnóstico: si el hop a GCP falla, devuelve el motivo real (no 499).
+// El idtoken de Google viaja en el BODY (POST) del navegador → y de aquí al
+// backend por header Authorization. Así NINGÚN hop lleva el token en la URL
+// (URLs largas + respuesta grande rompían el hop Vercel↔GCP con 499/HTML).
+// Corre en el runtime Node de Vercel (same-origin, sin CORS). Reintenta 3x.
 export default async function handler(req, res) {
-  const idtoken = (req.query && req.query.idtoken) || '';
-  const backend = 'https://api.oakberry-cupones.com/?accion=mapaCalorDatos&idtoken='
-    + encodeURIComponent(idtoken);
+  // idtoken: del body JSON (POST) o del query (?idtoken=, compatibilidad).
+  let idtoken = '';
+  if (req.method === 'POST') {
+    const b = typeof req.body === 'string' ? safeParse(req.body) : (req.body || {});
+    idtoken = b.idtoken || '';
+  }
+  if (!idtoken && req.query) idtoken = req.query.idtoken || '';
 
+  const backend = 'https://api.oakberry-cupones.com/?accion=mapaCalorDatos';
   res.setHeader('Cache-Control', 'no-store');
   const t0 = Date.now();
   let lastInfo = '';
@@ -18,7 +24,7 @@ export default async function handler(req, res) {
       const r = await fetch(backend, {
         method: 'GET',
         signal: ctrl.signal,
-        headers: { 'Accept': 'application/json' },
+        headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + idtoken },
       });
       clearTimeout(timer);
       const text = await r.text();
@@ -31,12 +37,13 @@ export default async function handler(req, res) {
       clearTimeout(timer);
       lastInfo = 'fetch ' + (e && e.name === 'AbortError' ? 'timeout 25s' : (e && e.message));
     }
-    // pequeño backoff antes de reintentar
     await new Promise(ok => setTimeout(ok, 300 * attempt));
   }
 
-  return res.status(502).json({
+  return res.status(200).json({
     ok: false,
     mensaje: 'No se pudo leer el backend: ' + lastInfo + ' (3 intentos, ' + (Date.now() - t0) + 'ms)',
   });
 }
+
+function safeParse(s) { try { return JSON.parse(s); } catch (e) { return {}; } }
