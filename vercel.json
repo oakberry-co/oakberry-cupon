@@ -22,6 +22,7 @@
     { "source": "/cursos",         "destination": "/cursos.html"              },
     { "source": "/reactivar",      "destination": "/reactivar.html"           },
     { "source": "/tiendas",        "destination": "/tiendas.html"             },
+    { "source": "/mapadecalor",    "destination": "/mapadecalor.html"         },
     { "source": "/dashboard",         "destination": "https://dashboard.oakberry-cupones.com/dashboard/" },
     { "source": "/dashboard/:path*",  "destination": "https://dashboard.oakberry-cupones.com/dashboard/:path*" },
     { "source": "/adidas-activar", "destination": "/adidas-activar.html"      },
