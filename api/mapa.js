@@ -1,55 +1,41 @@
-// api/mapa.js — proxy server-side al backend de adquisición.
-// El idtoken de Google viaja en el BODY (POST) del navegador → y de aquí al
-// backend por header Authorization. Así NINGÚN hop lleva el token en la URL
-// (URLs largas + respuesta grande rompían el hop Vercel↔GCP con 499/HTML).
-// Corre en el runtime Node de Vercel (same-origin, sin CORS). Reintenta 3x.
+// api/mapa.js — datos del mapa de calor, con login de Google verificado aquí.
+// NO toca el backend (Caddy comprimía la respuesta y el hop Vercel↔GCP la
+// corrompía). Verifica el ID token contra Google (tokeninfo) y, si el correo
+// está autorizado, devuelve el snapshot empaquetado en mapdata.js.
+import { MAPDATA } from './mapdata.js';
+
+const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
+const ALLOWLIST = ['dzuluaga@manelfoods.com'];
+
 export default async function handler(req, res) {
-  // idtoken: del body JSON (POST) o del query (?idtoken=, compatibilidad).
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
   let idtoken = '';
   if (req.method === 'POST') {
     const b = typeof req.body === 'string' ? safeParse(req.body) : (req.body || {});
     idtoken = b.idtoken || '';
   }
   if (!idtoken && req.query) idtoken = req.query.idtoken || '';
+  if (!idtoken) return res.status(200).json({ ok: false, auth: false, mensaje: 'Falta el token.' });
 
-  const backend = 'https://api.oakberry-cupones.com/?accion=mapaCalorDatos';
-  res.setHeader('Cache-Control', 'no-store');
-  const t0 = Date.now();
-  let lastInfo = '';
-
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 25000);
-    try {
-      const r = await fetch(backend, {
-        method: 'GET',
-        signal: ctrl.signal,
-        // identity: pedimos SIN gzip. Caddy comprime respuestas grandes y el
-        // fetch de Vercel corrompía el body gzip (→ 499/HTML). Sin comprimir, OK.
-        headers: {
-          'Accept': 'application/json',
-          'Accept-Encoding': 'identity',
-          'Authorization': 'Bearer ' + idtoken,
-        },
-      });
-      clearTimeout(timer);
-      const text = await r.text();
-      if (r.ok) {
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
-        return res.status(200).send(text);
-      }
-      lastInfo = 'backend HTTP ' + r.status;
-    } catch (e) {
-      clearTimeout(timer);
-      lastInfo = 'fetch ' + (e && e.name === 'AbortError' ? 'timeout 25s' : (e && e.message));
-    }
-    await new Promise(ok => setTimeout(ok, 300 * attempt));
+  // Verificación del ID token contra Google (reachable desde Vercel).
+  let info;
+  try {
+    const r = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idtoken));
+    info = await r.json();
+  } catch (e) {
+    return res.status(200).json({ ok: false, mensaje: 'No se pudo verificar el login: ' + (e && e.message) });
   }
 
-  return res.status(200).json({
-    ok: false,
-    mensaje: 'No se pudo leer el backend: ' + lastInfo + ' (3 intentos, ' + (Date.now() - t0) + 'ms)',
-  });
+  const email = (info.email || '').toLowerCase();
+  const audOk = info.aud === CLIENT_ID;
+  const emailOk = info.email_verified === 'true' || info.email_verified === true;
+  if (!audOk || !emailOk || !ALLOWLIST.includes(email)) {
+    return res.status(200).json({ ok: false, auth: false, mensaje: 'Correo no autorizado para ver este mapa.' });
+  }
+
+  return res.status(200).json({ ok: true, auth: true, email, ...MAPDATA });
 }
 
 function safeParse(s) { try { return JSON.parse(s); } catch (e) { return {}; } }

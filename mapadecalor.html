@@ -4,16 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mapa de calor — Adquisición Oakberry</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<link rel="stylesheet" href="/mapa-assets/leaflet.css"/>
+<script src="/mapa-assets/leaflet.js"></script>
+<script src="/mapa-assets/leaflet-heat.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{--beige:#f6f1e4;--morado:#3d2b5e;--morado-c:#9b85c4;--oro:#b8860b;}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;font-family:'Montserrat',system-ui,sans-serif;background:var(--beige)}
-  #map{position:absolute;inset:0;z-index:1}
-  .panel{position:absolute;top:14px;left:14px;z-index:1000;background:rgba(246,241,228,.96);
+  /* sin tiles: el fondo del mapa es el beige de marca */
+  #map{position:absolute;inset:0;z-index:1;background:#eae3d1}
+  .leaflet-container{background:#dcd3bd}
+  .panel{position:absolute;top:14px;left:14px;z-index:1000;background:rgba(246,241,228,.97);
     border:2px solid var(--morado);border-radius:14px;padding:14px 16px;max-width:300px;
     box-shadow:0 6px 22px rgba(61,43,94,.28)}
   .panel h1{font-size:15px;color:var(--morado);font-weight:800;letter-spacing:.3px;margin-bottom:2px}
@@ -37,20 +39,16 @@
   .store-dot{color:var(--oro)}
   .foot{font-size:9px;color:#8a7ba3;margin-top:10px;border-top:1px solid #ddd4bf;padding-top:7px}
   .leaflet-popup-content{font-family:inherit;font-size:12px}
-  /* Pantalla de login */
   #gate{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;
     align-items:center;justify-content:center;background:var(--beige);gap:18px;text-align:center;padding:24px}
-  #gate .logo{font-size:44px}
-  #gate h2{color:var(--morado);font-size:20px;font-weight:800}
+  #gate .logo{font-size:44px}#gate h2{color:var(--morado);font-size:20px;font-weight:800}
   #gate p{color:#6b5b86;font-size:13px;max-width:320px}
   #gate .err{color:#c0392b;font-size:12px;font-weight:600;min-height:16px}
   #spinner{position:fixed;inset:0;z-index:1500;display:none;align-items:center;justify-content:center;
-    background:var(--beige);color:var(--morado);font-size:14px}
+    background:var(--beige);color:var(--morado);font-size:14px;text-align:center;padding:24px}
 </style>
 </head>
 <body>
-
-<!-- Pantalla de login (Google) -->
 <div id="gate">
   <div class="logo">&#129747;</div>
   <h2>Mapa de calor &mdash; Adquisici&oacute;n</h2>
@@ -58,9 +56,7 @@
   <div id="gbtn"></div>
   <div class="err" id="gerr"></div>
 </div>
-
 <div id="spinner">Cargando mapa&hellip;</div>
-
 <div id="map"></div>
 <div class="panel" style="display:none" id="panel">
   <h1>&#129747; D&oacute;nde crean cupones</h1>
@@ -84,29 +80,24 @@
     <div class="bar"></div>
     <div style="margin-top:6px"><span class="store-dot">&#9670;</span> Tiendas Oakberry</div>
   </div>
-  <div class="foot" id="foot">Datos en vivo &middot; IP = precisi&oacute;n ciudad/barrio, no domicilio.</div>
+  <div class="foot" id="foot">Datos por IP: ciudad/barrio, no domicilio exacto.</div>
 </div>
 
 <script>
 const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
-// Proxy same-origin (api/mapa.js). El navegador NO puede pegarle al api.
-// directo (red corporativa lo bloquea) → va por Vercel. Token en el body.
 const API = '/api/mapa';
 let map, heat, storeLayer, DATA, ID_TOKEN;
 let MODE = 0, CITY = '';
-// Centros aproximados para hacer zoom al elegir ciudad
 const CITY_CENTER = {
-  'Bogota':[4.66,-74.08,11], 'Medellin':[6.24,-75.57,11], 'Cali':[3.42,-76.52,11],
-  'Barranquilla':[10.98,-74.80,11], 'Bucaramanga':[7.11,-73.12,11], 'Cartagena':[10.40,-75.51,11],
-  'Cucuta':[7.89,-72.50,12], 'Monteria':[8.75,-75.88,12], 'Valledupar':[10.46,-73.25,12],
-  'Pereira':[4.81,-75.69,12], 'Santa Marta':[11.24,-74.20,12], 'Envigado':[6.17,-75.59,12]
+  'Bogota':[4.66,-74.08,11],'Medellin':[6.24,-75.57,11],'Cali':[3.42,-76.52,11],
+  'Barranquilla':[10.98,-74.80,11],'Bucaramanga':[7.11,-73.12,11],'Cartagena':[10.40,-75.51,11],
+  'Cucuta':[7.89,-72.50,12],'Monteria':[8.75,-75.88,12],'Valledupar':[10.46,-73.25,12],
+  'Pereira':[4.81,-75.69,12],'Santa Marta':[11.24,-74.20,12],'Envigado':[6.17,-75.59,12]
 };
 
-// ── Google Identity Services ──────────────────────────────────────
 window.onload = function(){
   if(!window.google || !google.accounts){
-    document.getElementById('gerr').textContent='No se pudo cargar Google. Recarga la página.';
-    return;
+    document.getElementById('gerr').textContent='No se pudo cargar Google. Recarga la página.'; return;
   }
   google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onCredential });
   google.accounts.id.renderButton(document.getElementById('gbtn'),
@@ -122,79 +113,55 @@ function onCredential(resp){
   loadData();
 }
 
-function fail(msg){
-  const s=document.getElementById('spinner');
-  s.style.display='flex'; s.textContent=msg;
-}
+function fail(msg){ const s=document.getElementById('spinner'); s.style.display='flex'; s.textContent=msg; }
 
-// ── Carga de datos (con token) ────────────────────────────────────
 async function loadData(intento){
   intento = intento || 1;
   let res, d;
   try {
-    res = await fetch(API, {
-      method:'POST', credentials:'omit', cache:'no-store',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ idtoken: ID_TOKEN }),
-    });
-    d = await res.json();   // parseamos el body aunque el status no sea 2xx
+    res = await fetch(API, { method:'POST', credentials:'omit', cache:'no-store',
+      headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ idtoken: ID_TOKEN }) });
+    d = await res.json();
   } catch(e){
-    if(intento < 3){ setTimeout(()=>loadData(intento+1), 600*intento); return; }
-    fail('No se pudo conectar tras 3 intentos: ' + (e.message||e)); return;
+    if(intento < 3){ setTimeout(()=>loadData(intento+1), 500*intento); return; }
+    fail('No se pudo cargar: ' + (e.message||e)); return;
   }
-
-  // La función devuelve {ok:false, mensaje:...} con el motivo real si el hop falla
-  if(d && d.ok === false && d.mensaje && d.auth !== false){
-    if(intento < 3){ setTimeout(()=>loadData(intento+1), 600*intento); return; }
-    fail(d.mensaje); return;
-  }
-
   if(d && d.auth === false){
     document.getElementById('spinner').style.display='none';
     document.getElementById('gate').style.display='flex';
-    document.getElementById('gerr').textContent='Correo no autorizado para ver este mapa.';
-    return;
+    document.getElementById('gerr').textContent = d.mensaje || 'No autorizado.'; return;
   }
-  if(!d || !d.ok){ fail('Backend: ' + (d && d.mensaje ? d.mensaje : 'respuesta inválida')); return; }
-  if(!d.heat || !d.heat.length){ fail('El backend no devolvió datos de mapa.'); return; }
-
+  if(!d || !d.ok || !d.heat){ fail(d && d.mensaje ? d.mensaje : 'Sin datos.'); return; }
   DATA = d;
-  try { initMap(); render(); }
+  try { await initMap(); render(); }
   catch(e){ fail('Error dibujando el mapa: ' + (e.message||e)); return; }
   document.getElementById('spinner').style.display='none';
 }
 
-// ── Mapa ──────────────────────────────────────────────────────────
-function initMap(){
-  if(typeof L === 'undefined'){ throw new Error('Leaflet no cargó (CDN bloqueado)'); }
-  if(typeof L.heatLayer === 'undefined'){ throw new Error('plugin heat no cargó'); }
-  map = L.map('map',{zoomControl:true}).setView([4.6,-74.08],6);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
-    attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom:19, subdomains:'abcd'}).addTo(map);
+async function initMap(){
+  if(typeof L === 'undefined') throw new Error('Leaflet no cargó');
+  if(typeof L.heatLayer === 'undefined') throw new Error('plugin heat no cargó');
+  map = L.map('map',{ zoomControl:true, minZoom:5, maxZoom:14 }).setView([4.6,-74.08],6);
+  // Fondo = contorno de Colombia (sin tiles externos)
+  try {
+    const g = await fetch('/mapa-assets/colombia.geojson', { cache:'force-cache' }).then(r=>r.json());
+    L.geoJSON(g, { style:{ color:'#b6a98a', weight:1, fillColor:'#efe8d6', fillOpacity:1 } }).addTo(map);
+  } catch(e){ /* si falla el contorno, igual mostramos el heat sobre el fondo */ }
 }
 
-// modo 0=leads(idx2) · 1=compró(idx3) · 2=no compró(idx2-idx3)
-function weight(r, mode){
-  if(mode===0) return r[2];
-  if(mode===1) return r[3];
-  return r[2]-r[3];
-}
-// nodos que pasan el filtro de ciudad actual (idx4 = ciudad normalizada)
-function nodosFiltrados(){
-  return CITY ? DATA.heat.filter(r=>r[4]===CITY) : DATA.heat;
-}
+function weight(r, mode){ if(mode===0) return r[2]; if(mode===1) return r[3]; return r[2]-r[3]; }
+function nodosFiltrados(){ return CITY ? DATA.heat.filter(r=>r[4]===CITY) : DATA.heat; }
 function buildHeat(){
   const rows = nodosFiltrados().filter(r=>weight(r,MODE)>0);
   if(!rows.length) return L.heatLayer([],{});
   const max = Math.max.apply(null, rows.map(r=>weight(r,MODE)));
   const pts = rows.map(r=>[r[0],r[1], weight(r,MODE)/max]);
-  return L.heatLayer(pts,{radius:32,blur:22,maxZoom:13,minOpacity:.35,
+  return L.heatLayer(pts,{radius:30,blur:20,maxZoom:12,minOpacity:.4,
     gradient:{0.0:'#4a90d9',0.35:'#7ec850',0.6:'#f5d442',0.8:'#f0932b',1.0:'#e74c3c'}});
 }
 function updateKPIs(){
   const rows = nodosFiltrados();
-  const leads = rows.reduce((a,r)=>a+r[2],0);
-  const compro = rows.reduce((a,r)=>a+r[3],0);
+  const leads = rows.reduce((a,r)=>a+r[2],0), compro = rows.reduce((a,r)=>a+r[3],0);
   document.getElementById('k1').textContent = leads.toLocaleString('es');
   document.getElementById('k2').textContent = compro.toLocaleString('es');
   document.getElementById('k3').textContent = (leads-compro).toLocaleString('es');
@@ -202,15 +169,15 @@ function updateKPIs(){
 function redraw(){
   if(heat) map.removeLayer(heat);
   heat = buildHeat().addTo(map);
-  storeLayer.bringToFront();
+  if(storeLayer) storeLayer.bringToFront();
   updateKPIs();
 }
 function setMode(m){
   MODE = m;
   for(let i=0;i<3;i++) document.getElementById('b'+i).classList.toggle('on',i===m);
-  const foots=['Concentraci&oacute;n de <b>leads</b> (cupones creados) por zona.',
+  const foots=['Concentraci&oacute;n de <b>leads</b> (cupones creados).',
     'D&oacute;nde est&aacute; la gente que <b>compr&oacute;</b> (canje&oacute;).',
-    'Demanda que <b>no convirti&oacute;</b> (lead &minus; compr&oacute;): d&oacute;nde se pierde.'];
+    'Demanda que <b>no convirti&oacute;</b> (lead &minus; compr&oacute;).'];
   document.getElementById('foot').innerHTML = foots[m] + '<br>Geo por IP: ciudad/barrio, no domicilio.';
   redraw();
 }
@@ -218,20 +185,15 @@ function onCity(){
   CITY = document.getElementById('citySel').value;
   redraw();
   if(CITY && CITY_CENTER[CITY]){ const c=CITY_CENTER[CITY]; map.setView([c[0],c[1]],c[2]); }
-  else { map.setView([4.6,-74.08],6); }
+  else map.setView([4.6,-74.08],6);
 }
 function render(){
-  // poblar dropdown de ciudades
   const sel = document.getElementById('citySel');
-  (DATA.ciudades||[]).forEach(c=>{
-    const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
-  });
+  (DATA.ciudades||[]).forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
   storeLayer = L.layerGroup().addTo(map);
   DATA.stores.forEach(s=>{
-    L.circleMarker([s.lat,s.lng],{radius:5,color:'#7a5c00',weight:1.5,
-      fillColor:'#b8860b',fillOpacity:.95})
-     .bindPopup('<b>'+s.nombre+'</b><br>'+(s.ciudad||'')+' &middot; Tienda Oakberry')
-     .addTo(storeLayer);
+    L.circleMarker([s.lat,s.lng],{radius:5,color:'#7a5c00',weight:1.5,fillColor:'#b8860b',fillOpacity:.95})
+     .bindPopup('<b>'+s.nombre+'</b><br>'+(s.ciudad||'')+' &middot; Tienda Oakberry').addTo(storeLayer);
   });
   document.getElementById('panel').style.display='block';
   setMode(0);
