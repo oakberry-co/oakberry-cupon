@@ -8,22 +8,23 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{--beige:#f6f1e4;--morado:#3d2b5e;--morado-c:#9b85c4;--oro:#b8860b;}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;font-family:'Montserrat',system-ui,sans-serif;background:var(--beige)}
   #map{position:absolute;inset:0;z-index:1}
   .panel{position:absolute;top:14px;left:14px;z-index:1000;background:rgba(246,241,228,.96);
-    border:2px solid var(--morado);border-radius:14px;padding:14px 16px;max-width:290px;
+    border:2px solid var(--morado);border-radius:14px;padding:14px 16px;max-width:300px;
     box-shadow:0 6px 22px rgba(61,43,94,.28)}
   .panel h1{font-size:15px;color:var(--morado);font-weight:800;letter-spacing:.3px;margin-bottom:2px}
   .panel .sub{font-size:11px;color:#6b5b86;margin-bottom:10px}
   .kpis{display:flex;gap:8px;margin-bottom:12px}
   .kpi{flex:1;background:#fff;border-radius:10px;padding:8px 6px;text-align:center;border:1px solid #e3dcc9}
-  .kpi b{display:block;font-size:19px;color:var(--morado);line-height:1}
-  .kpi span{font-size:9.5px;color:#7a6b93;text-transform:uppercase;letter-spacing:.4px}
-  .toggle{display:flex;gap:6px;margin-bottom:10px}
-  .toggle button{flex:1;font-size:11px;font-weight:700;padding:7px 4px;border-radius:8px;
+  .kpi b{display:block;font-size:18px;color:var(--morado);line-height:1}
+  .kpi span{font-size:9px;color:#7a6b93;text-transform:uppercase;letter-spacing:.3px}
+  .toggle{display:flex;gap:5px;margin-bottom:10px}
+  .toggle button{flex:1;font-size:10.5px;font-weight:700;padding:7px 3px;border-radius:8px;
     border:1.5px solid var(--morado);background:#fff;color:var(--morado);cursor:pointer;transition:.15s}
   .toggle button.on{background:var(--morado);color:#fff}
   .leg{font-size:10.5px;color:#5a4a75;line-height:1.5}
@@ -33,63 +34,131 @@
   .store-dot{color:var(--oro)}
   .foot{font-size:9px;color:#8a7ba3;margin-top:10px;border-top:1px solid #ddd4bf;padding-top:7px}
   .leaflet-popup-content{font-family:inherit;font-size:12px}
-  #status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    z-index:1200;font-size:14px;color:var(--morado);background:var(--beige)}
+  /* Pantalla de login */
+  #gate{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;background:var(--beige);gap:18px;text-align:center;padding:24px}
+  #gate .logo{font-size:44px}
+  #gate h2{color:var(--morado);font-size:20px;font-weight:800}
+  #gate p{color:#6b5b86;font-size:13px;max-width:320px}
+  #gate .err{color:#c0392b;font-size:12px;font-weight:600;min-height:16px}
+  #spinner{position:fixed;inset:0;z-index:1500;display:none;align-items:center;justify-content:center;
+    background:var(--beige);color:var(--morado);font-size:14px}
 </style>
 </head>
 <body>
+
+<!-- Pantalla de login (Google) -->
+<div id="gate">
+  <div class="logo">&#129747;</div>
+  <h2>Mapa de calor &mdash; Adquisici&oacute;n</h2>
+  <p>Acceso restringido. Inicia sesi&oacute;n con tu cuenta autorizada de Google.</p>
+  <div id="gbtn"></div>
+  <div class="err" id="gerr"></div>
+</div>
+
+<div id="spinner">Cargando mapa&hellip;</div>
+
 <div id="map"></div>
-<div id="status">Cargando mapa…</div>
 <div class="panel" style="display:none" id="panel">
   <h1>&#129747; D&oacute;nde crean cupones</h1>
-  <div class="sub">Programa de Adquisici&oacute;n &middot; geolocalizaci&oacute;n por IP</div>
+  <div class="sub">Programa de Adquisici&oacute;n &middot; geo por IP</div>
   <div class="kpis">
-    <div class="kpi"><b id="k1">0</b><span>Cupones geo</span></div>
+    <div class="kpi"><b id="k1">0</b><span>Creados</span></div>
     <div class="kpi"><b id="k2">0</b><span>Canjeados</span></div>
-    <div class="kpi"><b id="k3">0</b><span>Zonas</span></div>
+    <div class="kpi"><b id="k3">0</b><span>Sin canjear</span></div>
   </div>
   <div class="toggle">
-    <button id="bAll" class="on" onclick="setMode(0)">Todos los creados</button>
-    <button id="bRed" onclick="setMode(1)">Solo canjeados</button>
+    <button id="b0" class="on" onclick="setMode(0)">Creados</button>
+    <button id="b1" onclick="setMode(1)">Canjeados</button>
+    <button id="b2" onclick="setMode(2)">No canjeados</button>
   </div>
   <div class="leg">
     <div class="row"><span>menos</span><span>concentraci&oacute;n</span><span>m&aacute;s</span></div>
     <div class="bar"></div>
     <div style="margin-top:6px"><span class="store-dot">&#9670;</span> Tiendas Oakberry</div>
   </div>
-  <div class="foot">Datos en vivo &middot; IP = precisi&oacute;n ciudad/barrio, no domicilio exacto.</div>
+  <div class="foot" id="foot">Datos en vivo &middot; IP = precisi&oacute;n ciudad/barrio, no domicilio.</div>
 </div>
-<script>
-const API = 'https://api.oakberry-cupones.com/?accion=mapaCalorDatos';
-let map, heat, storeLayer, DATA;
 
+<script>
+const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
+const API = 'https://api.oakberry-cupones.com/?accion=mapaCalorDatos';
+let map, heat, storeLayer, DATA, ID_TOKEN;
+
+// ── Google Identity Services ──────────────────────────────────────
+window.onload = function(){
+  if(!window.google || !google.accounts){
+    document.getElementById('gerr').textContent='No se pudo cargar Google. Recarga la página.';
+    return;
+  }
+  google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onCredential });
+  google.accounts.id.renderButton(document.getElementById('gbtn'),
+    { theme:'filled_blue', size:'large', text:'signin_with', shape:'pill' });
+  google.accounts.id.prompt();
+};
+
+function onCredential(resp){
+  ID_TOKEN = resp.credential;
+  document.getElementById('gerr').textContent='';
+  document.getElementById('gate').style.display='none';
+  document.getElementById('spinner').style.display='flex';
+  loadData();
+}
+
+// ── Carga de datos (con token) ────────────────────────────────────
+function loadData(){
+  fetch(API + '&idtoken=' + encodeURIComponent(ID_TOKEN))
+    .then(r=>r.json())
+    .then(d=>{
+      if(d && d.auth === false){
+        document.getElementById('spinner').style.display='none';
+        const g=document.getElementById('gate'); g.style.display='flex';
+        document.getElementById('gerr').textContent='Correo no autorizado para ver este mapa.';
+        return;
+      }
+      if(!d || !d.ok || !d.heat){ throw new Error('sin datos'); }
+      DATA = d; initMap(); render();
+      document.getElementById('spinner').style.display='none';
+    })
+    .catch(()=>{
+      document.getElementById('spinner').textContent='No se pudo cargar el mapa. Reintenta.';
+    });
+}
+
+// ── Mapa ──────────────────────────────────────────────────────────
 function initMap(){
   map = L.map('map',{zoomControl:true}).setView([4.6,-74.08],6);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
     attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom:19, subdomains:'abcd'}).addTo(map);
 }
 
+// modo 0=creados(idx2) · 1=canjeados(idx3) · 2=no canjeados(idx2-idx3)
+function weight(r, mode){
+  if(mode===0) return r[2];
+  if(mode===1) return r[3];
+  return r[2]-r[3];
+}
 function buildHeat(mode){
-  const wi = mode===0?2:3;
-  const rows = DATA.heat.filter(r=>r[wi]>0);
-  const max = Math.max.apply(null, rows.map(r=>r[wi]));
-  const pts = rows.map(r=>[r[0],r[1], r[wi]/max]);
+  const rows = DATA.heat.filter(r=>weight(r,mode)>0);
+  const max = Math.max.apply(null, rows.map(r=>weight(r,mode)));
+  const pts = rows.map(r=>[r[0],r[1], weight(r,mode)/max]);
   return L.heatLayer(pts,{radius:32,blur:22,maxZoom:11,minOpacity:.35,
     gradient:{0.0:'#4a90d9',0.35:'#7ec850',0.6:'#f5d442',0.8:'#f0932b',1.0:'#e74c3c'}});
 }
-
 function setMode(m){
   map.removeLayer(heat);
   heat = buildHeat(m).addTo(map);
   storeLayer.bringToFront();
-  document.getElementById('bAll').classList.toggle('on',m===0);
-  document.getElementById('bRed').classList.toggle('on',m===1);
+  for(let i=0;i<3;i++) document.getElementById('b'+i).classList.toggle('on',i===m);
+  const foots=['Concentraci&oacute;n de cupones <b>creados</b> por zona.',
+    'D&oacute;nde se <b>canjearon</b> los cupones.',
+    'Demanda que <b>no convirti&oacute;</b> (creado &minus; canjeado): d&oacute;nde se pierde.'];
+  document.getElementById('foot').innerHTML = foots[m] + '<br>Geo por IP: ciudad/barrio, no domicilio.';
 }
-
 function render(){
   document.getElementById('k1').textContent = DATA.total.toLocaleString('es');
   document.getElementById('k2').textContent = DATA.canjeados.toLocaleString('es');
-  document.getElementById('k3').textContent = DATA.nodos;
+  document.getElementById('k3').textContent = (DATA.no_canjeados!=null?DATA.no_canjeados:(DATA.total-DATA.canjeados)).toLocaleString('es');
   storeLayer = L.layerGroup().addTo(map);
   DATA.stores.forEach(s=>{
     L.circleMarker([s.lat,s.lng],{radius:5,color:'#7a5c00',weight:1.5,
@@ -98,17 +167,9 @@ function render(){
      .addTo(storeLayer);
   });
   heat = buildHeat(0).addTo(map);
-  document.getElementById('status').style.display='none';
   document.getElementById('panel').style.display='block';
+  setMode(0);
 }
-
-initMap();
-fetch(API).then(r=>r.json()).then(d=>{
-  if(!d || !d.ok || !d.heat){ throw new Error('sin datos'); }
-  DATA = d; render();
-}).catch(e=>{
-  document.getElementById('status').textContent = 'No se pudo cargar el mapa. Reintenta en un momento.';
-});
 </script>
 </body>
 </html>
