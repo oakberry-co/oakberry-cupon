@@ -23,10 +23,14 @@
   .kpi{flex:1;background:#fff;border-radius:10px;padding:8px 6px;text-align:center;border:1px solid #e3dcc9}
   .kpi b{display:block;font-size:18px;color:var(--morado);line-height:1}
   .kpi span{font-size:9px;color:#7a6b93;text-transform:uppercase;letter-spacing:.3px}
-  .toggle{display:flex;gap:5px;margin-bottom:10px}
+  .toggle{display:flex;gap:5px;margin-bottom:8px}
   .toggle button{flex:1;font-size:10.5px;font-weight:700;padding:7px 3px;border-radius:8px;
     border:1.5px solid var(--morado);background:#fff;color:var(--morado);cursor:pointer;transition:.15s}
   .toggle button.on{background:var(--morado);color:#fff}
+  .fld{margin-bottom:10px}
+  .fld label{font-size:9px;color:#7a6b93;text-transform:uppercase;letter-spacing:.4px;font-weight:700;display:block;margin-bottom:3px}
+  .fld select{width:100%;font-family:inherit;font-size:12px;color:var(--morado);font-weight:600;
+    padding:6px 8px;border-radius:8px;border:1.5px solid var(--morado-c);background:#fff;cursor:pointer}
   .leg{font-size:10.5px;color:#5a4a75;line-height:1.5}
   .leg .bar{height:10px;border-radius:5px;margin:4px 0;
     background:linear-gradient(90deg,#4a90d9,#7ec850,#f5d442,#f0932b,#e74c3c)}
@@ -63,14 +67,18 @@
   <h1>&#129747; D&oacute;nde crean cupones</h1>
   <div class="sub">Programa de Adquisici&oacute;n &middot; geo por IP</div>
   <div class="kpis">
-    <div class="kpi"><b id="k1">0</b><span>Creados</span></div>
-    <div class="kpi"><b id="k2">0</b><span>Canjeados</span></div>
-    <div class="kpi"><b id="k3">0</b><span>Sin canjear</span></div>
+    <div class="kpi"><b id="k1">0</b><span>Leads</span></div>
+    <div class="kpi"><b id="k2">0</b><span>Compr&oacute;</span></div>
+    <div class="kpi"><b id="k3">0</b><span>No compr&oacute;</span></div>
   </div>
   <div class="toggle">
-    <button id="b0" class="on" onclick="setMode(0)">Creados</button>
-    <button id="b1" onclick="setMode(1)">Canjeados</button>
-    <button id="b2" onclick="setMode(2)">No canjeados</button>
+    <button id="b0" class="on" onclick="setMode(0)">Leads</button>
+    <button id="b1" onclick="setMode(1)">Compr&oacute;</button>
+    <button id="b2" onclick="setMode(2)">No compr&oacute;</button>
+  </div>
+  <div class="fld">
+    <label>Ciudad</label>
+    <select id="citySel" onchange="onCity()"><option value="">Todas las ciudades</option></select>
   </div>
   <div class="leg">
     <div class="row"><span>menos</span><span>concentraci&oacute;n</span><span>m&aacute;s</span></div>
@@ -84,6 +92,14 @@
 const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
 const API = 'https://api.oakberry-cupones.com/?accion=mapaCalorDatos';
 let map, heat, storeLayer, DATA, ID_TOKEN;
+let MODE = 0, CITY = '';
+// Centros aproximados para hacer zoom al elegir ciudad
+const CITY_CENTER = {
+  'Bogota':[4.66,-74.08,11], 'Medellin':[6.24,-75.57,11], 'Cali':[3.42,-76.52,11],
+  'Barranquilla':[10.98,-74.80,11], 'Bucaramanga':[7.11,-73.12,11], 'Cartagena':[10.40,-75.51,11],
+  'Cucuta':[7.89,-72.50,12], 'Monteria':[8.75,-75.88,12], 'Valledupar':[10.46,-73.25,12],
+  'Pereira':[4.81,-75.69,12], 'Santa Marta':[11.24,-74.20,12], 'Envigado':[6.17,-75.59,12]
+};
 
 // ── Google Identity Services ──────────────────────────────────────
 window.onload = function(){
@@ -132,33 +148,59 @@ function initMap(){
     attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom:19, subdomains:'abcd'}).addTo(map);
 }
 
-// modo 0=creados(idx2) · 1=canjeados(idx3) · 2=no canjeados(idx2-idx3)
+// modo 0=leads(idx2) · 1=compró(idx3) · 2=no compró(idx2-idx3)
 function weight(r, mode){
   if(mode===0) return r[2];
   if(mode===1) return r[3];
   return r[2]-r[3];
 }
-function buildHeat(mode){
-  const rows = DATA.heat.filter(r=>weight(r,mode)>0);
-  const max = Math.max.apply(null, rows.map(r=>weight(r,mode)));
-  const pts = rows.map(r=>[r[0],r[1], weight(r,mode)/max]);
-  return L.heatLayer(pts,{radius:32,blur:22,maxZoom:11,minOpacity:.35,
+// nodos que pasan el filtro de ciudad actual (idx4 = ciudad normalizada)
+function nodosFiltrados(){
+  return CITY ? DATA.heat.filter(r=>r[4]===CITY) : DATA.heat;
+}
+function buildHeat(){
+  const rows = nodosFiltrados().filter(r=>weight(r,MODE)>0);
+  if(!rows.length) return L.heatLayer([],{});
+  const max = Math.max.apply(null, rows.map(r=>weight(r,MODE)));
+  const pts = rows.map(r=>[r[0],r[1], weight(r,MODE)/max]);
+  return L.heatLayer(pts,{radius:32,blur:22,maxZoom:13,minOpacity:.35,
     gradient:{0.0:'#4a90d9',0.35:'#7ec850',0.6:'#f5d442',0.8:'#f0932b',1.0:'#e74c3c'}});
 }
-function setMode(m){
-  map.removeLayer(heat);
-  heat = buildHeat(m).addTo(map);
+function updateKPIs(){
+  const rows = nodosFiltrados();
+  const leads = rows.reduce((a,r)=>a+r[2],0);
+  const compro = rows.reduce((a,r)=>a+r[3],0);
+  document.getElementById('k1').textContent = leads.toLocaleString('es');
+  document.getElementById('k2').textContent = compro.toLocaleString('es');
+  document.getElementById('k3').textContent = (leads-compro).toLocaleString('es');
+}
+function redraw(){
+  if(heat) map.removeLayer(heat);
+  heat = buildHeat().addTo(map);
   storeLayer.bringToFront();
+  updateKPIs();
+}
+function setMode(m){
+  MODE = m;
   for(let i=0;i<3;i++) document.getElementById('b'+i).classList.toggle('on',i===m);
-  const foots=['Concentraci&oacute;n de cupones <b>creados</b> por zona.',
-    'D&oacute;nde se <b>canjearon</b> los cupones.',
-    'Demanda que <b>no convirti&oacute;</b> (creado &minus; canjeado): d&oacute;nde se pierde.'];
+  const foots=['Concentraci&oacute;n de <b>leads</b> (cupones creados) por zona.',
+    'D&oacute;nde est&aacute; la gente que <b>compr&oacute;</b> (canje&oacute;).',
+    'Demanda que <b>no convirti&oacute;</b> (lead &minus; compr&oacute;): d&oacute;nde se pierde.'];
   document.getElementById('foot').innerHTML = foots[m] + '<br>Geo por IP: ciudad/barrio, no domicilio.';
+  redraw();
+}
+function onCity(){
+  CITY = document.getElementById('citySel').value;
+  redraw();
+  if(CITY && CITY_CENTER[CITY]){ const c=CITY_CENTER[CITY]; map.setView([c[0],c[1]],c[2]); }
+  else { map.setView([4.6,-74.08],6); }
 }
 function render(){
-  document.getElementById('k1').textContent = DATA.total.toLocaleString('es');
-  document.getElementById('k2').textContent = DATA.canjeados.toLocaleString('es');
-  document.getElementById('k3').textContent = (DATA.no_canjeados!=null?DATA.no_canjeados:(DATA.total-DATA.canjeados)).toLocaleString('es');
+  // poblar dropdown de ciudades
+  const sel = document.getElementById('citySel');
+  (DATA.ciudades||[]).forEach(c=>{
+    const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
+  });
   storeLayer = L.layerGroup().addTo(map);
   DATA.stores.forEach(s=>{
     L.circleMarker([s.lat,s.lng],{radius:5,color:'#7a5c00',weight:1.5,
@@ -166,7 +208,6 @@ function render(){
      .bindPopup('<b>'+s.nombre+'</b><br>'+(s.ciudad||'')+' &middot; Tienda Oakberry')
      .addTo(storeLayer);
   });
-  heat = buildHeat(0).addTo(map);
   document.getElementById('panel').style.display='block';
   setMode(0);
 }
