@@ -89,7 +89,8 @@
 
 <script>
 const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
-const API = 'https://api.oakberry-cupones.com/?accion=mapaCalorDatos';
+// Proxy same-origin (Vercel rewrite → api.oakberry-cupones.com). Evita CORS.
+const API = '/apimapa';
 let map, heat, storeLayer, DATA, ID_TOKEN;
 let MODE = 0, CITY = '';
 // Centros aproximados para hacer zoom al elegir ciudad
@@ -126,29 +127,32 @@ function fail(msg){
 }
 
 // ── Carga de datos (con token) ────────────────────────────────────
-function loadData(){
-  fetch(API + '&idtoken=' + encodeURIComponent(ID_TOKEN))
-    .then(r=>r.json())
-    .catch(()=>{ throw new Error('NET'); })   // fallo de red/CORS
-    .then(d=>{
-      if(d && d.auth === false){
-        document.getElementById('spinner').style.display='none';
-        const g=document.getElementById('gate'); g.style.display='flex';
-        document.getElementById('gerr').textContent='Correo no autorizado para ver este mapa.';
-        return;
-      }
-      if(!d || !d.ok){ fail('Backend: ' + (d && d.mensaje ? d.mensaje : 'respuesta inválida')); return; }
-      if(!d.heat || !d.heat.length){ fail('El backend no devolvió datos de mapa.'); return; }
-      DATA = d;
-      try { initMap(); render(); }
-      catch(e){ fail('Error dibujando el mapa: ' + (e.message||e)); return; }
-      document.getElementById('spinner').style.display='none';
-    })
-    .catch(e=>{
-      fail(e.message==='NET'
-        ? 'No se pudo conectar con el backend (red/CORS).'
-        : 'Error: ' + (e.message||e));
-    });
+async function loadData(){
+  let res;
+  try {
+    res = await fetch(API + '?idtoken=' + encodeURIComponent(ID_TOKEN),
+      { method:'GET', credentials:'omit', cache:'no-store' });
+  } catch(e){ fail('Fetch falló (red): ' + (e.message||e)); return; }
+
+  if(!res.ok){ fail('HTTP ' + res.status + ' del backend.'); return; }
+
+  let d;
+  try { d = await res.json(); }
+  catch(e){ fail('Respuesta no-JSON del backend.'); return; }
+
+  if(d && d.auth === false){
+    document.getElementById('spinner').style.display='none';
+    document.getElementById('gate').style.display='flex';
+    document.getElementById('gerr').textContent='Correo no autorizado para ver este mapa.';
+    return;
+  }
+  if(!d || !d.ok){ fail('Backend: ' + (d && d.mensaje ? d.mensaje : 'respuesta inválida')); return; }
+  if(!d.heat || !d.heat.length){ fail('El backend no devolvió datos de mapa.'); return; }
+
+  DATA = d;
+  try { initMap(); render(); }
+  catch(e){ fail('Error dibujando el mapa: ' + (e.message||e)); return; }
+  document.getElementById('spinner').style.display='none';
 }
 
 // ── Mapa ──────────────────────────────────────────────────────────
