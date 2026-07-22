@@ -24,7 +24,13 @@ export default async function handler(req, res) {
       const r = await fetch(backend, {
         method: 'GET',
         signal: ctrl.signal,
-        headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + idtoken },
+        // identity: pedimos SIN gzip. Caddy comprime respuestas grandes y el
+        // fetch de Vercel corrompía el body gzip (→ 499/HTML). Sin comprimir, OK.
+        headers: {
+          'Accept': 'application/json',
+          'Accept-Encoding': 'identity',
+          'Authorization': 'Bearer ' + idtoken,
+        },
       });
       clearTimeout(timer);
       const text = await r.text();
