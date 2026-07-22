@@ -4,10 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mapa de calor — Adquisición Oakberry</title>
-<link rel="preconnect" href="https://unpkg.com">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{--beige:#f6f1e4;--morado:#3d2b5e;--morado-c:#9b85c4;--oro:#b8860b;}
@@ -121,10 +120,16 @@ function onCredential(resp){
   loadData();
 }
 
+function fail(msg){
+  const s=document.getElementById('spinner');
+  s.style.display='flex'; s.textContent=msg;
+}
+
 // ── Carga de datos (con token) ────────────────────────────────────
 function loadData(){
   fetch(API + '&idtoken=' + encodeURIComponent(ID_TOKEN))
     .then(r=>r.json())
+    .catch(()=>{ throw new Error('NET'); })   // fallo de red/CORS
     .then(d=>{
       if(d && d.auth === false){
         document.getElementById('spinner').style.display='none';
@@ -132,17 +137,24 @@ function loadData(){
         document.getElementById('gerr').textContent='Correo no autorizado para ver este mapa.';
         return;
       }
-      if(!d || !d.ok || !d.heat){ throw new Error('sin datos'); }
-      DATA = d; initMap(); render();
+      if(!d || !d.ok){ fail('Backend: ' + (d && d.mensaje ? d.mensaje : 'respuesta inválida')); return; }
+      if(!d.heat || !d.heat.length){ fail('El backend no devolvió datos de mapa.'); return; }
+      DATA = d;
+      try { initMap(); render(); }
+      catch(e){ fail('Error dibujando el mapa: ' + (e.message||e)); return; }
       document.getElementById('spinner').style.display='none';
     })
-    .catch(()=>{
-      document.getElementById('spinner').textContent='No se pudo cargar el mapa. Reintenta.';
+    .catch(e=>{
+      fail(e.message==='NET'
+        ? 'No se pudo conectar con el backend (red/CORS).'
+        : 'Error: ' + (e.message||e));
     });
 }
 
 // ── Mapa ──────────────────────────────────────────────────────────
 function initMap(){
+  if(typeof L === 'undefined'){ throw new Error('Leaflet no cargó (CDN bloqueado)'); }
+  if(typeof L.heatLayer === 'undefined'){ throw new Error('plugin heat no cargó'); }
   map = L.map('map',{zoomControl:true}).setView([4.6,-74.08],6);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
     attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom:19, subdomains:'abcd'}).addTo(map);
