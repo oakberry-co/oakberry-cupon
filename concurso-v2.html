@@ -416,6 +416,7 @@ nav{
 <nav>
   <div class="nav-brand">&#127949; LA MOTO</div>
   <div class="tabs-wrap">
+    <button class="tab-btn"         onclick="showTab('desempate',this)">&#127937; Desempate</button>
     <button class="tab-btn active"  onclick="showTab('ranking',this)">Ranking</button>
     <button class="tab-btn"         onclick="showTab('cajeros',this)">Colaboradores</button>
     <button class="tab-btn"         onclick="showTab('registro',this)">Registro</button>
@@ -4028,6 +4029,100 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Motocicleta NKD 124cc">
 <!-- ═══════════════════════════════════
      COLABORADORES
 ═══════════════════════════════════ -->
+<!-- ═══════════════════════════════════
+     DESEMPATE
+═══════════════════════════════════ -->
+<div class="tab-content" id="tab-desempate">
+  <section class="dz-wrap">
+    <div class="dz-badge">&#127937; El concurso terminó en EMPATE</div>
+    <h2 class="dz-h2">Ronda de Desempate &mdash; La Moto</h2>
+    <p class="dz-motivo">Tres tiendas quedaron primeras con <b>590 puntos</b>. Se define en 2 semanas
+      (<b>27 jul &rarr; 9 ago</b>): gana quien <b>m&aacute;s suba su ticket</b> vs. su propio promedio,
+      <b>manteniendo su adquisici&oacute;n</b> de oakers. Cada tienda compite contra s&iacute; misma.</p>
+    <div class="dz-cards" id="dz-cards"></div>
+    <div class="dz-how">
+      <div><span class="dz-how-n">1</span> Gana la mayor <b>subida de ticket</b> vs. su promedio.</div>
+      <div><span class="dz-how-n">2</span> Debe <b>mantener su adquisici&oacute;n</b> de oakers (candado &#128274;).</div>
+    </div>
+    <p class="dz-foot" id="dz-foot">&#9203; Arranca el 27 de julio &middot; ac&aacute; ver&aacute;s en vivo la subida de ticket de cada tienda.</p>
+  </section>
+
+  <style>
+    #tab-desempate .dz-wrap{max-width:840px;margin:0 auto;background:#f6f2fc;border:1px solid #e6dcf5;
+      border-radius:20px;padding:26px;}
+    #tab-desempate .dz-badge{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+      background:#fff4d6;color:#8a6d0e;border:1px solid #f0d78a;padding:5px 12px;border-radius:100px;font-weight:800;margin-bottom:12px;}
+    #tab-desempate .dz-h2{margin:0 0 8px;font-size:1.6rem;font-weight:800;color:#2a1b4a;}
+    #tab-desempate .dz-motivo{margin:0 0 20px;font-size:.92rem;line-height:1.5;color:#5a5175;}
+    #tab-desempate .dz-cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));}
+    #tab-desempate .dz-card{background:#ffffff;border:1px solid #ece6f5;border-radius:16px;padding:18px;position:relative;
+      box-shadow:0 6px 20px rgba(74,46,131,.08);color:#2e2350;}
+    #tab-desempate .dz-card.lead{border-color:#f0c14b;box-shadow:0 8px 26px rgba(240,193,75,.28);}
+    #tab-desempate .dz-crown{position:absolute;top:-14px;right:14px;font-size:1.8rem;}
+    #tab-desempate .dz-name{font-weight:800;font-size:1.12rem;color:#2a1b4a;}
+    #tab-desempate .dz-city{font-size:.78rem;color:#8b82a3;margin-bottom:14px;}
+    #tab-desempate .dz-metric{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+      padding:9px 0;border-top:1px solid #f1edf8;}
+    #tab-desempate .dz-metric .k{font-size:.74rem;color:#6f6690;text-transform:uppercase;letter-spacing:.03em;}
+    #tab-desempate .dz-metric .v{font-size:1.2rem;font-weight:800;color:#2a1b4a;font-variant-numeric:tabular-nums;}
+    #tab-desempate .dz-live{font-size:1.8rem;font-weight:800;color:#8b82a3;}
+    #tab-desempate .dz-live.pos{color:#1a9d54;}#tab-desempate .dz-live.neg{color:#d64545;}
+    #tab-desempate .dz-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+    #tab-desempate .dz-dot.ok{background:#26c165;}#tab-desempate .dz-dot.bad{background:#e24b4b;}#tab-desempate .dz-dot.wait{background:#c3bcd6;}
+    #tab-desempate .dz-how{margin:20px 0 0;display:grid;gap:8px;}
+    #tab-desempate .dz-how div{font-size:.86rem;color:#5a5175;display:flex;align-items:center;gap:10px;}
+    #tab-desempate .dz-how-n{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#4b2e83;color:#fff;
+      display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;}
+    #tab-desempate .dz-foot{margin:18px 0 0;font-size:.82rem;color:#8b82a3;text-align:center;}
+  </style>
+
+  <script>
+  (function(){
+    var BASE = [
+      {name:"Chipichape",         city:"Cali",     ticket:26500, piso:75},
+      {name:"Oakberry Colina",    city:"Bogotá",   ticket:27000, piso:60},
+      {name:"Oakberry El Tesoro", city:"Medellín", ticket:29000, piso:40}
+    ];
+    var COP = function(n){ return "$" + Math.round(n||0).toLocaleString("es-CO"); };
+    function esc(s){ return String(s||"").replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}); }
+    function renderStatic(){
+      document.getElementById("dz-cards").innerHTML = BASE.map(function(t){
+        return '<div class="dz-card"><div class="dz-name">'+esc(t.name)+'</div><div class="dz-city">'+esc(t.city)+'</div>'
+          + '<div class="dz-metric"><span class="k">&#127915; Ticket a superar</span><span class="v">'+COP(t.ticket)+'</span></div>'
+          + '<div class="dz-metric"><span class="k">&#128274; Mantener oakers/sem</span><span class="v">'+t.piso+'</span></div></div>';
+      }).join("");
+    }
+    function renderLive(d){
+      var pct = function(n){ return (n>0?"+":"")+Number(n).toFixed(1)+"%"; };
+      var cerrado = d.fase==="desempate_cerrado";
+      document.getElementById("dz-cards").innerHTML = (d.tiendas||[]).map(function(t){
+        var elegible = t.mantiene_adquisicion!==false;
+        var lead = t.rank===1 && elegible;
+        var crown = lead ? (cerrado?"🏆":"🏍️") : (t.mantiene_adquisicion===false?"🚫":"");
+        var crec = (t.crec_ticket_pct==null)
+          ? '<span class="dz-live">&mdash;</span>'
+          : '<span class="dz-live '+(t.crec_ticket_pct>=0?"pos":"neg")+'">'+pct(t.crec_ticket_pct)+'</span>';
+        var dot = t.mantiene_adquisicion===true?"ok":(t.mantiene_adquisicion===false?"bad":"wait");
+        return '<div class="dz-card'+(lead?" lead":"")+'"><span class="dz-crown">'+crown+'</span>'
+          + '<div class="dz-name">'+esc(t.store_name||"")+'</div><div class="dz-city">'+esc(t.city||"")+'</div>'
+          + '<div class="dz-metric"><span class="k">Subida de ticket</span>'+crec+'</div>'
+          + '<div class="dz-metric"><span class="k">'+COP(t.ticket_actual)+' &middot; meta '+COP(t.ticket_base)+'</span>'
+          + '<span class="v" style="font-size:.9rem"><span class="dz-dot '+dot+'"></span>'+t.oakers_sem+'/'+t.oakers_piso+'</span></div></div>';
+      }).join("");
+      var f = document.getElementById("dz-foot");
+      f.textContent = cerrado ? "🏁 Desempate cerrado." : ("Día "+d.dias_transcurridos+" de "+d.dias_total+" · se actualiza solo.");
+    }
+    renderStatic();
+    // Auto-upgrade a datos en vivo cuando el Cloud Function tenga getDesempate.
+    try{
+      fetch("/concurso-api?action=getDesempate").then(function(r){return r.json();}).then(function(j){
+        if(j && j.desempate && j.desempate.tiendas){ renderLive(j.desempate); }
+      }).catch(function(){});
+    }catch(e){}
+  })();
+  </script>
+</div>
+
 <div class="tab-content" id="tab-cajeros">
   <div class="caj-view">
    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px;">
