@@ -4079,16 +4079,16 @@ REQEREBERAREQEREBERAREQEREH/2Q==" alt="Motocicleta NKD 124cc">
   <script>
   (function(){
     var BASE = [
-      {name:"Chipichape",         city:"Cali",     ticket:26500, piso:75},
-      {name:"Oakberry Colina",    city:"Bogotá",   ticket:27000, piso:60},
-      {name:"Oakberry El Tesoro", city:"Medellín", ticket:29000, piso:40}
+      {name:"Chipichape",         city:"Cali",     ticket:31500, piso:75},
+      {name:"Oakberry Colina",    city:"Bogotá",   ticket:32000, piso:60},
+      {name:"Oakberry El Tesoro", city:"Medellín", ticket:34500, piso:40}
     ];
     var COP = function(n){ return "$" + Math.round(n||0).toLocaleString("es-CO"); };
     function esc(s){ return String(s||"").replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}); }
     function renderStatic(){
       document.getElementById("dz-cards").innerHTML = BASE.map(function(t){
         return '<div class="dz-card"><div class="dz-name">'+esc(t.name)+'</div><div class="dz-city">'+esc(t.city)+'</div>'
-          + '<div class="dz-metric"><span class="k">&#127915; Ticket a superar</span><span class="v">'+COP(t.ticket)+'</span></div>'
+          + '<div class="dz-metric"><span class="k">&#127915; Ticket a superar <small style="opacity:.7">(IVA incl.)</small></span><span class="v">'+COP(t.ticket)+'</span></div>'
           + '<div class="dz-metric"><span class="k">&#128274; Mantener oakers/sem</span><span class="v">'+t.piso+'</span></div></div>';
       }).join("");
     }
