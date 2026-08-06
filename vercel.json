@@ -38,6 +38,8 @@
     { "source": "/uet",            "destination": "/uet.html"                 },
     { "source": "/ruleta-pantalla", "destination": "/ruleta-pantalla.html"    },
     { "source": "/ruleta",         "destination": "/ruleta.html"              },
+    { "source": "/sorpresa-config", "destination": "/sorpresa-admin.html"      },
+    { "source": "/sorpresa",       "destination": "/sorpresa.html"            },
     { "source": "/api/(.*)",       "destination": "/api/$1"                   }
   ]
 }

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oakberry — Configurar Cupón Sorpresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+<style>
+  :root{--p:#5F4B8B;--y:#F5C842;--bg:#0e0b16;--card:#1a1427;--card2:#221935;
+        --border:rgba(255,255,255,.08);--text:#e8e0ff;--muted:rgba(232,224,255,.45);--green:#39d98a;--red:#ff5c5c}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:34px 18px}
+  .wrap{max-width:720px;margin:0 auto;display:grid;gap:20px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px}
+  h1{font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:2px}
+  .sub{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+  .ptitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .ptitle::before{content:'';width:3px;height:14px;background:var(--y);border-radius:2px}
+  label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:7px}
+  input,select{width:100%;padding:12px 14px;background:var(--card2);border:1px solid var(--border);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:var(--text);outline:none}
+  input:focus,select:focus{border-color:rgba(95,75,139,.6);box-shadow:0 0 0 3px rgba(95,75,139,.15)}
+  select option{background:var(--card2)}
+  .field{margin-bottom:16px}
+  .row{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .row .rnum{font-size:10px;font-weight:700;color:var(--y);font-family:'Space Mono',monospace;min-width:70px}
+  .rdel{cursor:pointer;color:var(--red);font-weight:700;padding:4px 8px}
+  .hdr{display:flex;gap:10px;margin-bottom:6px;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:'Space Mono',monospace}
+  .addrow{border:1.5px dashed var(--p);background:transparent;color:var(--text);font-weight:700;border-radius:10px;padding:10px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;width:100%;text-transform:uppercase;letter-spacing:1px}
+  .gen{width:100%;margin-top:8px;padding:15px;border:none;border-radius:14px;background:var(--y);color:#3d2b5e;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:1px;cursor:pointer}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .actbtn{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:12px}
+  .actbtn.primary{background:var(--p);color:#fff;border-color:var(--p)}
+  .qrbox{text-align:center;display:none}
+  .qrbox canvas{background:#fff;padding:14px;border-radius:14px;max-width:280px;width:100%}
+  .linkline{font-family:'Space Mono',monospace;font-size:12px;color:var(--y);word-break:break-all;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;margin:12px 0}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--p);color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="panel">
+    <h1>🎁 Cupón Sorpresa</h1>
+    <div class="sub">Un QR · cupón al azar · se agota el stock</div>
+  </div>
+
+  <div class="panel">
+    <div class="ptitle">Editar campaña existente</div>
+    <div class="row" style="margin-bottom:0">
+      <select id="poolSel" style="flex:1"><option value="">— Nueva campaña —</option></select>
+      <button class="actbtn" style="flex:0 0 auto" onclick="cargarSel()">Cargar</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ptitle">Campaña</div>
+    <div class="field"><label>Nombre de la campaña</label><input id="nombre" placeholder="Ej: Apertura Calle 140"></div>
+
+    <div class="ptitle" style="margin-top:20px">Cupones del pool</div>
+    <div class="hdr"><span style="min-width:70px"></span><span style="flex:1">Producto</span><span style="width:74px;text-align:center">% off</span><span style="width:74px;text-align:center">Stock</span><span style="width:74px;text-align:center">Prob.</span><span style="width:24px"></span></div>
+    <div id="lineas"></div>
+    <button class="addrow" onclick="addLinea()">+ Agregar cupón</button>
+
+    <div class="field" style="margin-top:16px"><label>Vigencia del cupón</label>
+      <select id="vigencia"><option value="24">24 horas</option><option value="48">48 horas</option><option value="72" selected>72 horas</option><option value="168">7 días</option></select>
+    </div>
+    <div class="hint"><b>100% = bowl gratis.</b> "Prob." = qué tan seguido sale ese cupón (deja 1 en todos para que salgan parejo). Un % fuera de {15,20,25,30,35,40} necesita crear el descuento en Toteat para que el cajero lo aplique.</div>
+
+    <button class="gen" id="genBtn" onclick="generar()">⚡ Guardar + generar QR</button>
+  </div>
+
+  <div class="panel qrbox" id="qrbox">
+    <div class="ptitle">QR de la campaña · repartir / imprimir</div>
+    <canvas id="qr"></canvas>
+    <div class="linkline" id="linkline"></div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="actbtn primary" onclick="descargarQR()">⬇ Descargar QR</button>
+      <button class="actbtn" onclick="copiarLink()">📋 Copiar link</button>
+      <button class="actbtn" onclick="window.open(LINK,'_blank')">🔗 Abrir landing</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const API="https://api.oakberry-cupones.com";
+const TAMANOS=["Bowl 7oz","Bowl 9oz","Bowl 12oz","Bowl 16oz","Tu compra"];
+let LINK="";
+
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),2200);}
+function fetchGET(params){
+  return new Promise((resolve,reject)=>{
+    const cb="cb_"+Math.random().toString(36).slice(2);
+    const url=API+"?"+new URLSearchParams({...params,callback:cb});
+    const s=document.createElement("script");let done=false;
+    const clean=()=>{done=true;clearTimeout(t);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
+    window[cb]=d=>{if(done)return;clean();resolve(d);};
+    s.onerror=()=>{if(done)return;clean();reject(new Error("e"));};
+    s.src=url;document.body.appendChild(s);
+    const t=setTimeout(()=>{if(!done){clean();reject(new Error("t"));}},12000);
+  });
+}
+
+function renumLineas(){[...document.querySelectorAll("#lineas .row")].forEach((r,i)=>r.querySelector(".rnum").textContent="Cupón "+(i+1));}
+function addLinea(prod,pct,stock,peso){
+  prod=prod||"Bowl 9oz"; pct=(pct==null?100:pct); stock=(stock==null?10:stock); peso=(peso==null?1:peso);
+  const opts=TAMANOS.map(s=>`<option value="${s}" ${s===prod?"selected":""}>${s}</option>`).join("");
+  const row=document.createElement("div");row.className="row";
+  row.innerHTML=`<span class="rnum"></span>`
+    +`<select class="lprod" style="flex:1">${opts}</select>`
+    +`<input class="lpct" type="number" min="0" max="100" value="${pct}" style="width:74px">`
+    +`<input class="lstock" type="number" min="1" value="${stock}" style="width:74px">`
+    +`<input class="lpeso" type="number" min="1" value="${peso}" style="width:74px">`
+    +`<span class="rdel">✕</span>`;
+  row.querySelector(".rdel").onclick=()=>{row.remove();renumLineas();};
+  document.getElementById("lineas").appendChild(row);renumLineas();
+}
+function recogerLineas(){
+  const vig=parseInt(document.getElementById("vigencia").value)||72;
+  return [...document.querySelectorAll("#lineas .row")].map(r=>({
+    producto:r.querySelector(".lprod").value,
+    descuento:(parseInt(r.querySelector(".lpct").value)||0)+"%",
+    stock:parseInt(r.querySelector(".lstock").value)||0,
+    peso:parseInt(r.querySelector(".lpeso").value)||1,
+    vigenciaHoras:vig,
+  })).filter(l=>l.stock>0);
+}
+
+async function generar(){
+  const nombre=document.getElementById("nombre").value.trim();
+  const lineas=recogerLineas();
+  if(!nombre){toast("⚠ Ponle nombre a la campaña");return;}
+  if(!lineas.length){toast("⚠ Agrega al menos un cupón con stock");return;}
+  const btn=document.getElementById("genBtn");btn.disabled=true;btn.textContent="Guardando…";
+  try{
+    const r=await fetchGET({accion:"sorpresaGuardarPool",nombre,lineas:JSON.stringify(lineas)});
+    if(!r||!r.ok){toast("⚠ "+((r&&r.mensaje)||"Error"));btn.disabled=false;btn.textContent="⚡ Guardar + generar QR";return;}
+    LINK=r.link;
+    document.getElementById("linkline").textContent=LINK;
+    new QRious({element:document.getElementById("qr"),value:LINK,size:600,foreground:"#3d2b5e",background:"#ffffff"});
+    document.getElementById("qrbox").style.display="block";
+    document.getElementById("qrbox").scrollIntoView({behavior:"smooth"});
+    toast("✅ Campaña guardada");
+    cargarPools();
+  }catch(e){toast("⚠ Sin conexión");}
+  btn.disabled=false;btn.textContent="⚡ Guardar + generar QR";
+}
+
+function descargarQR(){const c=document.getElementById("qr");const a=document.createElement("a");a.href=c.toDataURL("image/png");a.download="qr-cupon-sorpresa.png";a.click();}
+function copiarLink(){if(LINK)navigator.clipboard.writeText(LINK).then(()=>toast("✅ Link copiado"));}
+
+async function cargarPools(){
+  try{const r=await fetchGET({accion:"sorpresaListarPools"});
+    if(r&&r.ok){const sel=document.getElementById("poolSel");
+      sel.innerHTML='<option value="">— Nueva campaña —</option>'+
+        (r.pools||[]).map(p=>`<option value="${p.pool}">${p.nombre} · ${p.entregados}/${p.stock_total} entregados</option>`).join("");}
+  }catch(e){}
+}
+async function cargarSel(){
+  const pool=document.getElementById("poolSel").value;
+  if(!pool){document.getElementById("nombre").value="";document.getElementById("lineas").innerHTML="";addLinea();return;}
+  const r=await fetchGET({accion:"sorpresaCargarPool",pool});
+  if(!r||!r.ok||!r.existe){toast("⚠ No se pudo cargar");return;}
+  document.getElementById("nombre").value=r.nombre||"";
+  document.getElementById("lineas").innerHTML="";
+  (r.lineas||[]).forEach(l=>addLinea(l.producto,parseInt((l.descuento||"0").replace("%","")),l.stock,l.peso));
+  if(!(r.lineas||[]).length)addLinea();
+  toast("✅ Cargada: "+(r.nombre||pool)+(r.lineas&&r.lineas.length?" · stock restante en cada línea abajo":""));
+}
+
+// init
+addLinea("Bowl 9oz",50,10,1);
+addLinea("Bowl 9oz",30,20,1);
+cargarPools();
+</script>
+</body>
+</html>

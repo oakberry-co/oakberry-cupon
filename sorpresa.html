@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Oakberry — Cupón Sorpresa 🎁</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--beige:#f6f1e4;--morado:#3d2b5e;--morado-claro:#9b85c4;--dorado:#b8860b}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Montserrat',sans-serif;background:var(--morado);color:var(--beige);
+       min-height:100vh;display:flex;flex-direction:column;align-items:center;
+       padding:24px 18px 40px;text-align:center}
+  h1{font-size:24px;font-weight:800;margin:14px 0 4px;line-height:1.15}
+  p.sub{color:var(--morado-claro);font-weight:600;font-size:14px;margin-bottom:18px}
+  .card{background:var(--beige);color:var(--morado);border-radius:22px;padding:22px 18px;
+        width:100%;max-width:420px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  label{display:block;text-align:left;font-weight:700;font-size:13px;margin:12px 2px 5px}
+  input{width:100%;padding:13px 14px;border:2px solid #d8cdb5;border-radius:12px;
+        font-family:inherit;font-size:16px;font-weight:600;color:var(--morado);background:#fff}
+  input:focus{outline:none;border-color:var(--morado-claro)}
+  .tyc{display:flex;align-items:flex-start;gap:8px;margin:16px 2px 4px;text-align:left;font-size:12px;font-weight:600}
+  .tyc input{width:auto;margin-top:2px}.tyc a{color:var(--dorado)}
+  button.cta{width:100%;margin-top:18px;padding:15px;border:none;border-radius:14px;
+        background:var(--dorado);color:#fff;font-family:inherit;font-weight:800;font-size:17px;cursor:pointer;transition:transform .1s,opacity .2s}
+  button.cta:active{transform:scale(.98)}button.cta:disabled{opacity:.5;cursor:not-allowed}
+  .err{color:#c0392b;font-weight:700;font-size:13px;margin-top:10px;min-height:16px}
+  .hidden{display:none!important}
+  @keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  .reveal{animation:pop .5s ease-out}
+  .prize{font-size:24px;font-weight:800;color:var(--dorado);margin:8px 0;line-height:1.15}
+  .code{font-size:34px;font-weight:800;letter-spacing:5px;color:var(--morado);background:#fff;
+        border:2px dashed var(--morado-claro);border-radius:12px;padding:12px;margin:12px 0}
+  .muted{font-size:12px;color:#7a6f5c;font-weight:600}
+  .spin{width:52px;height:52px;border:6px solid rgba(255,255,255,.25);border-top-color:var(--dorado);
+        border-radius:50%;margin:26px auto;animation:rot .8s linear infinite}
+  @keyframes rot{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+  <img src="/email-logo-cream.png" alt="Oakberry" style="height:24px;margin-bottom:2px">
+
+  <!-- registro -->
+  <div id="view-reg">
+    <img src="/email-hero.jpg" alt="" style="width:100%;max-width:420px;height:160px;object-fit:cover;object-position:center;border-radius:18px;margin:8px 0 2px;box-shadow:0 8px 22px rgba(0,0,0,.3)">
+    <h1>🎁 ¡Cupón sorpresa!</h1>
+    <p class="sub">Déjanos tus datos y descubre qué cupón te tocó. Muéstralo en caja.</p>
+    <div class="card">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" type="text" autocomplete="name" placeholder="Tu nombre">
+      <label for="celular">Celular (WhatsApp)</label>
+      <input id="celular" type="tel" inputmode="numeric" autocomplete="tel" placeholder="3001234567" maxlength="13">
+      <label for="email">Email <span style="font-weight:600;color:#9a8e76">(opcional)</span></label>
+      <input id="email" type="email" autocomplete="email" placeholder="tu@correo.com">
+      <div class="tyc">
+        <input id="tyc" type="checkbox">
+        <span>Acepto los <a href="/tyc" target="_blank">Términos</a> y el tratamiento de mis datos.</span>
+      </div>
+      <button class="cta" id="btn-reg">Ver mi cupón 🎁</button>
+      <div class="err" id="err-reg"></div>
+    </div>
+  </div>
+
+  <!-- cargando -->
+  <div id="view-loading" class="hidden">
+    <h1>Abriendo tu sorpresa…</h1>
+    <div class="spin"></div>
+  </div>
+
+  <!-- resultado -->
+  <div id="view-result" class="hidden">
+    <div class="card reveal">
+      <div id="res-headline" style="font-weight:800;font-size:18px"></div>
+      <div class="prize" id="res-prize"></div>
+      <div id="res-code-wrap" class="hidden">
+        <div class="muted">Tu código</div>
+        <div class="code" id="res-code"></div>
+        <div class="muted" id="res-vig"></div>
+      </div>
+      <div id="res-look" class="muted" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+<script>
+const CFG={SCRIPT_URL:"https://api.oakberry-cupones.com"};
+const QS=new URLSearchParams(location.search);
+const POOL=QS.get("pool")||"";
+
+function fetchGET(params){
+  return new Promise((resolve,reject)=>{
+    const cb="cb_"+Math.random().toString(36).slice(2);
+    const url=CFG.SCRIPT_URL+"?"+new URLSearchParams({...params,callback:cb});
+    const s=document.createElement("script");let done=false;
+    const clean=()=>{done=true;clearTimeout(t);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
+    window[cb]=d=>{if(done)return;clean();resolve(d);};
+    s.onerror=()=>{if(done)return;clean();reject(new Error("e"));};
+    s.src=url;document.body.appendChild(s);
+    const t=setTimeout(()=>{if(!done){clean();reject(new Error("t"));}},12000);
+  });
+}
+async function api(p){try{return await fetchGET(p);}catch(e){await new Promise(r=>setTimeout(r,400));return await fetchGET(p);}}
+
+function fingerprint(){
+  try{
+    const c=document.createElement("canvas"),ctx=c.getContext("2d");
+    ctx.textBaseline="top";ctx.font="14px Arial";ctx.fillStyle="#f60";ctx.fillRect(0,0,60,20);
+    ctx.fillStyle="#069";ctx.fillText("oakberry-sorpresa",2,2);
+    const d=c.toDataURL();let h=0;for(let i=0;i<d.length;i++){h=(h*31+d.charCodeAt(i))>>>0;}
+    return "fp"+h.toString(36)+"_"+screen.width+"x"+screen.height;
+  }catch(e){return "";}
+}
+function show(v){["view-reg","view-loading","view-result"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==v));}
+
+document.getElementById("btn-reg").addEventListener("click",async()=>{
+  const err=document.getElementById("err-reg");err.textContent="";
+  const nombre=document.getElementById("nombre").value.trim();
+  const celular=document.getElementById("celular").value.replace(/\D/g,"");
+  const email=document.getElementById("email").value.trim();
+  if(!POOL){err.textContent="QR inválido (falta la campaña).";return;}
+  if(!nombre){err.textContent="Escribe tu nombre.";return;}
+  if(celular.replace(/^57/,"").length!==10){err.textContent="Celular inválido (10 dígitos).";return;}
+  if(!document.getElementById("tyc").checked){err.textContent="Acepta los términos para continuar.";return;}
+  const btn=document.getElementById("btn-reg");btn.disabled=true;btn.textContent="Abriendo…";
+  show("view-loading");
+  try{
+    const r=await api({accion:"sorpresaRegistrar",pool:POOL,nombre,celular,email,fingerprint:fingerprint()});
+    if(!r||!r.ok){show("view-reg");err.textContent=(r&&r.mensaje)||"Error, intenta de nuevo.";btn.disabled=false;btn.textContent="Ver mi cupón 🎁";return;}
+    mostrarResultado(r);
+  }catch(e){show("view-reg");err.textContent="Sin conexión, intenta de nuevo.";btn.disabled=false;btn.textContent="Ver mi cupón 🎁";}
+});
+
+function mostrarResultado(r){
+  const cw=document.getElementById("res-code-wrap");
+  if(r.agotado){
+    document.getElementById("res-headline").textContent="¡Uy! 💜";
+    document.getElementById("res-prize").textContent="Se acabaron los cupones";
+    cw.classList.add("hidden");
+    document.getElementById("res-look").textContent=r.mensaje||"Gracias por participar.";
+    show("view-result");return;
+  }
+  document.getElementById("res-headline").textContent="🎉 ¡Felicitaciones!";
+  const desc=(r.descuento||"").trim();
+  const prod=(r.producto||"").trim();
+  document.getElementById("res-prize").textContent=[desc,prod].filter(Boolean).join(" · ")||"¡Ganaste un cupón!";
+  if(r.codigo){
+    document.getElementById("res-code").textContent=r.codigo;
+    document.getElementById("res-vig").innerHTML="Muéstralo en caja de Oakberry · válido <b>"+(r.vigencia||"72 horas")+"</b>.";
+    cw.classList.remove("hidden");
+  } else cw.classList.add("hidden");
+  document.getElementById("res-look").textContent=r.yaJugo?"Este es el cupón que ya te habíamos dado 🙂":"";
+  show("view-result");
+}
+</script>
+</body>
+</html>
