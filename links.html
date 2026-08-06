@@ -249,6 +249,7 @@
         <button class="tab"        id="tab-sorteo"   onclick="setModo('sorteo')">🏆 Sorteo</button>
         <button class="tab"        id="tab-fisico"   onclick="setModo('fisico')">📺 Canal físico</button>
         <button class="tab"        id="tab-amigos"   onclick="setModo('amigos')">🤝 Amigos</button>
+        <button class="tab"        id="tab-sorpresa" onclick="setModo('sorpresa')">🎁 Sorpresa</button>
       </div>
 
       <!-- ════════════════════════════════════════
@@ -758,6 +759,65 @@
           <div class="hint" style="margin-top:10px;">Flujo: copia el mensaje → pégalo en el chat del contacto de la empresa → adjunta el flyer descargado. El link corto redirige al registro de la empresa (el QR no cambia).</div>
         </div>
         <canvas id="amg-piezaCanvas" width="1080" height="1350" style="display:none;"></canvas>
+      </div>
+
+      <!-- ════════════════════════════════════════
+           MODO SORPRESA (Cupón Sorpresa · QR → cupón al azar con stock)
+      ════════════════════════════════════════ -->
+      <div id="modoSorpresa" style="display:none;">
+
+        <div class="amigos-section">
+          <div class="amigos-title">Cupón Sorpresa · un QR → cupón al azar</div>
+          <div class="hint" style="margin-top:0;">
+            Arma un <strong>pool de cupones</strong> (cada línea = producto · % off · stock · probabilidad).
+            El QR entrega uno <strong>al azar</strong> en cada escaneo (pide nombre + celular) y va
+            <strong>agotando el stock</strong>. Cuando se acaban todos → "se acabaron".
+          </div>
+        </div>
+
+        <div class="divider">Editar campaña existente</div>
+        <div class="field">
+          <label>Carga una campaña creada para editarla · el QR/link no cambia</label>
+          <div style="display:flex;gap:8px;">
+            <select id="srp-editSel" style="flex:1;min-width:0;"><option value="">— Nueva campaña —</option></select>
+            <button type="button" class="action-btn" style="flex:0 0 auto;" onclick="srpCargarSel()">Cargar</button>
+          </div>
+        </div>
+
+        <div class="divider">Campaña</div>
+        <div class="field"><label>Nombre de la campaña</label><input id="srp-nombre" placeholder="Ej: Apertura Calle 140"></div>
+
+        <div class="divider">Cupones del pool</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;font-family:'Space Mono',monospace;color:var(--muted);">
+          <span style="min-width:86px;"></span>
+          <span style="flex:1;">Producto</span>
+          <span style="width:70px;text-align:center;">% off</span>
+          <span style="width:70px;text-align:center;">Stock</span>
+          <span style="width:70px;text-align:center;">Prob.</span>
+          <span style="width:20px;"></span>
+        </div>
+        <div id="srp-lineas" style="margin-top:0;"></div>
+        <button type="button" class="amg-addrung" onclick="srpAddLinea()">+ Agregar cupón</button>
+
+        <div class="row" style="margin-top:12px;">
+          <div class="field"><label>Vigencia del cupón</label>
+            <select id="srp-vigencia"><option value="24">24 horas</option><option value="48">48 horas</option><option value="72" selected>72 horas</option><option value="168">7 días</option></select>
+          </div>
+        </div>
+        <div class="hint" style="margin-bottom:4px;"><strong>100% = bowl gratis.</strong> "Prob." = qué tan seguido sale ese cupón (deja 1 en todos = parejo). Un % fuera de {15,20,25,30,35,40} necesita crear el descuento en Toteat.</div>
+
+        <button class="gen-btn" id="srp-generar" onclick="srpGenerar()">⚡ Guardar + generar QR</button>
+
+        <div id="srp-result" style="display:none;margin-top:20px;background:var(--card2);border:1px dashed rgba(245,200,66,0.4);border-radius:14px;padding:20px;text-align:center;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--accent);font-family:'Space Mono',monospace;margin-bottom:14px;">QR de la campaña · repartir / imprimir</div>
+          <div style="background:#fff;display:inline-block;padding:16px;border-radius:12px;"><canvas id="srp-qrCanvas" style="max-width:280px;width:100%;height:auto;display:block;"></canvas></div>
+          <div class="link-actions" style="margin-top:16px;">
+            <button class="action-btn primary" onclick="srpDescargarQR()">⬇ QR (PNG)</button>
+            <button class="action-btn" onclick="srpCopiarLink()">📋 Copiar link</button>
+            <button class="action-btn" onclick="if(SRP_LINK)window.open(SRP_LINK,'_blank')">↗ Abrir landing</button>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -1784,6 +1844,82 @@ function amgFlyerDescargar(formato) {
 }
 
 
+// ── Cupón Sorpresa (QR → cupón al azar con stock) ─────────
+const SRP_TAMANOS = ["Bowl 7oz","Bowl 9oz","Bowl 12oz","Bowl 16oz","Tu compra"];
+let SRP_LINK = "", srpInited = false;
+function srpInit(){
+  if (srpInited) return; srpInited = true;
+  srpAddLinea("Bowl 9oz", 50, 10, 1); srpAddLinea("Bowl 9oz", 30, 20, 1);
+  srpCargarPools();
+}
+function srpRenumLineas(){ [...document.querySelectorAll("#srp-lineas .amg-rung")].forEach((r,i)=> r.querySelector(".rnum").textContent = "Cupón " + (i+1)); }
+function srpAddLinea(prod, pct, stock, peso){
+  prod = prod || "Bowl 9oz"; pct = (pct ?? 100); stock = (stock ?? 10); peso = (peso ?? 1);
+  const opts = SRP_TAMANOS.map(s => `<option value="${s}" ${s===prod?"selected":""}>${s}</option>`).join("");
+  const row = document.createElement("div"); row.className = "amg-rung";
+  row.innerHTML = `<span class="rnum"></span>`
+    + `<select class="sprod" style="flex:1;min-width:0;">${opts}</select>`
+    + `<input class="spct" type="number" min="0" max="100" value="${pct}" style="width:70px;flex:0 0 auto;">`
+    + `<input class="sstock" type="number" min="1" value="${stock}" style="width:70px;flex:0 0 auto;">`
+    + `<input class="speso" type="number" min="1" value="${peso}" style="width:70px;flex:0 0 auto;">`
+    + `<span class="rdel">✕</span>`;
+  row.querySelector(".rdel").onclick = () => { row.remove(); srpRenumLineas(); };
+  document.getElementById("srp-lineas").appendChild(row); srpRenumLineas();
+}
+function srpRecogerLineas(){
+  const vig = parseInt(document.getElementById("srp-vigencia").value) || 72;
+  return [...document.querySelectorAll("#srp-lineas .amg-rung")].map(r => ({
+    producto: r.querySelector(".sprod").value,
+    descuento: (parseInt(r.querySelector(".spct").value)||0) + "%",
+    stock: parseInt(r.querySelector(".sstock").value)||0,
+    peso: parseInt(r.querySelector(".speso").value)||1,
+    vigenciaHoras: vig,
+  })).filter(l => l.stock > 0);
+}
+async function srpCargarPools(){
+  try{
+    const r = await amgJsonp(new URLSearchParams({accion:"sorpresaListarPools"}));
+    if (r && r.ok){
+      const sel = document.getElementById("srp-editSel");
+      sel.innerHTML = '<option value="">— Nueva campaña —</option>' +
+        (r.pools||[]).map(p => `<option value="${p.pool}">${p.nombre} · ${p.entregados}/${p.stock_total} entregados</option>`).join("");
+    }
+  }catch(e){}
+}
+async function srpCargarSel(){
+  const pool = document.getElementById("srp-editSel").value;
+  if (!pool){ document.getElementById("srp-nombre").value=""; document.getElementById("srp-lineas").innerHTML=""; srpAddLinea(); return; }
+  const r = await amgJsonp(new URLSearchParams({accion:"sorpresaCargarPool", pool}));
+  if (!r || !r.ok || !r.existe){ showToast("⚠ No se pudo cargar"); return; }
+  document.getElementById("srp-nombre").value = r.nombre || "";
+  document.getElementById("srp-lineas").innerHTML = "";
+  (r.lineas||[]).forEach(l => srpAddLinea(l.producto, parseInt((l.descuento||"0").replace("%","")), l.stock, l.peso));
+  if (!(r.lineas||[]).length) srpAddLinea();
+  showToast("✅ Cargada: " + (r.nombre||pool));
+}
+async function srpGenerar(){
+  const nombre = document.getElementById("srp-nombre").value.trim();
+  const lineas = srpRecogerLineas();
+  if (!nombre){ showToast("⚠ Ponle nombre a la campaña"); return; }
+  if (!lineas.length){ showToast("⚠ Agrega al menos un cupón con stock"); return; }
+  const btn = document.getElementById("srp-generar"); btn.disabled = true; btn.textContent = "Guardando…";
+  try{
+    const r = await amgJsonp(new URLSearchParams({accion:"sorpresaGuardarPool", nombre, lineas: JSON.stringify(lineas)}));
+    if (!r || !r.ok){ showToast("⚠ " + ((r&&r.mensaje)||"Error")); btn.disabled = false; btn.textContent = "⚡ Guardar + generar QR"; return; }
+    SRP_LINK = r.link;
+    if (window.QRious){ dibujarQR(document.getElementById("srp-qrCanvas"), SRP_LINK); document.getElementById("srp-result").style.display = "block"; }
+    linkActual = SRP_LINK;
+    const d2 = document.getElementById("linkDisplay"); d2.textContent = SRP_LINK; d2.classList.remove("empty");
+    const d1 = document.getElementById("shortLinkDisplay"); d1.textContent = SRP_LINK; d1.classList.remove("empty");
+    showToast("✅ Campaña guardada");
+    srpCargarPools();
+    document.getElementById("srp-result").scrollIntoView({behavior:"smooth", block:"nearest"});
+  }catch(e){ showToast("⚠ Sin conexión"); }
+  btn.disabled = false; btn.textContent = "⚡ Guardar + generar QR";
+}
+function srpDescargarQR(){ const c = document.getElementById("srp-qrCanvas"); if (!c || !SRP_LINK) return; const a = document.createElement("a"); a.href = c.toDataURL("image/png"); a.download = "qr-sorpresa-" + (_slugCr(document.getElementById("srp-nombre").value) || "campana") + ".png"; a.click(); showToast("⬇ QR descargado"); }
+function srpCopiarLink(){ if (SRP_LINK) navigator.clipboard.writeText(SRP_LINK).then(()=>showToast("✅ Link copiado")); }
+
 // ── MODO ──────────────────────────────────────────────────
 function setModo(modo) {
   modoActual = modo;
@@ -1791,13 +1927,16 @@ function setModo(modo) {
   document.getElementById("tab-sorteo").className = "tab" + (modo==="sorteo" ? " active" : "");
   document.getElementById("tab-fisico").className = "tab" + (modo==="fisico" ? " active" : "");
   document.getElementById("tab-amigos").className = "tab" + (modo==="amigos" ? " active" : "");
+  document.getElementById("tab-sorpresa").className = "tab" + (modo==="sorpresa" ? " active" : "");
   // El bloque de pauta (nombre de creativo + UTM Meta) solo aplica a cupón/sorteo
-  document.getElementById("modoPautaWrap").style.display = (modo==="fisico"||modo==="amigos") ? "none" : "block";
+  document.getElementById("modoPautaWrap").style.display = (modo==="fisico"||modo==="amigos"||modo==="sorpresa") ? "none" : "block";
   document.getElementById("modoFisico").style.display    = modo==="fisico" ? "block" : "none";
   document.getElementById("modoAmigos").style.display    = modo==="amigos" ? "block" : "none";
+  document.getElementById("modoSorpresa").style.display  = modo==="sorpresa" ? "block" : "none";
   document.getElementById("modoCupon").style.display  = modo==="cupon"  ? "block" : "none";
   document.getElementById("modeSorteo").style.display = modo==="sorteo" ? "block" : "none";
   if (modo === "amigos") amgInit();
+  if (modo === "sorpresa") srpInit();
 }
 
 // ── MOMENTOS CUPÓN ────────────────────────────────────────
