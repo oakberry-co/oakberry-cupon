@@ -659,16 +659,19 @@
           </label>
         </div>
 
-        <div class="divider">Bienvenida · gancho del primer producto</div>
-        <div class="row">
-          <div class="field"><label>Primeros N · bowl 7oz gratis</label><input id="amg-cupoGratis" type="number" min="0" value="50"></div>
-          <div class="field"><label>Siguientes M · bowl 7oz con %</label><input id="amg-cupo50" type="number" min="0" value="100"></div>
+        <div class="divider">Bienvenida · cupos por orden de llegada</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;font-family:'Space Mono',monospace;color:var(--muted);">
+          <span style="min-width:86px;"></span>
+          <span style="width:80px;flex:0 0 auto;text-align:center;">Cupos</span>
+          <span style="flex:0 0 auto;">Tamaño</span>
+          <span style="width:80px;flex:0 0 auto;text-align:center;">% off</span>
         </div>
-        <div class="row">
-          <div class="field"><label>% del segundo tramo</label><input id="amg-desc50" type="number" min="0" max="100" value="50"></div>
+        <div id="amg-tramos" style="margin-top:0;"></div>
+        <button type="button" class="amg-addrung" onclick="amgAddTramo()">+ Agregar tramo</button>
+        <div class="row" style="margin-top:12px;">
           <div class="field"><label>Vigencia del cupón (horas)</label><input id="amg-vig" type="number" min="1" value="48"></div>
         </div>
-        <div class="hint" style="margin-bottom:4px;">Ej: primeros 50 → bowl 7oz <strong>GRATIS</strong>; siguientes 100 → al <strong>50%</strong>. La landing muestra cuántos quedan.</div>
+        <div class="hint" style="margin-bottom:4px;">Cada fila = <strong>N cupos</strong> de un bowl a cierto <strong>% off</strong>, por orden de llegada (la landing muestra cuántos quedan). <strong>100% = bowl GRATIS.</strong> Ej: 10 al 50% · 20 al 30%. Un % fuera de {15,20,25,30,35,40} necesita crear el descuento en Toteat.</div>
 
         <div class="divider">Estrategia</div>
         <div class="amg-chips" id="amg-modoToggle">
@@ -1134,6 +1137,7 @@ async function _amgInitReal() {
     panel.appendChild(lab);
   });
   amgConstruirDias();
+  amgAddTramo(50, 100, "7oz"); amgAddTramo(100, 50, "7oz");   // bienvenida por defecto: 50 gratis + 100 al 50%
   amgAddRung(30); amgAddRung(100);   // misión por defecto: compra 2 = 30%, compra 3 = Bowl GRATIS
   document.querySelectorAll("#amg-modoToggle .amg-chip").forEach(c => c.addEventListener("click", () => {
     document.querySelectorAll("#amg-modoToggle .amg-chip").forEach(x => x.classList.remove("sel"));
@@ -1273,6 +1277,33 @@ function amgAddRung(pct) {
 }
 function amgRecogerEscalera(){ return [...document.querySelectorAll("#amg-escalera .rsel")].map(s => parseInt(s.value)); }
 
+// ── Bienvenida configurable: N tramos (cupos × tamaño × % off) ──
+const AMG_TAMANOS = ["7oz","9oz","12oz","16oz"];
+function amgRenumTramos(){ [...document.querySelectorAll("#amg-tramos .amg-rung")].forEach((r,i) => r.querySelector(".rnum").textContent = "Tramo " + (i+1)); }
+function amgAddTramo(cupos, pct, tamano){
+  cupos  = (cupos ?? 10); pct = (pct ?? 100); tamano = tamano || "7oz";
+  const topts = AMG_TAMANOS.map(s => `<option value="${s}" ${s===tamano?"selected":""}>${s}</option>`).join("");
+  const row = document.createElement("div"); row.className = "amg-rung";
+  row.innerHTML = `<span class="rnum"></span>`
+    + `<input class="tcupos" type="number" min="1" value="${cupos}" title="cupos disponibles" style="width:80px;flex:0 0 auto;">`
+    + `<select class="ttam" title="tamaño del bowl" style="width:auto;flex:0 0 auto;">${topts}</select>`
+    + `<input class="tpct" type="number" min="0" max="100" value="${pct}" title="% off (100 = bowl gratis)" style="width:80px;flex:0 0 auto;">`
+    + `<span class="rdel">✕</span>`;
+  row.querySelector(".rdel").onclick = () => { row.remove(); amgRenumTramos(); };
+  document.getElementById("amg-tramos").appendChild(row);
+  amgRenumTramos();
+}
+function amgRecogerTramos(){
+  return [...document.querySelectorAll("#amg-tramos .amg-rung")].map(r => ({
+    cupos:  parseInt(r.querySelector(".tcupos").value) || 0,
+    tamano: r.querySelector(".ttam").value,
+    pct:    parseInt(r.querySelector(".tpct").value) || 0,
+  })).filter(t => t.cupos > 0);
+}
+function amgResumenTramos(tramos){
+  return (tramos||[]).map(t => `${t.cupos}× ${t.pct>=100?"GRATIS":t.pct+"%"} ${t.tamano}`).join(" · ");
+}
+
 function amgRecogerConfig() {
   const cfg = [];
   document.querySelectorAll("#amg-dias .amg-dia.on").forEach(div => {
@@ -1319,9 +1350,9 @@ async function amgCargarEmpresa(nombre) {
   document.getElementById("amg-fechaInicio").value = c.fechaInicio || "";
   document.getElementById("amg-fechaFin").value    = c.fechaFin || "";
   document.getElementById("amg-esControl").checked = !!c.esControl;
-  document.getElementById("amg-cupoGratis").value  = c.cupoGratis ?? 0;
-  document.getElementById("amg-cupo50").value      = c.cupo50 ?? 0;
-  document.getElementById("amg-desc50").value      = c.desc50pct ?? 50;
+  document.getElementById("amg-tramos").innerHTML = "";
+  (c.tramos||[]).forEach(t => amgAddTramo(t.cupos, t.pct, t.tamano));
+  if (!(c.tramos||[]).length) { amgAddTramo(50,100,"7oz"); amgAddTramo(100,50,"7oz"); }
   document.getElementById("amg-vig").value         = c.vigenciaWelcomeH ?? 48;
   AMG_TIENDAS_SEL = (c.tiendas||[]).slice();
   document.querySelectorAll("#amg-mselPanel .ms-item input").forEach(i => { i.checked = AMG_TIENDAS_SEL.includes(i.value); });
@@ -1364,14 +1395,13 @@ async function amgGenerar() {
   if (!AMG_CAT) { showToast("⚠ Catálogos aún cargando, intenta de nuevo"); return; }
   const empresa    = document.getElementById("amg-empresa").value.trim();
   const cc         = document.getElementById("amg-cc").value.trim();
-  const cupoGratis = document.getElementById("amg-cupoGratis").value || "0";
-  const cupo50     = document.getElementById("amg-cupo50").value || "0";
-  const desc50     = document.getElementById("amg-desc50").value || "50";
+  const tramos     = amgRecogerTramos();
   const vig        = document.getElementById("amg-vig").value || "48";
   const campeon    = document.getElementById("amg-campeon").value.trim();
   const tiendas    = AMG_TIENDAS_SEL.slice();
   if (!empresa || !cc)   { showToast("⚠ Empresa y centro comercial son obligatorios"); return; }
   if (!tiendas.length)   { showToast("⚠ Selecciona al menos una tienda"); return; }
+  if (!tramos.length)    { showToast("⚠ Agrega al menos un tramo de bienvenida (cupos + % off)"); return; }
   const cfg      = amgRecogerConfig();
   const escalera = amgModoSel === "escalado" ? amgRecogerEscalera() : [];
   if (!cfg.length && !escalera.length) { showToast("⚠ Configura al menos un día o una escalera"); return; }
@@ -1382,7 +1412,7 @@ async function amgGenerar() {
   // 1. crear/actualizar empresa (bienvenida 2 capas + multi-tienda)
   const e = await amgJsonp(new URLSearchParams({accion:"crearEmpresa", empresa, centroComercial:cc,
     tiendas: tiendas.join(","), tiendaNombre: amgPretty(tiendas[0]),
-    cupoGratis, cupo50, desc50pct:desc50, vigenciaWelcomeH:vig, campeonNombre:campeon,
+    tramos: JSON.stringify(tramos), vigenciaWelcomeH:vig, campeonNombre:campeon,
     fechaInicio: document.getElementById("amg-fechaInicio").value,
     fechaFin:    document.getElementById("amg-fechaFin").value,
     modo: amgModoSel, escalera: JSON.stringify(escalera),
@@ -1416,9 +1446,9 @@ async function amgGenerar() {
     setTimeout(() => amgFlyerDescargar("jpg"),  1500);
     setTimeout(() => amgFlyerDescargar("story"),2100);
   }
-  amgResumen(empresa, cc, tiendas, {cupoGratis, cupo50, desc50, vig});
+  amgResumen(empresa, cc, tiendas, {tramos, vig});
   const item = { nombre: `AMIGOS ${empresa}`, link: AMG_LINK,
-    params: {cc, tiendas: tiendas.length, cupoGratis}, ts: new Date(), tipo: "amigos" };
+    params: {cc, tiendas: tiendas.length, tramos: tramos.length}, ts: new Date(), tipo: "amigos" };
   historial.unshift(item); renderHistorial();
   showToast(`✅ ${AMG_EDIT ? "Cambios guardados" : "Empresa creada"}: ${empresa} · ${tiendas.length} tienda(s)`);
   btn.disabled = false; btn.textContent = lbl;
@@ -1433,7 +1463,7 @@ function amgResumen(empresa, cc, tiendas, b) {
     ["Centro comercial", cc],
     ["Tiendas", tiendas.map(amgPretty).join(" · ")],
     ["Modelo", amgModoSel === "escalado" ? "Escalera por compra" : "Calendario por día"],
-    ["Bienvenida", `${b.cupoGratis} gratis + ${b.cupo50} al ${b.desc50}%`],
+    ["Bienvenida", amgResumenTramos(b.tramos) || "—"],
     ["Vigencia cupón", b.vig + " h"],
   ];
   document.getElementById("summaryRows").innerHTML = rows.map(([k,v]) =>
@@ -1452,16 +1482,18 @@ async function amgCrearShort(empresa) {
   return AMG_SHORT;
 }
 function amgArmarMensaje(empresa, cc) {
-  const n = document.getElementById("amg-cupoGratis").value || "0";
-  const m = document.getElementById("amg-cupo50").value || "0";
-  const x = document.getElementById("amg-desc50").value || "50";
+  const tramos = amgRecogerTramos();
   const link = AMG_SHORT || AMG_LINK;
+  const bullets = tramos.map((t, i) => {
+    const cual = i === 0 ? "Los primeros" : "Los siguientes";
+    const ben  = t.pct >= 100 ? `un bowl ${t.tamano} GRATIS` : `bowl ${t.tamano} al ${t.pct}% OFF`;
+    return `🫐 ${cual} ${t.cupos} que se registren: ${ben}`;
+  }).join("\n");
   return `Hola 👋 Somos Oakberry ${cc}.
 
 Este es el beneficio exclusivo para el equipo de ${empresa}:
 
-🫐 Los primeros ${n} que se registren reciben un bowl 7oz GRATIS
-🍓 Los siguientes ${m}, bowl al ${x}% OFF
+${bullets}
 🎁 Y después: descuentos y sorpresas toda la semana
 
 Registro (toma 1 minuto): ${link}
@@ -1560,10 +1592,9 @@ function amgLoadImg(src) {
   });
 }
 function amgTextoCupos() {
-  const n = document.getElementById("amg-cupoGratis").value || "0";
-  const m = document.getElementById("amg-cupo50").value || "0";
-  const x = document.getElementById("amg-desc50").value || "50";
-  return `Solo ${n} unidades gratis y ${m} al ${x}% OFF. Aplican T&C*`;
+  const tramos = amgRecogerTramos();
+  const partes = tramos.map(t => t.pct >= 100 ? `${t.cupos} gratis` : `${t.cupos} al ${t.pct}%`);
+  return `Solo ${partes.join(" y ")}. Aplican T&C*`;
 }
 // Pega QR (+ párrafo de cupos si la plantilla lo pide) sobre el arte a resolución completa
 function amgTplCompose(ctx, img, fmt) {

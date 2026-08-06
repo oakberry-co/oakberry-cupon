@@ -190,10 +190,12 @@ async function cargarOferta(){
     const r = await fetchGETSafe({ accion:"consultarCupos", empresa:EMPRESA });
     if(!r || !r.existe) return;
     const box = document.getElementById("ofertaBox");
-    const quedan = (r.gratisRestante||0) + (r.cincoRestante||0);
+    const quedan = (r.tramos && r.tramos.length)
+      ? r.tramos.reduce((a,t)=>a+(t.restante||0),0)
+      : ((r.gratisRestante||0) + (r.cincoRestante||0));
     let html = "🎁 <b>¡Premio de bienvenida AL AZAR!</b><br>";
     if(quedan > 0){
-      html += `Regístrate y descubre qué ganaste en tu <b>bowl 7oz</b> 🍓 · válido ${r.vigenciaH}h`;
+      html += `Regístrate y descubre qué ganaste en tu <b>bowl</b> 🍓 · válido ${r.vigenciaH}h`;
       html += `<br><span class="rest">⚡ Quedan solo ${quedan} premios</span>`;
     } else {
       html += `Únete al club y disfruta los beneficios por día.`;
@@ -268,8 +270,9 @@ async function registrar(){
     });
     if (res && res.ok){
       const tier = res.tier;
-      const benef = tier === "gratis" ? "🎉 ¡GANASTE un BOWL 7oz GRATIS!"
-                  : tier === "50"     ? "🎉 ¡GANASTE tu bowl 7oz al 50% OFF!"
+      const benef = res.beneficio        ? "🎉 ¡GANASTE " + res.beneficio + "!"
+                  : tier === "gratis"    ? "🎉 ¡GANASTE un BOWL 7oz GRATIS!"
+                  : tier === "50"        ? "🎉 ¡GANASTE tu bowl 7oz al 50% OFF!"
                   : "🎉 ¡Bienvenido al club!";
       document.getElementById("okBenef").textContent = benef;
       document.getElementById("okCode").textContent  = res.codigo || "—";
