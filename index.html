@@ -480,16 +480,19 @@ const esSorteo = P.modo === "sorteo";
 // 50% A (form-first, control) · 25% B (código a la vista) · 25% C (tragamonedas).
 // Persistente por usuario (localStorage) para que un reload no cambie de grupo.
 const AB_VARIANT = (function(){
-  try {
-    // Override de QA: ?ab=A|B|C fuerza la variante (para probar en el celular). No se
-    // guarda: es efímero. Los links de pauta no llevan ?ab=, así que no afecta a nadie.
-    const forced = new URLSearchParams(location.search).get("ab");
-    if (forced === "A" || forced === "B" || forced === "C") return forced;
-    const k = "oak_ab_v1"; let v = localStorage.getItem(k);
-    if (v === "A" || v === "B" || v === "C") return v;
-    const r = Math.random(); v = r < 0.50 ? "A" : (r < 0.75 ? "B" : "C");
-    localStorage.setItem(k, v); return v;
-  } catch(e){ return "A"; }   // sin localStorage → control
+  // Override de QA: ?ab=A|B|C fuerza la variante. No se guarda: efímero. Los links de
+  // pauta no llevan ?ab=, así que no afecta a nadie.
+  var forced = null;
+  try { forced = new URLSearchParams(location.search).get("ab"); } catch(e){}
+  if (forced === "A" || forced === "B" || forced === "C") return forced;
+  // Si localStorage falla (modo privado/webview), NO forzamos control: asignamos al azar
+  // igual (solo no se persiste) para no sesgar el A/B ni romper el split 50/25/25.
+  var k = "oak_ab_v1", v = null;
+  try { v = localStorage.getItem(k); } catch(e){}
+  if (v === "A" || v === "B" || v === "C") return v;
+  var r = Math.random(); v = r < 0.50 ? "A" : (r < 0.75 ? "B" : "C");
+  try { localStorage.setItem(k, v); } catch(e){}
+  return v;
 })();
 // Código que le mostramos en el reveal; el backend lo respeta al activar (coupons.py::_codigo_final).
 const REVEAL_CODE = genCodigo();
