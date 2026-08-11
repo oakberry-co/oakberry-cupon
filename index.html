@@ -626,16 +626,43 @@ function fetchGET(params) {
     .finally(() => clearTimeout(timer));
 }
 
-// Wrapper con reintento automático — en móvil el primer intento puede
-// fallar por el redirect 302, pero el segundo funciona porque el redirect
-// ya está en caché del navegador.
+// Envío resiliente: fetch() primario; si falla (webview IG/FB o redirect 302 sin
+// CORS) cae a JSONP (inmune a CORS); y si eso también falla, un último reintento
+// de fetch para redes intermitentes. Antes reintentaba fetch()->fetch(), que no
+// salvaba a los webviews donde fetch falla estructuralmente (el hueco del rework).
 async function fetchGETSafe(params) {
   try {
-    return await fetchGET(params);
+    return await fetchGET(params);            // fetch primario (navegador normal)
   } catch(e) {
-    await new Promise(r => setTimeout(r, 400));
-    return await fetchGET(params);
+    // fetch()+CORS se cae en los webviews in-app de Instagram/Facebook y con el
+    // redirect 302 (el hop del redirect llega sin headers CORS). JSONP (<script src>)
+    // es INMUNE a CORS y sigue el 302 solo → salvavidas para el tráfico de pauta.
+    try {
+      return await fetchJSONP(params);
+    } catch(e2) {
+      await new Promise(r => setTimeout(r, 400));  // último intento: red intermitente
+      return await fetchGET(params);
+    }
   }
+}
+
+// JSONP clásico: el backend responde callback(JSON) cuando viene ?callback= (app.py
+// sigue soportándolo). Inmune a CORS y a los 302 que tumban fetch() en webviews.
+function fetchJSONP(params) {
+  return new Promise((resolve, reject) => {
+    const cb = "_jsonp_" + Math.random().toString(36).slice(2);
+    const s  = document.createElement("script");
+    const timer = setTimeout(() => { cleanup(); reject(new Error("jsonp-timeout")); }, 12000);
+    function cleanup() {
+      clearTimeout(timer);
+      try { delete window[cb]; } catch(_) { window[cb] = undefined; }
+      if (s.parentNode) s.parentNode.removeChild(s);
+    }
+    window[cb] = (data) => { cleanup(); resolve(data); };
+    s.onerror = () => { cleanup(); reject(new Error("jsonp-error")); };
+    s.src = CFG.SCRIPT_URL + "?" + new URLSearchParams({ ...params, callback: cb });
+    document.body.appendChild(s);
+  });
 }
 
 // ── BARRA DE PROGRESO ────────────────────────────────────────
