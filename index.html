@@ -143,12 +143,106 @@ fbq('track', 'PageView');
   .loading-step.done .step-check::after { content:'✓'; font-size:10px; color:#fff; font-weight:900; }
   .loading-step.active .step-check { border-color:var(--primary); animation:stepPulse 0.8s ease-in-out infinite; }
   @keyframes stepPulse { 0%,100%{box-shadow:0 0 0 0 rgba(95,75,139,0.4);} 50%{box-shadow:0 0 0 4px rgba(95,75,139,0.1);} }
+
+  /* ── Tragamonedas (variante C) — morado Oakberry, no dorado casino ── */
+  .slot{background:linear-gradient(180deg,#6b559c,#463663);border:3px solid var(--yellow);border-radius:18px;padding:14px 12px 16px;box-shadow:0 8px 22px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.15);margin-bottom:16px;}
+  .slot-marquee{text-align:center;color:var(--yellow);font-weight:900;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;text-shadow:0 1px 2px rgba(0,0,0,.4);}
+  .slot-row{display:flex;align-items:center;gap:8px;}
+  .reels{flex:1;display:flex;gap:5px;justify-content:center;background:#241c36;border-radius:10px;padding:9px;position:relative;box-shadow:inset 0 2px 8px rgba(0,0,0,.5);}
+  .reel{width:42px;height:58px;overflow:hidden;background:linear-gradient(180deg,#fffdf7,#ece5d6);border-radius:6px;box-shadow:inset 0 0 8px rgba(0,0,0,.3);}
+  .strip{display:flex;flex-direction:column;will-change:transform;}
+  .cell{height:58px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:var(--primary);}
+  .payline{position:absolute;left:7px;right:7px;top:50%;height:2px;background:rgba(245,200,66,.5);transform:translateY(-1px);pointer-events:none;}
+  .lever{width:20px;height:70px;position:relative;cursor:pointer;flex:0 0 auto;transform-origin:bottom center;transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+  .lever .rod{position:absolute;left:7px;bottom:0;width:6px;height:56px;background:linear-gradient(#d7d1e6,#8a80ab);border-radius:4px;}
+  .lever .knob{position:absolute;left:0;top:0;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff9dbb,#c0396b);box-shadow:0 2px 4px rgba(0,0,0,.4);}
+  .lever.pulled{transform:rotate(34deg);}
+  @media (prefers-reduced-motion: reduce){.lever{transition:none;}}
 </style>
 </head>
 <body>
 <div class="card">
 
-  <!-- ESTADO 1: FORMULARIO -->
+  <!-- ESTADO 0: REVEAL — premio primero (reward-first). B: código a la vista "sin activar".
+       C: tragamonedas (código oculto → rueda al jalar la palanca). Ambos activan igual.
+       Arranca OCULTO: el default visible es el formulario (fallback seguro si el JS falla);
+       initReveal() lo muestra solo para las variantes B/C. -->
+  <div id="stateReveal" class="state">
+    <div class="card-header">
+      <div class="brand">Oakberry</div>
+      <div class="brand-sub">Cupón exclusivo · Nuevos clientes</div>
+      <div class="discount-badge">
+        <span class="pct" id="revealPct">20%</span>
+        <span class="desc">OFF en tu<br><span id="revealProducto">Bowl 9oz</span></span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h2 class="section-title">¡Este es tu cupón! 🫐</h2>
+      <p class="section-sub">Actívalo con tus datos para poder usarlo</p>
+      <div class="ticket" style="background:#6f6193;">
+        <div class="ticket-label">Tu código de descuento</div>
+        <div class="ticket-code" id="revealCode" style="letter-spacing:6px;color:rgba(255,255,255,0.6);">•&nbsp;•&nbsp;•&nbsp;•&nbsp;•</div>
+        <div style="display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;padding:5px 12px;border-radius:50px;margin-bottom:8px;background:var(--yellow);color:var(--primary-dark);">🔒 Sin activar</div>
+        <div class="ticket-validity" style="color:#ffd2d2;">⚠ Este código todavía NO funciona — actívalo en el botón de abajo</div>
+        <div class="ticket-validity" id="revealDias" style="color:rgba(255,255,255,0.6);">🗓 Tenés 3 días para activarlo</div>
+        <div class="ticket-dashed"></div>
+        <div class="ticket-bottom">
+          <div>
+            <div class="d-label">Descuento</div>
+            <div class="d-value" id="revealDescBottom">20% OFF · Bowl 9oz</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn" id="leverBtn" onclick="jalarPalanca()" style="display:none;">🎰 ¡Girá tu cupón!</button>
+      <button class="btn" id="revealBtn" onclick="irAReclamar()">Activa tu cupón →</button>
+      <p class="terms">1 cupón por número · Válido solo en tiendas Oakberry Colombia</p>
+    </div>
+  </div>
+
+  <!-- ESTADO 0b: TRAGAMONEDAS (variante C) — rodillos que giran hasta el código real -->
+  <div id="stateSlot" class="state">
+    <div class="card-header">
+      <div class="brand">Oakberry</div>
+      <div class="brand-sub">Cupón exclusivo · Nuevos clientes</div>
+      <div class="discount-badge">
+        <span class="pct" id="slotPct">20%</span>
+        <span class="desc">OFF en tu<br><span id="slotProducto">Bowl 9oz</span></span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h2 class="section-title">¡Girá y destapá tu cupón! 🫐</h2>
+      <p class="section-sub" id="slotSub">Jalá la palanca para revelar tu código</p>
+      <div class="slot">
+        <div class="slot-marquee" id="slotMarquee">🫐 Oakberry · 20% OFF Bowl 9oz</div>
+        <div class="slot-row">
+          <div class="reels">
+            <div class="reel"><div class="strip" id="strip0"><div class="cell">?</div></div></div>
+            <div class="reel"><div class="strip" id="strip1"><div class="cell">?</div></div></div>
+            <div class="reel"><div class="strip" id="strip2"><div class="cell">?</div></div></div>
+            <div class="reel"><div class="strip" id="strip3"><div class="cell">?</div></div></div>
+            <div class="reel"><div class="strip" id="strip4"><div class="cell">?</div></div></div>
+            <div class="payline"></div>
+          </div>
+          <div class="lever" id="lever" onclick="pull()"><div class="knob"></div><div class="rod"></div></div>
+        </div>
+      </div>
+      <div id="slotBefore">
+        <button class="btn" id="spinBtn" onclick="pull()">🎰 Jalá la palanca</button>
+        <p class="terms">👉 Tocá la palanca o el botón</p>
+      </div>
+      <div id="slotAfter" style="display:none;">
+        <div class="ticket" style="background:#6f6193;padding:14px 18px;">
+          <div style="display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;padding:5px 12px;border-radius:50px;margin-bottom:8px;background:var(--yellow);color:var(--primary-dark);">🔒 Sin activar</div>
+          <div class="ticket-validity" style="color:#ffd2d2;">⚠ Este código todavía NO funciona — actívalo en el botón de abajo</div>
+          <div class="ticket-validity" id="slotDias" style="color:rgba(255,255,255,0.6);">🗓 Tenés 3 días para activarlo</div>
+        </div>
+        <button class="btn" onclick="irAReclamar()">Activa tu cupón →</button>
+      </div>
+      <p class="terms">1 cupón por número · Válido solo en tiendas Oakberry Colombia</p>
+    </div>
+  </div>
+
+  <!-- ESTADO 1: FORMULARIO (default visible = control A y fallback seguro) -->
   <div id="stateForm" class="state show">
     <div class="card-header">
       <div class="brand">Oakberry</div>
@@ -361,7 +455,9 @@ const P = (() => {
     fase:      p.get("fase")      || "organico",
     fuente:    p.get("fuente")    || "meta",
     descuento: p.get("descuento") || "20",
-    producto:  p.get("producto")  || "Bowl 9oz",
+    // FORZADO 9oz (política de margen): ignoramos el param del link. La agencia mandaba
+    // 'Bowl 12oz' y un 20% sobre 12oz se come el margen de 1ª compra. Todo es 9oz.
+    producto:  "Bowl 9oz",
     premio:    p.get("premio")    || "Un año de açaí gratis",
     vigencia:  parseInt(p.get("vigencia") || "72"),
     momentos:  p.get("momentos")  || "",
@@ -379,6 +475,24 @@ const P = (() => {
 })();
 
 const esSorteo = P.modo === "sorteo";
+
+// ── A/B reward-first (solo la página, NO toca la pauta) ───────────────────────
+// 50% A (form-first, control) · 25% B (código a la vista) · 25% C (tragamonedas).
+// Persistente por usuario (localStorage) para que un reload no cambie de grupo.
+const AB_VARIANT = (function(){
+  try {
+    // Override de QA: ?ab=A|B|C fuerza la variante (para probar en el celular). No se
+    // guarda: es efímero. Los links de pauta no llevan ?ab=, así que no afecta a nadie.
+    const forced = new URLSearchParams(location.search).get("ab");
+    if (forced === "A" || forced === "B" || forced === "C") return forced;
+    const k = "oak_ab_v1"; let v = localStorage.getItem(k);
+    if (v === "A" || v === "B" || v === "C") return v;
+    const r = Math.random(); v = r < 0.50 ? "A" : (r < 0.75 ? "B" : "C");
+    localStorage.setItem(k, v); return v;
+  } catch(e){ return "A"; }   // sin localStorage → control
+})();
+// Código que le mostramos en el reveal; el backend lo respeta al activar (coupons.py::_codigo_final).
+const REVEAL_CODE = genCodigo();
 
 // ── LINK DE CAMPAÑA (URL completa que originó este cupón) ─────
 // Se captura al cargar la página — incluye todos los parámetros UTM
@@ -545,10 +659,21 @@ if (esSorteo) {
   document.getElementById("pillText").innerHTML       = `⏳ Sorteo en <span style="font-weight:900;">${P.vigencia} horas</span> · 1 registro por número`;
   document.getElementById("btnText").textContent      = "Quiero participar →";
   document.getElementById("formTerms").textContent    = "1 registro por número · Sin spam · Oakberry Colombia";
+  show("stateForm");   // el sorteo no usa la pantalla de reveal de cupón
 } else {
   document.getElementById("headerPct").textContent      = P.descuento + "%";
   document.getElementById("headerProducto").textContent = P.producto;
   document.getElementById("pillVigencia").textContent   = P.vigencia + " horas";
+  var _rp  = document.getElementById("revealPct");        if (_rp)  _rp.textContent  = P.descuento + "%";
+  var _rpr = document.getElementById("revealProducto");   if (_rpr) _rpr.textContent = P.producto;
+  var _rdb = document.getElementById("revealDescBottom"); if (_rdb) _rdb.textContent = P.descuento + "% OFF · " + P.producto;
+  var _dias = Math.max(1, Math.round(P.vigencia / 24)), _diasTxt = "🗓 Tenés " + _dias + (_dias === 1 ? " día" : " días") + " para activarlo";
+  var _rvd = document.getElementById("revealDias"); if (_rvd) _rvd.textContent = _diasTxt;
+  var _sld = document.getElementById("slotDias");   if (_sld) _sld.textContent = _diasTxt;
+  var _slp = document.getElementById("slotPct");        if (_slp) _slp.textContent = P.descuento + "%";
+  var _slpr = document.getElementById("slotProducto");  if (_slpr) _slpr.textContent = P.producto;
+  var _slm = document.getElementById("slotMarquee");    if (_slm) _slm.textContent = "🫐 Oakberry · " + P.descuento + "% OFF " + P.producto;
+  initReveal();   // ruteo A/B: A=formulario (default) · B=código a la vista · C=tragamonedas
 }
 
 function genCodigo() {
@@ -795,6 +920,8 @@ async function solicitar() {
   try {
     const res = await fetchGETSafe({
       accion:      "registrarCupon",
+      codigoSugerido: (AB_VARIANT !== "A") ? REVEAL_CODE : "",  // el backend respeta el código que ya vio
+      abVariant:   AB_VARIANT,          // A/B: se guarda en codigos.ab_test
       eventId:     _leadEventId,        // dedup Lead píxel↔CAPI
       nombre, celular,
       ciudad:      P.ciudad,
@@ -964,8 +1091,76 @@ function mostrarExistente(data, nombre) {
   }
 }
 
+// Reward-first: del reveal (premio) al formulario (datos). Dispara ClaimClick (paso
+// nuevo del embudo); NO auto-enfoca para que InitiateCheckout siga siendo "el usuario
+// tocó un campo" y sea comparable al baseline form-first (~5.4% de las visitas).
+function irAReclamar() {
+  try { fbq('trackCustom','ClaimClick',{v:AB_VARIANT}); } catch(e){}
+  var bt = document.getElementById("btnText");   if (bt) bt.textContent = "Activar mi cupón " + REVEAL_CODE + " →";
+  var ft = document.getElementById("formTitle"); if (ft) ft.textContent = "Activa tu cupón";
+  var fs = document.getElementById("formSub");   if (fs) fs.textContent = "Solo tus datos y queda listo para usar";
+  show("stateForm");
+}
+
+// Ruteo del reward-first según la variante A/B asignada en la página.
+function initReveal() {
+  if (AB_VARIANT === "A") return;                 // control: se queda el formulario
+  if (AB_VARIANT === "C") { resetReels(); show("stateSlot"); return; }
+  var codeEl = document.getElementById("revealCode");   // B: código a la vista, sin activar
+  if (codeEl) { codeEl.textContent = REVEAL_CODE; codeEl.style.letterSpacing = "4px"; codeEl.style.color = "#fff"; }
+  show("stateReveal");
+}
+
+// ── Tragamonedas (variante C): 5 rodillos que giran y caen en el código real ──
+var _SLOT_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", _SLOT_CELL = 58, _SLOT_N = 18, _spinning = false;
+function _slotRc(){ return _SLOT_CHARS[Math.floor(Math.random() * _SLOT_CHARS.length)]; }
+function resetReels(){
+  for (var i = 0; i < 5; i++) {
+    var st = document.getElementById("strip" + i);
+    if (st) { st.style.transition = "none"; st.style.transform = "translateY(0)"; st.innerHTML = '<div class="cell">?</div>'; }
+  }
+  var b = document.getElementById("slotBefore"), a = document.getElementById("slotAfter"),
+      sb = document.getElementById("spinBtn"), lv = document.getElementById("lever");
+  if (b) b.style.display = "block"; if (a) a.style.display = "none";
+  if (sb) sb.disabled = false; if (lv) lv.classList.remove("pulled");
+  _spinning = false;
+}
+function pull(){
+  if (_spinning) return; _spinning = true;
+  try { fbq('trackCustom','SlotPull',{v:AB_VARIANT}); } catch(e){}
+  var sb = document.getElementById("spinBtn"), lv = document.getElementById("lever");
+  if (sb) sb.disabled = true;
+  if (lv) { lv.classList.add("pulled"); setTimeout(function(){ lv.classList.remove("pulled"); }, 320); }
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) {
+    for (var i = 0; i < 5; i++) { var s = document.getElementById("strip" + i); if (s) s.innerHTML = '<div class="cell">' + REVEAL_CODE[i] + '</div>'; }
+    return _slotDone();
+  }
+  var durs = [650, 800, 950, 1100, 1250];
+  for (var i = 0; i < 5; i++) {
+    var st = document.getElementById("strip" + i); if (!st) continue;
+    var html = "";
+    for (var k = 0; k < _SLOT_N; k++) html += '<div class="cell">' + _slotRc() + '</div>';
+    html += '<div class="cell">' + REVEAL_CODE[i] + '</div>';
+    st.innerHTML = html; st.style.transition = "none"; st.style.transform = "translateY(0)";
+  }
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    for (var i = 0; i < 5; i++) {
+      var st = document.getElementById("strip" + i);
+      if (st) { st.style.transition = "transform " + durs[i] + "ms cubic-bezier(.11,.66,.24,1)"; st.style.transform = "translateY(-" + (_SLOT_N * _SLOT_CELL) + "px)"; }
+    }
+  }); });
+  setTimeout(_slotDone, 1250 + 140);
+}
+function _slotDone(){
+  _spinning = false;
+  var sub = document.getElementById("slotSub"); if (sub) sub.textContent = "¡Ahí está tu cupón! Actívalo para usarlo";
+  var b = document.getElementById("slotBefore"), a = document.getElementById("slotAfter");
+  if (b) b.style.display = "none"; if (a) a.style.display = "block";
+}
+
 function show(id) {
-  ["stateForm","stateSuccess","stateUsed","stateLoopy","stateLoading"].forEach(s => {
+  ["stateReveal","stateSlot","stateForm","stateSuccess","stateUsed","stateLoopy","stateLoading"].forEach(s => {
     const el = document.getElementById(s);
     if (el) el.classList.remove("show");
   });
