@@ -477,16 +477,19 @@ const P = (() => {
 const esSorteo = P.modo === "sorteo";
 
 // ── A/B reward-first (solo la página, NO toca la pauta) ───────────────────────
-// 50% A (form-first, control) · 25% B (código a la vista) · 25% C (tragamonedas).
-// Persistente por usuario (localStorage) para que un reload no cambie de grupo.
+// CANARY 10% (2026-08-13, tras arreglar el render móvil que colapsó al 50%):
+// 90% A (form-first, control) · 5% B (código a la vista) · 5% C (tragamonedas).
+// Clave localStorage NUEVA (oak_ab_v2) para NO arrastrar asignaciones del split viejo 50/25/25.
 const AB_VARIANT = (function(){
-  // CANARY OFF (diagnóstico 2026-08-13): el tráfico real va SIEMPRE a form-first (A). Solo
-  // ?ab=B|C prueba el reward-first (QA en el celular, no lo ve ningún cliente real). Se
-  // re-activa el split cuando se resuelva el colapso de conversión que causó al 50%.
   var forced = null;
   try { forced = new URLSearchParams(location.search).get("ab"); } catch(e){}
-  if (forced === "A" || forced === "B" || forced === "C") return forced;
-  return "A";
+  if (forced === "A" || forced === "B" || forced === "C") return forced;   // ?ab= fuerza (QA)
+  var k = "oak_ab_v2", v = null;
+  try { v = localStorage.getItem(k); } catch(e){}
+  if (v === "A" || v === "B" || v === "C") return v;
+  var r = Math.random(); v = r < 0.90 ? "A" : (r < 0.95 ? "B" : "C");   // 90/5/5
+  try { localStorage.setItem(k, v); } catch(e){}
+  return v;
 })();
 // Código que le mostramos en el reveal; el backend lo respeta al activar (coupons.py::_codigo_final).
 const REVEAL_CODE = genCodigo();
