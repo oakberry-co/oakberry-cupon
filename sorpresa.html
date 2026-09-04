@@ -142,10 +142,21 @@ function mostrarResultado(r){
   document.getElementById("res-headline").textContent="🎉 ¡Felicitaciones!";
   const desc=(r.descuento||"").trim();
   const prod=(r.producto||"").trim();
-  document.getElementById("res-prize").textContent=[desc,prod].filter(Boolean).join(" · ")||"¡Ganaste un cupón!";
+  const nUsos=parseInt(r.usos||1,10);
+  const premioTxt=[desc,prod].filter(Boolean).join(" · ")||"¡Ganaste un cupón!";
+  document.getElementById("res-prize").textContent=
+    nUsos>1 ? (premioTxt+" × "+nUsos+" visitas") : premioTxt;
   if(r.codigo){
     document.getElementById("res-code").textContent=r.codigo;
-    document.getElementById("res-vig").innerHTML="Muéstralo en caja de Oakberry · válido <b>"+(r.vigencia||"72 horas")+"</b>.";
+    // Un cupón multiuso o atado a una tienda tiene que decirlo ACÁ, en la pantalla
+    // donde la persona lo recibe: si se entera en la caja equivocada, la promo se
+    // le vuelve un problema al cajero.
+    const usos=parseInt(r.usos||1,10);
+    const donde=(r.tiendaUnica||"").trim();
+    let vig="Muéstralo en caja"+(donde?"":" de Oakberry")+" · válido <b>"+(r.vigencia||"72 horas")+"</b>.";
+    if(usos>1) vig+="<br><b>Lo puedes usar "+usos+" veces</b> (un bowl por visita).";
+    if(donde)  vig+="<br>📍 Solo en <b>Oakberry "+donde+"</b>.";
+    document.getElementById("res-vig").innerHTML=vig;
     cw.classList.remove("hidden");
   } else cw.classList.add("hidden");
   document.getElementById("res-look").textContent=r.yaJugo?"Este es el cupón que ya te habíamos dado 🙂":"";
