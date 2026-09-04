@@ -4,7 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="facebook-domain-verification" content="reib374m8ywck7hmx2ldhypaxxtvip" />
-<title>Oakberry</title>
+<title>Tu cupón Oakberry — actívalo y úsalo en tienda</title>
+<meta name="description" content="Activa tu cupón Oakberry con tus datos y úsalo en cualquier tienda. Cupón exclusivo para nuevos clientes.">
+<meta name="robots" content="noindex, follow">
+
+<!-- Preview del link. Este cupón viaja SIEMPRE por WhatsApp, DM de Instagram o
+     QR en tienda; el título era "Oakberry" a secas y sin imagen, así que el
+     preview salía pelado en el único canal por el que la gente lo recibe.
+     Tarjeta generada con `common/og_cards.py` del repo datawarehouse.
+     El `noindex` de arriba no estorba: los bots de preview no son buscadores
+     (ver robots.txt) y de todas formas siguen el link. -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CO">
+<meta property="og:site_name" content="Oakberry Colombia">
+<meta property="og:title" content="Tu cupón Oakberry">
+<meta property="og:description" content="Actívalo con tus datos y úsalo en cualquier tienda.">
+<meta property="og:image" content="https://www.oakberry-cupones.com/og-cupon.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tu cupón Oakberry">
+<meta name="twitter:card" content="summary_large_image">
+
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
 
 <!-- ═══════════════════════════════════════════════════
@@ -158,9 +178,19 @@ fbq('track', 'PageView');
   .lever .knob{position:absolute;left:0;top:0;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff9dbb,#c0396b);box-shadow:0 2px 4px rgba(0,0,0,.4);}
   .lever.pulled{transform:rotate(34deg);}
   @media (prefers-reduced-motion: reduce){.lever{transition:none;}}
+
+  /* H1 accesible. La página no tenía ninguno: el título visual es el div .brand,
+     que se repite en los tres estados (reveal / ruleta / formulario). Oculto a la
+     vista pero presente para lectores de pantalla. No usa display:none ni
+     visibility:hidden porque eso también lo esconde del lector. */
+  .a11y-title{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;
+  }
 </style>
 </head>
 <body>
+<h1 class="a11y-title">Tu cupón Oakberry — actívalo y úsalo en tienda</h1>
 <div class="card">
 
   <!-- ESTADO 0: REVEAL — premio primero (reward-first). B: código a la vista "sin activar".

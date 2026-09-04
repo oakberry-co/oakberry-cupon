@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conciliación de programas — Oakberry</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root{--beige:#f6f1e4;--morado:#3d2b5e;--morado-c:#9b85c4;--oro:#b8860b;
+        --rojo:#c0392b;--verde:#1a7a45;--linea:#e3dcc9}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{font-family:'Montserrat',system-ui,sans-serif;background:var(--beige);color:var(--morado)}
+  .wrap{max-width:1500px;margin:0 auto;padding:30px 26px 80px}
+  h1{font-size:29px;font-weight:800;letter-spacing:.2px}
+  .sub{font-size:14.5px;color:#6b5b86;margin:6px 0 26px}
+  .sub b{color:var(--morado)}
+
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:28px}
+  .kpi{background:#fff;border:1px solid var(--linea);border-radius:14px;padding:18px 20px}
+  .kpi b{display:block;font-size:31px;line-height:1.15;font-variant-numeric:tabular-nums;margin-top:5px}
+  .kpi span{font-size:11.5px;color:#7a6b93;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+  .kpi.alerta b{color:var(--rojo)}
+  .kpi.gasto b{color:var(--oro)}
+  .kpi small{display:block;font-size:12.5px;color:#8a7ba3;margin-top:5px}
+
+  .resumen{background:#fff;border:1px solid var(--linea);border-radius:14px;
+    padding:6px 4px;margin-bottom:26px;overflow:hidden}
+  .resumen .fila{display:flex;align-items:center;gap:14px;padding:14px 18px;
+    border-bottom:1px solid #f0ebdd;flex-wrap:wrap}
+  .resumen .fila:last-child{border-bottom:0}
+  .resumen .prog{font-size:15px;font-weight:800;min-width:150px}
+  .resumen .quien{font-size:14px;color:#6b5b86;flex:1;min-width:230px}
+  .resumen .monto{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;
+    text-align:right;min-width:130px}
+  .resumen .marca .prog,.resumen .marca .monto{color:var(--verde)}
+  .resumen .tienda .prog,.resumen .tienda .monto{color:var(--oro)}
+  .resumen .nota-fila{font-size:12.5px;color:#8a7ba3;width:100%;margin-top:-4px}
+  .franja{border-radius:11px;padding:13px 18px;margin-bottom:16px;font-size:14.5px;
+    line-height:1.6;border:1px solid}
+  .franja.marca{background:#e8f3ec;border-color:#bcdcc8;color:#1a5e34}
+  .franja.tienda{background:#fbf0dd;border-color:#e6d3a8;color:#7a5a10}
+  .franja.regla{background:#fbe4e1;border-color:#e8b8b1;color:#8e2b1e}
+  td.bien{color:var(--verde);font-weight:700}
+  td.mal{color:var(--rojo);font-weight:700}
+  a.fac{color:var(--oro);font-weight:700;text-decoration:none;white-space:nowrap}
+  a.fac:hover{text-decoration:underline}
+  .franja b{font-weight:800}
+  .tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .tabs button{font-family:inherit;font-size:14px;font-weight:700;padding:11px 22px;border-radius:10px;
+    border:1.5px solid var(--morado);background:#fff;color:var(--morado);cursor:pointer}
+  .tabs button.on{background:var(--morado);color:#fff}
+
+  .barra{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+  select{font-family:inherit;font-size:14px;font-weight:600;color:var(--morado);padding:10px 13px;
+    border-radius:9px;border:1.5px solid var(--morado-c);background:#fff;cursor:pointer;max-width:100%}
+  .btn{font-family:inherit;font-size:14px;font-weight:700;padding:11px 20px;border-radius:9px;
+    border:1.5px solid var(--oro);background:#fff;color:var(--oro);cursor:pointer}
+  .btn:hover{background:var(--oro);color:#fff}
+
+  .tablewrap{overflow-x:auto;background:#fff;border:1px solid var(--linea);border-radius:12px}
+  table{width:100%;border-collapse:collapse;font-size:15.5px;min-width:860px}
+  th{background:var(--morado);color:#fff;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;
+    padding:14px 16px;text-align:right;font-weight:700;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  th.l,td.l{text-align:left}
+  td{padding:13px 16px;text-align:right;border-bottom:1px solid #f0ebdd;
+     font-variant-numeric:tabular-nums;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  tr.abrible{cursor:pointer}
+  tr.abrible:hover{background:#faf7ee}
+  tfoot td{font-weight:800;border-top:2px solid var(--morado);background:#faf7ee}
+  .neg{color:var(--rojo);font-weight:700}
+  .ok{color:var(--verde)}
+  .mut{color:#a094b5}
+  .caret{display:inline-block;width:16px;color:var(--morado-c);font-weight:800}
+  .pill{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;
+    background:#f0ebdd;color:#6b5b86;text-transform:uppercase;letter-spacing:.3px}
+  .pill.r{background:#fbe4e1;color:var(--rojo)}
+  .pill.m{background:#e8f3ec;color:var(--verde)}
+  .pill.t{background:#fbf0dd;color:var(--oro)}
+
+  /* sub-tabla del desglose por producto */
+  tr.det td{background:#faf8f1;padding:0;border-bottom:1px solid #f0ebdd}
+  .det-in{padding:6px 16px 16px}
+  .det-in h4{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#7a6b93;
+    margin:12px 0 7px;font-weight:800}
+  .det-in table{font-size:14px;min-width:0;background:#fff;border:1px solid var(--linea);
+    border-radius:9px;overflow:hidden}
+  .det-in th{background:#efe9da;color:#6b5b86;font-size:10.5px;padding:9px 13px}
+  .det-in td{padding:9px 13px}
+  .det-in tfoot td{background:#f6f1e4;border-top:1.5px solid var(--morado-c)}
+  .det-in p{font-size:14px;padding:4px 2px}
+
+  .alerta-item{background:#fff;border:1px solid var(--linea);border-left:3px solid var(--rojo);
+    border-radius:10px;padding:14px 18px;margin-bottom:9px;font-size:14.5px;display:flex;
+    justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .alerta-item .q{font-weight:700}
+  .nota{font-size:14px;color:#6b5b86;line-height:1.75;background:#fff;border:1px solid var(--linea);
+    border-radius:12px;padding:18px 22px;margin-top:22px;max-width:1100px}
+  .nota b{color:var(--morado)}
+  .aviso{background:#fbf0dd;border:1px solid #e6d3a8;border-radius:12px;padding:16px 20px;
+    font-size:14px;line-height:1.7;color:#6b5b86;margin-bottom:20px;max-width:1100px}
+  .aviso b{color:var(--oro)}
+
+  #gate{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;background:var(--beige);gap:16px;text-align:center;padding:24px}
+  #gate .logo{font-size:42px}
+  #gate h2{font-size:19px;font-weight:800}
+  #gate p{color:#6b5b86;font-size:13px;max-width:340px}
+  #gate .err{color:var(--rojo);font-size:12px;font-weight:600;min-height:16px}
+  #app{display:none}
+  @media(max-width:820px){ .wrap{padding:20px 14px 60px} h1{font-size:21px} .sub{font-size:13px}
+    .kpi b{font-size:24px} table{font-size:14px} th,td{padding:10px 12px} .nota{font-size:13px} }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="logo">&#129530;</div>
+  <h2>Conciliaci&oacute;n de programas</h2>
+  <p>Acceso restringido. Inicia sesi&oacute;n con tu cuenta autorizada de Google.</p>
+  <div id="gbtn"></div>
+  <div class="err" id="gerr"></div>
+</div>
+
+<div id="app"><div class="wrap">
+  <h1 id="titulo">Conciliaci&oacute;n de programas</h1>
+  <div class="sub" id="sub"></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="resumen" id="resumen"></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="barra" id="barra"></div>
+  <div id="vista"></div>
+  <div class="nota" id="nota"></div>
+</div></div>
+
+<script>
+const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
+let D = null, VISTA = 'devolucion', MES = 'todos', TIENDA = 'todas';
+const ABIERTO = new Set();
+
+const cop = n => (n < 0 ? '-' : '') + '$' + Math.abs(Math.round(n)).toLocaleString('es-CO');
+const num = n => Number(n || 0).toLocaleString('es-CO');
+const esc = s => String(s == null ? '' : s).replace(/[<>&"]/g,
+  c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const MESES_N = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto',
+                 'septiembre','octubre','noviembre','diciembre'];
+const mesLargo = m => { const [y, mm] = m.split('-'); return MESES_N[+mm - 1] + ' ' + y; };
+const suma = (rows, k) => rows.reduce((a, r) => a + (r[k] || 0), 0);
+
+// El cruce POS↔web solo vale desde D.cruce_desde (junio 2026). Antes, el reloj
+// del Apps Script viejo estaba corrido una hora y el 96% de las órdenes de
+// marzo/abril cae fuera de la ventana: mostrar el número se lee como fraude
+// masivo cuando es un reloj mal puesto.
+const cruceVale = m => !D.cruce_desde || m >= D.cruce_desde;
+
+const TAM = { '7oz':'7 oz', '9oz':'9 oz', '12oz':'12 oz', '16oz':'16 oz',
+              '22oz':'22 oz', 'topping':'Topping / extra' };
+const ORDEN_TAM = { '7oz':1, '9oz':2, '12oz':3, '16oz':4, '22oz':5, 'topping':9 };
+
+const FRANJA_ADQ = '<div class="franja marca"><b>Programa de adquisición.</b> ' +
+  'Acá vendiste el bowl con descuento, así que <b>la marca te devuelve el 100%</b> de lo ' +
+  'descontado sobre el producto. Los toppings que la caja haya descontado en esas órdenes ' +
+  'los asumís vos y aparecen dentro del detalle de cada mes.</div>';
+
+/* ── login ───────────────────────────────────────────── */
+function onCredential(resp) {
+  const err = document.getElementById('gerr');
+  err.textContent = 'Verificando…';
+  fetch('/api/conciliacion', {
+    method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idtoken: resp.credential })
+  }).then(r => r.json()).then(j => {
+    if (!j.ok) { err.textContent = j.mensaje || 'No autorizado.'; return; }
+    D = j;
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    montarTabs(); render();
+  }).catch(e => { err.textContent = 'Error de red: ' + e.message; });
+}
+
+window.onload = () => {
+  if (!window.google) { document.getElementById('gerr').textContent = 'No cargó Google Sign-In.'; return; }
+  google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onCredential });
+  google.accounts.id.renderButton(document.getElementById('gbtn'),
+    { theme: 'outline', size: 'large', text: 'signin_with' });
+};
+
+/* ── filtros ─────────────────────────────────────────── */
+function fil(rows) {
+  return rows.filter(r => (TIENDA === 'todas' || r.tienda === TIENDA) &&
+                          (MES === 'todos' || r.mes === MES));
+}
+const filas = () => fil(D.filas);
+
+/* ── tabs ────────────────────────────────────────────── */
+function montarTabs() {
+  const t = [['devolucion', 'Adquisición — te devolvemos'],
+             ['tienda', 'Adquisición por tienda'],
+             ['programas', 'Reactivación y retención — lo asumís vos'],
+             ['cruce', 'POS vs página de validación']];
+  document.getElementById('tabs').innerHTML = t.map(([v, l]) =>
+    '<button data-v="' + v + '"' + (v === VISTA ? ' class="on"' : '') + '>' + l + '</button>').join('');
+  document.querySelectorAll('.tabs button').forEach(b => {
+    b.onclick = () => { VISTA = b.dataset.v; ABIERTO.clear(); montarTabs(); render(); };
+  });
+}
+
+/* ── render ──────────────────────────────────────────── */
+function render() {
+  const mias = D.tiendas.length;
+  document.getElementById('titulo').textContent = D.interno
+    ? 'Conciliación de programas — Oakberry'
+    : 'Mis programas — ' + (D.nombre || '');
+  document.getElementById('sub').innerHTML =
+    'Datos al <b>' + esc(D.generado) + '</b> &middot; ' + D.meses.length + ' meses &middot; ' +
+    mias + (mias === 1 ? ' tienda' : ' tiendas') + ' &middot; ' + esc(D.email);
+
+  pintarKPIs();
+  pintarResumen();
+  pintarBarra();
+  document.getElementById('vista').innerHTML =
+    VISTA === 'devolucion'  ? vistaMes()
+    : VISTA === 'tienda'    ? vistaTienda()
+    : VISTA === 'programas' ? vistaProgramas()
+    : vistaCruce();
+  pintarNota();
+  engancharFilas();
+}
+
+function pintarKPIs() {
+  const t = filas(), d = fil(D.detalle);
+  const saldo = suma(t, 'saldo');
+  // Lo que la tienda asume se muestra a COSTO (38% bowl / 50% topping), no a
+  // precio de venta: ella entregó producto, no perdió una venta.
+  // Se separa a propósito: el topping descontado dentro de una orden de
+  // adquisición también lo asume la tienda, pero pertenece a OTRO programa que
+  // el de reactivación/retención. Mezclarlos en un solo número es justo lo que
+  // hacía difícil saber de dónde venía cada peso.
+  const otrosProg = suma(d.filter(x => x.prog !== 'Adquisición'), 'costo');
+  const k = [
+    ['Adquisición: te devolvemos', cop(suma(t, 'debido')), 'sin IVA', ''],
+    ['Ya acreditado', cop(suma(t, 'acreditado')), 'en las facturas', ''],
+    ['Pendiente', cop(saldo), cop(suma(t, 'saldo_iva')) + ' con IVA', saldo > 0 ? 'alerta' : ''],
+    ['Reactivación + retención', cop(otrosProg), 'lo asumís vos, a costo', 'gasto'],
+  ];
+  document.getElementById('kpis').innerHTML = k.map(([l, v, s, c]) =>
+    '<div class="kpi ' + c + '"><span>' + l + '</span><b>' + v + '</b><small>' + s + '</small></div>'
+  ).join('');
+}
+
+// Tres líneas que contestan, sin abrir ninguna pestaña, de dónde sale cada peso
+// y quién lo paga. Es lo primero que se lee después de los KPI.
+function pintarResumen() {
+  const t = filas(), d = fil(D.detalle);
+  const adqBowl = suma(t, 'debido');
+  const adqTop  = suma(d.filter(x => x.prog === 'Adquisición' && x.asume === 'tienda'), 'costo');
+  const rea     = suma(d.filter(x => x.prog === 'Reactivación'), 'costo');
+  const ret     = suma(d.filter(x => x.prog === 'Retención'), 'costo');
+  const f = [];
+  f.push(['marca', 'Adquisición', 'Vendiste el bowl con descuento &mdash; <b>te lo devolvemos completo</b>',
+          adqBowl, adqTop ? 'Los toppings que la caja descontó de más en esas mismas órdenes, ' +
+          cop(adqTop) + ' a costo, los asumís vos.' : '']);
+  if (rea) f.push(['tienda', 'Reactivación', 'Entregaste producto gratis &mdash; <b>lo asumís vos</b>, valorado a costo', rea, '']);
+  if (ret) f.push(['tienda', 'Retención', 'Regalaste el topping &mdash; <b>lo asumís vos</b>, valorado a costo', ret, '']);
+  document.getElementById('resumen').innerHTML = f.map(([c, prog, quien, monto, nota]) =>
+    '<div class="fila ' + c + '"><span class="prog">' + prog + '</span>' +
+    '<span class="quien">' + quien + '</span>' +
+    '<span class="monto">' + cop(monto) + '</span>' +
+    (nota ? '<span class="nota-fila">' + nota + '</span>' : '') + '</div>').join('');
+}
+
+function pintarBarra() {
+  const selT = D.tiendas.length > 1
+    ? '<select id="selT"><option value="todas">Todas mis tiendas</option>' +
+      D.tiendas.map(s => '<option value="' + s + '"' + (s === TIENDA ? ' selected' : '') + '>' +
+        s + '</option>').join('') + '</select>' : '';
+  const selM = (VISTA === 'tienda')
+    ? '<select id="selM"><option value="todos">Todos los meses</option>' +
+      D.meses.map(m => '<option value="' + m + '"' + (m === MES ? ' selected' : '') + '>' +
+        mesLargo(m) + '</option>').join('') + '</select>' : '';
+  document.getElementById('barra').innerHTML =
+    selT + selM + '<button class="btn" id="csv">Descargar CSV</button>';
+  const a = document.getElementById('selT');
+  if (a) a.onchange = e => { TIENDA = e.target.value; ABIERTO.clear(); render(); };
+  const b = document.getElementById('selM');
+  if (b) b.onchange = e => { MES = e.target.value; render(); };
+  document.getElementById('csv').onclick = bajarCSV;
+}
+
+/* ── vista: devolución por mes, abrible ──────────────── */
+function vistaMes() {
+  let cuerpo = '', tot = { ordenes: 0, sin_codigo: 0, debido: 0, acreditado: 0, saldo: 0 };
+  for (const m of D.meses) {
+    const g = filas().filter(f => f.mes === m);
+    if (!g.length) continue;
+    const r = { ordenes: suma(g, 'ordenes'), sin_codigo: suma(g, 'sin_codigo'),
+                debido: suma(g, 'debido'), acreditado: suma(g, 'acreditado'),
+                saldo: suma(g, 'saldo') };
+    for (const k in tot) tot[k] += (k === 'sin_codigo' && !cruceVale(m)) ? 0 : r[k];
+    const ab = ABIERTO.has(m);
+    cuerpo +=
+      '<tr class="abrible" data-k="' + m + '"><td class="l"><span class="caret">' +
+      (ab ? '&#9660;' : '&#9654;') + '</span><b>' + mesLargo(m) + '</b>' +
+      (m === D.mes_sin_facturar ? ' <span class="pill">sin facturar</span>' : '') + '</td>' +
+      '<td>' + num(r.ordenes) + '</td>' +
+      (cruceVale(m)
+        ? '<td class="' + (r.sin_codigo ? 'neg' : 'mut') + '">' + num(r.sin_codigo) + '</td>'
+        : '<td class="mut" title="Hasta mayo el reloj de la página de validación iba corrido una hora: el cruce no es interpretable">—</td>') +
+      '<td>' + cop(r.debido) + '</td><td>' + cop(r.acreditado) + '</td>' +
+      '<td class="' + (r.saldo > 0 ? 'neg' : r.saldo < 0 ? 'ok' : 'mut') + '">' + cop(r.saldo) +
+      '</td><td class="l">' + facturaCelda(g) + '</td></tr>' +
+      (ab ? '<tr class="det"><td colspan="6"><div class="det-in">' +
+            tablaProducto(m, 'Adquisición') + '</div></td></tr>' : '');
+  }
+  if (!cuerpo) return FRANJA_ADQ + '<div class="nota">Sin movimientos para este filtro.</div>';
+  return FRANJA_ADQ + '<div class="tablewrap"><table><thead><tr>' +
+    '<th class="l">Mes</th><th>Órdenes</th><th>Sin código</th><th>Devuelve la marca</th>' +
+    '<th>Acreditado</th><th>Pendiente</th><th class="l">Factura</th></tr></thead><tbody>' +
+    cuerpo + '</tbody>' +
+    '<tfoot><tr><td class="l">Total</td><td>' + num(tot.ordenes) + '</td><td>' + num(tot.sin_codigo) +
+    '</td><td>' + cop(tot.debido) + '</td><td>' + cop(tot.acreditado) + '</td><td class="' +
+    (tot.saldo > 0 ? 'neg' : 'mut') + '">' + cop(tot.saldo) +
+    '</td><td></td></tr></tfoot></table></div>';
+}
+
+// La factura es el respaldo: si hay una sola para el filtro puesto se enlaza
+// directo al documento electrónico de Siigo, que abre sin login. Con varias
+// tiendas se enlazan todas, que es lo que un dueño de varias necesita.
+function facturaCelda(filasMes) {
+  const fs = [...new Map(filasMes.filter(f => f.factura)
+    .map(f => [f.factura, f])).values()];
+  if (!fs.length) return '<span class="mut">—</span>';
+  return fs.map(f => f.factura_url
+    ? '<a class="fac" href="' + esc(f.factura_url) + '" target="_blank" rel="noopener">' +
+      esc(f.factura) + ' &#8599;</a>'
+    : '<span class="mut">' + esc(f.factura) + '</span>').join(' · ');
+}
+
+/* Desglose producto × tamaño de un mes y programa. */
+function tablaProducto(mes, prog) {
+  const d = fil(D.detalle).filter(x => x.mes === mes && x.prog === prog);
+  if (!d.length) return '<h4>' + prog + '</h4><p class="mut">Sin movimientos este mes.</p>';
+  // El detalle viene por tienda: sin agrupar, con "todas mis tiendas" el mismo
+  // "BOWL THE ONE 9 oz" sale una vez por cada tienda que lo entregó y parece
+  // repetido. Se suma por producto + tamaño; si hay filtro de tienda puesto,
+  // esto ya trae una sola y el agrupado no cambia nada.
+  const g = new Map();
+  for (const x of d) {
+    const k = x.producto + '|' + x.tam + '|' + x.asume;
+    const a = g.get(k);
+    if (a) { a.uds += x.uds; a.cop += x.cop; a.cop_iva += x.cop_iva; a.costo += x.costo; }
+    else g.set(k, { producto: x.producto, tam: x.tam, asume: x.asume,
+                    uds: x.uds, cop: x.cop, cop_iva: x.cop_iva, costo: x.costo,
+                    tiendas: new Set() });
+    g.get(k).tiendas.add(x.tienda);
+  }
+  const rows = [...g.values()].sort((a, b) =>
+    (ORDEN_TAM[a.tam] - ORDEN_TAM[b.tam]) || b.cop - a.cop);
+  const cuerpo = rows.map(x =>
+    '<tr><td class="l">' + esc(x.producto) + '</td>' +
+    '<td class="l">' + (TAM[x.tam] || esc(x.tam)) +
+      (x.tiendas.size > 1 ? ' <span class="pill">' + x.tiendas.size + ' tiendas</span>' : '') +
+    '</td>' +
+    '<td>' + num(x.uds) + '</td><td>' + cop(x.cop) + '</td>' +
+    '<td class="' + (x.asume === 'marca' ? 'mut' : '') + '">' +
+      (x.asume === 'marca' ? '—' : cop(x.costo)) + '</td>' +
+    '<td class="l">' + (x.asume === 'marca'
+      ? '<span class="pill m">la marca, al 100%</span>'
+      : '<span class="pill t">la tienda, a costo</span>') +
+    '</td></tr>').join('');
+  const marca = suma(rows.filter(x => x.asume === 'marca'), 'cop');
+  const tienda = suma(rows.filter(x => x.asume === 'tienda'), 'costo');
+  return '<h4>' + prog + ' &mdash; detalle por producto</h4><table><thead><tr>' +
+    '<th class="l">Producto</th><th class="l">Tamaño</th><th>Unidades</th>' +
+    '<th>Valor sin IVA</th><th>Costo real</th><th class="l">Lo asume</th></tr></thead><tbody>' +
+    cuerpo + '</tbody><tfoot><tr><td class="l">Total</td><td></td><td>' + num(suma(rows, 'uds')) +
+    '</td><td>' + cop(suma(rows, 'cop')) + '</td><td>' + cop(tienda) +
+    '</td><td class="l">' + (marca ? '<span class="pill m">' + cop(marca) + ' marca</span> ' : '') +
+    (tienda ? '<span class="pill t">' + cop(tienda) + ' tienda</span>' : '') +
+    '</td></tr></tfoot></table>';
+}
+
+/* ── vista: por tienda ───────────────────────────────── */
+function vistaTienda() {
+  const rows = filas().slice().sort((a, b) => b.saldo - a.saldo || a.tienda.localeCompare(b.tienda));
+  if (!rows.length) return FRANJA_ADQ + '<div class="nota">Sin movimientos para este filtro.</div>';
+  const cuerpo = rows.map(f =>
+    '<tr><td class="l"><b>' + esc(f.tienda) + '</b>' +
+    (f.sin_fee ? ' <span class="pill r">sin fee</span>' : '') + '</td>' +
+    '<td class="l mut">' + mesLargo(f.mes) + '</td><td>' + num(f.ordenes) + '</td>' +
+    (cruceVale(f.mes)
+      ? '<td class="' + (f.sin_codigo ? 'neg' : 'mut') + '">' + num(f.sin_codigo) + '</td>'
+      : '<td class="mut">—</td>') +
+    '<td>' + cop(f.debido) + '</td><td>' + cop(f.acreditado) + '</td>' +
+    '<td class="' + (f.saldo > 0 ? 'neg' : f.saldo < 0 ? 'ok' : 'mut') + '">' + cop(f.saldo) + '</td>' +
+    '<td class="l">' + facturaCelda([f]) + '</td></tr>').join('');
+  return FRANJA_ADQ + '<div class="tablewrap"><table><thead><tr>' +
+    '<th class="l">Tienda</th><th class="l">Mes</th><th>Órdenes</th><th>Sin código</th>' +
+    '<th>Devuelve la marca</th><th>Acreditado</th><th>Pendiente</th><th class="l">Factura</th>' +
+    '</tr></thead><tbody>' + cuerpo + '</tbody><tfoot><tr><td class="l">Total</td><td></td><td>' +
+    num(suma(rows, 'ordenes')) + '</td><td>' +
+    num(suma(rows.filter(f => cruceVale(f.mes)), 'sin_codigo')) + '</td><td>' +
+    cop(suma(rows, 'debido')) + '</td><td>' + cop(suma(rows, 'acreditado')) +
+    '</td><td class="neg">' + cop(suma(rows, 'saldo')) + '</td><td></td></tr></tfoot></table></div>';
+}
+
+/* ── vista: reactivación y retención ─────────────────── */
+function vistaProgramas() {
+  const aviso = '<div class="franja tienda"><b>Esto NO es adquisición y de acá no se devuelve nada.</b> ' +
+    'En adquisición vendiste el bowl con descuento y te lo devolvemos. Acá <b>entregaste ' +
+    'producto gratis</b>, y ese costo lo asumís vos.<br>' +
+    'Lo valoramos a <b>costo de producto</b> —<b>38%</b> en bowl, <b>50%</b> en topping—, no a ' +
+    'precio de carta: cobrarte la carta por algo que regalaste inflaría tu gasto casi al triple.</div>';
+  let cuerpo = '', tot = { uds: 0, cop: 0, costo: 0 };
+  for (const m of D.meses) {
+    for (const prog of ['Reactivación', 'Retención']) {
+      const d = fil(D.detalle).filter(x => x.mes === m && x.prog === prog);
+      if (!d.length) continue;
+      const r = { uds: suma(d, 'uds'), cop: suma(d, 'cop'), costo: suma(d, 'costo') };
+      for (const k in tot) tot[k] += r[k];
+      const key = m + '|' + prog, ab = ABIERTO.has(key);
+      cuerpo += '<tr class="abrible" data-k="' + key + '"><td class="l"><span class="caret">' +
+        (ab ? '&#9660;' : '&#9654;') + '</span><b>' + mesLargo(m) + '</b></td>' +
+        '<td class="l">' + prog + '</td><td>' + num(r.uds) + '</td>' +
+        '<td class="mut">' + cop(r.cop) + '</td><td><b>' + cop(r.costo) + '</b></td></tr>' +
+        (ab ? '<tr class="det"><td colspan="5"><div class="det-in">' +
+              tablaProducto(m, prog) + '</div></td></tr>' : '');
+    }
+  }
+  if (!cuerpo) return aviso + '<div class="nota">Sin movimientos de reactivación ni retención.</div>';
+  return aviso + '<div class="tablewrap"><table><thead><tr><th class="l">Mes</th>' +
+    '<th class="l">Programa</th><th>Unidades</th><th>Valor de venta</th>' +
+    '<th>Lo que te cuesta</th>' +
+    '</tr></thead><tbody>' + cuerpo + '</tbody><tfoot><tr><td class="l">Total</td><td></td><td>' +
+    num(tot.uds) + '</td><td class="mut">' + cop(tot.cop) + '</td><td>' + cop(tot.costo) +
+    '</td></tr></tfoot></table></div>';
+}
+
+/* ── vista: POS vs página de validación ──────────────────────── */
+// El tablero que deja escrita la regla: se paga lo que está en los DOS lados.
+function vistaCruce() {
+  const franja = '<div class="franja regla"><b>Solo se paga lo que aparece en los dos lados.</b> ' +
+    'Un descuento aplicado en el POS <b>sin código validado en la web</b> no se paga: no hay ' +
+    'forma de saber a qué cliente se le entregó. Y un código validado <b>sin venta detrás</b> ' +
+    'tampoco, porque no hubo entrega.<br>' +
+    'El cruce es por tienda y por hora: la orden y la validación deben estar dentro de ' +
+    '<b>±15 minutos</b>, y cada código respalda una sola orden.<br>' +
+    '<b>Desde el 1.º de septiembre de 2026 esta es la regla de pago.</b> Los meses anteriores ' +
+    'se pagaron completos; el tablero los muestra para que se vea de qué tamaño es el hueco.</div>';
+
+  let cuerpo = '', tot = { pos: 0, web: 0, ok: 0, sinCod: 0, sinOrd: 0, plata: 0 };
+  for (const m of D.meses) {
+    const g = filas().filter(f => f.mes === m);
+    if (!g.length) continue;
+    const vale = cruceVale(m);
+    const r = { pos: suma(g, 'ordenes'), web: suma(g, 'codigos_web'),
+                ok: suma(g, 'con_codigo'), sinCod: suma(g, 'sin_codigo'),
+                sinOrd: suma(g, 'sin_orden'),
+                plata: Math.round((suma(g, 'bowls_cop') - suma(g, 'cop_respaldado')) / 1.19) };
+    if (vale) for (const k in tot) tot[k] += r[k];
+    const na = '<td class="mut" title="Hasta mayo el reloj de la página de validación iba corrido una hora: el cruce no es interpretable">—</td>';
+    cuerpo += '<tr><td class="l"><b>' + mesLargo(m) + '</b>' +
+      (vale ? '' : ' <span class="pill">reloj desfasado</span>') + '</td>' +
+      '<td>' + num(r.pos) + '</td><td>' + num(r.web) + '</td>' +
+      (vale ? '<td class="bien">' + num(r.ok) + '</td>' : na) +
+      (vale ? '<td class="' + (r.sinCod ? 'mal' : 'mut') + '">' + num(r.sinCod) + '</td>' : na) +
+      (vale ? '<td class="' + (r.sinOrd ? 'mal' : 'mut') + '">' + num(r.sinOrd) + '</td>' : na) +
+      (vale ? '<td class="' + (r.plata ? 'mal' : 'mut') + '">' + cop(r.plata) + '</td>' : na) +
+      '</tr>';
+  }
+  if (!cuerpo) return franja + '<div class="nota">Sin movimientos para este filtro.</div>';
+
+  const tabla = '<div class="tablewrap"><table><thead><tr><th class="l">Mes</th>' +
+    '<th>Órdenes en el POS</th><th>Códigos en la web</th><th>Cruzan &mdash; se pagan</th>' +
+    '<th>POS sin código</th><th>Código sin venta</th><th>No se pagaría</th>' +
+    '</tr></thead><tbody>' + cuerpo + '</tbody><tfoot><tr><td class="l">Total medible</td><td>' +
+    num(tot.pos) + '</td><td>' + num(tot.web) + '</td><td class="bien">' + num(tot.ok) +
+    '</td><td class="mal">' + num(tot.sinCod) + '</td><td class="mal">' + num(tot.sinOrd) +
+    '</td><td class="mal">' + cop(tot.plata) + '</td></tr></tfoot></table></div>';
+
+  const pct = tot.pos ? Math.round(tot.sinCod / tot.pos * 100) : 0;
+  const cierre = '<div class="nota"><b>Cómo se lee.</b> ' +
+    '<b>Cruzan</b> son las órdenes que tienen su código validado a tiempo: esas se pagan ' +
+    'completas. <b>POS sin código</b> es descuento entregado sin registrar quién lo recibió. ' +
+    '<b>Código sin venta</b> son validaciones que nunca llegaron a caja.<br>' +
+    (tot.pos ? 'Con los meses medibles, <b>' + pct + '%</b> de las órdenes no tendría respaldo, ' +
+      'equivalente a <b>' + cop(tot.plata) + '</b> sin IVA.<br>' : '') +
+    'Marzo, abril y mayo salen sin cruce porque hasta mayo el reloj de la página de validación ' +
+    'iba corrido una hora respecto al POS. Ahí el cruce no significa nada, así que no lo ' +
+    'mostramos ni lo sumamos.<br>' +
+    '<b>Para que todo cruce:</b> pedir siempre el código antes de aplicar el descuento y ' +
+    'escribirlo en el comentario de Toteat como <b>ADQ CUPON X% MKT</b>.</div>';
+  return franja + tabla + cierre;
+}
+
+function engancharFilas() {
+  document.querySelectorAll('tr.abrible').forEach(tr => {
+    tr.onclick = () => {
+      const k = tr.dataset.k;
+      ABIERTO.has(k) ? ABIERTO.delete(k) : ABIERTO.add(k);
+      render();
+    };
+  });
+}
+
+function pintarNota() {
+  const n = document.getElementById('nota');
+  // El tablero de cruce trae su propia explicación al pie: se oculta la caja
+  // general en vez de dejarla vacía, que se veía como un recuadro huérfano.
+  n.style.display = VISTA === 'cruce' ? 'none' : 'block';
+  if (VISTA === 'cruce') { n.innerHTML = ''; return; }
+  document.getElementById('nota').innerHTML = VISTA === 'programas'
+    ? '<b>Cómo se calcula.</b> Sale del descuento real aplicado en Toteat, producto por producto. ' +
+      '<b>Valor de venta</b> es lo que habrías facturado a precio de carta. ' +
+      '<b>Lo que te cuesta</b> es el food cost del P&amp;L: <b>38%</b> del bowl y <b>50%</b> ' +
+      'del topping, sin IVA — esa es la plata que de verdad salió. ' +
+      'Hacé clic en cualquier fila para ver el desglose por producto y tamaño.'
+    : '<b>Cómo se calcula.</b> <b>Devuelve la marca</b> = descuento real aplicado en Toteat sobre el ' +
+      '<b>bowl</b> (nunca toppings), sin IVA. <b>Acreditado</b> = lo que de verdad se restó del ' +
+      'Marketing Fee en la factura de regalías, no lo que dicen las observaciones. ' +
+      '<b>Pendiente</b> = lo que falta por devolver.<br>' +
+      'Hacé clic en cualquier mes para ver el detalle por producto y tamaño.<br>' +
+      'Desde <b>septiembre 2026</b> una orden solo se paga si tiene un código validado en la web, ' +
+      'en la misma tienda, dentro de <b>±15 minutos</b>. La columna <b>sin código</b> muestra ' +
+      'cuántas no pasarían hoy; aparece <b>—</b> hasta mayo 2026 porque el reloj de la página de ' +
+      'validación iba corrido una hora y ahí el cruce no significa nada.<br>' +
+      'El último mes aparece sin acreditar porque su factura se emite el mes siguiente: no es un ' +
+      'incumplimiento.';
+}
+
+/* ── CSV ─────────────────────────────────────────────── */
+function bajarCSV() {
+  // BOM + separador ; para que Excel en español no parta mal las columnas.
+  const cel = v => v == null ? '' : /[;"\n]/.test(String(v))
+    ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
+  let cols, rows, nombre;
+  if (VISTA === 'programas') {
+    cols = ['mes', 'tienda', 'prog', 'producto', 'tam', 'uds', 'cop', 'cop_iva', 'costo', 'asume'];
+    rows = fil(D.detalle).filter(d => d.prog !== 'Adquisición');
+    nombre = 'reactivacion_retencion';
+  } else {
+    cols = ['mes', 'tienda', 'codigo', 'nit', 'ordenes', 'con_codigo', 'sin_codigo',
+            'bowls_cop', 'toppings_cop', 'debido', 'acreditado', 'saldo', 'saldo_iva',
+            'factura', 'sin_fee', 'base_fact', 'base_pos', 'base_gap'];
+    rows = filas();
+    nombre = 'devolucion_adquisicion';
+  }
+  const csv = '﻿' + cols.join(';') + '\n' +
+    rows.map(f => cols.map(c => cel(f[c])).join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = nombre + '_' + (TIENDA === 'todas' ? 'todas' : TIENDA) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+</script>
+</body>
+</html>

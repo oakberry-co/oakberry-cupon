@@ -237,6 +237,17 @@
     font-family:inherit;
   }
   .session-bar button:hover{ background:var(--morado-osc); }
+
+/* ── Banner de estado del WhatsApp ──────────────────────────────────────
+   .wa-ok     → el mensaje ya salió solo (países con plantilla aprobada).
+   .wa-manual → el cupón existe pero NADIE lo recibió: falta que el equipo
+                lo mande. Ámbar a propósito; en verde se lee como "listo" y
+                se emitirían 140 cupones que nunca llegan.                */
+#waBanner{ padding:12px 14px; border-radius:10px; margin-bottom:12px;
+           font-size:.85rem; font-weight:600; text-align:center; line-height:1.45 }
+#waBanner.wa-ok{ background:#e7f7ee; border:1.5px solid var(--ok); color:#0f6b3a }
+#waBanner.wa-manual{ background:#fff6e5; border:1.5px solid #e0a800; color:#8a5a00 }
+#waBanner .wa-sub{ font-size:.78rem; font-weight:500; opacity:.85; display:inline-block; margin-top:2px }
 </style>
 </head>
 <body>
@@ -351,13 +362,10 @@
     <div id="result">
       <div class="codigo-box" id="codigoBox">XXXXXXX</div>
       <div class="vence-row" id="venceRow">Vence el —</div>
-      <div id="waBanner" style="display:none; background:#e7f7ee; border:1.5px solid var(--ok); color:#0f6b3a; padding:12px 14px; border-radius:10px; margin-bottom:12px; font-size:.85rem; font-weight:600; text-align:center; line-height:1.45">
-        ✅ WhatsApp de activación enviado desde Oakberry a <span id="waCel">—</span><br>
-        <span style="font-size:.78rem; font-weight:500; color:#0f6b3a; opacity:.85">El influencer tiene 7 días para activarlo + entrar al Club.</span>
-      </div>
+      <div id="waBanner" style="display:none"></div>
       <div class="btns">
         <button onclick="copiarCodigo()">🔗 Copiar código</button>
-        <button class="alt" onclick="compartirWA()">📲 Reenviar manualmente (fallback)</button>
+        <button class="alt" id="btnWA" onclick="compartirWA()">📲 Reenviar manualmente (fallback)</button>
         <button onclick="copiarTexto()">📋 Copiar texto completo</button>
       </div>
       <label style="margin-top:14px">Texto enviado / para reenviar</label>
@@ -423,7 +431,7 @@ function toast(msg, ok){
 
 // ── Carga ciudades y tiendas (reuso obtenerCiudades / obtenerTiendasPorCiudad) ──
 async function cargarCiudades(){
-  const r = await jsonp(new URLSearchParams({accion:"obtenerCiudades"}));
+  const r = await jsonp(new URLSearchParams({accion:"obtenerCiudades", pais: paisActual()}));
   const sel = document.getElementById("ciudad");
   (r.ciudades||[]).forEach(c=>{
     const opt = document.createElement("option");
@@ -437,7 +445,7 @@ async function cargarTiendas(ciudad){
   sel.innerHTML = '<option value="">Cargando…</option>';
   if(!ciudad){ sel.innerHTML = '<option value="">Selecciona ciudad primero…</option>'; return; }
   // Misma acción que usa validar.html (catalog.obtener_tiendas_por_ciudad).
-  const r = await jsonp(new URLSearchParams({accion:"obtenerTiendas", ciudad}));
+  const r = await jsonp(new URLSearchParams({accion:"obtenerTiendas", ciudad, pais: paisActual()}));
   sel.innerHTML = '<option value="">Selecciona tienda…</option>';
   (r.tiendas||[]).forEach(t=>{
     const opt = document.createElement("option");
@@ -568,7 +576,8 @@ function actualizarPreview(){
 
   if(desc){
     const num = desc.replace(/\D/g, "") || "100";
-    partes.push(`<br><strong style="color:var(--morado)">💳 APLICAR EN TOTEAT:</strong>`);
+    const pos = cfgPais().pos;
+    partes.push(`<br><strong style="color:var(--morado)">💳 APLICAR EN ${pos || "CAJA"}:</strong>`);
     partes.push(`<span style="font-family:'Courier New', monospace; background:#fff; padding:6px 10px; border-radius:6px; border:1.5px dashed var(--morado); display:inline-block; font-weight:700">INFLUENCER ${num}% - ${num}% DE DESCUENTO DE LA ORDEN</span>`);
   }
 
@@ -624,10 +633,15 @@ document.getElementById("generar").addEventListener("click", async ()=>{
   const btn = document.getElementById("generar");
   btn.disabled = true; btn.textContent = "Generando…";
 
+  // `usuario` es lo que el backend usa para resolver el país del cupón. Sin
+  // él no emite: es la garantía de que este panel no puede crear un cupón del
+  // otro mercado.
+  const sess = sesionActiva() || {};
   const r = await jsonp(new URLSearchParams({
     accion: "crearCuponInfluencer",
     instagram, nombre, celular, ciudad, tienda, descuento,
     productos, toppingsIncluidos, vigencia,
+    usuario: sess.usuario || "",
   }));
 
   btn.disabled = false; btn.textContent = "🎟️ Generar cupón";
@@ -643,11 +657,31 @@ document.getElementById("generar").addEventListener("click", async ()=>{
   document.getElementById("textoPreview").textContent = r.textoWA || "";
   // Banner: WA oficial enviado en background al celular capturado.
   const waBan = document.getElementById("waBanner");
+  const ind = r.indicativo || cfgPais().indicativo;
   if(r.waDisparado && r.celular){
-    document.getElementById("waCel").textContent = "+57 " + r.celular;
+    waBan.className = "wa-ok";
+    waBan.innerHTML = '✅ WhatsApp de activación enviado desde Oakberry a <strong>+' +
+      ind + ' ' + r.celular + '</strong><br>' +
+      '<span class="wa-sub">El influencer tiene 7 días para activarlo + entrar al Club.</span>';
+    waBan.style.display = "block";
+  } else if(r.waManual && r.celular){
+    // País en modo manual (RD hoy): el cupón ya existe pero NADIE lo recibió
+    // todavía. El banner tiene que decirlo fuerte, o se emiten 140 cupones que
+    // nunca llegan y el equipo se entera cuando ninguno se activa.
+    waBan.className = "wa-manual";
+    waBan.innerHTML = '📲 <strong>Falta enviarlo.</strong> Este cupón todavía no le llegó a nadie.<br>' +
+      '<span class="wa-sub">Dale a “Enviar por WhatsApp” acá abajo para mandárselo a +' +
+      ind + ' ' + r.celular + '.</span>';
     waBan.style.display = "block";
   } else {
     waBan.style.display = "none";
+  }
+  // En modo manual mandar el WhatsApp NO es un fallback, es EL paso que falta.
+  const btnWA = document.getElementById("btnWA");
+  if(btnWA){
+    const manual = !!r.waManual;
+    btnWA.textContent = manual ? "📲 Enviar por WhatsApp" : "📲 Reenviar manualmente (fallback)";
+    btnWA.className = manual ? "" : "alt";
   }
   document.getElementById("result").style.display = "block";
   toast("✅ Cupón " + r.codigo + " generado" + (r.waDisparado ? " · WA enviado" : ""), true);
@@ -675,8 +709,11 @@ function copiarTexto(){
 function compartirWA(){
   if(!LAST || !LAST.textoWA) return;
   // Si tenemos celular, abre el chat directo. Si no, dejamos elegir contacto.
+  // Indicativo del país del cupón (57 Colombia · 1 RD). Con el 57 en duro,
+  // los 140 envíos dominicanos abrirían chats con un número inexistente.
+  const ind = LAST.indicativo || cfgPais().indicativo;
   const cel = (LAST.celular || "").replace(/\D/g, "");
-  const wa = cel ? ("https://wa.me/" + (cel.startsWith("57") ? cel : "57" + cel.slice(-10)))
+  const wa = cel ? ("https://wa.me/" + (cel.startsWith(ind) ? cel : ind + cel.slice(-10)))
                  : "https://wa.me/";
   window.open(wa + "?text=" + encodeURIComponent(LAST.textoWA), "_blank");
 }
@@ -703,7 +740,10 @@ function fmtFechaCorta(s){
 async function cargarHistorial(){
   const tbody = document.getElementById("histBody");
   tbody.innerHTML = '<tr><td colspan="7" class="hist-empty">Cargando…</td></tr>';
-  const r = await jsonp(new URLSearchParams({accion:"listarCuponesInfluencer", limit:"30"}));
+  const sess = sesionActiva() || {};
+  const r = await jsonp(new URLSearchParams({
+    accion:"listarCuponesInfluencer", limit:"30", usuario: sess.usuario || "",
+  }));
   if(!r.ok || !r.cupones || !r.cupones.length){
     tbody.innerHTML = '<tr><td colspan="7" class="hist-empty">Sin cupones aún. Generá el primero arriba.</td></tr>';
     return;
@@ -734,6 +774,20 @@ async function cargarHistorial(){
 // ── Login gate (reutiliza auth.login del backend de adquisición) ──
 const SESS_KEY = "influencers_sess";
 
+// Espejo PRESENTACIONAL del registro de países del backend (config.PAISES).
+// Acá solo vive lo que se pinta; quién puede emitir qué lo decide el servidor
+// leyendo `usuarios.pais` — este objeto no es una puerta de seguridad.
+const PAISES = {
+  CO: {nombre:"Colombia",             bandera:"🇨🇴", indicativo:"57", pos:"TOTEAT", waAuto:true},
+  DO: {nombre:"República Dominicana", bandera:"🇩🇴", indicativo:"1",  pos:"",       waAuto:false},
+};
+
+function paisActual(){
+  const s = sesionActiva();
+  return (s && s.pais) || "CO";
+}
+function cfgPais(){ return PAISES[paisActual()] || PAISES.CO; }
+
 function sesionActiva(){
   try{
     const raw = sessionStorage.getItem(SESS_KEY);
@@ -746,7 +800,14 @@ function mostrarApp(sess){
   document.getElementById("loginOverlay").classList.add("hidden");
   const bar = document.getElementById("sessionBar");
   bar.style.display = "flex";
-  document.getElementById("sessionUser").textContent = "👤 " + (sess.nombre || sess.usuario);
+  const cfg = PAISES[sess.pais || "CO"] || PAISES.CO;
+  document.getElementById("sessionUser").textContent =
+    "👤 " + (sess.nombre || sess.usuario) + " · " + cfg.bandera + " " + cfg.nombre;
+  // El título deja claro en qué mercado se está emitiendo. Con dos países
+  // vivos, equivocarse de panel es el error caro.
+  const h1 = document.querySelector(".wrap h1");
+  if(h1) h1.innerHTML = 'Influencers ' + cfg.bandera +
+    ' <span class="pill">' + (sess.pais || "CO") + ' · CREAR CUPÓN</span>';
   // Una vez logueados, dejamos el form listo: 1 producto + chips de toppings (ocultos).
   if(!document.querySelector("#productosList .prod-row")){
     document.getElementById("productosList").appendChild(nuevaFilaProducto(1, "Bowl 12oz"));
@@ -781,7 +842,7 @@ async function intentarLogin(){
     err.classList.add("show");
     return;
   }
-  const sess = {usuario: r.usuario, rol: r.rol, nombre: r.nombre};
+  const sess = {usuario: r.usuario, rol: r.rol, nombre: r.nombre, pais: r.pais || "CO"};
   sessionStorage.setItem(SESS_KEY, JSON.stringify(sess));
   mostrarApp(sess);
   // Cargar datos AHORA que estamos autenticados.

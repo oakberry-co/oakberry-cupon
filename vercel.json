@@ -26,6 +26,7 @@
     { "source": "/reactivar",      "destination": "/reactivar.html"           },
     { "source": "/tiendas",        "destination": "/tiendas.html"             },
     { "source": "/mapadecalor",    "destination": "/mapadecalor.html"         },
+    { "source": "/conciliacion",   "destination": "/conciliacion.html"        },
     { "source": "/dashboard",         "destination": "https://dashboard.oakberry-cupones.com/dashboard/" },
     { "source": "/dashboard/:path*",  "destination": "https://dashboard.oakberry-cupones.com/dashboard/:path*" },
     { "source": "/adidas-activar", "destination": "/adidas-activar.html"      },
@@ -40,6 +41,8 @@
     { "source": "/ruleta",         "destination": "/ruleta.html"              },
     { "source": "/sorpresa-config", "destination": "/sorpresa-admin.html"      },
     { "source": "/sorpresa",       "destination": "/sorpresa.html"            },
+    { "source": "/juego-api/:path*", "destination": "https://oakberry-reactivacion-api-664413392517.us-central1.run.app/:path*" },
+    { "source": "/franquiciados",  "destination": "/franquiciados.html"       },
     { "source": "/api/(.*)",       "destination": "/api/$1"                   }
   ]
 }

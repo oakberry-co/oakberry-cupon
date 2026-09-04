@@ -1,0 +1,29 @@
+# oakberry-cupones.com — NO se indexa.
+#
+# Es la propiedad con más superficie pública que tenemos: ~50 páginas estáticas
+# (cupón, ruleta, sorpresa, amigos, influencers, premios, reactivar, encuesta,
+# validar, mapa de calor, TyC...). Ninguna gana nada saliendo en Google: a todas
+# se llega por un link que nosotros mandamos —WhatsApp, pauta, QR en tienda— y
+# varias son operativas o de un programa que hoy está pausado.
+#
+# Indexarlas solo agrega superficie: páginas de trámite descubribles por
+# cualquiera y contenido de campañas viejas compitiendo consigo mismo.
+#
+# El preview del link SÍ tiene que seguir funcionando (es como viaja todo esto),
+# y los bots que lo arman piden la página igual que un buscador. Por eso van
+# permitidos aparte: un `Disallow: /` a secas dejaría todos los links pelados.
+
+User-agent: *
+Disallow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: Slackbot-LinkExpanding
+Allow: /

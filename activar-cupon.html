@@ -178,6 +178,24 @@
   .check label a{ color:var(--primary); }
   .check.required label::after{ content:" *"; color:var(--red); }
 
+  /* Campo de texto opcional (dirección de envío merch) */
+  .field{ margin-top:12px; text-align:left; }
+  .field label{
+    display:block; font-size:14px; font-weight:800; color:#444;
+    margin:0 0 6px 2px; text-transform:none; letter-spacing:0;
+  }
+  .field label .opt{ font-weight:600; color:#9a927e; }
+  .field input{
+    width:100%; box-sizing:border-box;
+    background:#faf6ef; border:1.8px solid #e6dfc8; border-radius:14px;
+    padding:15px 14px; font-family:inherit; font-size:15px; color:#333;
+    min-height:56px; -webkit-tap-highlight-color:transparent;
+    transition:border-color .18s, background .18s;
+  }
+  .field input::placeholder{ color:#b3ac97; }
+  .field input:focus{ outline:none; border-color:var(--primary); background:#fff; }
+  .field .hint{ font-size:12px; color:#8a8272; margin:6px 2px 0; line-height:1.4; }
+
   .btn{
     width:100%; padding:18px 16px; margin-top:16px;
     background:var(--primary); color:#fff;
@@ -283,13 +301,21 @@
     <div class="sec-title">⭐ Club de Creadores</div>
     <div class="club-card">
       <div class="club-title">Bienvenido(a) al Club Oakberry</div>
-      <div class="club-intro">Activá tu cupón y entrás automáticamente a nuestro Club de Creadores — un programa nuevo donde te llegan cosas geniales solo por ser parte.</div>
+      <div class="club-intro" id="clubIntro">Activá tu cupón y entrás automáticamente a nuestro Club de Creadores — un programa nuevo donde te llegan cosas geniales solo por ser parte.</div>
       <div class="club-perks">
         <div class="club-perk"><div class="icon">👕</div>Merch exclusivo del Club</div>
         <div class="club-perk"><div class="icon">🫐</div>Productos y bowls de regalo</div>
         <div class="club-perk"><div class="icon">🥄</div>Acceso anticipado a toppings nuevos</div>
         <div class="club-perk"><div class="icon">🏆</div>Premios y sorpresas por ser del Club</div>
       </div>
+    </div>
+
+    <!-- Dirección de envío (opcional) — para mandarte merch del Club -->
+    <div class="field">
+      <label for="direccion">📦 ¿A dónde te enviamos las sorpresas? <span class="opt">(opcional)</span></label>
+      <input type="text" id="direccion" name="direccion" autocomplete="street-address"
+             placeholder="Ciudad, barrio y dirección">
+      <div class="hint">Déjanos tu dirección si querés recibir merch y regalos del Club en tu casa. Podés dejarlo en blanco.</div>
     </div>
 
     <!-- SECCIÓN 3: ACTIVAR -->
@@ -378,10 +404,40 @@ function toast(msg, ok){
 
 function primerNombre(n){ return (n||"").trim().split(" ")[0] || ""; }
 
+// ── Voz del copy según el país del cupón ─────────────────────────────────
+// Esta landing la abre el creador en su celular, y es lo primero que lee de
+// una marca a la que le va a poner la cara. El voseo colombiano suena
+// extranjero en Santo Domingo, así que RD se sirve en tuteo. El país llega en
+// la respuesta de `consultarCuponInfluencer` (columna `codigos.pais`).
+const VOZ = {
+  voseo: {
+    titulo: "Oakberry · Activá tu cupón 🫐",
+    regalo: "Tenés un regalo",
+    intro: "Activá tu cupón y entrás automáticamente a nuestro Club de Creadores — un programa nuevo donde te llegan cosas geniales solo por ser parte.",
+    boton: "🎉 Activar mi cupón",
+  },
+  tuteo: {
+    titulo: "Oakberry · Activa tu cupón 🫐",
+    regalo: "Tienes un regalo",
+    intro: "Activa tu cupón y entras automáticamente a nuestro Club de Creadores — un programa nuevo donde te llegan cosas geniales solo por ser parte.",
+    boton: "🎉 Activar mi cupón",
+  },
+};
+const VOZ_POR_PAIS = {CO: "voseo", DO: "tuteo"};
+
+function voz(pais){ return VOZ[VOZ_POR_PAIS[(pais || "CO").toUpperCase()] || "voseo"]; }
+
 function render(d){
+  const v = voz(d.pais);
+  document.title = v.titulo;
+  const intro = document.getElementById("clubIntro");
+  if(intro) intro.textContent = v.intro;
+  const btnAct = document.getElementById("activarBtn");
+  if(btnAct) btnAct.textContent = v.boton;
+
   const nom = primerNombre(d.nombre);
   document.getElementById("heroMsg").innerHTML =
-    (nom ? `¡Hola <span class="heart">${nom}</span>! 💜<br>` : "¡Hola! 💜<br>") + "Tenés un regalo";
+    (nom ? `¡Hola <span class="heart">${nom}</span>! 💜<br>` : "¡Hola! 💜<br>") + v.regalo;
 
   document.getElementById("g-oferta").innerHTML =
     `<strong>${d.descuento || ""}</strong> en ${d.productosTexto || d.producto || "—"}`;
@@ -430,11 +486,14 @@ document.getElementById("activarBtn").addEventListener("click", async ()=>{
   // Esto está explícito en el texto del checkbox y en /tyc/influencers
   // (Ley 1581 Colombia art. 9 permite consentimiento bundle si los fines
   // están claramente disclosed).
+  const direccion = (document.getElementById("direccion").value || "").trim();
+
   const r = await jsonp(new URLSearchParams({
     accion: "activarCuponInfluencer",
     codigo,
     tycAceptados: "true",
     optInMarketing: "true",
+    direccion,  // opcional — vacío si el influencer no la dejó
   }));
 
   btn.disabled = false; btn.textContent = "🎉 Activar mi cupón";

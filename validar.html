@@ -853,11 +853,46 @@ async function validar() {
     return;
   }
 
+  // ── Routing Eventos con cupo (apertura Santo Domingo) ──
+  //    RDA = invitación de apertura (2 bowls) · RDP = preapertura (1 bowl 9oz).
+  //    Son auto-inscripciones desde oakberry-eventos.com/santodomingo. El
+  //    backend valida ventana de fechas, tienda y país, y le dice al cajero
+  //    QUÉ ENTREGAR — sin nombrar ningún POS: en RD el punto de venta lo opera
+  //    el franquiciado con su propio sistema.
+  const esEvento = codigo.length === 7 && /^(RDA|RDP)/.test(codigo);
+  if (esEvento) {
+    try {
+      const res = await fetchGET({ accion: "eventoCanjear", codigo, tienda, ciudad });
+      if (res.ok) {
+        document.getElementById("codigo").value = "";
+        const lineas = res.mensaje.split("\n");
+        mostrarResultado(true, lineas[0], lineas.slice(1));
+      } else {
+        mostrarError(res.mensaje || "no existe");
+      }
+    } catch(e) {
+      mostrarError("Error de conexión, intenta de nuevo");
+    } finally {
+      btn.classList.remove("loading");
+      btn.disabled = false;
+    }
+    return;
+  }
+
   // ── Routing Influencers: cupón pre-emitido a un @ de Instagram ──
-  //    Prefijo `INF` (nuevo, desde 2026-06-17) o `IG` (legacy, cupones ya
-  //    emitidos antes del cambio que siguen Disponible). 7 chars total.
-  //    El backend valida tienda/ciudad y marca canjeado igual que canjearCodigo.
-  const esInfluencer = /^(INF|IG)/.test(codigo);
+  //    Colombia: `INF` (desde 2026-06-17) o `IG` (legacy, cupones ya emitidos
+  //    antes del cambio que siguen Disponible).
+  //    República Dominicana: `RDI` (desde el lanzamiento de sep-2026).
+  //    7 chars total en todos los casos.
+  //    El prefijo separa los dos mercados: el backend rechaza un RDI
+  //    presentado en una caja colombiana (y un INF en una dominicana), además
+  //    de validar tienda/ciudad y marcar canjeado como canjearCodigo.
+  // El largo importa: los códigos genéricos de adquisición son de 5 chars
+  // sobre un alfabeto que incluye R, D e I, así que existen cupones
+  // colombianos legítimos que empiezan por RD o INF de puro azar (RDWRP,
+  // RD5ZC…). Sin el chequeo de 7, esos se irían al handler equivocado y el
+  // cajero vería "formato inválido" con un cupón bueno en la mano.
+  const esInfluencer = codigo.length === 7 && /^(RDI|INF|IG)/.test(codigo);
   if (esInfluencer) {
     try {
       const res = await fetchGET({

@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#5F4B8B">
+<title>¿A qué hora comes OAKBERRY? — Reto por 6 Mystery Box</title>
+<meta name="description" content="6 preguntas, 12 segundos cada una. Acierta las 6 y compite por una de las 6 Mystery Box: ganan los 6 más rápidos.">
+
+<link rel="canonical" href="https://www.oakberry-cupones.com/franquiciados">
+
+<!-- Open Graph. Este link viaja por WhatsApp e Instagram: sin og:image el
+     preview sale pelado justo en el canal por el que la gente lo recibe. -->
+<meta property="og:title" content="¿A qué hora comes OAKBERRY?">
+<meta property="og:description" content="6 preguntas, 12 segundos cada una. Puntaje perfecto entra a la carrera por una de las 6 Mystery Box.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CO">
+<meta property="og:site_name" content="Oakberry">
+<meta property="og:url" content="https://www.oakberry-cupones.com/franquiciados">
+<meta property="og:image" content="https://www.oakberry-cupones.com/og-juego.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="¿A qué hora comes OAKBERRY?">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+
+<style>
+/* ── TOKENS ── mismos de republicadominicana.html ──────────────── */
+:root{
+  --primary:      #5F4B8B;
+  --primary-dark: #4a3a6e;
+  --primary-deep: #362b52;
+  --yellow:       #F5C842;
+  --yellow-dark:  #d9ad2c;
+  --white:        #ffffff;
+  --off-white:    #fdfcff;
+  --border:       #e8e3f4;
+  --gray:         #8a8398;
+  --gray-light:   #f7f4ff;
+  --ink:          #2a2438;
+  --red:          #c0392b;
+  --red-light:    #fdecea;
+  --green:        #27ae60;
+  --green-light:  #eaf7ef;
+  --tap-min:      48px;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;}
+
+body{
+  font-family:'Montserrat',sans-serif;
+  color:var(--ink);
+  background:var(--off-white);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;flex-direction:column;
+}
+
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px;width:100%;}
+
+/* ── TOP BAR ─────────────────────────────────────────────────── */
+.topbar{
+  background:var(--primary);
+  /* viewport-fit=cover mete el contenido bajo el notch: hay que devolverlo. */
+  padding:calc(16px + env(safe-area-inset-top)) 0 16px;
+  position:sticky;top:0;z-index:50;
+  box-shadow:0 2px 14px rgba(54,43,82,0.25);
+}
+.topbar .wrap{padding-left:calc(20px + env(safe-area-inset-left));padding-right:calc(20px + env(safe-area-inset-right));display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.logo{font-size:22px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:2.5px;}
+.logo span{color:var(--yellow);}
+.topbar-tag{
+  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;
+  color:rgba(255,255,255,.72);white-space:nowrap;
+}
+
+/* ── ESCENARIO DEL JUEGO ─────────────────────────────────────── */
+.game{
+  flex:1;position:relative;isolation:isolate;
+  background:var(--primary-deep);
+  padding:34px 0 56px;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.game::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:560px;z-index:-1;
+  background:
+    linear-gradient(180deg, rgba(58,45,90,0.70) 0%, rgba(54,43,82,0.93) 58%, var(--primary-deep) 100%),
+    radial-gradient(120% 100% at 80% 0%, rgba(245,200,66,0.20), transparent 55%),
+    url('oakville-hero.jpg') center 38%/cover no-repeat;
+}
+.stage{max-width:540px;margin:0 auto;width:100%;padding:0 20px;}
+
+/* ── INTRO ───────────────────────────────────────────────────── */
+.prize{
+  display:inline-flex;align-items:center;gap:9px;
+  background:var(--yellow);color:var(--primary);
+  border-radius:50px;padding:10px 22px;margin-bottom:20px;
+  font-size:12.5px;font-weight:900;text-transform:uppercase;letter-spacing:.6px;
+  box-shadow:0 8px 24px rgba(245,200,66,.32);
+}
+.eyebrow{
+  font-size:11.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:var(--yellow);margin-bottom:12px;
+}
+.center{text-align:center;}
+h1{
+  font-size:clamp(27px,6vw,40px);font-weight:900;line-height:1.08;
+  letter-spacing:-.5px;color:#fff;max-width:16ch;margin:0 auto 16px;
+}
+h1 em{color:var(--yellow);font-style:normal;}
+.lede{
+  font-size:15.5px;font-weight:500;color:rgba(255,255,255,.85);
+  max-width:46ch;margin:0 auto 28px;
+}
+/* Las reglas van DEBAJO del campo: son referencia, no la acción. Compactas
+   para que el botón de empezar no se salga de pantalla en un iPhone SE. */
+.rules-min{
+  list-style:none;margin:20px 0 0;padding:14px 16px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:14px;
+  display:grid;gap:9px;
+}
+.rules-min li{
+  font-size:13px;font-weight:500;color:rgba(255,255,255,.78);line-height:1.4;
+  padding-left:16px;position:relative;
+}
+.rules-min li::before{
+  content:"";position:absolute;left:0;top:7px;width:5px;height:5px;
+  border-radius:50%;background:var(--yellow);
+}
+.rules-min li b{color:#fff;font-weight:800;}
+
+/* ── BOTONES ─────────────────────────────────────────────────── */
+.btn{
+  width:100%;min-height:56px;padding:0 20px;border:none;border-radius:14px;
+  font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;
+  text-transform:uppercase;letter-spacing:1px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  position:relative;overflow:hidden;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .18s,transform .1s,box-shadow .18s;
+}
+.btn:active:not(:disabled){transform:scale(.98);}
+.btn:disabled{opacity:.55;cursor:not-allowed;box-shadow:none;}
+.btn-yellow{background:var(--yellow);color:var(--primary);box-shadow:0 10px 30px rgba(245,200,66,.35);}
+.btn-yellow:hover:not(:disabled){background:var(--yellow-dark);}
+.btn-purple{background:var(--primary);color:#fff;box-shadow:0 8px 24px rgba(95,75,139,.35);}
+.btn-purple:hover:not(:disabled){background:var(--primary-dark);}
+.btn-ghost{
+  background:rgba(255,255,255,.09);color:#fff;
+  border:1.5px solid rgba(255,255,255,.28);box-shadow:none;
+}
+.btn-ghost:hover:not(:disabled){background:rgba(255,255,255,.16);}
+.btn-text{transition:opacity .18s;}
+.btn-loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .18s;}
+.btn.loading .btn-text{opacity:0;}
+.btn.loading .btn-loader{opacity:1;}
+.spin{width:22px;height:22px;border:2.5px solid rgba(95,75,139,.28);border-top-color:var(--primary);border-radius:50%;animation:spin .65s linear infinite;}
+.btn-purple .spin,.btn-ghost .spin{border-color:rgba(255,255,255,.3);border-top-color:#fff;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── CABEZOTE DEL QUIZ (progreso + reloj) ────────────────────── */
+.qhead{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.dots{display:flex;gap:6px;flex:1;}
+.dot{height:6px;flex:1;border-radius:4px;background:rgba(255,255,255,.20);overflow:hidden;}
+.dot i{display:block;height:100%;width:0;background:var(--yellow);border-radius:4px;}
+.dot.done i{width:100%;background:#fff;}
+.dot.now i{width:100%;background:var(--yellow);}
+.timer{
+  width:46px;height:46px;border-radius:50%;flex:none;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  background:conic-gradient(var(--yellow) calc(var(--pct,100)*1%), rgba(255,255,255,.18) 0);
+  transition:background .1s linear;
+}
+.timer::after{content:'';position:absolute;inset:4px;border-radius:50%;background:var(--primary-deep);}
+.timer span{position:relative;z-index:1;font-size:15px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;}
+.timer.low{background:conic-gradient(#ff7a6b calc(var(--pct,100)*1%), rgba(255,255,255,.18) 0);}
+.timer.done{opacity:.4;}
+
+/* ── TARJETA DE PREGUNTA ─────────────────────────────────────── */
+.card{
+  background:#fff;border-radius:22px;padding:26px 22px 24px;
+  box-shadow:0 16px 50px rgba(20,14,40,.42);border:1px solid var(--border);
+}
+@media(min-width:520px){.card{padding:30px 28px 28px;}}
+.qnum{
+  font-size:11px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase;
+  color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:9px;
+}
+.qnum::after{content:"";flex:1;height:1px;background:var(--border);}
+.qtext{
+  font-size:20px;font-weight:800;line-height:1.28;color:var(--ink);
+  letter-spacing:-.2px;margin-bottom:20px;
+}
+.opts{display:grid;gap:10px;}
+.opt{
+  width:100%;min-height:var(--tap-min);text-align:left;
+  display:flex;align-items:center;gap:12px;
+  background:#fff;border:2px solid var(--border);border-radius:12px;
+  padding:13px 15px;font-family:'Montserrat',sans-serif;
+  font-size:14.5px;font-weight:700;color:var(--ink);cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  transition:border-color .15s,background .15s,color .15s;
+}
+.opt:hover:not(:disabled){border-color:var(--primary);background:var(--gray-light);}
+.opt:active:not(:disabled){transform:scale(.99);}
+.opt:disabled{cursor:default;}
+.opt .mk{
+  flex-shrink:0;width:24px;height:24px;border-radius:50%;
+  border:2px solid var(--border);background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:900;color:transparent;
+}
+.opt.correct{background:var(--green-light);border-color:var(--green);color:#1c6b40;}
+.opt.correct .mk{background:var(--green);border-color:var(--green);color:#fff;}
+.opt.wrong{background:var(--red-light);border-color:var(--red);color:#96271b;}
+.opt.wrong .mk{background:var(--red);border-color:var(--red);color:#fff;}
+
+.fact{
+  background:var(--gray-light);border:1px solid var(--border);
+  border-left:4px solid var(--primary);border-radius:0 12px 12px 0;
+  padding:0 15px;font-size:13.5px;font-weight:600;color:#554e63;line-height:1.55;
+  opacity:0;max-height:0;overflow:hidden;
+  transition:opacity .28s ease,max-height .28s ease,padding .28s ease,margin .28s ease;
+}
+.fact.show{opacity:1;max-height:240px;padding:14px 15px;margin-top:18px;}
+.nextwrap{margin-top:18px;display:none;}
+.nextwrap.show{display:block;}
+
+/* ── RESULTADO ───────────────────────────────────────────────── */
+.ringwrap{display:flex;justify-content:center;margin-bottom:20px;}
+.ring{
+  width:156px;height:156px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:conic-gradient(var(--yellow) calc(var(--sc,0)*1%), rgba(255,255,255,.16) 0);
+  animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes popIn{from{opacity:0;transform:scale(.4);}to{opacity:1;transform:scale(1);}}
+.ring .inner{
+  width:126px;height:126px;border-radius:50%;background:var(--primary-deep);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.ring .n{font-size:38px;font-weight:900;color:#fff;line-height:1;letter-spacing:-1px;}
+.ring .d{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:5px;}
+
+.recap{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;padding:4px 16px;margin:22px 0;
+}
+.recap .r{
+  display:flex;gap:11px;align-items:flex-start;padding:12px 0;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  font-size:13px;font-weight:600;color:rgba(255,255,255,.85);line-height:1.45;text-align:left;
+}
+.recap .r:last-child{border-bottom:none;}
+.recap .ic{
+  flex-shrink:0;width:21px;height:21px;border-radius:50%;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;
+}
+.ic.y{background:var(--green);} .ic.n{background:var(--red);}
+
+/* ── FORMULARIO DE INSCRIPCIÓN ───────────────────────────────── */
+.entry{display:grid;gap:12px;text-align:left;margin-top:4px;}
+.entry input[type=text]{
+  width:100%;min-height:var(--tap-min);padding:13px 15px;
+  border-radius:11px;border:2px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.08);color:#fff;
+  font-family:'Montserrat',sans-serif;font-size:16px;font-weight:600;
+  outline:none;-webkit-appearance:none;transition:border-color .18s,box-shadow .18s;
+}
+.entry input::placeholder{color:rgba(255,255,255,.45);font-weight:500;}
+.entry input:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(245,200,66,.18);}
+.entry input.err{border-color:#ff8b7a;box-shadow:0 0 0 3px rgba(255,139,122,.16);}
+.consent{display:flex;gap:11px;align-items:flex-start;cursor:pointer;}
+.consent input[type=checkbox]{
+  appearance:none;-webkit-appearance:none;min-width:20px;height:20px;margin-top:1px;
+  border:2px solid rgba(255,255,255,.3);border-radius:6px;background:rgba(255,255,255,.08);
+  cursor:pointer;position:relative;transition:background .18s,border-color .18s;flex-shrink:0;
+}
+.consent input[type=checkbox]:checked{background:var(--yellow);border-color:var(--yellow);}
+.consent input[type=checkbox]:checked::after{
+  content:'';position:absolute;left:5px;top:1px;width:6px;height:11px;
+  border:2.5px solid var(--primary);border-top:none;border-left:none;transform:rotate(45deg);
+}
+.consent input[type=checkbox].err{border-color:#ff8b7a;}
+.consent span{font-size:12.5px;font-weight:500;color:rgba(255,255,255,.78);line-height:1.5;}
+.err-msg{font-size:12px;font-weight:700;color:#ff9e8c;display:none;}
+.err-msg.show{display:block;}
+.privacy{
+  font-size:11.5px;font-weight:500;color:rgba(255,255,255,.5);
+  text-align:center;margin-top:12px;line-height:1.6;
+}
+
+/* ── RANKING ─────────────────────────────────────────────────── */
+.leader{margin-top:30px;}
+.leader h2{
+  font-size:13px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase;
+  color:var(--yellow);margin-bottom:14px;display:flex;align-items:center;gap:10px;justify-content:center;
+}
+.aviso{
+  background:rgba(245,200,66,.12);border:1px solid rgba(245,200,66,.4);
+  border-radius:12px;padding:11px 15px;margin:0 0 4px;
+  font-size:13px;font-weight:600;color:var(--yellow);line-height:1.45;
+}
+.link-tablero{
+  color:var(--yellow);font-weight:800;text-decoration:underline;
+  text-underline-offset:3px;-webkit-tap-highlight-color:transparent;
+  display:inline-block;padding:6px 4px;
+}
+/* Sin el juego arriba, el tablero puede usar más pantalla. */
+.tablero-solo{max-height:none;}
+.leader-nota{
+  font-size:11.5px;font-weight:600;color:rgba(255,255,255,.55);
+  text-align:center;margin:-6px 0 12px;
+}
+/* El tablero crece con el equipo: scroll propio para que la pagina no se
+   vuelva infinita cuando jueguen treinta personas. */
+.tablero{max-height:52vh;max-height:52dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:2px;}
+.lrow{
+  display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);margin-bottom:7px;
+}
+.lrow .pos{width:28px;flex-shrink:0;font-size:13px;font-weight:900;color:rgba(255,255,255,.45);}
+.lrow .nm{flex:1;min-width:0;font-size:13.5px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lrow .sc{flex-shrink:0;font-size:11.5px;font-weight:800;color:rgba(255,255,255,.5);font-variant-numeric:tabular-nums;}
+.lrow .tm{flex-shrink:0;width:52px;text-align:right;font-size:13px;font-weight:800;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;}
+/* Los que hoy van por una Mystery Box. */
+.lrow.gana{background:rgba(245,200,66,.10);border-color:rgba(245,200,66,.45);}
+.lrow.gana .pos{color:var(--yellow);}
+.lrow.gana .tm{color:var(--yellow);}
+.lrow.you{background:rgba(255,255,255,.16);border-color:#fff;}
+.lrow.you.gana{background:rgba(245,200,66,.22);border-color:var(--yellow);}
+.lrow.you .nm{color:var(--yellow);}
+.empty{font-size:13.5px;font-weight:500;color:rgba(255,255,255,.6);text-align:center;padding:6px 0;}
+
+.note{
+  font-size:11.5px;font-weight:500;color:rgba(255,255,255,.48);
+  text-align:center;margin-top:24px;line-height:1.6;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────────── */
+.footer{
+  background:var(--primary-deep);color:rgba(255,255,255,0.55);
+  text-align:center;font-size:12px;font-weight:500;
+  padding:30px 20px calc(30px + env(safe-area-inset-bottom));
+}
+.footer .logo{font-size:16px;margin-bottom:8px;}
+
+/* ── CONFETI / TOAST ─────────────────────────────────────────── */
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:60;}
+.toast{
+  position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(8px);
+  background:#fff;color:var(--primary);padding:13px 22px;border-radius:50px;
+  font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;
+  box-shadow:0 10px 30px rgba(20,14,40,.35);
+  opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:70;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important;animation-iteration-count:1 !important;}
+  html{scroll-behavior:auto;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="logo">OAK<span>BERRY</span></div>
+    <div class="topbar-tag">Reto relámpago</div>
+  </div>
+</div>
+
+<main class="game">
+  <div class="stage" id="stage"></div>
+</main>
+
+<div class="footer">
+  <div class="logo">OAK<span style="color:#F5C842;">BERRY</span></div>
+  <div>Açaí del Amazonas · Colombia</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ══════════════════════════════════════════════════════════════
+   1. CONTENIDO DEL JUEGO — lo único que se toca para cambiarlo.
+      Las 6 preguntas del brief. `correct` es el índice de la
+      opción correcta dentro de `opts` (empieza en 0).
+   ══════════════════════════════════════════════════════════════ */
+var QUESTIONS = [
+  {
+    q: "¿A qué horas puedes pedir tu bowl OAKBERRY?",
+    opts: ["Solo por la tarde","Todo el día: desayuno, almuerzo o cena","Solo después de almorzar"],
+    correct: 1,
+    fact: "Así es. OAKBERRY no es solo de tarde — es tu desayuno, tu almuerzo o tu cena, cuando tú quieras."
+  },
+  {
+    q: "Si quieres que tu bowl te reemplace una comida completa, ¿cuál pides?",
+    opts: ["9 oz","12 oz","22 oz para compartir"],
+    correct: 1,
+    fact: "El 12 oz está pensado justo para eso: el mismo sabor de siempre, en el tamaño que sí llena."
+  },
+  {
+    q: "Verdadero o falso: puedes pedir tu OAKBERRY a domicilio para desayunar sin salir de casa.",
+    opts: ["Verdadero","Falso"],
+    correct: 0,
+    fact: "Verdadero. Pide temprano y te llega mientras te alistas."
+  },
+  {
+    q: "¿De dónde viene el açaí de OAKBERRY?",
+    opts: ["Del Amazonas","Es un sabor artificial","No se sabe"],
+    correct: 0,
+    fact: "Directo del Amazonas, con proveedores seleccionados — por eso sabe como sabe."
+  },
+  {
+    q: "¿Qué logra un bowl OAKBERRY de 12 oz en adelante?",
+    opts: ["Que llene de verdad","Solo un antojo pasajero","Lo mismo que un postre cualquiera"],
+    correct: 0,
+    fact: "Te sostiene. No es solo un capricho dulce: es una comida de verdad."
+  },
+  {
+    q: "Completa la frase: “Esto no va después de tu comida. Esto es tu ____.”",
+    opts: ["postre","antojo","comida"],
+    correct: 2,
+    fact: "“Esto es tu comida.” En OAKBERRY el açaí no es solo postre — puede ser tu próxima comida."
+  }
+];
+
+var TIME_PER_Q = 12;              // segundos por pregunta
+var PREMIO     = "6 Mystery Box";
+var GANADORES  = 6;   // el servidor manda; esto es solo el texto por defecto
+var PROGRAMA   = "juego_a_que_hora";
+
+/* ══════════════════════════════════════════════════════════════
+   2. BACKEND
+      El brief guardaba el leaderboard reescribiendo su propio HTML
+      (API de Artifacts). Eso no existe fuera de Artifacts. Acá el
+      juego habla con /juego-api, que es un rewrite de vercel.json
+      hacia el Cloud Run de CRM.
+
+      OJO con lo que NO decide la pagina: ni el tiempo ni el puntaje.
+      El servidor firma la hora de arranque, mide el transcurrido
+      contra su propio reloj y califica con su propia clave. El
+      premio son 6 meses de acai: si el navegador pudiera decir
+      "tarde 1 ms", el ranking no valdria nada.
+   ══════════════════════════════════════════════════════════════ */
+var API = "/juego-api";
+var tablero    = [];      // todos los que jugaron, ya ordenado por el servidor
+var ganadores  = GANADORES;
+
+// Identifica al jugador ANTES de que deje celular. Si el navegador bloquea
+// localStorage se genera uno por sesión: peor para deduplicar, pero jugable.
+var JUGADOR_KEY = "oak_jugador_id";
+var jugadorId = (function(){
+  try{
+    var v = localStorage.getItem(JUGADOR_KEY);
+    if(!v){ v = "j"+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+            localStorage.setItem(JUGADOR_KEY, v); }
+    return v;
+  }catch(e){ return "j"+Date.now().toString(36)+Math.random().toString(36).slice(2,10); }
+})();
+
+function apiGet(ruta){
+  return fetch(API+ruta,{headers:{"Accept":"application/json"}})
+    .then(function(r){ return r.json(); });
+}
+function apiPost(ruta, cuerpo){
+  return fetch(API+ruta,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(cuerpo)
+  }).then(function(r){ return r.json(); });
+}
+
+var UTM = (function(){
+  var p = new URLSearchParams(location.search);
+  return {
+    source:p.get("utm_source")||"", medium:p.get("utm_medium")||"",
+    campaign:p.get("utm_campaign")||"", ad:p.get("utm_ad")||"",
+    adset:p.get("utm_adset")||"", fbclid:p.get("fbclid")||""
+  };
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   3. ESTADO
+   ══════════════════════════════════════════════════════════════ */
+var game = {
+  screen:"intro", qi:0, answers:[],
+  startTs:0, qStart:0, timerId:null, timeLeft:TIME_PER_Q,
+  totalMs:0, myEntryId:null, sending:false, token:null,
+  nombre:"", serverScore:null, puesto:null, gana:false, repetido:false
+};
+
+function esc(s){
+  return (s==null?"":String(s)).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function fmtSecs(ms){ return (ms/1000).toFixed(1)+"s"; }
+function score(){
+  // El servidor es quien califica; lo local solo sirve mientras se juega.
+  return (game.serverScore != null) ? game.serverScore
+       : game.answers.filter(function(a){ return a.correct; }).length;
+}
+
+function toast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t=setTimeout(function(){ t.classList.remove("show"); },2600);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. FLUJO DEL JUEGO
+   ══════════════════════════════════════════════════════════════ */
+function startGame(){
+  var btn = document.getElementById("btn-start");
+  if(btn){ btn.classList.add("loading"); btn.disabled = true; }
+
+  // El servidor firma la hora de arranque. Sin token no hay partida valida.
+  apiPost("/juego/start",{}).then(function(res){
+    if(!res || !res.ok) throw new Error("sin token");
+    game.screen="quiz"; game.qi=0; game.answers=[]; game.token=res.token;
+    game.startTs=Date.now(); game.qStart=Date.now();
+    game.myEntryId=null; game.sending=false;
+    game.serverScore=null; game.puesto=null; game.gana=false; game.repetido=false;
+    render(); startTimer();
+  }).catch(function(){
+    if(btn){ btn.classList.remove("loading"); btn.disabled = false; }
+    toast("No pudimos conectar. Intenta de nuevo.");
+  });
+}
+
+function startTimer(){
+  clearInterval(game.timerId);
+  game.timeLeft = TIME_PER_Q;
+  var ring  = document.getElementById("timer");
+  var label = document.getElementById("timer-label");
+  game.timerId = setInterval(function(){
+    game.timeLeft -= 0.1;
+    var pct = Math.max(0, game.timeLeft/TIME_PER_Q*100);
+    if(ring){
+      ring.style.setProperty("--pct", pct.toFixed(1));
+      ring.classList.toggle("low", game.timeLeft <= 4);
+    }
+    if(label) label.textContent = Math.max(0, Math.ceil(game.timeLeft));
+    if(game.timeLeft <= 0){
+      clearInterval(game.timerId);
+      answer(-1);                        // se acabó el tiempo, cuenta como fallada
+    }
+  },100);
+}
+
+function answer(idx){
+  clearInterval(game.timerId);
+  var q = QUESTIONS[game.qi];
+  game.answers.push({ idx:idx, correct: idx===q.correct, ms: Date.now()-game.qStart });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(el,i){
+    el.disabled = true;
+    if(i===q.correct)      el.classList.add("correct");
+    else if(i===idx)       el.classList.add("wrong");
+  });
+
+  var ring = document.getElementById("timer");
+  if(ring){ ring.classList.remove("low"); ring.classList.add("done"); }
+
+  var fact = document.getElementById("fact");
+  if(fact) fact.classList.add("show");
+  var next = document.getElementById("nextwrap");
+  if(next) next.classList.add("show");
+}
+
+function nextQuestion(){
+  if(game.qi < QUESTIONS.length-1){
+    game.qi += 1;
+    game.qStart = Date.now();
+    render(); startTimer();
+  } else {
+    finish();
+  }
+}
+
+function finish(){
+  var next = document.getElementById("btn-next");
+  if(next){ next.classList.add("loading"); next.disabled = true; }
+
+  // Acá para el cronómetro Y queda grabada la participación: el tablero
+  // muestra a todo el que jugó, no solo a quien llenó un formulario después.
+  apiPost("/juego/terminar",{
+    token: game.token,
+    nombre: game.nombre,
+    jugador_id: jugadorId,
+    respuestas: game.answers.map(function(a){ return a.idx; }),
+    client_ms: Date.now() - game.startTs
+  }).then(function(res){
+    if(!res || !res.ok) throw new Error(res && res.error);
+    game.screen      = "results";
+    game.serverScore = res.score;
+    game.totalMs     = res.elapsed_ms;     // el tiempo oficial es el del servidor
+    game.myEntryId   = res.entry_id;
+    game.puesto      = res.puesto;
+    game.gana        = res.gana;
+    game.repetido    = res.repetido;
+    ganadores        = res.ganadores || ganadores;
+    tablero          = res.tablero || [];
+    render();
+    if(res.gana) confetti();
+  }).catch(function(){
+    if(next){ next.classList.remove("loading"); next.disabled = false; }
+    toast("No pudimos cerrar tu partida. Intenta de nuevo.");
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6. PANTALLAS
+   ══════════════════════════════════════════════════════════════ */
+function verTablero(){
+  game.screen = "tablero";
+  render();
+  // Siempre fresco: quien organiza abre esto justo para ver quién va ganando.
+  apiGet("/juego/ranking").then(function(res){
+    if(res && res.ok){
+      tablero   = res.tablero || [];
+      ganadores = res.ganadores || ganadores;
+      if(game.screen === "tablero") render();
+    }
+  }).catch(function(){});
+}
+
+function render(){
+  var stage = document.getElementById("stage");
+  stage.innerHTML = game.screen==="intro"   ? viewIntro()
+                  : game.screen==="quiz"    ? viewQuiz()
+                  : game.screen==="tablero" ? viewTablero()
+                  :                           viewResults();
+  wire();
+  window.scrollTo({top:0,behavior:"auto"});
+}
+
+function viewIntro(){
+  return ''+
+  '<div class="center">'+
+    '<div class="prize">🎁 '+esc(PREMIO)+'</div>'+
+    '<h1>¿A qué hora comes <em>OAKBERRY</em>?</h1>'+
+    '<p class="lede">6 preguntas, 12 segundos cada una. Ganan las '+esc(PREMIO)+' los '+ganadores+' más rápidos que acierten todas.</p>'+
+  '</div>'+
+  '<form class="entry" id="start-form" novalidate>'+
+    '<input type="text" id="in-nombre" placeholder="¿Cómo te llamas?" autocomplete="given-name" enterkeyhint="go" maxlength="60" value="'+esc(game.nombre||"")+'">'+
+    '<div class="err-msg" id="in-err"></div>'+
+    '<button type="submit" class="btn btn-yellow" id="btn-start">'+
+      '<span class="btn-text">Empezar el reto →</span>'+
+      '<span class="btn-loader"><span class="spin"></span></span>'+
+    '</button>'+
+  '</form>'+
+  '<ul class="rules-min">'+
+    '<li><b>12 s</b> por pregunta</li>'+
+    '<li><b>6/6</b> para competir</li>'+
+    '<li>Ganan los <b>'+ganadores+' más rápidos</b></li>'+
+    '<li><b>Un solo intento</b> — cuenta el primero</li>'+
+  '</ul>'+
+  '<p class="note">Con tu nombre apareces en el tablero del equipo.</p>'+
+  '<p class="note" style="margin-top:8px;"><a href="#tablero" class="link-tablero" id="lnk-tablero">Ver el tablero →</a></p>';
+}
+
+function viewQuiz(){
+  var q = QUESTIONS[game.qi];
+
+  var dots = QUESTIONS.map(function(_,i){
+    var cls = i<game.qi ? "dot done" : (i===game.qi ? "dot now" : "dot");
+    return '<div class="'+cls+'"><i></i></div>';
+  }).join("");
+
+  var opts = q.opts.map(function(o,i){
+    return '<button class="opt" data-i="'+i+'"><span class="mk">✓</span>'+esc(o)+'</button>';
+  }).join("");
+
+  return ''+
+  '<div class="qhead">'+
+    '<div class="dots">'+dots+'</div>'+
+    '<div class="timer" id="timer" style="--pct:100"><span id="timer-label">'+TIME_PER_Q+'</span></div>'+
+  '</div>'+
+  '<div class="card">'+
+    '<div class="qnum">Pregunta '+(game.qi+1)+' de '+QUESTIONS.length+'</div>'+
+    '<p class="qtext">'+esc(q.q)+'</p>'+
+    '<div class="opts">'+opts+'</div>'+
+    '<div class="fact" id="fact">'+esc(q.fact)+'</div>'+
+    '<div class="nextwrap" id="nextwrap">'+
+      '<button class="btn btn-purple" id="btn-next">'+
+        '<span class="btn-text">'+
+          (game.qi < QUESTIONS.length-1 ? "Siguiente pregunta →" : "Ver mi resultado →")+
+        '</span>'+
+        '<span class="btn-loader"><span class="spin"></span></span>'+
+      '</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function filasTablero(){
+  if(!tablero.length) return '<p class="empty">Todavía no ha jugado nadie.</p>';
+  return tablero.map(function(e){
+    var mine  = e.id === game.myEntryId;
+    var ganan = e.puesto <= ganadores && e.score === e.total;
+    return '<div class="lrow'+(mine?" you":"")+(ganan?" gana":"")+'">'+
+             '<span class="pos">'+(ganan?"🎁":"#"+e.puesto)+'</span>'+
+             '<span class="nm">'+esc(e.nombre)+(mine?" (tú)":"")+'</span>'+
+             '<span class="sc">'+e.score+'/'+e.total+'</span>'+
+             '<span class="tm">'+fmtSecs(e.ms)+'</span>'+
+           '</div>';
+  }).join("");
+}
+
+function cuantosGanan(){
+  return tablero.filter(function(e){
+    return e.score === e.total && e.puesto <= ganadores;
+  }).length;
+}
+
+function viewTablero(){
+  var n = cuantosGanan();
+  var sobran = ganadores - n;
+  return ''+
+  '<div class="center">'+
+    '<div class="prize">🎁 '+esc(PREMIO)+'</div>'+
+    '<h1 style="font-size:clamp(24px,5.5vw,34px);">Tablero del equipo</h1>'+
+    '<p class="lede">'+tablero.length+(tablero.length===1?" persona ha jugado":" personas han jugado")+
+      '. Las Mystery Box son para los '+ganadores+' más rápidos con puntaje perfecto.</p>'+
+    (sobran > 0 && tablero.length
+      ? '<p class="aviso">Solo '+n+(n===1?" persona tiene":" personas tienen")+' 6/6, así que hay '+
+        sobran+(sobran===1?" Mystery Box":" Mystery Box")+' sin asignar.</p>'
+      : '')+
+  '</div>'+
+  '<div class="leader" style="margin-top:20px;">'+
+    '<p class="leader-nota">🎁 = gana una de las '+ganadores+' Mystery Box</p>'+
+    '<div class="tablero tablero-solo">'+filasTablero()+'</div>'+
+  '</div>'+
+  '<button class="btn btn-ghost" id="btn-volver" style="margin-top:22px;">Volver al reto</button>';
+}
+
+function viewResults(){
+  var sc      = score();
+  var perfect = sc === QUESTIONS.length;
+  var pct     = Math.round(sc/QUESTIONS.length*100);
+
+  var recap = QUESTIONS.map(function(q,i){
+    var a = game.answers[i];
+    return '<div class="r"><span class="ic '+(a.correct?"y":"n")+'">'+(a.correct?"✓":"✕")+'</span>'+esc(q.q)+'</div>';
+  }).join("");
+
+  var titulo, cuerpo;
+  if(perfect){
+    titulo = game.gana ? "¡Vas por una Mystery Box!" : "¡Puntaje perfecto!";
+    cuerpo = '<p class="lede" style="color:#fff;font-weight:700;">Puesto #'+game.puesto+' con '+fmtSecs(game.totalMs)+'.</p>'+
+             (game.gana
+               ? '<p class="lede">Estás entre los '+ganadores+' más rápidos. Si alguien te pasa, bajas — el reto sigue abierto.</p>'
+               : '<p class="lede">Las Mystery Box son para los '+ganadores+' primeros. Te faltan '+
+                 fmtSecs(Math.max(0, game.totalMs - (tablero[ganadores-1] ? tablero[ganadores-1].ms : 0)))+
+                 ' para entrar.</p>');
+  } else {
+    titulo = "Casi lo logras";
+    cuerpo = '<p class="lede">Solo el puntaje perfecto compite por una Mystery Box. Quedaste con '+sc+' de '+QUESTIONS.length+'.</p>';
+  }
+
+  cuerpo += '<p class="lede" style="font-size:13.5px;color:rgba(255,255,255,.6);">'+
+              (game.repetido
+                ? 'Ya habías jugado: este es tu primer intento, que es el que cuenta.'
+                : 'Este fue tu único intento — las preguntas son las mismas para todos.')+
+            '</p>';
+
+  return ''+
+  '<div class="center">'+
+    '<div class="ringwrap"><div class="ring" style="--sc:'+pct+'">'+
+      '<div class="inner"><span class="n">'+sc+'/'+QUESTIONS.length+'</span><span class="d">correctas</span></div>'+
+    '</div></div>'+
+    '<h1 style="font-size:clamp(24px,5vw,32px);max-width:20ch;">'+titulo+'</h1>'+
+    cuerpo+
+  '</div>'+
+  '<div class="recap">'+recap+'</div>'+
+  '<div class="leader">'+
+    '<h2>🏁 Tablero · '+tablero.length+(tablero.length===1?" jugador":" jugadores")+'</h2>'+
+    '<p class="leader-nota">🎁 = va por una de las '+ganadores+' Mystery Box</p>'+
+    '<div class="tablero">'+filasTablero()+'</div>'+
+  '</div>'+
+  '<p class="note">OAKBERRY está disponible para desayuno, almuerzo y cena — el mismo bowl, la misma calidad, a cualquier hora.</p>';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   7. EVENTOS
+   ══════════════════════════════════════════════════════════════ */
+function wire(){
+  Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(el){
+    el.onclick = function(){ answer(parseInt(el.getAttribute("data-i"),10)); };
+  });
+
+  var next = document.getElementById("btn-next");
+  if(next) next.onclick = nextQuestion;
+
+  var lnk = document.getElementById("lnk-tablero");
+  if(lnk) lnk.onclick = function(ev){ ev.preventDefault(); verTablero(); };
+
+  var volver = document.getElementById("btn-volver");
+  if(volver) volver.onclick = function(){
+    if(location.hash) history.replaceState(null,"",location.pathname);
+    game.screen = "intro"; render();
+  };
+
+  var form = document.getElementById("start-form");
+  if(form) form.onsubmit = function(ev){
+    ev.preventDefault();
+    var iN  = document.getElementById("in-nombre");
+    var err = document.getElementById("in-err");
+    var nombre = iN.value.replace(/\s+/g," ").trim();
+
+    iN.classList.remove("err"); err.classList.remove("show");
+    if(nombre.length < 2){
+      iN.classList.add("err");
+      err.textContent = "Escribe tu nombre para aparecer en el tablero.";
+      err.classList.add("show");
+      iN.focus();
+      return;
+    }
+    game.nombre = nombre;
+    startGame();
+  };
+}
+
+/* ══════════════════════════════════════════════════════════════
+   8. CONFETI
+   ══════════════════════════════════════════════════════════════ */
+function confetti(){
+  if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var canvas = document.getElementById("confetti");
+  var ctx = canvas.getContext("2d");
+  function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+  resize(); addEventListener("resize", resize);
+
+  var colors = ["#5F4B8B","#F5C842","#8B5CF6","#ffffff","#d9ad2c"];
+  var parts = [];
+  for(var i=0;i<90;i++){
+    parts.push({
+      x: Math.random()*canvas.width, y: -20 - Math.random()*canvas.height*0.5,
+      w: 6+Math.random()*6, h: 8+Math.random()*8,
+      vy: 2+Math.random()*3, vx: -1.5+Math.random()*3,
+      rot: Math.random()*360, vr: -6+Math.random()*12,
+      color: colors[Math.floor(Math.random()*colors.length)]
+    });
+  }
+  var frames = 0;
+  (function tick(){
+    frames++;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    parts.forEach(function(p){
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+    });
+    if(frames < 260) requestAnimationFrame(tick);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
+
+apiGet("/juego/ranking").then(function(res){
+  if(res && res.ok){
+    tablero   = res.tablero || [];
+    ganadores = res.ganadores || ganadores;
+    if(game.screen === "tablero") render();
+  }
+}).catch(function(){});
+
+// /franquiciados#tablero abre directo en el tablero, sin pasar por el juego.
+if((location.hash||"").toLowerCase() === "#tablero") game.screen = "tablero";
+
+render();
+})();
+</script>
+
+</body>
+</html>

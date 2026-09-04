@@ -96,6 +96,20 @@
 
   <div id="toast" class="toast"></div>
 
+  <!-- 0. Editar empresa existente -->
+  <div class="card" style="border:1px dashed var(--morado)">
+    <h2><span class="n">✎</span> Editar una empresa existente</h2>
+    <label>Carga una empresa ya creada para cambiar sus descuentos (agregar/quitar). <b>El QR/link no cambia.</b></label>
+    <div class="row" style="align-items:end">
+      <div style="flex:2"><select id="editSel" style="width:100%;padding:10px;border-radius:10px;border:1px solid #ddd">
+        <option value="">— Nueva empresa (deja en blanco) —</option>
+      </select></div>
+      <div><button type="button" class="btns" id="editBtn"
+        style="background:var(--morado);color:#fff;border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer">Cargar para editar</button></div>
+    </div>
+    <div id="editBanner" style="display:none;margin-top:10px;padding:8px 12px;border-radius:10px;background:#efe7fb;color:var(--morado);font-weight:700;font-size:.86rem"></div>
+  </div>
+
   <!-- 1. Empresa + tienda -->
   <div class="card">
     <h2><span class="n">1</span> Empresa y tienda</h2>
@@ -238,7 +252,103 @@ function onMselChange(sc, checked){
   });
   renderMselLabel();
   construirDias();
+  initEdit();
 })();
+
+// ── Modo edición: cargar una empresa ya creada y prellenar el form ──
+let EDIT_MODE = "";
+async function initEdit(){
+  const sel=document.getElementById("editSel");
+  const r=await jsonp(new URLSearchParams({accion:"listarEmpresas"}));
+  (r.empresas||[]).forEach(e=>{
+    const o=document.createElement("option"); o.value=e.empresa;
+    o.textContent=e.empresa+" · "+(e.centro_comercial||"")+" ("+(e.registrados||0)+" reg.)";
+    sel.appendChild(o);
+  });
+  document.getElementById("editBtn").addEventListener("click", ()=>{
+    const nombre=sel.value;
+    if(!nombre){ resetEdit(); toast("Modo nueva empresa",true); return; }
+    cargarEmpresa(nombre);
+  });
+}
+function resetEdit(){
+  EDIT_MODE="";
+  document.getElementById("editBanner").style.display="none";
+  const btn=document.getElementById("generar");
+  btn.textContent="Crear empresa + guardar estrategia + generar QR";
+}
+function setChip(sel, valores){           // marca chips cuyo dataset.v ∈ valores
+  sel.querySelectorAll(".chip").forEach(c=>c.classList.toggle("sel", valores.includes(c.dataset.v)));
+}
+function resetCalendario(){
+  document.querySelectorAll("#dias .dia").forEach(div=>{
+    const on=div.querySelector(".diaOn"); on.checked=false; div.classList.remove("on");
+    div.querySelectorAll(".chip.sel").forEach(c=>c.classList.remove("sel"));
+    const pts=[...div.querySelectorAll(".ptToggle .pt")];
+    pts.forEach((x,i)=>x.classList.toggle("sel", i===0));   // default: producto
+    div.querySelector(".ptProducto").style.display="block";
+    div.querySelector(".ptTopping").style.display="none";
+  });
+}
+async function cargarEmpresa(nombre){
+  const r=await jsonp(new URLSearchParams({accion:"cargarConfigEmpresa", empresa:nombre}));
+  if(!r.ok||!r.existe){ toast("No se pudo cargar: "+(r.mensaje||nombre),"err"); return; }
+  const c=r.config;
+  // Empresa + bienvenida
+  document.getElementById("empresa").value=c.empresa||"";
+  document.getElementById("cc").value=c.centroComercial||"";
+  document.getElementById("campeon").value=c.campeonNombre||c.campeonContacto||"";
+  document.getElementById("fechaInicio").value=c.fechaInicio||"";
+  document.getElementById("fechaFin").value=c.fechaFin||"";
+  document.getElementById("esControl").checked=!!c.esControl;
+  document.getElementById("cupoGratis").value=c.cupoGratis??0;
+  document.getElementById("cupo50").value=c.cupo50??0;
+  document.getElementById("desc50").value=c.desc50pct??50;
+  document.getElementById("vig").value=c.vigenciaWelcomeH??48;
+  // Tiendas (multi-select)
+  TIENDAS_SEL=(c.tiendas||[]).slice();
+  document.querySelectorAll("#mselPanel .msel-opt input").forEach(i=>{ i.checked=TIENDAS_SEL.includes(i.value); });
+  renderMselLabel(); await cargarValle(primaryTienda());
+  // Modo
+  const modo=c.modo||"calendario";
+  document.querySelectorAll("#modoToggle .md").forEach(x=>{
+    const on=x.dataset.modo===modo; x.classList.toggle("sel",on);
+  });
+  modoSel=modo;
+  document.getElementById("escaleraWrap").style.display = modo==="escalado"?"block":"none";
+  // Escalera
+  document.getElementById("escalera").innerHTML="";
+  (c.escalera||[]).forEach(p=>addRung(p));
+  if(!(c.escalera||[]).length){ addRung(30); addRung(100); }
+  document.getElementById("misionDias").value=c.misionDias??45;
+  document.getElementById("escaleraLuego").checked=c.escaleraLuego!==false;
+  // Calendario
+  resetCalendario();
+  (c.calendario||[]).forEach(d=>{
+    const div=document.querySelector('#dias .dia[data-dia="'+d.dia+'"]'); if(!div) return;
+    const on=div.querySelector(".diaOn"); on.checked=true; div.classList.add("on");
+    const isTop=(d.descuentoId==="topping");
+    const pts=[...div.querySelectorAll(".ptToggle .pt")];
+    pts.forEach(x=>x.classList.toggle("sel", x.dataset.pt===(isTop?"topping":"producto")));
+    div.querySelector(".ptProducto").style.display=isTop?"none":"block";
+    div.querySelector(".ptTopping").style.display=isTop?"block":"none";
+    if(isTop){ setChip(div.querySelector(".topChips"), d.productos||[]); }
+    else{
+      if(d.descuentoId){ const ds=div.querySelector(".descSel"); ds.value=d.descuentoId; }
+      setChip(div.querySelector(".prodChips"), d.productos||[]);
+    }
+    const rangos=(d.ventanas||"").split(",").map(s=>s.trim());
+    div.querySelectorAll(".franjaChips .chip").forEach(ch=>ch.classList.toggle("sel", rangos.includes(ch.dataset.rango)));
+  });
+  // Estado edición
+  EDIT_MODE=c.empresa;
+  const b=document.getElementById("editBanner");
+  b.style.display="block";
+  b.innerHTML="✏️ Editando <b>"+c.empresa+"</b> — al guardar se actualizan los descuentos y el QR/link <b>no cambia</b>.";
+  document.getElementById("generar").textContent="Guardar cambios (mismo QR)";
+  toast("Empresa cargada: "+c.empresa,true);
+  document.getElementById("empresa").scrollIntoView({behavior:"smooth"});
+}
 
 // ── grilla de días ──
 function construirDias(){
@@ -371,8 +481,9 @@ document.getElementById("generar").addEventListener("click", async ()=>{
   const cfg=recogerConfig();
   const escalera = modoSel==="escalado" ? recogerEscalera() : [];
   if(!cfg.length && !escalera.length){ toast("Configura al menos un día o una escalera","err"); return; }
-  const btn=document.getElementById("generar"); const lbl="Crear empresa + guardar estrategia + generar QR";
-  btn.disabled=true; btn.textContent="Generando…";
+  const btn=document.getElementById("generar");
+  const lbl=EDIT_MODE?"Guardar cambios (mismo QR)":"Crear empresa + guardar estrategia + generar QR";
+  btn.disabled=true; btn.textContent="Guardando…";
 
   // 1. crear empresa (bienvenida 2 capas + multi-tienda)
   const e=await jsonp(new URLSearchParams({accion:"crearEmpresa", empresa, centroComercial:cc,
@@ -396,7 +507,7 @@ document.getElementById("generar").addEventListener("click", async ()=>{
   document.getElementById("url").value=LINK;
   document.getElementById("qrimg").src="https://api.qrserver.com/v1/create-qr-code/?size=440x440&margin=10&data="+encodeURIComponent(LINK);
   document.getElementById("result").style.display="block";
-  toast(`✅ Campaña creada: ${empresa} · ${tiendas.length} tienda(s) · ${cfg.length} día(s)`,true);
+  toast(`✅ ${EDIT_MODE?"Cambios guardados":"Campaña creada"}: ${empresa} · ${tiendas.length} tienda(s) · ${cfg.length} día(s)`,true);
   btn.disabled=false; btn.textContent=lbl;
   document.getElementById("result").scrollIntoView({behavior:"smooth"});
 });
