@@ -161,6 +161,7 @@
   .history-badge.reactiv{background:rgba(232,89,60,0.2);color:var(--coral);}
   .history-badge.sorteo{background:rgba(245,200,66,0.15);color:var(--accent);}
   .history-badge.fisico{background:rgba(57,217,138,0.18);color:var(--green);}
+  .history-badge.domicilios{background:rgba(57,217,138,0.18);color:var(--green);}
   .history-copy{background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;font-family:'Space Mono',monospace;white-space:nowrap;transition:all 0.18s;flex-shrink:0;}
   .history-copy:hover{border-color:var(--accent);color:var(--accent);}
   .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#0e0b16;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;padding:12px 24px;border-radius:50px;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;}
@@ -225,7 +226,7 @@
       <div class="logo-icon">🫐</div>
       <div>
         <div class="logo-text">Oakberry</div>
-        <div class="logo-sub">Generador de Links · Pauta · Físico · Amigos</div>
+        <div class="logo-sub">Generador de Links · Pauta · Físico · Amigos · Domicilios</div>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
@@ -250,6 +251,7 @@
         <button class="tab"        id="tab-fisico"   onclick="setModo('fisico')">📺 Canal físico</button>
         <button class="tab"        id="tab-amigos"   onclick="setModo('amigos')">🤝 Amigos</button>
         <button class="tab"        id="tab-sorpresa" onclick="setModo('sorpresa')">🎁 Sorpresa</button>
+        <button class="tab"        id="tab-domicilios" onclick="setModo('domicilios')">🛵 Domicilios</button>
       </div>
 
       <!-- ════════════════════════════════════════
@@ -762,6 +764,79 @@
       </div>
 
       <!-- ════════════════════════════════════════
+           MODO DOMICILIOS PROPIO (solo UTM + click IDs)
+      ════════════════════════════════════════ -->
+      <div id="modoDomicilios" style="display:none;">
+        <div class="pauta-section">
+          <div class="pauta-title">Domicilios propio · link con UTM</div>
+          <div class="hint" style="margin-top:0;margin-bottom:14px;">
+            Sin oferta ni tiendas: solo trazabilidad. Elegí fuente, poné el nombre de la campaña y listo.
+            El <code>fbclid</code> / <code>ttclid</code> / <code>gclid</code> lo agrega la plataforma sola al hacer clic.
+          </div>
+          <div class="field">
+            <label>URL de destino</label>
+            <input type="text" id="d-destino" value="https://oakberry-domicilios.com/" oninput="generarDomicilios(false)">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Fuente · utm_source</label>
+              <select id="d-fuente" onchange="dSugerirMedio();generarDomicilios(false)">
+                <option value="meta">Meta (FB/IG pauta)</option>
+                <option value="instagram">Instagram orgánico</option>
+                <option value="tiktok">TikTok Ads</option>
+                <option value="google">Google Ads</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="email">Email</option>
+                <option value="influencer">Influencer</option>
+                <option value="qr">QR (empaque / volante)</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Medio · utm_medium</label>
+              <select id="d-medio" onchange="generarDomicilios(false)">
+                <option value="paid_social">paid_social</option>
+                <option value="organic_social">organic_social</option>
+                <option value="cpc">cpc</option>
+                <option value="whatsapp">whatsapp</option>
+                <option value="email">email</option>
+                <option value="influencer">influencer</option>
+                <option value="qr">qr</option>
+                <option value="referral">referral</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Campaña · utm_campaign</label>
+            <input type="text" id="d-campana" placeholder="Ej: lanzamiento-zona-g" oninput="generarDomicilios(false)">
+          </div>
+          <div class="field">
+            <label>Contenido / creativo · utm_content <span style="font-weight:700;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+            <input type="text" id="d-contenido" placeholder="En pauta queda el nombre del anuncio automático" oninput="generarDomicilios(false)">
+          </div>
+        </div>
+
+        <div id="d-pautaBox" class="meta-url-box" style="display:none;">
+          <div class="meta-url-label">① URL del sitio web</div>
+          <div class="meta-url-text" id="d-sitio" style="color:var(--green);"></div>
+          <button class="action-btn" style="margin-top:8px;" onclick="dCopiar('sitio')">📋 Copiar destino</button>
+          <div class="meta-url-label" style="margin-top:16px;">② Parámetros de URL</div>
+          <div class="meta-url-text" id="d-params" style="color:var(--text);"></div>
+          <button class="action-btn" style="margin-top:8px;" onclick="dCopiar('params')">📋 Copiar parámetros</button>
+          <div class="hint" id="d-pautaHint"></div>
+        </div>
+
+        <button class="gen-btn" onclick="generarDomicilios(true)">⚡ Generar link</button>
+
+        <div id="d-qrBox" style="display:none;margin-top:20px;background:var(--card2);border:1px dashed var(--border);border-radius:14px;padding:20px;text-align:center;">
+          <div style="background:#fff;display:inline-block;padding:16px;border-radius:12px;"><canvas id="d-qrCanvas" style="max-width:240px;width:100%;height:auto;display:block;"></canvas></div>
+          <div class="link-actions" style="margin-top:16px;">
+            <button class="action-btn primary" onclick="dDescargarQR()">⬇ Descargar QR (PNG)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════
            MODO SORPRESA (Cupón Sorpresa · QR → cupón al azar con stock)
       ════════════════════════════════════════ -->
       <div id="modoSorpresa" style="display:none;">
@@ -873,7 +948,9 @@
 
 <script>
 const BASE       = "https://www.oakberry-cupones.com";
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJKDl-AIEEh8gHA4NQTLIfkZAQsffGwhS1Pgv-F-E54voGpl4fnxPBrGRPoXmUKsOI/exec";
+// Backend GCP (Flask · Postgres). El Apps Script viejo guardaba los links en el Sheet,
+// pero /r#alias resuelve contra Postgres → los links cortos quedaban rotos.
+const SCRIPT_URL = "https://api.oakberry-cupones.com/";
 
 const MOMENTOS = {
   madrugada: { nombre:"Madrugada", inicio:23, fin:7,   cruce:true },
@@ -1920,6 +1997,88 @@ async function srpGenerar(){
 function srpDescargarQR(){ const c = document.getElementById("srp-qrCanvas"); if (!c || !SRP_LINK) return; const a = document.createElement("a"); a.href = c.toDataURL("image/png"); a.download = "qr-sorpresa-" + (_slugCr(document.getElementById("srp-nombre").value) || "campana") + ".png"; a.click(); showToast("⬇ QR descargado"); }
 function srpCopiarLink(){ if (SRP_LINK) navigator.clipboard.writeText(SRP_LINK).then(()=>showToast("✅ Link copiado")); }
 
+// ── DOMICILIOS PROPIO (solo UTM + click IDs) ──────────────
+// Pauta (Meta/TikTok/Google): destino limpio + parámetros con macros de la plataforma;
+// el click ID (fbclid/ttclid/gclid) lo agrega la plataforma sola. Orgánico: link final + corto + QR.
+const D_MEDIO = { meta:"paid_social", instagram:"organic_social", tiktok:"paid_social", google:"cpc",
+  whatsapp:"whatsapp", email:"email", influencer:"influencer", qr:"qr", otro:"referral" };
+const D_MACROS = {
+  meta:   { content:"{{ad.name}}", extra:{ utm_term:"{{adset.name}}", campaign_id:"{{campaign.id}}", adset_id:"{{adset.id}}", ad_id:"{{ad.id}}", placement:"{{placement}}" },
+            hint:"En el anuncio: ① va en <strong>URL del sitio web</strong> y ② en <strong>Parámetros de URL</strong>. Meta agrega <code>fbclid</code> sola en cada clic." },
+  tiktok: { content:"__CID_NAME__", extra:{ utm_term:"__AID_NAME__", campaign_id:"__CAMPAIGN_ID__", adgroup_id:"__AID__", ad_id:"__CID__", placement:"__PLACEMENT__" },
+            hint:"En TikTok Ads Manager: ① en <strong>Destino</strong> y ② en <strong>URL parameters</strong>. TikTok agrega <code>ttclid</code> sola." },
+  google: { content:"{creative}", extra:{ utm_term:"{keyword}", campaign_id:"{campaignid}", adgroup_id:"{adgroupid}" },
+            hint:"En Google Ads: ① es la <strong>URL final</strong> y ② el <strong>sufijo de URL final</strong>. Con auto-etiquetado activo Google agrega <code>gclid</code> sola." },
+};
+let dLinkActual = "", dSitioActual = "", dParamsActual = "";
+function dSugerirMedio() {
+  document.getElementById("d-medio").value = D_MEDIO[document.getElementById("d-fuente").value] || "referral";
+}
+function generarDomicilios(guardar) {
+  const fuente    = document.getElementById("d-fuente").value;
+  const medio     = document.getElementById("d-medio").value;
+  const campana   = _slugCr(document.getElementById("d-campana").value);
+  const contenido = _slugCr(document.getElementById("d-contenido").value);
+  let destino = document.getElementById("d-destino").value.trim();
+  const macros = D_MACROS[fuente];
+  document.getElementById("d-pautaBox").style.display = macros ? "block" : "none";
+  document.getElementById("d-qrBox").style.display = "none";
+  if (!campana || !/^https?:\/\/\S+$/i.test(destino)) {
+    if (guardar) showToast(!campana ? "⚠ Falta el nombre de la campaña" : "⚠ URL de destino inválida");
+    if (macros) { document.getElementById("d-sitio").textContent = "Completa la campaña…"; document.getElementById("d-params").textContent = ""; }
+    return;
+  }
+  // UTMs como query propia; los macros quedan sin codificar para que la plataforma los reemplace
+  const utm = { utm_source: fuente, utm_medium: medio, utm_campaign: campana };
+  if (contenido) utm.utm_content = contenido;
+  else if (macros) utm.utm_content = macros.content;
+  const extra = macros ? macros.extra : {};
+  dSitioActual  = destino;
+  dParamsActual = Object.entries({ ...utm, ...extra }).map(([k,v]) => `${k}=${macros ? v : encodeURIComponent(v)}`).join("&");
+  dLinkActual   = destino + (destino.includes("?") ? "&" : "?") + dParamsActual;
+  if (macros) {
+    document.getElementById("d-sitio").textContent = dSitioActual;
+    document.getElementById("d-params").textContent = dParamsActual;
+    document.getElementById("d-pautaHint").innerHTML = macros.hint;
+  }
+  if (!guardar) return;
+
+  linkActual = dLinkActual;
+  const display = document.getElementById("linkDisplay");
+  display.textContent = dLinkActual; display.classList.remove("empty");
+  const shortDisplay = document.getElementById("shortLinkDisplay");
+  const nombre = `DOM ${fuente} ${campana}${contenido ? " " + contenido : ""}`;
+  const alias = nombre.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+  if (macros) {
+    // Con macros sin reemplazar un link corto no sirve: en pauta se usan ① + ②
+    shortDisplay.textContent = "No aplica en pauta — usá ① y ② en la plataforma";
+    shortDisplay.classList.add("empty");
+  } else {
+    shortDisplay.textContent = `${BASE}/r#${alias}`; shortDisplay.classList.remove("empty");
+    if (window.QRious) { dibujarQR(document.getElementById("d-qrCanvas"), dLinkActual); document.getElementById("d-qrBox").style.display = "block"; }
+  }
+  const params = { fuente, fase: medio, ciudad: "", tienda: "", modo: "domicilios" };
+  document.getElementById("summaryCard").style.display = "block";
+  document.getElementById("summaryRows").innerHTML = Object.entries({ ...utm, destino })
+    .map(([k,v]) => `<div class="summary-row"><span class="summary-key">${k}</span><span class="summary-val">${v}</span></div>`).join("");
+  const item = { nombre, link: dLinkActual, params, ts: new Date(), tipo: "domicilios" };
+  historial.unshift(item);
+  renderHistorial();
+  if (!macros) guardarEnSheet({ ...item, nombre });
+  showToast("✅ Link de domicilios generado");
+}
+function dCopiar(cual) {
+  const v = cual === "sitio" ? dSitioActual : dParamsActual;
+  if (!v) { showToast("⚠ Completa la campaña primero"); return; }
+  navigator.clipboard.writeText(v).then(() => showToast(cual === "sitio" ? "✅ Destino copiado" : "✅ Parámetros copiados"));
+}
+function dDescargarQR() {
+  const c = document.getElementById("d-qrCanvas");
+  if (!c || !dLinkActual) return;
+  const a = document.createElement("a"); a.href = c.toDataURL("image/png");
+  a.download = "qr-domicilios-" + (_slugCr(document.getElementById("d-campana").value) || "campana") + ".png"; a.click();
+}
+
 // ── MODO ──────────────────────────────────────────────────
 function setModo(modo) {
   modoActual = modo;
@@ -1928,11 +2087,14 @@ function setModo(modo) {
   document.getElementById("tab-fisico").className = "tab" + (modo==="fisico" ? " active" : "");
   document.getElementById("tab-amigos").className = "tab" + (modo==="amigos" ? " active" : "");
   document.getElementById("tab-sorpresa").className = "tab" + (modo==="sorpresa" ? " active" : "");
+  document.getElementById("tab-domicilios").className = "tab" + (modo==="domicilios" ? " active" : "");
   // El bloque de pauta (nombre de creativo + UTM Meta) solo aplica a cupón/sorteo
-  document.getElementById("modoPautaWrap").style.display = (modo==="fisico"||modo==="amigos"||modo==="sorpresa") ? "none" : "block";
+  document.getElementById("modoPautaWrap").style.display = (modo==="fisico"||modo==="amigos"||modo==="sorpresa"||modo==="domicilios") ? "none" : "block";
   document.getElementById("modoFisico").style.display    = modo==="fisico" ? "block" : "none";
   document.getElementById("modoAmigos").style.display    = modo==="amigos" ? "block" : "none";
   document.getElementById("modoSorpresa").style.display  = modo==="sorpresa" ? "block" : "none";
+  document.getElementById("modoDomicilios").style.display = modo==="domicilios" ? "block" : "none";
+  if (modo === "domicilios") generarDomicilios(false);
   document.getElementById("modoCupon").style.display  = modo==="cupon"  ? "block" : "none";
   document.getElementById("modeSorteo").style.display = modo==="sorteo" ? "block" : "none";
   if (modo === "amigos") amgInit();
@@ -2107,7 +2269,7 @@ function generar() {
   display.classList.remove("empty");
 
   const alias = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"");
+    .replace(/\s+/g,"-").replace(/[^a-z0-9\-]/g,"").replace(/-+/g,"-");
   const shortLink = `${BASE}/r#${alias}`;
   const shortDisplay = document.getElementById("shortLinkDisplay");
   shortDisplay.textContent = shortLink;
@@ -2155,13 +2317,15 @@ function renderHistorial() {
   list.innerHTML = historial.slice(0,10).map((item,i) => {
     const hora = item.ts.toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"});
     const tipo = item.tipo || "cupon";
-    const badge = `<span class="history-badge ${tipo}">${tipo==="reactivacion"?"🔄 Reactiv":tipo==="sorteo"?"🏆 Sorteo":tipo==="fisico"?"📺 Físico":tipo==="amigos"?"🤝 Amigos":"🎟 Cupón"}</span>`;
+    const badge = `<span class="history-badge ${tipo}">${tipo==="reactivacion"?"🔄 Reactiv":tipo==="sorteo"?"🏆 Sorteo":tipo==="fisico"?"📺 Físico":tipo==="amigos"?"🤝 Amigos":tipo==="domicilios"?"🛵 Domicilios":"🎟 Cupón"}</span>`;
     const det = tipo === "reactivacion"
       ? `${item.params.descuento}% · ${decodeURIComponent((item.params.producto||"").replace(/\+/g," "))}`
       : tipo === "sorteo"
         ? `Sorteo · ${item.params.ciudad}`
         : tipo === "fisico"
           ? `${CANALES_FISICO[(item.params.fuente||"").replace("fisico_","")]||"Externo"} · ${item.params.descuento}%`
+          : tipo === "domicilios"
+            ? `${item.params.fuente} · ${item.params.fase}`
           : tipo === "amigos"
             ? `${item.params.cc||""} · ${item.params.tiendas||0} tienda(s)`
             : `${item.params.descuento}% · ${decodeURIComponent((item.params.producto||"").replace(/\+/g," "))}`;
