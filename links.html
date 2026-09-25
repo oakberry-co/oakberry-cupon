@@ -768,14 +768,26 @@
       ════════════════════════════════════════ -->
       <div id="modoDomicilios" style="display:none;">
         <div class="pauta-section">
-          <div class="pauta-title">Domicilios propio · link con UTM</div>
+          <div class="pauta-title">Domicilios propio · link Menüpp con oferta + UTM</div>
           <div class="hint" style="margin-top:0;margin-bottom:14px;">
-            Sin oferta ni tiendas: solo trazabilidad. Elegí fuente, poné el nombre de la campaña y listo.
-            El <code>fbclid</code> / <code>ttclid</code> / <code>gclid</code> lo agrega la plataforma sola al hacer clic.
+            Menüpp guarda en cada orden <strong>solo 4 parámetros</strong>: <code>utm_source</code>, <code>utm_medium</code>,
+            <code>utm_campaign</code> y <code>utm_id</code>. Todo lo demás se pierde. Por eso la campaña se arma sola
+            (<code>dom_tienda_etapa_oferta</code>) y en pauta <code>utm_id</code> lleva el ID del anuncio.
+            La oferta viaja en <code>?traits=</code>.
           </div>
-          <div class="field">
-            <label>URL de destino</label>
-            <input type="text" id="d-destino" value="https://menupp.co/oakberry" oninput="generarDomicilios(false)">
+          <div class="row">
+            <div class="field">
+              <label>Tienda</label>
+              <select id="d-tienda" onchange="generarDomicilios(false)"></select>
+            </div>
+            <div class="field">
+              <label>Oferta</label>
+              <select id="d-oferta" onchange="generarDomicilios(false)"></select>
+            </div>
+          </div>
+          <div class="field" id="d-destinoWrap" style="display:none;">
+            <label>URL del menú de la tienda (la de Menüpp, sin <code>?</code>)</label>
+            <input type="text" id="d-destino" placeholder="https://menupp.co/oakberry/venue/…/menu/…" oninput="generarDomicilios(false)">
           </div>
           <div class="row">
             <div class="field">
@@ -806,13 +818,25 @@
               </select>
             </div>
           </div>
-          <div class="field">
-            <label>Campaña · utm_campaign</label>
-            <input type="text" id="d-campana" placeholder="Ej: lanzamiento-zona-g" oninput="generarDomicilios(false)">
+          <div class="row">
+            <div class="field">
+              <label>Etapa del embudo</label>
+              <select id="d-etapa" onchange="generarDomicilios(false)">
+                <option value="awareness">awareness (alcance / interés)</option>
+                <option value="conversion">conversion (compra en frío)</option>
+                <option value="remarketing">remarketing (vio y no compró)</option>
+                <option value="base">base (contacto directo WA / email)</option>
+                <option value="organico">organico (bio, QR, stories)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Sufijo <span style="font-weight:700;text-transform:none;letter-spacing:0;">(opcional, ej. oct o v2)</span></label>
+              <input type="text" id="d-sufijo" placeholder="" oninput="generarDomicilios(false)">
+            </div>
           </div>
           <div class="field">
-            <label>Contenido / creativo · utm_content <span style="font-weight:700;text-transform:none;letter-spacing:0;">(opcional)</span></label>
-            <input type="text" id="d-contenido" placeholder="En pauta queda el nombre del anuncio automático" oninput="generarDomicilios(false)">
+            <label>utm_campaign (se arma solo)</label>
+            <div class="meta-url-text" id="d-campanaPreview" style="color:var(--accent);">—</div>
           </div>
         </div>
 
@@ -1997,45 +2021,75 @@ async function srpGenerar(){
 function srpDescargarQR(){ const c = document.getElementById("srp-qrCanvas"); if (!c || !SRP_LINK) return; const a = document.createElement("a"); a.href = c.toDataURL("image/png"); a.download = "qr-sorpresa-" + (_slugCr(document.getElementById("srp-nombre").value) || "campana") + ".png"; a.click(); showToast("⬇ QR descargado"); }
 function srpCopiarLink(){ if (SRP_LINK) navigator.clipboard.writeText(SRP_LINK).then(()=>showToast("✅ Link copiado")); }
 
-// ── DOMICILIOS PROPIO (solo UTM + click IDs) ──────────────
-// Pauta (Meta/TikTok/Google): destino limpio + parámetros con macros de la plataforma;
-// el click ID (fbclid/ttclid/gclid) lo agrega la plataforma sola. Orgánico: link final + corto + QR.
+// ── DOMICILIOS PROPIO (Menüpp: tienda + oferta + 4 UTM) ──────────────
+// Menüpp (EaterLayout) guarda en la orden SOLO utm_id/utm_source/utm_medium/utm_campaign;
+// utm_content/utm_term/ad_id se pierden. Por eso: la campaña se arma con convención fija
+// dom_<tienda>_<etapa>_<oferta> y en pauta utm_id = ID del anuncio (se cruza con la API de Meta).
+// La oferta viaja en ?traits= (Menüpp la aplica y la limpia de la URL; los utm_* se quedan).
+const D_TIENDAS = {
+  zonag: { nombre:"BOG · Zona G", url:"https://menupp.co/oakberry/venue/08b185c1-d095-4226-982d-320c97242c50/menu/wuNxTuUsY9ZP0sOtsZhX" },
+  baq76: { nombre:"BAQ · Barranquilla 76 (pegar URL)", url:"" },
+  otra:  { nombre:"Otra (pegar URL)", url:"" },
+};
+// traits de Zona G. Si Barranquilla 76 usa otros IDs, se pegan aquí.
+const D_OFERTAS = {
+  full:   { nombre:"Sin descuento",               traits:"" },
+  "15off":{ nombre:"15OFFBOWLS · 15% en bowls",    traits:"WDonJ96kCuCnA9dcr2KP" },
+  "20off":{ nombre:"20OFFBOWLS · 20% en bowls",    traits:"aud59LyLqF8Joftxn1Zv" },
+  envio0: { nombre:"ENVIOGRATIS · envío gratis",  traits:"JbzgrVvyB9uz3uBEt6n8" },
+};
 const D_MEDIO = { meta:"paid_social", instagram:"organic_social", tiktok:"paid_social", google:"cpc",
   whatsapp:"whatsapp", email:"email", influencer:"influencer", qr:"qr", otro:"referral" };
 const D_MACROS = {
-  meta:   { content:"{{ad.name}}", extra:{ utm_term:"{{adset.name}}", campaign_id:"{{campaign.id}}", adset_id:"{{adset.id}}", ad_id:"{{ad.id}}", placement:"{{placement}}" },
-            hint:"En el anuncio: ① va en <strong>URL del sitio web</strong> y ② en <strong>Parámetros de URL</strong>. Meta agrega <code>fbclid</code> sola en cada clic." },
-  tiktok: { content:"__CID_NAME__", extra:{ utm_term:"__AID_NAME__", campaign_id:"__CAMPAIGN_ID__", adgroup_id:"__AID__", ad_id:"__CID__", placement:"__PLACEMENT__" },
-            hint:"En TikTok Ads Manager: ① en <strong>Destino</strong> y ② en <strong>URL parameters</strong>. TikTok agrega <code>ttclid</code> sola." },
-  google: { content:"{creative}", extra:{ utm_term:"{keyword}", campaign_id:"{campaignid}", adgroup_id:"{adgroupid}" },
-            hint:"En Google Ads: ① es la <strong>URL final</strong> y ② el <strong>sufijo de URL final</strong>. Con auto-etiquetado activo Google agrega <code>gclid</code> sola." },
+  meta:   { utm_id:"{{ad.id}}",
+            hint:"En el anuncio: ① va en <strong>URL del sitio web</strong> y ② en <strong>Seguimiento → Parámetros de URL</strong>. Meta pone el <code>&</code> y reemplaza <code>{{ad.id}}</code> en cada clic." },
+  tiktok: { utm_id:"__CID__",
+            hint:"En TikTok Ads Manager: ① en <strong>Destino</strong> y ② en <strong>URL parameters</strong>." },
+  google: { utm_id:"{creative}",
+            hint:"En Google Ads: ① es la <strong>URL final</strong> y ② el <strong>sufijo de URL final</strong>." },
 };
 let dLinkActual = "", dSitioActual = "", dParamsActual = "";
+(function dInit(){
+  const t = document.getElementById("d-tienda"), o = document.getElementById("d-oferta");
+  if (!t || !o) return;
+  t.innerHTML = Object.entries(D_TIENDAS).map(([k,v]) => `<option value="${k}">${v.nombre}</option>`).join("");
+  o.innerHTML = Object.entries(D_OFERTAS).map(([k,v]) => `<option value="${k}">${v.nombre}</option>`).join("");
+})();
 function dSugerirMedio() {
-  document.getElementById("d-medio").value = D_MEDIO[document.getElementById("d-fuente").value] || "referral";
+  const f = document.getElementById("d-fuente").value;
+  document.getElementById("d-medio").value = D_MEDIO[f] || "referral";
+  const e = document.getElementById("d-etapa");
+  if (f==="whatsapp"||f==="email") e.value = "base";
+  else if (!D_MACROS[f]) e.value = "organico";
+  else if (e.value==="base"||e.value==="organico") e.value = "awareness";
 }
 function generarDomicilios(guardar) {
-  const fuente    = document.getElementById("d-fuente").value;
-  const medio     = document.getElementById("d-medio").value;
-  const campana   = _slugCr(document.getElementById("d-campana").value);
-  const contenido = _slugCr(document.getElementById("d-contenido").value);
-  let destino = document.getElementById("d-destino").value.trim();
+  const tiendaK = document.getElementById("d-tienda").value;
+  const ofertaK = document.getElementById("d-oferta").value;
+  const fuente  = document.getElementById("d-fuente").value;
+  const medio   = document.getElementById("d-medio").value;
+  const etapa   = document.getElementById("d-etapa").value;
+  const sufijo  = _slugCr(document.getElementById("d-sufijo").value).replace(/-/g,"");
+  const tienda  = D_TIENDAS[tiendaK], oferta = D_OFERTAS[ofertaK];
+  document.getElementById("d-destinoWrap").style.display = tienda.url ? "none" : "block";
+  let base = (tienda.url || document.getElementById("d-destino").value.trim()).split("?")[0].replace(/\/+$/,"");
+  const campana = ["dom", tiendaK, etapa, ofertaK, sufijo].filter(Boolean).join("_");
+  document.getElementById("d-campanaPreview").textContent = campana;
   const macros = D_MACROS[fuente];
   document.getElementById("d-pautaBox").style.display = macros ? "block" : "none";
   document.getElementById("d-qrBox").style.display = "none";
-  if (!campana || !/^https?:\/\/\S+$/i.test(destino)) {
-    if (guardar) showToast(!campana ? "⚠ Falta el nombre de la campaña" : "⚠ URL de destino inválida");
-    if (macros) { document.getElementById("d-sitio").textContent = "Completa la campaña…"; document.getElementById("d-params").textContent = ""; }
+  if (!/^https:\/\/menupp\.co\/\S+$/i.test(base)) {
+    dLinkActual = dSitioActual = dParamsActual = "";
+    if (guardar) showToast("⚠ Falta la URL del menú de Menüpp de esa tienda");
+    if (macros) { document.getElementById("d-sitio").textContent = "Falta la URL de la tienda…"; document.getElementById("d-params").textContent = ""; }
     return;
   }
-  // UTMs como query propia; los macros quedan sin codificar para que la plataforma los reemplace
+  dSitioActual = oferta.traits ? `${base}?traits=${oferta.traits}` : base;
   const utm = { utm_source: fuente, utm_medium: medio, utm_campaign: campana };
-  if (contenido) utm.utm_content = contenido;
-  else if (macros) utm.utm_content = macros.content;
-  const extra = macros ? macros.extra : {};
-  dSitioActual  = destino;
-  dParamsActual = Object.entries({ ...utm, ...extra }).map(([k,v]) => `${k}=${macros ? v : encodeURIComponent(v)}`).join("&");
-  dLinkActual   = destino + (destino.includes("?") ? "&" : "?") + dParamsActual;
+  if (macros) utm.utm_id = macros.utm_id;
+  // Los macros van sin codificar para que la plataforma los reemplace
+  dParamsActual = Object.entries(utm).map(([k,v]) => `${k}=${macros ? v : encodeURIComponent(v)}`).join("&");
+  dLinkActual   = dSitioActual + (dSitioActual.includes("?") ? "&" : "?") + dParamsActual;
   if (macros) {
     document.getElementById("d-sitio").textContent = dSitioActual;
     document.getElementById("d-params").textContent = dParamsActual;
@@ -2047,7 +2101,7 @@ function generarDomicilios(guardar) {
   const display = document.getElementById("linkDisplay");
   display.textContent = dLinkActual; display.classList.remove("empty");
   const shortDisplay = document.getElementById("shortLinkDisplay");
-  const nombre = `DOM ${fuente} ${campana}${contenido ? " " + contenido : ""}`;
+  const nombre = `DOM ${fuente} ${campana}`;
   const alias = nombre.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
   if (macros) {
     // Con macros sin reemplazar un link corto no sirve: en pauta se usan ① + ②
@@ -2057,9 +2111,9 @@ function generarDomicilios(guardar) {
     shortDisplay.textContent = `${BASE}/r#${alias}`; shortDisplay.classList.remove("empty");
     if (window.QRious) { dibujarQR(document.getElementById("d-qrCanvas"), dLinkActual); document.getElementById("d-qrBox").style.display = "block"; }
   }
-  const params = { fuente, fase: medio, ciudad: "", tienda: "", modo: "domicilios" };
+  const params = { fuente, fase: medio, ciudad: "", tienda: tiendaK, modo: "domicilios" };
   document.getElementById("summaryCard").style.display = "block";
-  document.getElementById("summaryRows").innerHTML = Object.entries({ ...utm, destino })
+  document.getElementById("summaryRows").innerHTML = Object.entries({ tienda: tienda.nombre, oferta: oferta.nombre, ...utm, destino: dSitioActual })
     .map(([k,v]) => `<div class="summary-row"><span class="summary-key">${k}</span><span class="summary-val">${v}</span></div>`).join("");
   const item = { nombre, link: dLinkActual, params, ts: new Date(), tipo: "domicilios" };
   historial.unshift(item);
@@ -2076,7 +2130,7 @@ function dDescargarQR() {
   const c = document.getElementById("d-qrCanvas");
   if (!c || !dLinkActual) return;
   const a = document.createElement("a"); a.href = c.toDataURL("image/png");
-  a.download = "qr-domicilios-" + (_slugCr(document.getElementById("d-campana").value) || "campana") + ".png"; a.click();
+  a.download = "qr-domicilios-" + (document.getElementById("d-campanaPreview").textContent || "campana") + ".png"; a.click();
 }
 
 // ── MODO ──────────────────────────────────────────────────
