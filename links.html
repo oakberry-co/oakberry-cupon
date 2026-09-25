@@ -772,12 +772,14 @@
           <div class="hint" style="margin-top:0;margin-bottom:14px;">
             Menüpp guarda en cada orden <strong>solo 4 parámetros</strong>: <code>utm_source</code>, <code>utm_medium</code>,
             <code>utm_campaign</code> y <code>utm_id</code>. Todo lo demás se pierde. Por eso la campaña se arma sola
-            (<code>dom_tienda_etapa_oferta</code>) y en pauta <code>utm_id</code> lleva el ID del anuncio.
-            La oferta viaja en <code>?traits=</code>.
+            (<code>dom_zona_etapa_oferta</code>) y en pauta <code>utm_id</code> lleva el ID del anuncio.
+            La oferta viaja en <code>?traits=</code>. El link es <strong>uno solo para la marca</strong>: la tienda que
+            despacha la asigna Menüpp por la dirección del cliente (y se ve en Toteat), así que la "zona" acá es
+            a quién se le muestra la pauta, no qué tienda cocina.
           </div>
           <div class="row">
             <div class="field">
-              <label>Tienda</label>
+              <label>Zona de la pauta (a quién se le muestra)</label>
               <select id="d-tienda" onchange="generarDomicilios(false)"></select>
             </div>
             <div class="field">
@@ -786,7 +788,7 @@
             </div>
           </div>
           <div class="field" id="d-destinoWrap" style="display:none;">
-            <label>URL del menú de la tienda (la de Menüpp, sin <code>?</code>)</label>
+            <label>URL del menú de Menüpp (sin <code>?</code>)</label>
             <input type="text" id="d-destino" placeholder="https://menupp.co/oakberry/venue/…/menu/…" oninput="generarDomicilios(false)">
           </div>
           <div class="row">
@@ -2024,14 +2026,17 @@ function srpCopiarLink(){ if (SRP_LINK) navigator.clipboard.writeText(SRP_LINK).
 // ── DOMICILIOS PROPIO (Menüpp: tienda + oferta + 4 UTM) ──────────────
 // Menüpp (EaterLayout) guarda en la orden SOLO utm_id/utm_source/utm_medium/utm_campaign;
 // utm_content/utm_term/ad_id se pierden. Por eso: la campaña se arma con convención fija
-// dom_<tienda>_<etapa>_<oferta> y en pauta utm_id = ID del anuncio (se cruza con la API de Meta).
+// dom_<zona>_<etapa>_<oferta> y en pauta utm_id = ID del anuncio (se cruza con la API de Meta).
+// El menú es UNO para la marca: Menüpp asigna la tienda por la dirección al final del checkout.
+// Por eso <zona> = segmentación de la pauta; la tienda que despacha sale de Toteat (store_id).
 // La oferta viaja en ?traits= (Menüpp la aplica y la limpia de la URL; los utm_* se quedan).
+const D_MENU = "https://menupp.co/oakberry/venue/08b185c1-d095-4226-982d-320c97242c50/menu/wuNxTuUsY9ZP0sOtsZhX";
 const D_TIENDAS = {
-  zonag: { nombre:"BOG · Zona G", url:"https://menupp.co/oakberry/venue/08b185c1-d095-4226-982d-320c97242c50/menu/wuNxTuUsY9ZP0sOtsZhX" },
-  baq76: { nombre:"BAQ · Barranquilla 76 (pegar URL)", url:"" },
-  otra:  { nombre:"Otra (pegar URL)", url:"" },
+  zonag: { nombre:"BOG · alrededor de Zona G",      url:D_MENU },
+  baq76: { nombre:"BAQ · alrededor de Barranquilla 76", url:D_MENU },
+  todas: { nombre:"Todas las zonas de cobertura",  url:D_MENU },
+  otra:  { nombre:"Otro menú (pegar URL)",          url:"" },
 };
-// traits de Zona G. Si Barranquilla 76 usa otros IDs, se pegan aquí.
 const D_OFERTAS = {
   full:   { nombre:"Sin descuento",               traits:"" },
   "15off":{ nombre:"15OFFBOWLS · 15% en bowls",    traits:"WDonJ96kCuCnA9dcr2KP" },
@@ -2080,7 +2085,7 @@ function generarDomicilios(guardar) {
   document.getElementById("d-qrBox").style.display = "none";
   if (!/^https:\/\/menupp\.co\/\S+$/i.test(base)) {
     dLinkActual = dSitioActual = dParamsActual = "";
-    if (guardar) showToast("⚠ Falta la URL del menú de Menüpp de esa tienda");
+    if (guardar) showToast("⚠ Falta la URL del menú de Menüpp");
     if (macros) { document.getElementById("d-sitio").textContent = "Falta la URL de la tienda…"; document.getElementById("d-params").textContent = ""; }
     return;
   }
@@ -2113,7 +2118,7 @@ function generarDomicilios(guardar) {
   }
   const params = { fuente, fase: medio, ciudad: "", tienda: tiendaK, modo: "domicilios" };
   document.getElementById("summaryCard").style.display = "block";
-  document.getElementById("summaryRows").innerHTML = Object.entries({ tienda: tienda.nombre, oferta: oferta.nombre, ...utm, destino: dSitioActual })
+  document.getElementById("summaryRows").innerHTML = Object.entries({ zona: tienda.nombre, oferta: oferta.nombre, ...utm, destino: dSitioActual })
     .map(([k,v]) => `<div class="summary-row"><span class="summary-key">${k}</span><span class="summary-val">${v}</span></div>`).join("");
   const item = { nombre, link: dLinkActual, params, ts: new Date(), tipo: "domicilios" };
   historial.unshift(item);
