@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Mensajería · OAKBERRY</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+/* Mensajería — bandeja de DMs de Instagram para el equipo.
+   Marca: Nexa Slab + paleta de SISTEMA-VISUAL.md; layout de herramienta (no 9:16).
+   API: crm/api/mensajeria.py en Cloud Run. */
+@font-face{font-family:Nexa;src:url(/exacto-assets/fuentes/nexa-slab-regular.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Nexa;src:url(/exacto-assets/fuentes/nexa-slab-bold.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:Nexa;src:url(/exacto-assets/fuentes/nexa-slab-black.woff2) format("woff2");font-weight:900;font-display:swap}
+:root{
+  --crema:#FBF6E9; --crema-cielo:#F5EEE0; --hueso:#EAE1CC; --blanco:#fff;
+  --tinta:#21152A; --tinta-suave:#5C4A66; --gris:#8A7D90;
+  --morado:#4B1F60; --lila:#B79CC8; --lila-suave:#EFE6F4; --oro:#F4B223; --oro-suave:#FDF1D3;
+  --coral:#E04850; --verde:#2F6B3A; --verde-suave:#E3F0E5;
+  --radio:14px; --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--crema);color:var(--tinta);font:15px/1.45 var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.marca{font-family:Nexa,Georgia,serif}
+.oculto{display:none!important}
+
+/* ── Login ── */
+#login{height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+.tarjeta{background:var(--blanco);border-radius:22px;padding:36px 28px;max-width:380px;width:100%;
+  text-align:center;box-shadow:0 10px 40px rgba(75,31,96,.12)}
+.tarjeta img{height:34px;margin-bottom:22px}
+.tarjeta h1{font-family:Nexa,serif;font-weight:900;font-size:26px;color:var(--morado);letter-spacing:.3px}
+.tarjeta p{color:var(--tinta-suave);margin:8px 0 26px;font-size:14px}
+#gbtn{display:flex;justify-content:center;min-height:44px}
+.aviso-login{margin-top:16px;font-size:13px;color:var(--coral);min-height:18px}
+
+/* ── App ── */
+#app{height:100%;display:flex;flex-direction:column}
+.barra{background:var(--morado);color:var(--crema);display:flex;align-items:center;gap:12px;
+  padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));flex-shrink:0}
+.barra img{height:20px}
+.barra .titulo{font-family:Nexa,serif;font-weight:900;font-size:17px;letter-spacing:.4px}
+.cuentas{margin-left:auto;display:flex;background:rgba(255,255,255,.12);border-radius:99px;padding:3px}
+.cuentas button{padding:6px 12px;border-radius:99px;font-size:13px;font-weight:600;color:var(--crema);white-space:nowrap}
+.cuentas button.on{background:var(--crema);color:var(--morado)}
+.cuentas .n{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:99px;
+  background:var(--oro);color:var(--tinta);font-size:11px;line-height:18px;text-align:center}
+.yo{font-size:12px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.salir{font-size:12px;opacity:.75;text-decoration:underline}
+
+.cuerpo{flex:1;display:flex;min-height:0}
+.lista{width:380px;flex-shrink:0;border-right:1px solid var(--hueso);display:flex;flex-direction:column;background:var(--crema)}
+.herr{padding:12px 14px 8px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--hueso)}
+.buscar{width:100%;padding:10px 14px;border:1px solid var(--hueso);border-radius:99px;background:var(--blanco);
+  font:inherit;color:var(--tinta);outline:none}
+.buscar:focus{border-color:var(--lila)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:6px 12px;border-radius:99px;border:1px solid var(--hueso);background:var(--blanco);font-size:13px;color:var(--tinta-suave)}
+.chip.on{background:var(--tinta);border-color:var(--tinta);color:var(--crema)}
+.items{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.item{display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid var(--crema-cielo);width:100%;text-align:left;align-items:flex-start}
+.item:hover{background:var(--crema-cielo)}
+.item.on{background:var(--lila-suave)}
+.av{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-family:Nexa,serif;font-weight:900;font-size:17px;color:var(--blanco);background:var(--lila);text-transform:uppercase}
+.item .txt{flex:1;min-width:0}
+.fila1{display:flex;align-items:baseline;gap:6px}
+.user{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hora{margin-left:auto;font-size:12px;color:var(--gris);white-space:nowrap}
+.prev{font-size:13.5px;color:var(--tinta-suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.item.pend .prev{color:var(--tinta);font-weight:600}
+.etqs{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.etq{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--crema-cielo);color:var(--tinta-suave);white-space:nowrap}
+.etq.pend{background:var(--oro-suave);color:#7A5300;font-weight:600}
+.etq.cerr{background:#F3E3E4;color:#8E2A31}
+.etq.menc{background:var(--lila-suave);color:var(--morado)}
+.vacio{padding:40px 24px;text-align:center;color:var(--gris);font-size:14px}
+
+/* ── Hilo ── */
+.hilo{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--blanco)}
+.cab{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--hueso)}
+.volver{display:none;font-size:22px;padding:0 6px 0 0;color:var(--morado)}
+.cab .user{font-size:16px}
+.cab .sub{font-size:12.5px;color:var(--gris)}
+.cab a{margin-left:auto;font-size:12.5px;color:var(--morado);white-space:nowrap}
+.ventana{padding:8px 16px;font-size:13px;border-bottom:1px solid var(--hueso)}
+.ventana.ok{background:var(--verde-suave);color:var(--verde)}
+.ventana.no{background:#F3E3E4;color:#8E2A31}
+.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:6px;background:var(--crema);-webkit-overflow-scrolling:touch}
+.dia{align-self:center;font-size:11.5px;color:var(--gris);margin:10px 0 4px;background:var(--crema-cielo);padding:3px 10px;border-radius:99px}
+.b{max-width:78%;padding:9px 13px;border-radius:18px;white-space:pre-wrap;word-wrap:break-word;font-size:14.5px}
+.b.in{align-self:flex-start;background:var(--blanco);border:1px solid var(--hueso);border-bottom-left-radius:6px}
+.b.out{align-self:flex-end;background:var(--morado);color:var(--crema);border-bottom-right-radius:6px}
+.b .meta{font-size:11px;opacity:.65;margin-top:4px}
+.b .tipo{font-size:12px;font-style:italic;opacity:.8}
+.b img{display:block;max-width:220px;width:100%;border-radius:12px;margin-top:6px}
+.b.borrado{opacity:.55}
+.redactor{border-top:1px solid var(--hueso);padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));display:flex;gap:8px;align-items:flex-end;background:var(--blanco)}
+.redactor textarea{flex:1;resize:none;border:1px solid var(--hueso);border-radius:20px;padding:10px 14px;font:inherit;
+  max-height:140px;min-height:42px;outline:none;color:var(--tinta);background:var(--crema)}
+.redactor textarea:focus{border-color:var(--lila)}
+.enviar{background:var(--morado);color:var(--crema);border-radius:99px;padding:10px 18px;font-weight:700;white-space:nowrap}
+.enviar:disabled{opacity:.45;cursor:default}
+.error{margin:0 12px 8px;padding:8px 12px;border-radius:10px;background:#F3E3E4;color:#8E2A31;font-size:13px}
+.nada{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gris);gap:10px;background:var(--crema)}
+.nada .marca{font-weight:900;font-size:20px;color:var(--lila)}
+
+/* ── Celular: una columna ── */
+@media (max-width:760px){
+  .lista{width:100%;border-right:0}
+  .hilo{display:none}
+  body.viendo .lista{display:none}
+  body.viendo .hilo{display:flex}
+  .volver{display:block}
+  .yo,.barra .titulo{display:none}
+  .barra{gap:8px;padding-left:12px;padding-right:12px}
+  .barra img{height:16px}
+  .cuentas button{padding:6px 11px}
+  .b{max-width:86%}
+}
+</style>
+</head>
+<body>
+
+<section id="login">
+  <div class="tarjeta">
+    <img src="/email-logo-purple.png" alt="OAKBERRY">
+    <h1>Mensajería</h1>
+    <p>Los DMs de Instagram de @oakberrycol y @oakberry_rd, para responderlos en equipo.</p>
+    <div id="gbtn"></div>
+    <div class="aviso-login" id="avisoLogin"></div>
+  </div>
+</section>
+
+<section id="app" class="oculto">
+  <header class="barra">
+    <img src="/email-logo-cream.png" alt="OAKBERRY">
+    <span class="titulo">Mensajería</span>
+    <div class="cuentas" id="cuentas">
+      <button data-c="oakberrycol" class="on">CO<span class="n oculto"></span></button>
+      <button data-c="oakberry_rd">RD<span class="n oculto"></span></button>
+    </div>
+    <span class="yo" id="yo"></span>
+    <button class="salir" id="salir">Salir</button>
+  </header>
+  <div class="cuerpo">
+    <aside class="lista">
+      <div class="herr">
+        <input class="buscar" id="buscar" type="search" placeholder="Buscar @usuario o nombre" autocomplete="off">
+        <div class="chips" id="chips">
+          <button class="chip on" data-f="pendientes">Sin responder</button>
+          <button class="chip" data-f="todas">Todas</button>
+          <button class="chip" data-f="menciones">Menciones</button>
+        </div>
+      </div>
+      <div class="items" id="items"><div class="vacio">Cargando…</div></div>
+    </aside>
+    <main class="hilo" id="hilo">
+      <div class="nada" id="nada"><span class="marca">OAKBERRY</span><span>Escoge una conversación</span></div>
+      <div id="conv" class="oculto" style="display:flex;flex-direction:column;flex:1;min-height:0">
+        <div class="cab">
+          <button class="volver" id="volver" aria-label="Volver">&#8249;</button>
+          <div class="av" id="cAv"></div>
+          <div style="min-width:0"><div class="user" id="cUser"></div><div class="sub" id="cSub"></div></div>
+          <a id="cPerfil" target="_blank" rel="noopener">Ver perfil</a>
+        </div>
+        <div class="ventana" id="ventana"></div>
+        <div class="msgs" id="msgs"></div>
+        <div class="error oculto" id="err"></div>
+        <form class="redactor" id="redactor">
+          <textarea id="texto" rows="1" maxlength="1000" placeholder="Escribe una respuesta…"></textarea>
+          <button class="enviar" id="enviar" type="submit">Enviar</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</section>
+
+<script>
+const API = 'https://oakberry-reactivacion-api-664413392517.us-central1.run.app/mensajeria';
+const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
+const KEY = 'msj_sesion';
+const $ = id => document.getElementById(id);
+const st = { s:null, email:'', cuenta:'oakberrycol', filtro:'pendientes', q:'', igsid:null, enviando:false, firma:'' };
+
+// ── sesión ──
+function guardar(s, email){ try{ localStorage.setItem(KEY, JSON.stringify({s, email, t:Date.now()})); }catch(e){} }
+function leer(){ try{ const d = JSON.parse(localStorage.getItem(KEY)||'null'); if(d && Date.now()-d.t < 11.5*3600e3) return d; }catch(e){} return null; }
+function salir(msg){ try{ localStorage.removeItem(KEY); }catch(e){} st.s=null; $('app').classList.add('oculto'); $('login').classList.remove('oculto'); $('avisoLogin').textContent = msg||''; pintarBoton(); }
+async function onCredential(resp){
+  $('avisoLogin').textContent = 'Entrando…';
+  try{
+    const r = await fetch(API+'/sesion', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({idtoken:resp.credential})});
+    const d = await r.json();
+    if(!d.ok){ $('avisoLogin').textContent = d.mensaje || 'No se pudo entrar.'; return; }
+    guardar(d.sesion, d.email); entrar(d.sesion, d.email);
+  }catch(e){ $('avisoLogin').textContent = 'Sin conexión con el servidor. Intenta de nuevo.'; }
+}
+function pintarBoton(){
+  if(!window.google || !google.accounts){ return setTimeout(pintarBoton, 300); }
+  google.accounts.id.initialize({client_id:CLIENT_ID, callback:onCredential, auto_select:false});
+  google.accounts.id.renderButton($('gbtn'), {theme:'outline', size:'large', shape:'pill', text:'signin_with', locale:'es'});
+}
+function entrar(s, email){
+  st.s = s; st.email = email;
+  $('login').classList.add('oculto'); $('app').classList.remove('oculto');
+  $('yo').textContent = email;
+  cargarLista(); programar();
+}
+
+// ── API ──
+async function api(path, opts){
+  const sep = path.includes('?') ? '&' : '?';
+  const r = await fetch(API + path + (opts && opts.method==='POST' ? '' : sep+'s='+encodeURIComponent(st.s)), opts);
+  if(r.status === 401){ salir('Tu sesión venció. Vuelve a entrar.'); throw new Error('401'); }
+  return r.json();
+}
+
+// ── formato ──
+const TZ = 'America/Bogota';
+function horaCorta(iso){
+  const d = new Date(iso), hoy = new Date();
+  const mismoDia = d.toLocaleDateString('es-CO',{timeZone:TZ}) === hoy.toLocaleDateString('es-CO',{timeZone:TZ});
+  return mismoDia ? d.toLocaleTimeString('es-CO',{timeZone:TZ,hour:'numeric',minute:'2-digit'})
+                  : d.toLocaleDateString('es-CO',{timeZone:TZ,day:'numeric',month:'short'});
+}
+function diaLargo(iso){ return new Date(iso).toLocaleDateString('es-CO',{timeZone:TZ,weekday:'long',day:'numeric',month:'long'}); }
+function dur(seg){ const h=Math.floor(seg/3600), m=Math.floor(seg%3600/60); return h ? `${h} h ${m} min` : `${m} min`; }
+function miles(n){ return n==null ? '' : Number(n).toLocaleString('es-CO'); }
+const TIPOS = {story_mention:'Te mencionó en una historia', story_reply:'Respondió a una historia', image:'Foto', video:'Video',
+  audio:'Audio', share:'Compartió una publicación', ig_reel:'Compartió un reel', reel:'Compartió un reel', reaction:'Reaccionó',
+  deleted:'Mensaje borrado', unsupported:'Contenido no disponible', file:'Archivo', animated_image:'GIF'};
+function el(tag, cls, txt){ const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+function inicial(u){ return (u||'?').replace(/[^a-z0-9]/ig,'').charAt(0) || '?'; }
+function color(id){ const p=['#B79CC8','#4B1F60','#E04850','#2F6B3A','#C98A00','#5C4A66']; let h=0; for(const c of String(id)) h=(h*31+c.charCodeAt(0))>>>0; return p[h%p.length]; }
+
+// ── lista ──
+let cargandoLista = false;
+async function cargarLista(){
+  if(!st.s || cargandoLista) return; cargandoLista = true;
+  try{
+    const d = await api(`/conversaciones?cuenta=${st.cuenta}&filtro=${st.filtro}&q=${encodeURIComponent(st.q)}`);
+    if(!d.ok) return;
+    pintarPendientes(d.pendientes||{});
+    const cont = $('items'); cont.textContent = '';
+    if(!d.conversaciones.length){
+      cont.appendChild(el('div','vacio', st.filtro==='pendientes' ? 'Todo respondido. 🎉' : 'No hay conversaciones.'));
+      return;
+    }
+    for(const c of d.conversaciones){
+      const b = el('button','item'+(c.pendiente?' pend':'')+(c.igsid===st.igsid?' on':''));
+      const av = el('div','av', inicial(c.username)); av.style.background = color(c.igsid);
+      const t = el('div','txt'), f1 = el('div','fila1');
+      f1.append(el('span','user', c.username ? '@'+c.username : (c.nombre || 'Usuario de Instagram')), el('span','hora', horaCorta(c.ultimo)));
+      const prev = c.preview_tipo && c.preview_tipo!=='text' && TIPOS[c.preview_tipo] ? TIPOS[c.preview_tipo] : c.preview;
+      const et = el('div','etqs');
+      if(c.pendiente) et.appendChild(el('span', 'etq '+(c.ventana_seg>0?'pend':'cerr'), c.ventana_seg>0 ? 'Responder · quedan '+dur(c.ventana_seg) : 'Ventana cerrada'));
+      if(c.menciones) et.appendChild(el('span','etq menc', c.menciones+' mención'+(c.menciones>1?'es':'')));
+      if(c.seguidores!=null) et.appendChild(el('span','etq', miles(c.seguidores)+' seguidores'));
+      t.append(f1, el('div','prev', prev||''), et);
+      b.append(av, t);
+      b.onclick = () => abrir(c.igsid);
+      cont.appendChild(b);
+    }
+  }catch(e){} finally{ cargandoLista = false; }
+}
+function pintarPendientes(p){
+  for(const b of $('cuentas').children){ const n=p[b.dataset.c]||0, s=b.querySelector('.n'); s.textContent=n; s.classList.toggle('oculto', !n); }
+}
+
+// ── hilo ──
+async function abrir(igsid){
+  st.igsid = igsid; st.firma = '';
+  document.body.classList.add('viendo');
+  $('nada').classList.add('oculto'); $('conv').classList.remove('oculto');
+  $('msgs').textContent = ''; $('msgs').appendChild(el('div','dia','Cargando…')); $('err').classList.add('oculto');
+  for(const i of document.querySelectorAll('.item')) i.classList.remove('on');
+  await cargarHilo(true);
+  cargarLista();
+}
+async function cargarHilo(forzar){
+  if(!st.igsid) return;
+  const igsid = st.igsid;
+  let d; try{ d = await api('/hilo/'+encodeURIComponent(igsid)); }catch(e){ return; }
+  if(!d.ok || igsid !== st.igsid) return;
+  const firma = d.mensajes.length + '|' + (d.mensajes.at(-1)||{}).id + '|' + Math.floor(d.ventana_seg/60);
+  if(!forzar && firma === st.firma) return;
+  st.firma = firma;
+  const p = d.perfil || {};
+  $('cAv').textContent = inicial(p.username); $('cAv').style.background = color(igsid);
+  $('cUser').textContent = p.username ? '@'+p.username : (p.nombre || 'Usuario de Instagram');
+  $('cSub').textContent = [p.nombre, p.seguidores!=null ? miles(p.seguidores)+' seguidores' : null,
+    p.nos_sigue ? 'te sigue' : null, d.cuenta==='oakberry_rd' ? 'RD' : 'CO'].filter(Boolean).join(' · ');
+  if(p.username){ $('cPerfil').href = 'https://www.instagram.com/'+encodeURIComponent(p.username)+'/'; $('cPerfil').classList.remove('oculto'); }
+  else $('cPerfil').classList.add('oculto');
+  const v = $('ventana');
+  if(d.ventana_seg > 0){ v.className='ventana ok'; v.textContent = 'Puedes responder durante '+dur(d.ventana_seg)+' más.'; }
+  else { v.className='ventana no'; v.textContent = 'Pasaron más de 24 h desde su último mensaje: Instagram no deja responder hasta que vuelva a escribir.'; }
+  $('texto').disabled = $('enviar').disabled = d.ventana_seg <= 0;
+
+  const box = $('msgs'), abajo = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  box.textContent = '';
+  let dia = '';
+  for(const m of d.mensajes){
+    const dl = diaLargo(m.sent_at);
+    if(dl !== dia){ dia = dl; box.appendChild(el('div','dia', dl)); }
+    pintarBurbuja(m);
+  }
+  if(forzar || abajo) box.scrollTop = box.scrollHeight;
+}
+function pintarBurbuja(m){
+    const box = $('msgs');
+    const b = el('div','b '+m.direction+(m.borrado?' borrado':''));
+    if(m.tipo !== 'text' && TIPOS[m.tipo]) b.appendChild(el('div','tipo', TIPOS[m.tipo]));
+    if(m.texto) b.appendChild(el('div', null, m.texto));
+    if(m.media){ const img = el('img'); img.loading='lazy'; img.alt=TIPOS[m.tipo]||'imagen';
+      img.src = API+'/media/'+encodeURIComponent(m.id)+'?s='+encodeURIComponent(st.s); b.appendChild(img); }
+    if(m.borrado) b.appendChild(el('div','tipo','(lo borró el cliente)'));
+    b.appendChild(el('div','meta', horaCorta(m.sent_at) + (m.enviado_por ? ' · '+m.enviado_por.split('@')[0] : '')));
+    box.appendChild(b);
+}
+
+// ── responder ──
+$('redactor').onsubmit = async ev => {
+  ev.preventDefault();
+  const texto = $('texto').value.trim();
+  if(!texto || st.enviando) return;
+  st.enviando = true; $('enviar').disabled = true; $('enviar').textContent = 'Enviando…'; $('err').classList.add('oculto');
+  try{
+    const d = await api('/responder', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({s:st.s, igsid:st.igsid, texto})});
+    if(d.ok){
+      $('texto').value=''; ajustar();
+      pintarBurbuja(d.mensaje || {direction:'out', tipo:'text', texto, sent_at:new Date().toISOString(), enviado_por:st.email});
+      $('msgs').scrollTop = $('msgs').scrollHeight;
+      st.firma = '';                       // el próximo refresco del hilo trae la versión del servidor
+      setTimeout(cargarLista, 1200);       // la lista se actualiza sola, sin bloquear
+    }
+    else { $('err').textContent = d.mensaje || 'No se pudo enviar.'; $('err').classList.remove('oculto'); }
+  }catch(e){ if(e.message!=='401'){ $('err').textContent='Sin conexión; el mensaje NO se envió.'; $('err').classList.remove('oculto'); } }
+  finally{ st.enviando = false; $('enviar').textContent = 'Enviar'; $('enviar').disabled = $('texto').disabled; }
+};
+function ajustar(){ const t=$('texto'); t.style.height='auto'; t.style.height=Math.min(t.scrollHeight,140)+'px'; }
+$('texto').addEventListener('input', ajustar);
+$('texto').addEventListener('keydown', e => { // en computador: Enter envía, Shift+Enter salta línea
+  if(e.key==='Enter' && !e.shiftKey && !matchMedia('(max-width:760px)').matches){ e.preventDefault(); $('redactor').requestSubmit(); }
+});
+
+// ── controles ──
+$('cuentas').onclick = e => { const b=e.target.closest('button'); if(!b) return;
+  st.cuenta=b.dataset.c; for(const x of $('cuentas').children) x.classList.toggle('on', x===b);
+  st.igsid=null; cerrarHilo(); $('items').innerHTML='<div class="vacio">Cargando…</div>'; cargarLista(); };
+$('chips').onclick = e => { const b=e.target.closest('.chip'); if(!b) return;
+  st.filtro=b.dataset.f; for(const x of $('chips').children) x.classList.toggle('on', x===b); cargarLista(); };
+let tq; $('buscar').oninput = e => { clearTimeout(tq); tq=setTimeout(()=>{ st.q=e.target.value.trim(); cargarLista(); }, 350); };
+function cerrarHilo(){ document.body.classList.remove('viendo'); $('conv').classList.add('oculto'); $('nada').classList.remove('oculto'); st.igsid=null; }
+$('volver').onclick = () => { cerrarHilo(); cargarLista(); };
+$('salir').onclick = () => salir('');
+
+// ── refresco: lista cada 20 s, hilo abierto cada 8 s; en pausa si la pestaña no está visible ──
+let tl, th;
+function programar(){
+  clearInterval(tl); clearInterval(th);
+  tl = setInterval(()=>{ if(!document.hidden) cargarLista(); }, 20000);
+  th = setInterval(()=>{ if(!document.hidden && st.igsid) cargarHilo(false); }, 8000);
+}
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && st.s){ cargarLista(); if(st.igsid) cargarHilo(false); } });
+
+const prev = leer();
+if(prev) entrar(prev.s, prev.email); else pintarBoton();
+</script>
+</body>
+</html>
