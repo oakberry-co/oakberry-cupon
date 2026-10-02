@@ -36,6 +36,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .tarjeta p{color:var(--tinta-suave);margin:8px 0 26px;font-size:14px}
 #gbtn{display:flex;justify-content:center;min-height:44px}
 .aviso-login{margin-top:16px;font-size:13px;color:var(--coral);min-height:18px}
+.link-codigo{margin-top:14px;font-size:12.5px;color:var(--tinta-suave);text-decoration:underline}
+#formCodigo{display:flex;gap:8px;margin-top:12px}
+#formCodigo.oculto{display:none}
 
 /* ── App ── */
 #app{height:100%;display:flex;flex-direction:column}
@@ -132,6 +135,11 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
     <p>Los DMs de Instagram de @oakberrycol y @oakberry_rd, para responderlos en equipo.</p>
     <div id="gbtn"></div>
     <div class="aviso-login" id="avisoLogin"></div>
+    <button class="link-codigo" id="verCodigo" type="button">¿Tienes un código de acceso?</button>
+    <form id="formCodigo" class="oculto" autocomplete="off">
+      <input id="codigo" class="buscar" placeholder="Access code" aria-label="Código de acceso">
+      <button class="enviar" type="submit">Entrar</button>
+    </form>
   </div>
 </section>
 
@@ -199,6 +207,18 @@ async function onCredential(resp){
     guardar(d.sesion, d.email); entrar(d.sesion, d.email);
   }catch(e){ $('avisoLogin').textContent = 'Sin conexión con el servidor. Intenta de nuevo.'; }
 }
+$('verCodigo').onclick = () => { $('formCodigo').classList.toggle('oculto'); $('codigo').focus(); };
+$('formCodigo').onsubmit = async ev => {
+  ev.preventDefault();
+  const codigo = $('codigo').value.trim(); if(!codigo) return;
+  $('avisoLogin').textContent = 'Entrando…';
+  try{
+    const r = await fetch(API+'/sesion', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({codigo})});
+    const d = await r.json();
+    if(!d.ok){ $('avisoLogin').textContent = d.mensaje || 'Código inválido.'; return; }
+    guardar(d.sesion, d.email); entrar(d.sesion, d.email);
+  }catch(e){ $('avisoLogin').textContent = 'Sin conexión con el servidor. Intenta de nuevo.'; }
+};
 function pintarBoton(){
   if(!window.google || !google.accounts){ return setTimeout(pintarBoton, 300); }
   google.accounts.id.initialize({client_id:CLIENT_ID, callback:onCredential, auto_select:false});
