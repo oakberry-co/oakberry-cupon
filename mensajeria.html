@@ -111,12 +111,30 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .nada{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gris);gap:10px;background:var(--crema)}
 .nada .marca{font-weight:900;font-size:20px;color:var(--lila)}
 
+.auto-btn{align-self:flex-start;background:var(--oro-suave);border-color:#EED9A0;color:#7A5300}
+.auto{display:flex;flex-direction:column;flex:1;min-height:0;background:var(--crema)}
+.auto-cuerpo{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.auto-ayuda{font-size:13px;color:var(--tinta-suave)}
+.regla{background:var(--blanco);border:1px solid var(--hueso);border-radius:14px;padding:12px 14px;text-align:left;width:100%}
+.regla .p{font-weight:700}.regla .w{font-size:12.5px;color:var(--gris);margin-top:2px}
+.regla .r{font-size:13.5px;color:var(--tinta-suave);margin-top:6px;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.regla.off{opacity:.5}
+.auto-form{background:var(--blanco);border:1px solid var(--hueso);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.auto-form label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600}
+.auto-form label small{font-weight:400;color:var(--gris)}
+.auto-form label.fila{flex-direction:row;align-items:center;gap:8px;font-weight:500}
+.auto-form textarea{border:1px solid var(--hueso);border-radius:12px;padding:10px;font:inherit;resize:vertical}
+.fila-botones{display:flex;gap:8px;flex-wrap:wrap}
+.publicar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--hueso)}
+.etq.auto{background:#E6EEF9;color:#2B4C7E}
 /* ── Celular: una columna ── */
 @media (max-width:760px){
   .lista{width:100%;border-right:0}
   .hilo{display:none}
   body.viendo .lista{display:none}
   body.viendo .hilo{display:flex}
+  body.editando .lista{display:none}
+  body.editando .hilo{display:flex}
   .volver{display:block}
   .yo,.barra .titulo{display:none}
   .barra{gap:8px;padding-left:12px;padding-right:12px}
@@ -163,11 +181,36 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
           <button class="chip" data-f="todas">Todas</button>
           <button class="chip" data-f="menciones">Menciones</button>
         </div>
+        <button class="chip auto-btn" id="abrirAuto" type="button">⚡ Respuestas automáticas</button>
       </div>
       <div class="items" id="items"><div class="vacio">Cargando…</div></div>
     </aside>
     <main class="hilo" id="hilo">
       <div class="nada" id="nada"><span class="marca">OAKBERRY</span><span>Escoge una conversación</span></div>
+      <div id="auto" class="oculto auto">
+        <div class="cab"><button class="volver" id="cerrarAuto" aria-label="Volver" style="display:block">&#8249;</button>
+          <div><div class="user">Respuestas automáticas</div><div class="sub" id="autoSub"></div></div></div>
+        <div class="auto-cuerpo">
+          <p class="auto-ayuda">Se responden solas: el botón del menú que el cliente toca al abrir el chat (máximo 4) o cuando su mensaje trae una palabra clave. La misma respuesta no se repite a una persona en 24 h, y si alguien del equipo respondió en las últimas 2 h el automático se calla.</p>
+          <div id="autoLista"></div>
+          <button class="chip" id="nuevaRegla" type="button">+ Nueva respuesta</button>
+          <form id="autoForm" class="oculto auto-form">
+            <input type="hidden" id="fId">
+            <label>Pregunta del menú <small>(lo que ve el cliente como botón; máx. 80)</small><input id="fPregunta" maxlength="80" class="buscar"></label>
+            <label class="fila"><input type="checkbox" id="fMenu"> Mostrar como botón en el menú</label>
+            <label>Palabras clave <small>(separadas por coma: horario, a qué hora, abren)</small><input id="fPalabras" class="buscar"></label>
+            <label>Respuesta<textarea id="fRespuesta" maxlength="1000" rows="5"></textarea></label>
+            <label class="fila"><input type="checkbox" id="fActiva" checked> Activa</label>
+            <label>Orden <input id="fOrden" type="number" min="1" max="99" value="1" class="buscar" style="width:90px"></label>
+            <div class="error oculto" id="autoErr"></div>
+            <div class="fila-botones"><button class="enviar" type="submit">Guardar</button>
+              <button class="chip" type="button" id="borrarRegla">Borrar</button>
+              <button class="chip" type="button" id="cancelarRegla">Cancelar</button></div>
+          </form>
+          <div class="publicar"><button class="enviar" id="publicarMenu" type="button">Publicar menú en Instagram</button>
+            <span id="publicarMsg" class="sub"></span></div>
+        </div>
+      </div>
       <div id="conv" class="oculto" style="display:flex;flex-direction:column;flex:1;min-height:0">
         <div class="cab">
           <button class="volver" id="volver" aria-label="Volver">&#8249;</button>
@@ -278,6 +321,7 @@ async function cargarLista(){
       const prev = c.preview_tipo && c.preview_tipo!=='text' && TIPOS[c.preview_tipo] ? TIPOS[c.preview_tipo] : c.preview;
       const et = el('div','etqs');
       if(c.pendiente) et.appendChild(el('span', 'etq '+(c.ventana_seg>0?'pend':'cerr'), c.ventana_seg>0 ? 'Responder · quedan '+dur(c.ventana_seg) : 'Ventana cerrada'));
+      if(c.auto && !c.pendiente) et.appendChild(el('span','etq auto','Respondido automático'));
       if(c.menciones) et.appendChild(el('span','etq menc', c.menciones+' mención'+(c.menciones>1?'es':'')));
       if(c.seguidores!=null) et.appendChild(el('span','etq', miles(c.seguidores)+' seguidores'));
       t.append(f1, el('div','prev', prev||''), et);
@@ -295,7 +339,7 @@ function pintarPendientes(p){
 async function abrir(igsid){
   st.igsid = igsid; st.firma = '';
   document.body.classList.add('viendo');
-  $('nada').classList.add('oculto'); $('conv').classList.remove('oculto');
+  $('nada').classList.add('oculto'); $('auto').classList.add('oculto'); document.body.classList.remove('editando'); $('conv').classList.remove('oculto');
   $('msgs').textContent = ''; $('msgs').appendChild(el('div','dia','Cargando…')); $('err').classList.add('oculto');
   for(const i of document.querySelectorAll('.item')) i.classList.remove('on');
   await cargarHilo(true);
@@ -372,13 +416,67 @@ $('texto').addEventListener('keydown', e => { // en computador: Enter envía, Sh
 // ── controles ──
 $('cuentas').onclick = e => { const b=e.target.closest('button'); if(!b) return;
   st.cuenta=b.dataset.c; for(const x of $('cuentas').children) x.classList.toggle('on', x===b);
-  st.igsid=null; cerrarHilo(); $('items').innerHTML='<div class="vacio">Cargando…</div>'; cargarLista(); };
+  st.igsid=null; const editando=document.body.classList.contains('editando'); cerrarHilo(); $('items').innerHTML='<div class="vacio">Cargando…</div>'; cargarLista(); if(editando) abrirAuto(); };
 $('chips').onclick = e => { const b=e.target.closest('.chip'); if(!b) return;
   st.filtro=b.dataset.f; for(const x of $('chips').children) x.classList.toggle('on', x===b); cargarLista(); };
 let tq; $('buscar').oninput = e => { clearTimeout(tq); tq=setTimeout(()=>{ st.q=e.target.value.trim(); cargarLista(); }, 350); };
 function cerrarHilo(){ document.body.classList.remove('viendo'); $('conv').classList.add('oculto'); $('nada').classList.remove('oculto'); st.igsid=null; }
 $('volver').onclick = () => { cerrarHilo(); cargarLista(); };
 $('salir').onclick = () => salir('');
+
+// ── respuestas automáticas ──
+let reglasCache = [];
+async function abrirAuto(){
+  st.igsid = null; document.body.classList.remove('viendo'); document.body.classList.add('editando');
+  $('conv').classList.add('oculto'); $('nada').classList.add('oculto'); $('auto').classList.remove('oculto');
+  $('autoSub').textContent = '@' + st.cuenta; $('autoForm').classList.add('oculto'); $('publicarMsg').textContent='';
+  await cargarReglas();
+}
+async function cargarReglas(){
+  const d = await api('/auto'); if(!d.ok) return;
+  reglasCache = d.reglas.filter(r => r.cuenta === st.cuenta);
+  const box = $('autoLista'); box.textContent = '';
+  if(!reglasCache.length) box.appendChild(el('div','vacio','Todavía no hay respuestas automáticas para esta cuenta.'));
+  for(const r of reglasCache){
+    const b = el('button','regla'+(r.activa?'':' off'));
+    b.append(el('div','p', (r.en_menu?'☰ ':'') + (r.pregunta || 'Solo palabra clave') + (r.activa?'':' · apagada')),
+             el('div','w', r.palabras ? 'Palabras: '+r.palabras : 'Sin palabras clave'),
+             el('div','r', r.respuesta));
+    b.onclick = () => editarRegla(r);
+    box.appendChild(b);
+  }
+}
+function editarRegla(r){
+  r = r || {activa:true, orden: reglasCache.length+1};
+  $('fId').value = r.regla_id || ''; $('fPregunta').value = r.pregunta || ''; $('fMenu').checked = !!r.en_menu;
+  $('fPalabras').value = r.palabras || ''; $('fRespuesta').value = r.respuesta || '';
+  $('fActiva').checked = r.activa !== false; $('fOrden').value = r.orden || 1;
+  $('borrarRegla').classList.toggle('oculto', !r.regla_id); $('autoErr').classList.add('oculto');
+  $('autoForm').classList.remove('oculto'); $('fPregunta').focus();
+}
+$('abrirAuto').onclick = abrirAuto;
+$('cerrarAuto').onclick = () => { document.body.classList.remove('editando'); $('auto').classList.add('oculto'); $('nada').classList.remove('oculto'); };
+$('nuevaRegla').onclick = () => editarRegla(null);
+$('cancelarRegla').onclick = () => $('autoForm').classList.add('oculto');
+$('autoForm').onsubmit = async ev => {
+  ev.preventDefault();
+  const regla = {regla_id:$('fId').value, cuenta:st.cuenta, pregunta:$('fPregunta').value, en_menu:$('fMenu').checked,
+    palabras:$('fPalabras').value, respuesta:$('fRespuesta').value, activa:$('fActiva').checked, orden:+$('fOrden').value};
+  const d = await api('/auto', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({s:st.s, regla})});
+  if(!d.ok){ $('autoErr').textContent = d.mensaje; $('autoErr').classList.remove('oculto'); return; }
+  $('autoForm').classList.add('oculto'); cargarReglas();
+  $('publicarMsg').textContent = 'Guardado. Si cambiaste el menú, publícalo para que Instagram lo muestre.';
+};
+$('borrarRegla').onclick = async () => {
+  if(!confirm('¿Borrar esta respuesta automática?')) return;
+  await api('/auto/borrar', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({s:st.s, regla_id:$('fId').value})});
+  $('autoForm').classList.add('oculto'); cargarReglas();
+};
+$('publicarMenu').onclick = async () => {
+  $('publicarMsg').textContent = 'Publicando…';
+  const d = await api('/auto/publicar', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({s:st.s, cuenta:st.cuenta})});
+  $('publicarMsg').textContent = d.ok ? (d.botones.length ? 'Menú publicado: '+d.botones.join(' · ') : 'Menú vacío: se quitó de Instagram.') : d.mensaje;
+};
 
 // ── refresco: lista cada 20 s, hilo abierto cada 8 s; en pausa si la pestaña no está visible ──
 let tl, th;
