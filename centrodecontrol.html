@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Centro de control · OAKBERRY</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/cc-assets/flyer.js"></script>
+<style>
+/* Centro de control — eventos, contactos (influencers) y WhatsApp.
+   Backend: adquisicion/backend/actions/centro_control.py (api.oakberry-cupones.com, acciones cc*).
+   Marca: Nexa Slab + paleta de SISTEMA-VISUAL.md, tema claro, móvil primero. */
+@font-face{font-family:Nexa;src:url(/exacto-assets/fuentes/nexa-slab-regular.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Nexa;src:url(/exacto-assets/fuentes/nexa-slab-bold.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:Nexa;src:url(/exacto-assets/fuentes/nexa-slab-black.woff2) format("woff2");font-weight:900;font-display:swap}
+:root{
+  --crema:#FBF6E9; --crema-cielo:#F5EEE0; --hueso:#EAE1CC; --blanco:#fff;
+  --tinta:#21152A; --tinta-suave:#5C4A66; --gris:#8A7D90;
+  --morado:#4B1F60; --lila:#B79CC8; --lila-suave:#EFE6F4; --oro:#F4B223; --oro-suave:#FDF1D3;
+  --coral:#E04850; --coral-suave:#F3E3E4; --verde:#2F6B3A; --verde-suave:#E3F0E5;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--crema);color:var(--tinta);font:15px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.oculto{display:none!important}
+h2{font-family:Nexa,serif;font-weight:900;color:var(--morado);font-size:22px;letter-spacing:.2px}
+h3{font-family:Nexa,serif;font-weight:700;color:var(--morado);font-size:17px}
+.sub{color:var(--tinta-suave);font-size:13.5px}
+.mini{font-size:12px;color:var(--gris)}
+
+/* login */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.tarjeta{background:var(--blanco);border-radius:22px;padding:36px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 10px 40px rgba(75,31,96,.12)}
+.tarjeta h1{font-family:Nexa,serif;font-weight:900;font-size:26px;color:var(--morado)}
+.tarjeta p{color:var(--tinta-suave);margin:8px 0 26px;font-size:14px}
+#gbtn{display:flex;justify-content:center;min-height:44px}
+#avisoLogin{margin-top:16px;font-size:13px;color:var(--coral);min-height:18px}
+
+/* barra + tabs */
+.cabecera{position:sticky;top:0;z-index:5}
+.barra{background:var(--morado);color:var(--crema);padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;gap:12px}
+.barra .t{font-family:Nexa,serif;font-weight:900;font-size:18px;letter-spacing:.4px;white-space:nowrap}
+@media (max-width:500px){.barra .yo{display:none}.barra .salir{margin-left:auto}}
+.barra .yo{margin-left:auto;font-size:12px;opacity:.75;max-width:45vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.barra .salir{font-size:12px;opacity:.75;text-decoration:underline;color:var(--crema)}
+.tabs{display:flex;gap:4px;padding:10px 16px 0;background:var(--crema);border-bottom:1px solid var(--hueso);overflow-x:auto}
+.tabs button{padding:10px 14px;border-radius:12px 12px 0 0;font-weight:700;color:var(--tinta-suave);white-space:nowrap}
+.tabs button.on{background:var(--blanco);color:var(--morado);box-shadow:0 -1px 0 var(--hueso) inset}
+main{max-width:1100px;margin:0 auto;padding:16px}
+section.vista{display:flex;flex-direction:column;gap:14px}
+
+/* piezas */
+.card{background:var(--blanco);border:1px solid var(--hueso);border-radius:16px;padding:16px}
+.fila{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.esp{flex:1}
+.btn{background:var(--morado);color:var(--crema);border-radius:99px;padding:10px 18px;font-weight:700;white-space:nowrap}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.sec{background:var(--blanco);color:var(--morado);border:1px solid var(--lila)}
+.btn.chico{padding:6px 12px;font-size:13px}
+.btn.oro{background:var(--oro);color:var(--tinta)}
+.chip{padding:6px 12px;border-radius:99px;border:1px solid var(--hueso);background:var(--blanco);font-size:13px;color:var(--tinta-suave)}
+.chip.on{background:var(--tinta);border-color:var(--tinta);color:var(--crema)}
+.etq{font-size:11.5px;padding:2px 9px;border-radius:99px;background:var(--crema-cielo);color:var(--tinta-suave);white-space:nowrap;display:inline-block}
+.etq.ok{background:var(--verde-suave);color:var(--verde)}
+.etq.wait{background:var(--oro-suave);color:#7A5300}
+.etq.no{background:var(--coral-suave);color:#8E2A31}
+.etq.lila{background:var(--lila-suave);color:var(--morado)}
+input[type=text],input[type=date],input[type=number],input[type=tel],input[type=email],select,textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--hueso);border-radius:12px;background:var(--blanco);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--lila)}
+label.campo{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--tinta-suave)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.kpi{background:var(--blanco);border:1px solid var(--hueso);border-radius:14px;padding:12px 14px}
+.kpi .n{font-family:Nexa,serif;font-weight:900;font-size:26px;color:var(--morado);line-height:1.1}
+.kpi .l{font-size:12.5px;color:var(--tinta-suave)}
+.kpi.verde .n{color:var(--verde)}
+.aviso{padding:10px 14px;border-radius:12px;font-size:13.5px}
+.aviso.ok{background:var(--verde-suave);color:var(--verde)}
+.aviso.no{background:var(--coral-suave);color:#8E2A31}
+.aviso.info{background:var(--oro-suave);color:#6A4800}
+.vacio{padding:30px;text-align:center;color:var(--gris)}
+
+/* tablas → tarjetas en móvil */
+.tabla{width:100%;border-collapse:collapse;font-size:13.5px}
+.tabla th{text-align:left;font-size:12px;color:var(--gris);font-weight:600;padding:8px;border-bottom:1px solid var(--hueso);white-space:nowrap}
+.tabla td{padding:9px 8px;border-bottom:1px solid var(--crema-cielo);vertical-align:top}
+.tabla tr:hover td{background:var(--crema)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:700px){
+  .tabla thead{display:none}
+  .tabla tr{display:block;border-bottom:1px solid var(--hueso);padding:8px 0}
+  .tabla td{display:flex;gap:8px;border:0;padding:3px 4px}
+  .tabla td::before{content:attr(data-l);min-width:96px;color:var(--gris);font-size:12px}
+  .tabla td[data-l=""]::before{display:none}
+}
+
+/* eventos */
+.eventos{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.ev .nom{font-family:Nexa,serif;font-weight:700;font-size:17px;color:var(--tinta)}
+.ev .nums{display:flex;gap:14px;margin:10px 0;flex-wrap:wrap}
+.ev .nums b{font-size:18px;color:var(--morado);font-family:Nexa,serif;display:block}
+.ev .nums span{font-size:11.5px;color:var(--gris)}
+.barra-cupo{height:6px;background:var(--crema-cielo);border-radius:9px;overflow:hidden}
+.barra-cupo i{display:block;height:100%;background:var(--lila)}
+
+/* modal */
+.velo{position:fixed;inset:0;background:rgba(33,21,42,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:700px){.velo{align-items:center}}
+.modal{background:var(--crema);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom))}
+@media (min-width:700px){.modal{border-radius:22px}}
+.modal .cab{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.modal .x{margin-left:auto;font-size:26px;color:var(--gris);line-height:1}
+
+/* mensajes */
+.pasos{display:flex;flex-direction:column;gap:14px}
+.paso .num{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--morado);color:var(--crema);align-items:center;justify-content:center;font-weight:800;font-size:13px;margin-right:8px}
+.plantillas{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:10px}
+.pl{border:2px solid var(--hueso);border-radius:14px;padding:12px;text-align:left;background:var(--blanco)}
+.pl.on{border-color:var(--morado);background:var(--lila-suave)}
+.pl .tt{font-weight:800;color:var(--morado)}
+.pl .dd{font-size:12.5px;color:var(--tinta-suave);margin:4px 0 8px}
+.sugs{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.sugs button{font-size:12px;padding:5px 10px;border-radius:99px;background:var(--crema-cielo);color:var(--tinta-suave);text-align:left}
+.wa{background:#E7DED3;border-radius:16px;padding:16px;display:flex;justify-content:flex-start}
+.burbuja{background:#fff;border-radius:4px 14px 14px 14px;padding:10px 12px;max-width:340px;white-space:pre-wrap;font-size:14px;box-shadow:0 1px 1px rgba(0,0,0,.1)}
+.burbuja .bt{display:block;text-align:center;color:#027EB5;border-top:1px solid #eee;margin:8px -12px -4px;padding-top:8px;font-weight:600;font-size:13.5px}
+.excl{display:grid;grid-template-columns:1fr auto;gap:4px 14px;font-size:13px;margin-top:8px}
+.excl span:nth-child(even){text-align:right;font-weight:700}
+.qr{display:flex;flex-direction:column;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:20px}
+.qr #qrcaja{padding:12px;background:#fff}
+.ckbox{width:18px;height:18px;accent-color:var(--morado)}
+.creador{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+.vista-previa{position:sticky;top:120px;display:flex;flex-direction:column;gap:10px}
+.vista-previa canvas{width:100%;height:auto;border-radius:16px;box-shadow:0 8px 30px rgba(75,31,96,.18);background:var(--morado)}
+@media (max-width:900px){.creador{grid-template-columns:1fr}.vista-previa{position:static;order:-1;max-width:420px;margin:0 auto;width:100%}}
+.fotos{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.fotos button{border:3px solid transparent;border-radius:12px;overflow:hidden;aspect-ratio:3/4;padding:0}
+.fotos button.on{border-color:var(--morado)}
+.fotos img{width:100%;height:100%;object-fit:cover;display:block}
+.pl .tk{font-size:11.5px;color:var(--gris);margin-top:6px}
+
+/* cupones (pestaña Cupones, centro_cupones.py) */
+.pl .vv{font-family:Nexa,serif;font-weight:900;color:var(--tinta);font-size:15px;margin-top:2px}
+.tope{height:8px;background:var(--crema-cielo);border-radius:9px;overflow:hidden;margin:6px 0 4px}
+.tope i{display:block;height:100%;background:var(--verde)}
+.tope.pasa i{background:var(--coral)}
+.codigos{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px;margin-top:8px}
+.codigos span{font:700 14px/1 ui-monospace,Menlo,monospace;letter-spacing:.5px;background:var(--blanco);border:1px dashed var(--lila);border-radius:8px;padding:8px 4px;text-align:center}
+textarea.lista{font:14px/1.5 ui-monospace,Menlo,monospace}
+.cu-res td b{font-family:ui-monospace,Menlo,monospace}
+</style>
+</head>
+<body>
+
+<section id="login">
+  <div class="tarjeta">
+    <h1>Centro de control</h1>
+    <p>Cupones, eventos, influencers y WhatsApp de OAKBERRY.<br>Entra con tu correo de la casa.</p>
+    <div id="gbtn"></div>
+    <div id="avisoLogin"></div>
+  </div>
+</section>
+
+<div id="app" class="oculto">
+  <header class="cabecera">
+  <div class="barra">
+    <span class="t">Centro de control</span>
+    <span class="yo" id="yo"></span>
+    <button class="salir" onclick="salir()">Salir</button>
+  </div>
+  <nav class="tabs">
+    <button data-tab="cupones" class="on">🎟 Cupones</button>
+    <button data-tab="eventos">🎪 Eventos</button>
+    <button data-tab="crear">✨ Crear evento</button>
+    <button data-tab="contactos">⭐ Influencers y contactos</button>
+    <button data-tab="mensajes">💬 Mensajes</button>
+    <button data-tab="historial">📊 Historial de envíos</button>
+  </nav>
+  </header>
+  <main>
+    <!-- CUPONES -->
+    <section class="vista" id="v-cupones">
+      <div class="fila"><div><h2>Cupones</h2><div class="sub">Dale un cupón a alguien o arma un lote de códigos. En caja se valida en /validar y el descuento ya existe en Toteat: nadie lo tiene que pedir de palabra.</div></div><span class="esp"></span><button class="btn" onclick="nuevoCupon()">+ Nuevo cupón</button></div>
+      <div class="kpis" id="kpisCupones"></div>
+      <div class="fila" id="filtroCupones">
+        <button class="chip on" data-cfiltro="">Todos</button>
+        <button class="chip" data-cfiltro="persona">👤 Personas</button>
+        <button class="chip" data-cfiltro="lote">🎟 Lotes</button>
+        <button class="chip" data-cfiltro="qr">📱 Eventos con QR</button>
+      </div>
+      <div class="card scroll"><table class="tabla" id="tablaCupones"><tr><td class="vacio">Cargando…</td></tr></table></div>
+    </section>
+
+    <!-- EVENTOS -->
+    <section class="vista oculto" id="v-eventos">
+      <div class="fila"><div><h2>Eventos</h2><div class="sub">Cada evento tiene su link, QR y flyer. Quien lo escanea deja sus datos y le llega su regalo.</div></div><span class="esp"></span><button class="btn" onclick="nuevoEvento()">+ Crear evento</button></div>
+      <div class="kpis" id="kpisEventos"></div>
+      <div class="eventos" id="listaEventos"><div class="vacio">Cargando…</div></div>
+    </section>
+
+    <!-- CREAR EVENTO -->
+    <section class="vista oculto" id="v-crear">
+      <div class="fila"><div><h2 id="crTitulo">Crear evento</h2><div class="sub">Llena los datos y mira el flyer armarse a la derecha. Al guardar te damos el link, el QR y el flyer listos.</div></div></div>
+      <div class="creador">
+        <div class="pasos">
+          <div class="card paso"><h3><span class="num">1</span>El evento</h3>
+            <div class="pasos" style="margin-top:10px">
+              <label class="campo">Nombre del evento (así lo verá la gente)<input type="text" id="cr_nombre" maxlength="80" placeholder="Semana de bienestar"></label>
+              <div class="grid">
+                <label class="campo">Tipo<select id="cr_tipo"></select></label>
+                <label class="campo">Fecha<input type="date" id="cr_fecha"></label>
+              </div>
+              <div class="grid">
+                <label class="campo">Lugar<input type="text" id="cr_lugar" maxlength="80" placeholder="Oficinas Bancolombia, Cra 48"></label>
+                <label class="campo">Ciudad<input type="text" id="cr_ciudad" maxlength="40" placeholder="Medellín"></label>
+              </div>
+            </div></div>
+          <div class="card paso"><h3><span class="num">2</span>Empresa aliada</h3>
+            <div class="pasos" style="margin-top:10px">
+              <label class="campo">Nombre de la empresa (opcional)<input type="text" id="cr_aliado" maxlength="60" placeholder="Bancolombia"></label>
+              <label class="campo">Logo (PNG o JPG; mejor con fondo transparente)<input type="file" id="cr_logo" accept="image/png,image/jpeg,image/webp"></label>
+              <div class="fila"><img id="cr_logo_prev" alt="" style="max-height:48px;max-width:180px;display:none;background:#fff;border-radius:8px;padding:4px"><button class="btn sec chico oculto" id="cr_logo_quitar" type="button">Quitar logo</button></div>
+            </div></div>
+          <div class="card paso"><h3><span class="num">3</span>¿Qué regalamos?</h3>
+            <div class="fila" style="margin-top:10px"><button class="chip on" data-modo="cupon" type="button">🎁 Regalo para todos los que se inscriban</button><button class="chip" data-modo="sorteo" type="button">🎟️ Sorteo / concurso</button></div>
+            <div id="cr_sorteo" class="grid oculto" style="margin-top:10px">
+              <label class="campo">¿Cuántos ganadores?<input type="number" id="cr_ganadores" min="1" max="500" value="10"></label>
+              <label class="campo">Cierre y sorteo (fecha y hora)<input type="datetime-local" id="cr_cierre"></label>
+              <div class="mini" style="grid-column:1/-1">Al llegar la hora, el sistema rifa solo entre los inscritos y a cada ganador le llega su premio por WhatsApp.</div>
+            </div>
+            <div class="fila" style="margin-top:10px"><button class="chip on" data-btipo="bowl" type="button">🥣 Regalar un bowl</button><button class="chip" data-btipo="descuento" type="button">🏷️ Dar un descuento</button></div>
+            <div class="plantillas" id="cr_beneficios" style="margin-top:10px"></div>
+            <div class="mini" id="cr_toteat" style="margin-top:8px"></div>
+            <div id="cr_rifas_box" style="margin-top:14px">
+              <div class="fila"><b style="color:var(--morado)">🎟️ Rifas incluidas (opcional)</b><span class="esp"></span><button class="btn sec chico" type="button" id="cr_rifa_add">+ Agregar rifa</button></div>
+              <div class="mini">Además del regalo, rifa premios entre los inscritos a una hora fija. Se sortea solo y al ganador le llega por WhatsApp. Quien gana una rifa no entra a la siguiente.</div>
+              <div id="cr_rifas" class="pasos" style="margin-top:8px"></div>
+            </div>
+          </div>
+          <div class="card paso"><h3><span class="num">4</span>Condiciones (TyC)</h3>
+            <div class="pasos" style="margin-top:10px">
+              <div class="grid">
+                <label class="campo" id="cr_cupo_l">¿Cuántos cupones en total?<input type="number" id="cr_cupo" min="1" max="20000" value="300"></label>
+                <label class="campo">Días para usarlo (desde que se registra)<input type="number" id="cr_vig" min="1" max="90" value="7"></label>
+              </div>
+              <div class="grid">
+                <label class="campo">Válido desde (opcional)<input type="date" id="cr_desde"></label>
+                <label class="campo">¿Dónde se canjea?<select id="cr_tienda"><option value="todas">Todas las tiendas de Colombia</option></select></label>
+              </div>
+              <label class="campo">Condiciones adicionales (opcional)<textarea id="cr_tycx" rows="2" maxlength="500" placeholder="Solo para colaboradores de la empresa."></textarea></label>
+              <label class="fila" style="font-size:14px"><input type="checkbox" class="ckbox" id="cr_ig"> Pedir el Instagram como obligatorio</label>
+              <details><summary class="mini">Ver los términos como los leerá la persona</summary><ul id="cr_tyc_prev" class="mini" style="margin:8px 0 0 18px"></ul></details>
+            </div></div>
+          <div class="card paso"><h3><span class="num">5</span>WhatsApp y flyer</h3>
+            <div class="pasos" style="margin-top:10px">
+              <label class="fila" style="font-size:14px"><input type="checkbox" class="ckbox" id="cr_wa" checked> Mandarle el cupón por WhatsApp al registrarse</label>
+              <div class="mini" id="cr_wa_estado"></div>
+              <label class="campo">Frase del WhatsApp (solo para 15%)<input type="text" id="cr_wamsj" maxlength="160" placeholder="Gracias por pasar por OAKBERRY en la semana de bienestar."></label>
+              <div class="fotos oculto" id="cr_fotos"></div>
+              <details id="cr_textos"><summary class="mini" style="font-weight:700">✏️ Textos del flyer (se llenan solos; cámbialos si quieres)</summary>
+                <div class="pasos" style="margin-top:10px">
+                  <label class="campo">Línea pequeña de arriba<input type="text" id="fl_arriba" maxlength="80"></label>
+                  <label class="campo">Titular grande<input type="text" id="fl_titular" maxlength="40"></label>
+                  <div class="grid"><label class="campo">Frase al lado del bowl<input type="text" id="fl_lema" maxlength="60"></label>
+                  <label class="campo">Sellos sobre el bowl<select id="fl_sellos"><option value="0">Sin sellos</option><option value="1">1 sello</option><option value="2">2 sellos</option></select></label></div>
+                  <label class="campo">Texto bajo el QR<input type="text" id="fl_qrTexto" maxlength="40"></label>
+                  <label class="campo">Ubicación / fecha (línea 1)<input type="text" id="fl_ubicTitulo" maxlength="80"></label>
+                  <label class="campo">Ubicación / fecha (línea 2)<input type="text" id="fl_ubicTexto" maxlength="140"></label>
+                  <label class="campo">Letra pequeña<input type="text" id="fl_letra" maxlength="200"></label>
+                  <button class="btn sec chico" type="button" id="fl_reset">Volver a los textos automáticos</button>
+                </div></details>
+              <label class="fila oculto" style="font-size:14px" id="cr_activo_l"><input type="checkbox" class="ckbox" id="cr_activo" checked> Registro abierto (si lo apagas, el QR deja de dar cupones)</label>
+              <div id="cr_err"></div>
+              <button class="btn" id="cr_ok" type="button">Crear evento y generar link, QR y flyer</button>
+            </div></div>
+        </div>
+        <div class="vista-previa">
+          <div class="fila"><span class="mini">Vista previa</span><span class="esp"></span><button class="chip on" data-fmt="afiche" type="button">Afiche</button><button class="chip" data-fmt="post" type="button">Post 4:5</button><button class="chip" data-fmt="historia" type="button">Historia 9:16</button></div>
+          <canvas id="cr_canvas"></canvas>
+          <div id="cr_resultado"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACTOS -->
+    <section class="vista oculto" id="v-contactos">
+      <div class="fila"><div><h2>Influencers y contactos</h2><div class="sub">La base que antes vivía en el Excel. Edita, etiqueta y elige a quién escribirle.</div></div><span class="esp"></span><button class="btn" onclick="formContacto()">+ Agregar</button></div>
+      <div class="kpis" id="kpisContactos"></div>
+      <div class="card fila">
+        <input type="text" id="cq" placeholder="Buscar nombre, @ o celular" style="flex:2;min-width:180px">
+        <select id="ctipo" style="flex:1;min-width:120px"><option value="">Todos los tipos</option></select>
+        <select id="cciudad" style="flex:1;min-width:120px"><option value="">Todas las ciudades</option></select>
+        <select id="cetq" style="flex:1;min-width:120px"><option value="">Todas las etiquetas</option></select>
+      </div>
+      <div class="fila"><span class="sub" id="cuentaSel">0 seleccionados</span><span class="esp"></span>
+        <button class="btn sec chico" onclick="selTodos()">Seleccionar visibles con WhatsApp</button>
+        <button class="btn oro chico" id="btnEnviarSel" disabled onclick="enviarASeleccion()">💬 Escribirles</button></div>
+      <div class="card scroll"><table class="tabla" id="tablaContactos"></table></div>
+    </section>
+
+    <!-- MENSAJES -->
+    <section class="vista oculto" id="v-mensajes">
+      <div><h2>Mensajes por WhatsApp</h2><div class="sub" id="reglasEnvio">Siempre con vista previa. Nunca le escribe a quien respondió SALIR.</div></div>
+      <div class="pasos">
+        <div class="card paso"><h3><span class="num">1</span>¿Qué le mandamos?</h3><div class="plantillas" id="plantillas"></div></div>
+        <div class="card paso"><h3><span class="num">2</span>¿A quién?</h3>
+          <div class="fila" style="margin-top:10px">
+            <button class="chip on" data-fuente="contactos">Influencers y contactos</button>
+            <button class="chip" data-fuente="evento">Asistentes de un evento</button>
+          </div>
+          <div id="segContactos" style="margin-top:12px">
+            <div id="segSeleccion" class="aviso info oculto"></div>
+            <div id="segFiltros" class="grid">
+              <label class="campo">Tipo<select id="stipo" multiple size="3"></select></label>
+              <label class="campo">Ciudad<select id="sciudad" multiple size="5"></select></label>
+              <label class="campo">Etiqueta<select id="setq" multiple size="5"></select></label>
+              <label class="campo">¿Ya vino a una tienda?<select id="sasistio"><option value="">Da igual</option><option value="1">Sí, ya vino</option><option value="0">Todavía no</option></select></label>
+            </div>
+            <div class="mini" style="margin-top:6px">Sin nada marcado = todos. En el computador, Ctrl/⌘ + clic para marcar varias opciones.</div>
+          </div>
+          <div id="segEvento" class="oculto" style="margin-top:12px">
+            <label class="campo">Evento<select id="sevento"></select></label>
+            <div class="mini" style="margin-top:6px">Solo entran quienes aceptaron recibir mensajes en el formulario.</div>
+          </div>
+        </div>
+        <div class="card paso"><h3><span class="num">3</span>Personalízalo</h3><div id="camposPlantilla" class="pasos" style="margin-top:10px"><div class="sub">Elige primero una plantilla.</div></div></div>
+        <div class="card paso"><h3><span class="num">4</span>Revisa y envía</h3>
+          <div class="fila" style="margin-top:10px"><button class="btn sec" onclick="preview()">👀 Ver vista previa</button></div>
+          <div id="resPreview" style="margin-top:14px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORIAL -->
+    <section class="vista oculto" id="v-historial">
+      <div class="fila"><div><h2>Historial de envíos</h2><div class="sub">Lo que salió, si llegó, si lo leyeron y si vinieron a canjear.</div></div><span class="esp"></span><button class="btn sec chico" onclick="cargarHistorial()">↻ Actualizar</button></div>
+      <div class="card scroll"><table class="tabla" id="tablaLotes"></table></div>
+    </section>
+  </main>
+</div>
+
+<div id="velo" class="velo oculto" onclick="if(event.target===this)cerrar()"><div class="modal" id="modal"></div></div>
+
+<script>
+const API = 'https://api.oakberry-cupones.com/';
+const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
+const KEY = 'cc_sesion';
+const $ = id => document.getElementById(id);
+const st = { s:null, contactos:[], sel:new Set(), eventos:[], plantillas:[], plantilla:null, fuente:'contactos', preview:null, ids:null };
+const TIPO_EV = {concierto:'Concierto', lanzamiento_marca:'Lanzamiento de marca', apertura_tienda:'Apertura de tienda', bienestar_empresa:'Bienestar / RR. HH. de empresa', otro:'Otro'};
+const LOOPY = {en_evento:['Se inscribió en el evento','ok'], despues:['Se inscribió después','lila'], ya_era:['Ya era Loopy',''], no_loopy:['No es Loopy','no']};
+const META = {APPROVED:['Aprobada','ok'], PENDING:['En revisión de Meta','wait'], REJECTED:['Rechazada por Meta','no'], NO_CREADA:['Aún no creada en Meta','wait'], PAUSED:['Pausada por Meta','no']};
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function miles(n){ return n==null||n==='' ? '—' : Number(n).toLocaleString('es-CO'); }
+function fecha(iso){ if(!iso) return '—'; const d=new Date(iso.length===10? iso+'T12:00:00':iso); return d.toLocaleDateString('es-CO',{timeZone:'America/Bogota',day:'numeric',month:'short',year:'numeric'}); }
+function fechaHora(iso){ if(!iso) return '—'; return new Date(iso).toLocaleString('es-CO',{timeZone:'America/Bogota',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}); }
+function cel(c){ c=String(c||''); return c.length===10 ? c.slice(0,3)+' '+c.slice(3,6)+' '+c.slice(6) : c; }
+
+// ── sesión ──
+function guardar(s,email){ try{ localStorage.setItem(KEY, JSON.stringify({s,email,t:Date.now()})); }catch(e){} }
+function leer(){ try{ const d=JSON.parse(localStorage.getItem(KEY)||'null'); if(d && Date.now()-d.t < 11.5*3600e3) return d; }catch(e){} return null; }
+function salir(msg){ try{ localStorage.removeItem(KEY); }catch(e){} st.s=null; $('app').classList.add('oculto'); $('login').classList.remove('oculto'); $('avisoLogin').textContent=msg||''; pintarBoton(); }
+async function onCredential(resp){
+  $('avisoLogin').textContent='Entrando…';
+  try{
+    const d = await (await fetch(API+'?accion=ccSesion', {headers:{Authorization:'Bearer '+resp.credential}})).json();
+    if(!d.ok){ $('avisoLogin').textContent = d.mensaje || 'No se pudo entrar.'; return; }
+    guardar(d.sesion, d.email); entrar(d.sesion, d.email);
+  }catch(e){ $('avisoLogin').textContent='Sin conexión con el servidor. Intenta de nuevo.'; }
+}
+function pintarBoton(){
+  if(!window.google || !google.accounts) return setTimeout(pintarBoton, 300);
+  google.accounts.id.initialize({client_id:CLIENT_ID, callback:onCredential});
+  google.accounts.id.renderButton($('gbtn'), {theme:'outline', size:'large', shape:'pill', text:'signin_with', locale:'es'});
+}
+function entrar(s,email){
+  st.s=s; $('yo').textContent=email;
+  $('login').classList.add('oculto'); $('app').classList.remove('oculto');
+  const tab = (location.hash||'#cupones').slice(1);
+  ir(['cupones','eventos','contactos','mensajes','historial'].includes(tab) ? tab : 'cupones');
+  if(tab==='crear') nuevoEvento();
+  cargarEventos(); cargarContactos(); cargarPlantillas();
+}
+async function api(accion, params){
+  const q = new URLSearchParams({accion, s:st.s});
+  for(const [k,v] of Object.entries(params||{})) q.set(k, typeof v==='object' ? JSON.stringify(v) : v);
+  let d;
+  try{ d = await (await fetch(API+'?'+q.toString())).json(); }
+  catch(e){ throw new Error('Sin conexión con el servidor'); }
+  if(d && d.auth===false){ salir('Tu sesión venció. Vuelve a entrar.'); throw new Error('sesión'); }
+  return d;
+}
+
+// ── tabs ──
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => b.dataset.tab==='crear' ? nuevoEvento() : ir(b.dataset.tab));
+function ir(tab){
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab===tab));
+  document.querySelectorAll('section.vista').forEach(s => s.classList.toggle('oculto', s.id!=='v-'+tab));
+  history.replaceState(null,'','#'+tab);
+  if(tab==='historial') cargarHistorial();
+  if(tab==='cupones') cargarCupones();
+  window.scrollTo(0,0);
+}
+async function apiPost(accion, body){
+  let d;
+  try{ d = await (await fetch(API+'?'+new URLSearchParams({accion, s:st.s}), {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body||{})})).json(); }
+  catch(e){ throw new Error('Sin conexión con el servidor'); }
+  if(d && d.auth===false){ salir('Tu sesión venció. Vuelve a entrar.'); throw new Error('sesión'); }
+  return d;
+}
+
+// ══════════ CUPONES (centro_cupones.py) ══════════
+const MODO_TXT = {persona:['👤 Personas','lila'], lote:['🎟 Lote',''], qr:['📱 Evento QR','ok']};
+const WA_TXT = {enviado:['Enviado','ok'], pendiente:['En cola','wait'], enviando:['Enviando…','wait'], fallido:['No llegó','no'], suprimido:['Pidió no recibir','no'], omitido:['No se envió',''], espera_meta:['Esperando a Meta','wait']};
+// «Gracias por acompañarnos en …» (plantilla evento) y «… Por eso queremos consentirte» (plantilla regalo).
+const SUG_EVENTO = {pqr:'OAKBERRY y por contarnos cómo te fue; queremos que tu próxima visita sea mucho mejor', cortesia:'OAKBERRY y por todo tu cariño', influencer:'esta aventura y por compartirnos con tu comunidad', contenido:'la sesión de fotos de OAKBERRY', aliado:'esta alianza con OAKBERRY', evento:'nuestro evento', sampling:'la degustación de OAKBERRY', otro:'OAKBERRY'};
+const SUG_REGALO = {pqr:'Sentimos que tu última visita no haya sido la mejor y queremos que la próxima sí lo sea.', cortesia:'Queremos agradecerte por todo el cariño que le das a OAKBERRY.', influencer:'Gracias por compartirnos con tu comunidad.', contenido:'Gracias por ayudarnos a contar la historia de OAKBERRY.', aliado:'Gracias por ser nuestro aliado.', evento:'Nos encantó tenerte en nuestro evento.', sampling:'Gracias por darnos la oportunidad de consentirte.', otro:'Queremos consentirte.'};
+const cu = {op:null, lista:[], filtro:'', f:null, t:null, poll:null, det:null};
+function pesos(n){ return n==null ? '—' : '$'+Math.round(Number(n)).toLocaleString('es-CO'); }
+function hoyMas(dias){ return new Date(Date.now()+dias*864e5).toLocaleDateString('en-CA',{timeZone:'America/Bogota'}); }
+function quien(e){ return String(e||'').split('@')[0]; }
+function plantillaDe(f){ return f.beneficio_clave==='pct15' && f.tienda==='todas' ? 'regalo' : 'evento'; }
+
+document.querySelectorAll('[data-cfiltro]').forEach(b => b.onclick = () => {
+  cu.filtro = b.dataset.cfiltro;
+  document.querySelectorAll('[data-cfiltro]').forEach(x => x.classList.toggle('on', x===b));
+  pintarCupones();
+});
+
+async function cargarCupones(){
+  let d;
+  try{ d = await api('ccCupCampanas'); }catch(e){ return; }
+  if(!d.ok){ $('tablaCupones').innerHTML = `<tr><td><div class="aviso no">${esc(d.mensaje)}</div></td></tr>`; return; }
+  cu.lista = d.campanas;
+  const t = d.campanas.reduce((a,c)=>({e:a.e+c.emitidos, k:a.k+c.canjeados, p:a.p+(c.costo_canjeado||0)}), {e:0,k:0,p:0});
+  $('kpisCupones').innerHTML = `
+    <div class="kpi"><div class="n">${d.campanas.length}</div><div class="l">campañas</div></div>
+    <div class="kpi"><div class="n">${miles(t.e)}</div><div class="l">cupones entregados</div></div>
+    <div class="kpi verde"><div class="n">${miles(t.k)}</div><div class="l">canjeados en caja</div></div>
+    <div class="kpi"><div class="n">${pesos(t.p)}</div><div class="l">costo de lo canjeado (estimado)</div></div>`;
+  pintarCupones();
+}
+function pintarCupones(){
+  const filas = cu.lista.filter(c => !cu.filtro || c.modo===cu.filtro);
+  if(!filas.length){ $('tablaCupones').innerHTML = `<tr><td class="vacio">${cu.lista.length ? 'Nada con ese filtro.' : 'Aún no hay cupones. Crea el primero con <b>+ Nuevo cupón</b>.'}</td></tr>`; return; }
+  $('tablaCupones').innerHTML = `<thead><tr><th>Campaña</th><th>Beneficio</th><th>Entregados</th><th>Canjeados</th><th>WhatsApp</th><th>Costo</th><th>Creada</th><th></th></tr></thead><tbody>` +
+    filas.map(c => {
+      const m = MODO_TXT[c.modo] || MODO_TXT.qr;
+      const pct = c.emitidos ? Math.round(100*c.canjeados/c.emitidos) : 0;
+      const wa = c.modo==='persona' ? [c.wa_enviados ? `<span class="etq ok">✓ ${c.wa_enviados}</span>` : '', c.wa_pendientes ? `<span class="etq wait">en cola ${c.wa_pendientes}</span>` : '', c.wa_fallidos ? `<span class="etq no">✗ ${c.wa_fallidos}</span>` : ''].join(' ') || '—' : '—';
+      return `<tr>
+        <td data-l="Campaña"><div><b>${esc(c.nombre)}</b><br><span class="etq ${m[1]}">${m[0]}</span> <span class="mini" title="${esc(c.motivo_texto||'')}">${esc(c.motivo_nombre||'')}</span>${c.paga==='franquicia' ? ' <span class="etq wait">paga franquicia</span>' : ''}</div></td>
+        <td data-l="Beneficio"><div>${esc(c.beneficio||'')}<br><span class="mini">${esc(c.tienda==='todas' ? 'Todas las tiendas' : c.tienda)}</span></div></td>
+        <td data-l="Entregados">${miles(c.emitidos)}${c.modo!=='qr' ? ' de '+miles(c.cupo) : ''}</td>
+        <td data-l="Canjeados"><b>${miles(c.canjeados)}</b> <span class="mini">${c.emitidos ? pct+'%' : ''}</span></td>
+        <td data-l="WhatsApp">${wa}</td>
+        <td data-l="Costo"><div>${pesos(c.costo_canjeado)}<br><span class="mini">máx. ${pesos(c.costo_max)}</span></div></td>
+        <td data-l="Creada"><div>${fecha(c.created_at)}<br><span class="mini">${esc(quien(c.creado_por))}</span></div></td>
+        <td data-l=""><button class="btn sec chico" onclick="${c.modo==='qr' ? `detalleEvento('${esc(c.evento)}')` : `detalleCupon('${esc(c.evento)}')`}">Ver</button></td>
+      </tr>`;
+    }).join('') + '</tbody>';
+}
+
+// ── crear ──
+async function nuevoCupon(modo){
+  if(!cu.op){
+    let d; try{ d = await api('ccCupOpciones'); }catch(e){ return; }
+    if(!d.ok){ alert(d.mensaje); return; }
+    cu.op = d;
+  }
+  cu.f = {modo:modo||'persona', nombre:'', beneficio_clave:'bowl9', motivo:'cortesia', motivo_texto:'', paga:'marca', tienda:'todas', vence:hoyMas(30), personas:'', cantidad:20, enviar_wa:true, wa_mensaje:SUG_EVENTO.cortesia};
+  pintarCreadorCupon();
+}
+function pintarCreadorCupon(){
+  const f = cu.f, op = cu.op;
+  const motivos = Object.entries(op.motivos).map(([k,v]) => `<option value="${k}" ${k===f.motivo?'selected':''}>${esc(v)}</option>`).join('');
+  const tiendas = '<option value="todas">Todas las tiendas de Colombia</option>' + op.tiendas.map(t => `<option ${t===f.tienda?'selected':''}>${esc(t)}</option>`).join('');
+  abrir(`<div class="cab"><h3>Nuevo cupón</h3><button class="x" onclick="cerrar()">×</button></div>
+  <div class="pasos">
+    <div class="card paso"><h3><span class="num">1</span>¿Para quién?</h3>
+      <div class="fila" style="margin-top:10px">
+        <button class="chip ${f.modo==='persona'?'on':''}" data-cmodo="persona" type="button">👤 Personas (les llega por WhatsApp)</button>
+        <button class="chip ${f.modo==='lote'?'on':''}" data-cmodo="lote" type="button">🎟 Lote de códigos</button>
+        <button class="chip" data-cmodo="qr" type="button">📱 Evento con QR</button>
+      </div>
+      <div class="mini" style="margin-top:6px">${f.modo==='persona' ? 'Cortesías, compensaciones, prensa: escribes nombre y celular y a cada uno le llega su código.' : 'Códigos sin dueño para repartir a mano o imprimir (un aliado, una activación). Cada código sirve una vez.'}</div>
+      <label class="campo" style="margin-top:10px">Nombre de la campaña (para encontrarla después)<input type="text" id="cu_nombre" maxlength="80" value="${esc(f.nombre)}" placeholder="${f.modo==='persona' ? 'Cortesías prensa noviembre' : 'Activación Bodytech Andino'}"></label>
+    </div>
+    <div class="card paso"><h3><span class="num">2</span>¿Qué recibe?</h3>
+      <div class="plantillas" id="cu_bens" style="margin-top:10px"></div>
+    </div>
+    <div class="card paso"><h3><span class="num">3</span>¿Por qué y quién paga?</h3>
+      <div class="grid" style="margin-top:10px">
+        <label class="campo">Motivo<select id="cu_motivo">${motivos}</select></label>
+        <label class="campo">Cuéntalo en una frase${f.motivo==='otro' ? '' : ' (opcional)'}<input type="text" id="cu_mtxt" maxlength="200" value="${esc(f.motivo_texto)}" placeholder="Queja de servicio en Andino, caso #123"></label>
+      </div>
+      <div class="fila" style="margin-top:10px"><span class="mini">¿Quién paga?</span>
+        <button class="chip ${f.paga==='marca'?'on':''}" data-cpaga="marca" type="button">La marca</button>
+        <button class="chip ${f.paga==='franquicia'?'on':''}" data-cpaga="franquicia" type="button">La franquicia</button></div>
+    </div>
+    <div class="card paso"><h3><span class="num">4</span>¿Dónde y hasta cuándo?</h3>
+      <div class="grid" style="margin-top:10px">
+        <label class="campo">¿Dónde se canjea?<select id="cu_tienda">${tiendas}</select></label>
+        <label class="campo">Vale hasta<input type="date" id="cu_vence" value="${esc(f.vence)}" min="${hoyMas(0)}" max="${hoyMas(180)}"></label>
+      </div>
+    </div>
+    ${f.modo==='persona' ? `
+    <div class="card paso"><h3><span class="num">5</span>¿A quién?</h3>
+      <label class="campo" style="margin-top:10px">Una persona por línea: nombre y celular
+        <textarea id="cu_personas" class="lista" rows="4" placeholder="Ana Pérez, 300 123 4567&#10;Juan Gómez, 310 555 1234">${esc(f.personas)}</textarea></label>
+      <div class="mini" id="cu_npers"></div>
+      <label class="fila" style="font-size:14px;margin-top:10px"><input type="checkbox" class="ckbox" id="cu_wa" ${f.enviar_wa?'checked':''}> Mandarle el código por WhatsApp</label>
+      <div id="cu_wabox" class="${f.enviar_wa?'':'oculto'}" style="margin-top:8px">
+        <label class="campo"><span id="cu_walabel"></span><input type="text" id="cu_wamsj" maxlength="160" value="${esc(f.wa_mensaje)}"></label>
+        <div class="mini">Sale de 8 a. m. a 8 p. m.; fuera de ese horario el código queda creado y el WhatsApp en cola.</div>
+      </div>
+    </div>` : `
+    <div class="card paso"><h3><span class="num">5</span>¿Cuántos códigos?</h3>
+      <label class="campo" style="margin-top:10px">Cantidad (máximo ${op.max_lote})<input type="number" id="cu_cant" min="1" max="${op.max_lote}" value="${f.cantidad}"></label>
+    </div>`}
+    <div class="card paso"><h3><span class="num">6</span>Revisa y crea</h3>
+      <div id="cu_previa" style="margin-top:10px"><div class="mini">Llena los datos y aquí ves cuánto puede costar y lo que le llega a la persona.</div></div>
+      <div id="cu_err" style="margin-top:8px"></div>
+      <button class="btn" id="cu_ok" type="button" style="margin-top:10px" onclick="crearCupon()">Crear y entregar</button>
+    </div>
+  </div>`);
+  pintarBensCupon();
+  document.querySelectorAll('[data-cmodo]').forEach(b => b.onclick = () => {
+    if(b.dataset.cmodo==='qr'){ cerrar(); nuevoEvento(); return; }
+    leerFormCupon(); cu.f.modo = b.dataset.cmodo; pintarCreadorCupon();
+  });
+  document.querySelectorAll('[data-cpaga]').forEach(b => b.onclick = () => { cu.f.paga = b.dataset.cpaga; document.querySelectorAll('[data-cpaga]').forEach(x => x.classList.toggle('on', x===b)); previaCupon(); });
+  $('modal').querySelectorAll('input,select,textarea').forEach(el => { el.oninput = el.onchange = () => { leerFormCupon(); previaCupon(); }; });
+  $('cu_motivo').oninput = null;       // el genérico leería el motivo nuevo antes de este handler
+  $('cu_motivo').onchange = () => {
+    const viejo = cu.f.motivo; leerFormCupon();
+    // Si la frase del WhatsApp era la sugerida del motivo anterior, se cambia por la del nuevo.
+    const sug = plantillaDe(cu.f)==='regalo' ? SUG_REGALO : SUG_EVENTO;
+    if(!cu.f.wa_mensaje || cu.f.wa_mensaje===SUG_EVENTO[viejo] || cu.f.wa_mensaje===SUG_REGALO[viejo]){ cu.f.wa_mensaje = sug[cu.f.motivo]; if($('cu_wamsj')) $('cu_wamsj').value = cu.f.wa_mensaje; }
+    previaCupon();
+  };
+  previaCupon();
+}
+function pintarBensCupon(){
+  $('cu_bens').innerHTML = cu.op.beneficios.map(b => `<button class="pl ${b.clave===cu.f.beneficio_clave?'on':''}" data-cben="${b.clave}" type="button">
+      <div class="tt">${esc(b.titulo)}</div><div class="vv">${pesos(b.valor)} <span class="mini">${b.tipo==='descuento' ? 'por canje, estimado' : 'por canje'}</span></div>
+      <div class="tk">En Toteat: «${esc(b.toteat)}»</div></button>`).join('');
+  document.querySelectorAll('[data-cben]').forEach(b => b.onclick = () => {
+    const antes = plantillaDe(cu.f); cu.f.beneficio_clave = b.dataset.cben; pintarBensCupon();
+    if(plantillaDe(cu.f)!==antes) ajustarFraseCupon(); previaCupon();
+  });
+}
+function ajustarFraseCupon(){
+  // Cambió la plantilla (regalo ↔ evento): la frase sugerida de una no sirve en la otra.
+  const f = cu.f, m = f.motivo;
+  if(!f.wa_mensaje || f.wa_mensaje===SUG_EVENTO[m] || f.wa_mensaje===SUG_REGALO[m]){
+    f.wa_mensaje = (plantillaDe(f)==='regalo' ? SUG_REGALO : SUG_EVENTO)[m];
+    if($('cu_wamsj')) $('cu_wamsj').value = f.wa_mensaje;
+  }
+}
+function leerFormCupon(){
+  const f = cu.f, v = id => $(id) ? $(id).value : undefined;
+  const antes = plantillaDe(f);
+  f.nombre = v('cu_nombre') ?? f.nombre; f.motivo = v('cu_motivo') ?? f.motivo; f.motivo_texto = v('cu_mtxt') ?? f.motivo_texto;
+  f.tienda = v('cu_tienda') ?? f.tienda; f.vence = v('cu_vence') ?? f.vence;
+  if($('cu_personas')) f.personas = $('cu_personas').value;
+  if($('cu_cant')) f.cantidad = Number($('cu_cant').value||0);
+  if($('cu_wa')){ f.enviar_wa = $('cu_wa').checked; $('cu_wabox').classList.toggle('oculto', !f.enviar_wa); }
+  if($('cu_wamsj')) f.wa_mensaje = $('cu_wamsj').value;
+  if(plantillaDe(f)!==antes) ajustarFraseCupon();
+  if($('cu_walabel')) $('cu_walabel').textContent = plantillaDe(f)==='regalo' ? 'El porqué del regalo (una frase; después dice «Por eso queremos consentirte con un regalo…»)' : 'Completa la frase: «Gracias por acompañarnos en …»';
+  if($('cu_npers')){ const n = f.personas.split('\n').filter(x=>x.trim()).length; $('cu_npers').textContent = n ? n+(n===1?' persona':' personas')+' (máximo '+cu.op.max_personas+')' : ''; }
+}
+function previaCupon(){
+  clearTimeout(cu.t);
+  cu.t = setTimeout(async () => {
+    const f = cu.f, seq = (cu.seq = (cu.seq||0) + 1); let d;
+    try{ d = await apiPost('ccCupPrevia', {datos:f}); }catch(e){ return; }
+    if(cu.f!==f || seq!==cu.seq) return;      // respuesta vieja: ya hay una más nueva en camino
+    const box = $('cu_previa'); if(!box) return;
+    if(!d.ok){ box.innerHTML = `<div class="aviso info">Falta: ${esc(d.mensaje)}</div>`; $('cu_ok').disabled = true; return; }
+    const pct = Math.min(100, Math.round(100*d.costo/d.tope));
+    box.innerHTML = `
+      <div class="fila"><div><b style="font-size:18px">${pesos(d.costo)}</b> <span class="mini">es lo máximo que puede costar: ${miles(d.cupo)} × ${pesos(d.valor)}</span></div></div>
+      <div class="tope ${d.pasa_tope?'pasa':''}"><i style="width:${pct}%"></i></div>
+      <div class="mini">Tope sin aprobación: ${pesos(d.tope)}</div>
+      ${d.pasa_tope && !d.puede ? `<div class="aviso no" style="margin-top:8px">Pasa el tope. Bájale cupos o pídele a ${esc(cu.op.aprobadores.join(' o '))} que la cree.</div>` : ''}
+      ${d.pasa_tope && d.puede ? `<div class="aviso info" style="margin-top:8px">Pasa el tope; la puedes crear porque apruebas campañas.</div>` : ''}
+      <div class="aviso ok" style="margin-top:10px">🏷️ En caja: el cajero valida el código en /validar y aplica en Toteat <b>«${esc(d.toteat)}»</b>.<br><span class="mini">Recibe: ${esc(d.producto)}</span></div>
+      ${d.texto_wa ? `<div class="mini" style="margin:12px 0 6px">Así le llega por WhatsApp${d.plantilla_aprobada===false ? ' — <b style="color:var(--coral)">plantilla sin aprobar por Meta</b>' : ''}:</div>
+        <div class="wa"><div class="burbuja">${esc(d.texto_wa)}<span class="bt">Copiar código</span><span class="bt">Ver tiendas</span></div></div>` : ''}`;
+    $('cu_ok').disabled = d.pasa_tope && !d.puede;
+  }, 350);
+}
+async function crearCupon(){
+  leerFormCupon();
+  const b = $('cu_ok'); b.disabled = true; b.textContent = 'Creando…'; $('cu_err').innerHTML = '';
+  let d;
+  try{ d = await apiPost('ccCupCrear', {datos:cu.f}); }
+  catch(e){ $('cu_err').innerHTML = `<div class="aviso no">${esc(e.message)}</div>`; b.disabled = false; b.textContent = 'Crear y entregar'; return; }
+  if(!d.ok){ $('cu_err').innerHTML = `<div class="aviso no">${esc(d.mensaje)}</div>`; b.disabled = false; b.textContent = 'Crear y entregar'; return; }
+  cargarCupones();
+  detalleCupon(d.evento, {nuevo:true, fallidos:d.fallidos});
+}
+
+// ── detalle ──
+async function detalleCupon(slug, opts){
+  opts = opts || {};
+  clearTimeout(cu.poll);
+  let d; try{ d = await api('ccCupDetalle', {evento:slug}); }catch(e){ return; }
+  if(!d.ok){ abrir(`<div class="aviso no">${esc(d.mensaje)}</div>`); return; }
+  cu.det = d;
+  const c = d.campana, r = d.registros;
+  const canj = r.filter(x => x.estado==='Canjeado').length;
+  const enCola = r.some(x => ['pendiente','enviando'].includes(x.wa_estado));
+  const motivoCola = (r.find(x => x.wa_estado==='pendiente' && x.wa_error)||{}).wa_error;
+  const fallidos = opts.fallidos && opts.fallidos.length ? `<div class="aviso no">No se pudo entregar a: ${opts.fallidos.map(x => esc(x.nombre)+' ('+esc(x.error)+')').join(', ')}. Vuelve a escribirlos en «Agregar personas».</div>` : '';
+  abrir(`<div class="cab"><h3>${esc(c.nombre)}</h3><button class="x" onclick="cerrar()">×</button></div>
+    <div class="pasos">
+      ${opts.nuevo ? `<div class="aviso ok">¡Listo! ${miles(r.length)} ${c.modo==='lote' ? 'códigos creados' : 'cupones entregados'}.</div>` : ''}${fallidos}
+      <div class="card">
+        <div class="kpis">
+          <div class="kpi"><div class="n">${miles(r.length)}</div><div class="l">de ${miles(c.cupo)} entregados</div></div>
+          <div class="kpi verde"><div class="n">${miles(canj)}</div><div class="l">canjeados</div></div>
+          <div class="kpi"><div class="n">${pesos(c.valor_cupon==null ? null : c.valor_cupon*canj)}</div><div class="l">costo canjeado · máx. ${pesos(c.costo_max)}</div></div>
+        </div>
+        <div class="excl" style="margin-top:12px">
+          <span>Beneficio</span><span>${esc(c.beneficio)}</span>
+          <span>En Toteat</span><span>«${esc(c.toteat_descuento)}»</span>
+          <span>Dónde</span><span>${esc(c.tienda==='todas' ? 'Todas las tiendas' : c.tienda)}</span>
+          <span>Vale hasta</span><span>${fecha(c.vence_el)}</span>
+          <span>Motivo</span><span>${esc(c.motivo_nombre)}${c.motivo_texto ? ' · '+esc(c.motivo_texto) : ''}</span>
+          <span>Paga</span><span>${c.paga==='franquicia' ? 'La franquicia' : 'La marca'}</span>
+          <span>Creada por</span><span>${esc(c.creado_por)} · ${fecha(c.created_at)}</span>
+        </div>
+      </div>
+      ${enCola ? `<div class="aviso info">WhatsApp en cola${motivoCola ? ': '+esc(motivoCola) : '…'} </div>` : ''}
+      <div class="fila">
+        ${c.wa_plantilla ? `<button class="btn sec chico" onclick="reenviarCupon('${esc(c.evento)}')">💬 Reenviar WhatsApp pendientes</button>` : ''}
+        ${c.modo==='lote' && r.length < c.cupo ? `<button class="btn sec chico" onclick="completarLote('${esc(c.evento)}')">Crear los ${c.cupo - r.length} que faltan</button>` : ''}
+        <button class="btn sec chico" onclick="csvCupon()">⬇ CSV</button>
+        ${c.modo==='lote' ? `<button class="btn sec chico" onclick="imprimirCupon()">🖨 Imprimir códigos</button>` : ''}
+      </div>
+      ${c.modo==='persona' ? `<details class="card"><summary><b style="color:var(--morado)">+ Agregar personas</b></summary>
+        <textarea id="cu_mas" class="lista" rows="3" style="margin-top:8px" placeholder="Nombre, celular (una por línea)"></textarea>
+        <div id="cu_mas_err" style="margin-top:6px"></div>
+        <button class="btn chico" style="margin-top:8px" onclick="agregarPersonas('${esc(c.evento)}')">Entregar</button></details>` : ''}
+      <div class="card scroll"><table class="tabla cu-res">
+        <thead><tr><th>${c.modo==='lote' ? '#' : 'Persona'}</th><th>Código</th>${c.wa_plantilla ? '<th>WhatsApp</th>' : ''}<th>Estado</th><th>Canje</th></tr></thead><tbody>
+        ${r.map((x,i) => { const w = WA_TXT[x.wa_estado]; return `<tr>
+          <td data-l="${c.modo==='lote' ? '#' : 'Persona'}">${c.modo==='lote' ? i+1 : `<div>${esc(x.nombre)}<br><span class="mini">${cel(x.celular)}</span></div>`}</td>
+          <td data-l="Código"><b>${esc(x.codigo)}</b></td>
+          ${c.wa_plantilla ? `<td data-l="WhatsApp">${w ? `<span class="etq ${w[1]}" title="${esc(x.wa_error||'')}">${w[0]}</span>` : '—'}</td>` : ''}
+          <td data-l="Estado"><span class="etq ${x.estado==='Canjeado'?'ok':x.estado==='Vencido'?'no':''}">${esc(x.estado||'—')}</span></td>
+          <td data-l="Canje">${x.estado==='Canjeado' ? `<div>${esc(x.punto_venta||'')}<br><span class="mini">${esc(x.fecha_canje||'')}</span></div>` : '—'}</td></tr>`; }).join('')}
+        </tbody></table></div>
+    </div>`);
+  // Mientras haya WhatsApp saliendo, se refresca solo (máx. ~1 min).
+  if(enCola && !motivoCola){ const n = opts.n || 0; if(n < 15) cu.poll = setTimeout(() => { if(!$('velo').classList.contains('oculto')) detalleCupon(slug, {nuevo:opts.nuevo, n:n+1}).then(cargarCupones); }, 4000); }
+}
+async function reenviarCupon(slug){
+  let d; try{ d = await api('ccCupReenviar', {evento:slug}); }catch(e){ return; }
+  if(!d.ok){ alert(d.mensaje); return; }
+  setTimeout(() => detalleCupon(slug, {n:0}), 1500);
+}
+async function completarLote(slug){
+  let d; try{ d = await api('ccCupCompletar', {evento:slug}); }catch(e){ return; }
+  if(!d.ok){ alert(d.mensaje); return; }
+  detalleCupon(slug); cargarCupones();
+}
+async function agregarPersonas(slug){
+  const t = $('cu_mas').value; if(!t.trim()) return;
+  let d; try{ d = await apiPost('ccCupAgregar', {evento:slug, personas:t}); }catch(e){ return; }
+  if(!d.ok){ $('cu_mas_err').innerHTML = `<div class="aviso no">${esc(d.mensaje)}</div>`; return; }
+  cargarCupones(); detalleCupon(slug, {nuevo:true, fallidos:d.fallidos});
+}
+function csvCupon(){
+  const {campana:c, registros:r} = cu.det;
+  const q = s => '"'+String(s==null?'':s).replace(/"/g,'""')+'"';
+  const filas = [['codigo','nombre','celular','whatsapp','estado','tienda_canje','fecha_canje','beneficio','vale_hasta']]
+    .concat(r.map(x => [x.codigo, x.nombre, x.celular, x.wa_estado||'', x.estado||'', x.punto_venta||'', x.fecha_canje||'', c.beneficio, (c.vence_el||'').slice(0,10)]));
+  const blob = new Blob(['﻿'+filas.map(f => f.map(q).join(',')).join('\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = c.evento+'.csv'; a.click();
+}
+function imprimirCupon(){
+  const {campana:c, registros:r} = cu.det;
+  const donde = c.tienda==='todas' ? 'Cualquier tienda OAKBERRY de Colombia' : 'OAKBERRY '+c.tienda;
+  const w = window.open('', '_blank'); if(!w){ alert('Permite las ventanas emergentes para imprimir.'); return; }
+  w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(c.nombre)}</title><style>
+    @font-face{font-family:Nexa;src:url(/exacto-assets/fuentes/nexa-slab-black.woff2) format("woff2");font-weight:900}
+    :root{color-scheme:light}body{margin:0;background:#fff;color:#21152A;font:12px/1.35 system-ui,sans-serif}
+    .g{display:grid;grid-template-columns:repeat(3,1fr);gap:0}.t{border:1px dashed #B79CC8;padding:14px 12px;text-align:center;break-inside:avoid;height:150px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:4px}
+    .m{font-family:Nexa,serif;font-weight:900;color:#4B1F60;font-size:15px;letter-spacing:1px}.b{font-weight:700;font-size:13px}.c{font:900 22px/1 ui-monospace,Menlo,monospace;letter-spacing:2px;color:#4B1F60;margin:4px 0}.p{font-size:10px;color:#5C4A66}
+    @page{margin:10mm}</style></head><body><div class="g">${r.map(x => `<div class="t"><div class="m">OAKBERRY</div><div class="b">${esc(c.beneficio)}</div><div class="c">${esc(x.codigo)}</div><div class="p">${esc(donde)} · vale hasta ${fecha(c.vence_el)}<br>Un solo uso. Muéstralo en caja.</div></div>`).join('')}</div>
+    <script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);
+  w.document.close();
+}
+function abrir(html){ $('modal').innerHTML=html; $('velo').classList.remove('oculto'); }
+function cerrar(){ $('velo').classList.add('oculto'); $('modal').innerHTML=''; }
+
+// ══════════ EVENTOS ══════════
+async function cargarEventos(){
+  const d = await api('ccEventos');
+  if(!d.ok){ $('listaEventos').innerHTML = `<div class="aviso no">${esc(d.mensaje)}</div>`; return; }
+  st.eventos = d.eventos;
+  const t = d.eventos.reduce((a,e)=>({r:a.r+e.registros, c:a.c+e.canjeados, o:a.o+e.opt_in}), {r:0,c:0,o:0});
+  $('kpisEventos').innerHTML = `
+    <div class="kpi"><div class="n">${d.eventos.length}</div><div class="l">eventos</div></div>
+    <div class="kpi"><div class="n">${miles(t.r)}</div><div class="l">personas registradas</div></div>
+    <div class="kpi"><div class="n">${miles(t.o)}</div><div class="l">aceptan WhatsApp</div></div>
+    <div class="kpi verde"><div class="n">${miles(t.c)}</div><div class="l">cupones canjeados</div></div>`;
+  $('sevento').innerHTML = d.eventos.map(e => `<option value="${esc(e.evento)}">${esc(e.nombre)} · ${fecha(e.fecha_evento)} (${e.opt_in} con permiso)</option>`).join('') || '<option value="">Aún no hay eventos</option>';
+  if(!d.eventos.length){ $('listaEventos').innerHTML = '<div class="card vacio">Aún no hay eventos. Crea el primero con <b>+ Nuevo evento</b>.</div>'; return; }
+  $('listaEventos').innerHTML = d.eventos.map(e => {
+    const pct = Math.min(100, Math.round(e.cupones*100/Math.max(1,e.cupo)));
+    return `<div class="card ev">
+      <div class="fila"><span class="etq ${e.activo?'ok':''}">${e.activo?'Abierto':'Pausado'}</span><span class="etq">${esc(TIPO_EV[e.tipo_evento]||'Evento')}</span></div>
+      <div class="nom" style="margin-top:8px">${esc(e.nombre)}</div>
+      <div class="sub">${fecha(e.fecha_evento)} · ${esc(e.lugar||'')}${e.lugar?' · ':''}${esc(e.ciudad||'')}</div>
+      ${e.modalidad==='sorteo' ? `<div class="nums">
+        <div><b>${miles(e.participantes + e.ganadores)}</b><span>inscritos</span></div>
+        <div><b>${miles(e.sorteo_ganadores)}</b><span>ganadores</span></div>
+        <div><b>${miles(e.canjeados)}</b><span>canjearon</span></div>
+      </div>
+      <div class="mini" style="margin-bottom:6px">🎟️ Sorteo ${e.sorteo_estado==='sorteado' ? 'hecho el ' + fechaHora(e.sorteo_ejecutado_at) : 'cierra el ' + fechaHora(e.sorteo_cierra_el)}</div>` : `<div class="nums">
+        <div><b>${miles(e.registros)}</b><span>registros</span></div>
+        <div><b>${miles(e.cupones)}/${miles(e.cupo)}</b><span>cupones</span></div>
+        <div><b>${miles(e.opt_in)}</b><span>aceptan WA</span></div>
+        <div><b>${miles(e.canjeados)}</b><span>canjeados</span></div>
+      </div>
+      <div class="barra-cupo"><i style="width:${pct}%"></i></div>`}
+      <div style="margin:6px 0 2px"><b>🎁 ${esc(e.beneficio||'')}</b>${e.aliado_nombre?` · 🤝 ${esc(e.aliado_nombre)}`:''}</div>
+      <div class="mini" style="margin:0 0 10px">Cupón válido ${e.vigencia_dias||'—'} días desde que se registra · ${e.wa_plantilla?`💬 llega por WhatsApp (${miles(e.wa_enviados)} enviados${e.wa_fallidos?`, ${e.wa_fallidos} fallaron`:''})`:'sin WhatsApp'}</div>
+      <div class="fila">
+        <button class="btn chico" onclick="abrirCreador('${esc(e.evento)}')">Link, QR y flyer</button>
+        <button class="btn sec chico" onclick="detalleEvento('${esc(e.evento)}')">Ver asistentes</button>
+      </div></div>`;
+  }).join('');
+}
+
+// ══════════ CREAR / EDITAR EVENTO ══════════
+const cr = { opciones:null, slug:'', modo:'cupon', btipo:'bowl', clave:'bowl9', logo:undefined, logoSrc:null, foto:'bowl-clasico', fmt:'afiche', t:null, flyer:{} };
+const FL = ['arriba','titular','lema','sellos','qrTexto','ubicTitulo','ubicTexto','letra'];
+cr.rifas = [];
+const isoBog = v => v ? new Date(v).toLocaleString('sv-SE',{timeZone:'America/Bogota'}).slice(0,16).replace(' ','T') : '';
+function pintarRifas(){
+  const premios = (cr.opciones ? cr.opciones.beneficios : []).filter(b => b.tipo === 'bowl');
+  $('cr_rifas').innerHTML = cr.rifas.map((r,i) => r.estado === 'sorteado'
+    ? `<div class="aviso ok">✅ ${esc(r.nombre)} · ${r.ganadores} × ${esc((premios.find(b=>b.clave===r.beneficio_clave)||{}).titulo||'')} · sorteada</div>`
+    : `<div class="card" style="padding:10px;gap:8px">
+        <div class="grid">
+          <label class="campo">Nombre<input type="text" maxlength="60" value="${esc(r.nombre)}" data-rifa="${i}" data-k="nombre"></label>
+          <label class="campo">Premio<select data-rifa="${i}" data-k="beneficio_clave">${premios.map(b=>`<option value="${b.clave}" ${b.clave===r.beneficio_clave?'selected':''}>${esc(b.titulo)}</option>`).join('')}</select></label>
+          <label class="campo">Ganadores<input type="number" min="1" max="100" value="${r.ganadores}" data-rifa="${i}" data-k="ganadores"></label>
+          <label class="campo">Se sortea (fecha y hora)<input type="datetime-local" value="${esc(r.sortea||'')}" data-rifa="${i}" data-k="sortea"></label>
+        </div>
+        <div class="fila"><span class="esp"></span><button class="btn sec chico" type="button" data-quitar="${i}">Quitar</button></div></div>`).join('');
+  document.querySelectorAll('[data-rifa]').forEach(el => el.addEventListener('input', () => { cr.rifas[el.dataset.rifa][el.dataset.k] = el.value; }));
+  document.querySelectorAll('[data-quitar]').forEach(b => b.onclick = () => { cr.rifas.splice(+b.dataset.quitar,1); pintarRifas(); });
+}
+async function opcionesEvento(){
+  if(cr.opciones) return cr.opciones;
+  const d = await api('ccEventoOpciones'); if(!d.ok) throw new Error(d.mensaje||'No cargó');
+  cr.opciones = d;
+  $('cr_tipo').innerHTML = Object.entries(TIPO_EV).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  $('cr_tienda').innerHTML = '<option value="todas">Todas las tiendas de Colombia</option>' + d.tiendas.map(t=>`<option>${esc(t)}</option>`).join('');
+  $('cr_fotos').innerHTML = d.fotos.map(f=>`<button type="button" data-foto="${f}"><img src="/cc-assets/${f}.jpg" alt=""></button>`).join('');
+  document.querySelectorAll('[data-foto]').forEach(b => b.onclick = () => { cr.foto=b.dataset.foto; pintarFotos(); previa(); });
+  return d;
+}
+function pintarFotos(){ document.querySelectorAll('[data-foto]').forEach(b=>b.classList.toggle('on', b.dataset.foto===cr.foto)); }
+function pintarBeneficios(){
+  document.querySelectorAll('[data-btipo]').forEach(b=>b.classList.toggle('on', b.dataset.btipo===cr.btipo));
+  const lista = cr.opciones.beneficios.filter(b=>b.tipo===cr.btipo);
+  if(!lista.some(b=>b.clave===cr.clave)) cr.clave = lista[cr.btipo==='bowl'?1:1] ? lista[1].clave : lista[0].clave;
+  $('cr_beneficios').innerHTML = lista.map(b=>`<button type="button" class="pl ${b.clave===cr.clave?'on':''}" data-clave="${b.clave}"><div class="tt">${esc(b.titulo)}</div><div class="tk">Toteat: ${esc(b.toteat)}</div></button>`).join('');
+  document.querySelectorAll('#cr_beneficios .pl').forEach(b=>b.onclick=()=>{ cr.clave=b.dataset.clave; pintarBeneficios(); previa(); });
+  const b = cr.opciones.beneficios.find(x=>x.clave===cr.clave);
+  $('cr_toteat').innerHTML = `En caja, el cajero aplicará en Toteat: <b>${esc(b.toteat)}</b>${b.tipo==='bowl'?' (cubre solo el bowl).':'.'}`;
+  const plant = cr.modo==='sorteo' ? 'ganador' : (cr.clave==='pct15' ? 'regalo' : 'evento');
+  $('cr_wa_estado').innerHTML = cr.opciones.plantillas[plant] ? '✅ La plantilla de WhatsApp está aprobada.'
+    : '⏳ La plantilla de WhatsApp para este beneficio está en revisión de Meta: mientras tanto el cupón se muestra en pantalla y el WhatsApp sale cuando la aprueben.';
+  $('cr_wamsj').closest('label').classList.toggle('oculto', cr.clave!=='pct15');
+}
+document.querySelectorAll('[data-btipo]').forEach(b => b.onclick = () => { cr.btipo=b.dataset.btipo; pintarBeneficios(); previa(); });
+document.querySelectorAll('[data-modo]').forEach(b => b.onclick = () => { cr.modo=b.dataset.modo; pintarModo(); previa(); });
+function pintarModo(){
+  document.querySelectorAll('[data-modo]').forEach(b=>b.classList.toggle('on', b.dataset.modo===cr.modo));
+  $('cr_sorteo').classList.toggle('oculto', cr.modo!=='sorteo'); $('cr_cupo_l').classList.toggle('oculto', cr.modo==='sorteo');
+  $('cr_rifas_box').classList.toggle('oculto', cr.modo==='sorteo');
+  $('cr_wa').closest('label').classList.toggle('oculto', cr.modo==='sorteo');
+  $('cr_vig').closest('label').firstChild.textContent = cr.modo==='sorteo' ? 'Días para usar el premio (desde el sorteo)' : 'Días para usarlo (desde que se registra)';
+  if(cr.opciones) pintarBeneficios();
+}
+FL.forEach(k => $('fl_'+k).addEventListener('input', () => { cr.flyer[k] = $('fl_'+k).value; previa(); }));
+$('cr_rifa_add').onclick = () => {
+  const n = cr.rifas.length, f = $('cr_fecha').value || new Date().toLocaleDateString('en-CA',{timeZone:'America/Bogota'});
+  cr.rifas.push({nombre: n===0 ? 'Rifa de la mañana' : n===1 ? 'Rifa de la tarde' : 'Rifa ' + (n+1), beneficio_clave:'bowl12', ganadores:2,
+                 sortea: f + (n===0 ? 'T12:00' : 'T18:00'), estado:'pendiente'});
+  pintarRifas();
+};
+$('fl_reset').onclick = () => { cr.flyer = {}; previa(); };
+['cr_ganadores','cr_cierre','cr_lugar','cr_ciudad'].forEach(id => $(id).addEventListener('input', () => previa()));
+document.querySelectorAll('[data-fmt]').forEach(b => b.onclick = () => { cr.fmt=b.dataset.fmt; document.querySelectorAll('[data-fmt]').forEach(x=>x.classList.toggle('on',x===b)); previa(); });
+['cr_nombre','cr_fecha','cr_aliado','cr_cupo','cr_vig','cr_tienda','cr_tycx','cr_desde','cr_wa'].forEach(id => $(id).addEventListener('input', () => previa()));
+
+async function nuevoEvento(){ await abrirCreador(null); }
+async function abrirCreador(slug){
+  ir('crear');
+  try{ await opcionesEvento(); }catch(e){ $('cr_err').innerHTML = `<div class="aviso no">${esc(e.message)}</div>`; return; }
+  const e = slug ? st.eventos.find(x=>x.evento===slug) : null;
+  cr.slug = e ? e.evento : ''; cr.logo = undefined;
+  cr.logoSrc = e && e.logo_url ? e.logo_url + '?t=' + Date.now() : null;
+  cr.clave = e && e.beneficio_clave ? e.beneficio_clave : 'bowl9';
+  cr.btipo = cr.clave.startsWith('bowl') ? 'bowl' : 'descuento';
+  cr.foto = 'bowl-clasico';
+  cr.modo = e && e.modalidad==='sorteo' ? 'sorteo' : 'cupon';
+  cr.flyer = e && e.flyer ? Object.assign({}, e.flyer) : {};
+  cr.rifas = (e && e.rifas || []).map(r => ({id:r.id, nombre:r.nombre, beneficio_clave:r.beneficio_clave, ganadores:r.ganadores, sortea:isoBog(r.sortea_el), estado:r.estado}));
+  $('cr_ganadores').value = e && e.sorteo_ganadores ? e.sorteo_ganadores : 10;
+  $('cr_cierre').value = e && e.sorteo_cierra_el ? new Date(e.sorteo_cierra_el).toLocaleString('sv-SE',{timeZone:'America/Bogota'}).slice(0,16).replace(' ','T') : '';
+  const hoy = new Date().toLocaleDateString('en-CA',{timeZone:'America/Bogota'});
+  $('crTitulo').textContent = e ? 'Editar: ' + e.nombre : 'Crear evento';
+  $('cr_nombre').value = e ? e.nombre : ''; $('cr_tipo').value = e ? (e.tipo_evento||'otro') : 'bienestar_empresa';
+  $('cr_fecha').value = e ? e.fecha_evento : hoy; $('cr_lugar').value = e ? (e.lugar||'') : ''; $('cr_ciudad').value = e ? (e.ciudad||'') : '';
+  $('cr_aliado').value = e ? (e.aliado_nombre||'') : ''; $('cr_logo').value = '';
+  $('cr_cupo').value = e ? e.cupo : 300; $('cr_vig').value = e ? (e.vigencia_dias||7) : 7;
+  $('cr_desde').value = e && e.abre_el ? new Date(e.abre_el).toLocaleDateString('en-CA',{timeZone:'America/Bogota'}) : '';
+  $('cr_tienda').value = e ? (e.tienda||'todas') : 'todas'; $('cr_tycx').value = e ? (e.tyc_extra||'') : '';
+  $('cr_ig').checked = !!(e && e.requiere_instagram); $('cr_wa').checked = !e || !!e.wa_plantilla;
+  $('cr_wamsj').value = e ? (e.wa_mensaje||'') : '';
+  $('cr_activo_l').classList.toggle('oculto', !e); $('cr_activo').checked = !e || e.activo;
+  $('cr_ok').textContent = e ? 'Guardar cambios y regenerar flyer' : 'Crear evento y generar link, QR y flyer';
+  $('cr_err').innerHTML = ''; $('cr_resultado').innerHTML = '';
+  pintarLogo(); pintarFotos(); pintarModo(); pintarBeneficios(); pintarRifas(); previa();
+  if(e) mostrarResultado(e.evento, e.url);
+}
+function pintarLogo(){
+  const p = $('cr_logo_prev'); const src = cr.logo || (cr.logo===undefined ? cr.logoSrc : null);
+  p.style.display = src ? 'block' : 'none'; if(src) p.src = src;
+  $('cr_logo_quitar').classList.toggle('oculto', !src);
+}
+$('cr_logo_quitar').onclick = () => { cr.logo = ''; cr.logoSrc = null; $('cr_logo').value=''; pintarLogo(); previa(); };
+$('cr_logo').onchange = ev => {
+  const f = ev.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => { const im = new Image(); im.onload = () => {
+    // Se reduce en el navegador a 400 px: el logo viaja en la base, no como archivo.
+    const k = Math.min(1, 400 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+    c.width = Math.round(im.width*k); c.height = Math.round(im.height*k); c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    cr.logo = c.toDataURL('image/png'); if(cr.logo.length > 380000) cr.logo = c.toDataURL('image/jpeg', .85);
+    pintarLogo(); previa(); }; im.src = r.result; };
+  r.readAsDataURL(f);
+};
+function datosEvento(){
+  return {evento: cr.slug || undefined, nombre:$('cr_nombre').value, tipo_evento:$('cr_tipo').value, fecha_evento:$('cr_fecha').value,
+    lugar:$('cr_lugar').value, ciudad:$('cr_ciudad').value, aliado_nombre:$('cr_aliado').value, beneficio_clave:cr.clave,
+    cupo:$('cr_cupo').value, vigencia_dias:$('cr_vig').value, valido_desde:$('cr_desde').value || null, tienda:$('cr_tienda').value,
+    tyc_extra:$('cr_tycx').value, requiere_instagram:$('cr_ig').checked, enviar_wa:$('cr_wa').checked, wa_mensaje:$('cr_wamsj').value,
+    foto_flyer:cr.foto, activo:$('cr_activo').checked, modalidad:cr.modo, sorteo_ganadores:$('cr_ganadores').value,
+    sorteo_cierra:$('cr_cierre').value, flyer: Object.keys(cr.flyer).length ? cr.flyer : null,
+    rifas: cr.rifas.filter(r => r.estado !== 'sorteado').map(r => ({id:r.id, nombre:r.nombre, beneficio_clave:r.beneficio_clave, ganadores:r.ganadores, sortea:r.sortea})),
+    ...(cr.logo!==undefined ? {aliado_logo: cr.logo} : {})};
+}
+function tycPrevia(d){
+  const b = cr.opciones.beneficios.find(x=>x.clave===d.beneficio_clave);
+  if(d.modalidad==='sorteo') return [`Premio: ${b.titulo.replace(' tu ',' la ')} para cada ganador (${d.sorteo_ganadores} ganadores).`,
+    'Participación gratuita, sin compra. Una participación por persona (por número de celular).',
+    `Inscripciones hasta el ${d.sorteo_cierra ? new Date(d.sorteo_cierra).toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'}) : '—'}; en ese momento el sistema sortea al azar.`,
+    'Los ganadores reciben su premio por WhatsApp.', `El premio vale ${d.vigencia_dias} días desde el sorteo; tiendas físicas en Colombia, no domicilios.`,
+    'El premio es personal: no es transferible ni se cambia por dinero.'].concat(d.tyc_extra ? [d.tyc_extra] : []);
+  const donde = d.tienda==='todas' ? 'cualquier tienda física OAKBERRY de Colombia' : 'la tienda OAKBERRY ' + d.tienda;
+  return [`Beneficio: ${b.titulo.replace(' tu ',' la ')}.`, `Un cupón por persona (por número de celular), sujeto al cupo: ${miles(d.cupo)} cupones en total.`,
+    `Válido ${d.vigencia_dias||7} días desde que te registras${d.valido_desde?', a partir del '+fecha(d.valido_desde):''}; si se vence, no se renueva.`,
+    `Se canjea en ${donde}; no aplica en domicilios.`, 'No se acumula con otras promociones ni descuentos (uno por orden).']
+    .concat(b.tipo==='bowl' ? ['El bowl incluye su receta estándar; toppings o adiciones extra se cobran.'] : [])
+    .concat(d.aliado_nombre ? [`Actividad realizada en alianza con ${d.aliado_nombre}.`] : [])
+    .concat(d.tyc_extra ? [d.tyc_extra] : []);
+}
+// Textos automáticos del flyer (estilo Oakers). Lo que el equipo edita en
+// "Textos del flyer" pisa estos valores y se guarda con el evento.
+function textosAuto(d){
+  const b = cr.opciones.beneficios.find(x=>x.clave===d.beneficio_clave) || {};
+  const m = /^pct(\d+)$/.exec(d.beneficio_clave||''), oz = /^bowl(\d+)$/.exec(d.beneficio_clave||'');
+  const fechaL = d.fecha_evento ? new Date(d.fecha_evento+'T12:00:00').toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'}) : '';
+  const lugar = [d.lugar, d.ciudad].filter(x => x && !/^todas$/i.test(x)).join(', ');
+  // Fechas siempre en hora de Bogotá: el input datetime-local no trae zona.
+  const bog = v => v ? new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(v) ? v : v + '-05:00') : null;
+  if(d.modalidad==='sorteo'){
+    const n = Number(d.sorteo_ganadores)||1;
+    const cierre = d.sorteo_cierra ? bog(d.sorteo_cierra).toLocaleString('es-CO',{timeZone:'America/Bogota',weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit'}) : '';
+    return {arriba:'Inscríbete y participa por', titular: m ? `${m[1]}% OFF` : `${n} ${n>1?'bowls':'bowl'} gratis`, lema:'El açaí #1 en el mundo', sellos:'1',
+      qrTexto:'¡Escanea y participa!', ubicTitulo: cierre ? 'Sorteo: ' + cierre : '', ubicTexto:'Los ganadores reciben su premio por WhatsApp',
+      letra:'Participación gratuita · 1 por persona · ' + (lugar ? lugar + ' · ' : '') + 'TyC en el link'};
+  }
+  return {arriba: d.nombre || '', titular: m ? `${m[1]}% OFF en tu orden` : (oz ? `Bowl ${oz[1]} oz gratis` : 'Bowl gratis'), lema:'El açaí #1 en el mundo', sellos:'0',
+    qrTexto:'¡Escanéalo y recíbelo!', ubicTitulo: fechaL ? fechaL.charAt(0).toUpperCase()+fechaL.slice(1) : '', ubicTexto: lugar,
+    letra:`Cupo limitado: ${miles(d.cupo)} cupones · 1 por persona · válido ${d.vigencia_dias||7} días desde el registro · TyC en el link`};
+}
+function datosFlyer(d, overrides, url, logo){
+  const auto = textosAuto(d), t = {};
+  FL.forEach(k => t[k] = (overrides && overrides[k] != null && overrides[k] !== '') ? overrides[k] : auto[k]);
+  return {...t, url, aliado:d.aliado_nombre, logo, foto:'bowl-clasico', redes:'@oakberrycol'};
+}
+function previa(){
+  clearTimeout(cr.t);
+  cr.t = setTimeout(async () => {
+    const d = datosEvento();
+    $('cr_tyc_prev').innerHTML = tycPrevia(d).map(x=>`<li>${esc(x)}</li>`).join('');
+    const auto = textosAuto(d);
+    FL.forEach(k => { const i = $('fl_'+k); if(document.activeElement !== i) i.value = cr.flyer[k] != null ? cr.flyer[k] : auto[k]; });
+    await OakFlyer.dibujar($('cr_canvas'), datosFlyer(d, cr.flyer, cr.slug ? urlEvento(cr.slug) : 'https://www.oakberry-cupones.com/evento/nuevo',
+      cr.logo || (cr.logo===undefined ? cr.logoSrc : null)), cr.fmt);
+  }, 150);
+}
+$('cr_ok').onclick = async () => {
+  $('cr_ok').disabled = true; $('cr_err').innerHTML = '';
+  try{
+    const r = await fetch(API+'?'+new URLSearchParams({accion:'ccEventoGuardar', s:st.s}), {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({datos:datosEvento()})});
+    const d = await r.json();
+    if(d.auth===false){ salir('Tu sesión venció. Vuelve a entrar.'); return; }
+    if(!d.ok){ $('cr_err').innerHTML = `<div class="aviso no">${esc(d.mensaje)}</div>`; return; }
+    cr.slug = d.evento; await cargarEventos();
+    const e = st.eventos.find(x=>x.evento===d.evento);
+    if(e){ cr.logo = undefined; cr.logoSrc = e.logo_url ? e.logo_url+'?t='+Date.now() : null; }
+    $('crTitulo').textContent = 'Editar: ' + $('cr_nombre').value; $('cr_ok').textContent = 'Guardar cambios y regenerar flyer';
+    $('cr_activo_l').classList.remove('oculto');
+    previa(); mostrarResultado(d.evento, d.url);
+    $('cr_resultado').scrollIntoView({behavior:'smooth', block:'center'});
+  }catch(e){ $('cr_err').innerHTML = `<div class="aviso no">${esc(e.message)}</div>`; }
+  finally{ $('cr_ok').disabled = false; }
+};
+function mostrarResultado(slug, url){
+  $('cr_resultado').innerHTML = `<div class="card"><div class="aviso ok" style="margin-bottom:10px">✅ Evento listo</div>
+    <div class="mini" style="word-break:break-all;margin-bottom:8px">${esc(url)}</div>
+    <div class="fila"><button class="btn sec chico" onclick="copiar('${esc(url)}', this)">Copiar link</button><a class="btn sec chico" href="${esc(url)}" target="_blank">Abrir landing</a></div>
+    <div class="fila" style="margin-top:8px"><button class="btn chico" onclick="bajarFlyer('${esc(slug)}','afiche')">⬇ Afiche</button><button class="btn chico" onclick="bajarFlyer('${esc(slug)}','post')">⬇ Post 4:5</button><button class="btn chico" onclick="bajarFlyer('${esc(slug)}','historia')">⬇ Historia 9:16</button><button class="btn sec chico" onclick="verQR('${esc(slug)}')">⬇ Solo QR</button></div></div>`;
+}
+async function bajarFlyer(slug, fmt){
+  const e = st.eventos.find(x=>x.evento===slug) || {};
+  await opcionesEvento();
+  const d = {nombre:e.nombre, fecha_evento:e.fecha_evento, lugar:e.lugar, ciudad:e.ciudad, aliado_nombre:e.aliado_nombre,
+    beneficio_clave:e.beneficio_clave||'pct15', cupo:e.cupo, vigencia_dias:e.vigencia_dias, modalidad:e.modalidad,
+    sorteo_ganadores:e.sorteo_ganadores, sorteo_cierra:e.sorteo_cierra_el};
+  const c = document.createElement('canvas');
+  await OakFlyer.dibujar(c, datosFlyer(d, e.flyer, urlEvento(slug), e.logo_url ? e.logo_url+'?t='+Date.now() : null), fmt);
+  const a = document.createElement('a'); a.download = `flyer-${slug}-${fmt}.png`;
+  try{ a.href = c.toDataURL('image/png'); a.click(); }
+  catch(err){ alert('No se pudo exportar el flyer (el logo no permitió copiarse). Prueba quitando y volviendo a subir el logo.'); }
+}
+
+function urlEvento(slug){ const e = st.eventos.find(x=>x.evento===slug); return e && e.url ? e.url : 'https://www.oakberry-cupones.com/evento/'+slug; }
+function verQR(slug){
+  const e = st.eventos.find(x=>x.evento===slug) || {nombre:slug};
+  const url = urlEvento(slug);
+  abrir(`<div class="cab"><h3>QR · ${esc(e.nombre)}</h3><button class="x" onclick="cerrar()">×</button></div>
+    <div class="qr"><div id="qrcaja"></div><div class="mini" style="word-break:break-all;text-align:center">${esc(url)}</div>
+    <div class="fila"><button class="btn" onclick="bajarQR('${esc(slug)}')">⬇ Descargar QR</button><button class="btn sec" onclick="copiar('${esc(url)}', this)">Copiar link</button><a class="btn sec" href="${esc(url)}" target="_blank">Abrir landing</a></div>
+    <div class="sub" style="text-align:center">Imprímelo en el stand. Quien lo escanee deja nombre y WhatsApp, y recibe su 15% al instante.</div></div>`);
+  new QRCode($('qrcaja'), {text:url, width:260, height:260, colorDark:'#4B1F60', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M});
+}
+function bajarQR(slug){
+  const c = $('qrcaja').querySelector('canvas'); if(!c) return;
+  const big = document.createElement('canvas'); big.width=big.height=1200;
+  const g = big.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,1200,1200); g.imageSmoothingEnabled=false; g.drawImage(c,60,60,1080,1080);
+  const a = document.createElement('a'); a.download='qr-'+slug+'.png'; a.href=big.toDataURL('image/png'); a.click();
+}
+function copiar(txt, b){ navigator.clipboard.writeText(txt).then(()=>{ const t=b.textContent; b.textContent='¡Copiado!'; setTimeout(()=>b.textContent=t,1500); }); }
+
+async function detalleEvento(slug){
+  abrir(`<div class="cab"><h3>Asistentes</h3><button class="x" onclick="cerrar()">×</button></div><div class="vacio">Cruzando con Loopy…</div>`);
+  const d = await api('ccEventoDetalle', {evento:slug});
+  if(!d.ok){ $('modal').innerHTML += `<div class="aviso no">${esc(d.mensaje)}</div>`; return; }
+  const t = d.totales, n = d.registros.length;
+  st.ultimoDetalle = d;
+  $('modal').innerHTML = `<div class="cab"><div><h3>${esc(d.evento.nombre)}</h3><div class="sub">${fecha(d.evento.fecha_evento)} · ${n} registros</div></div><button class="x" onclick="cerrar()">×</button></div>
+    ${d.error_cruce?`<div class="aviso no">${esc(d.error_cruce)}</div>`:''}
+    <div class="kpis" style="margin-bottom:12px">
+      <div class="kpi verde"><div class="n">${t.en_evento}</div><div class="l">se inscribieron a Loopy en el evento</div></div>
+      <div class="kpi"><div class="n">${t.despues}</div><div class="l">se inscribieron después</div></div>
+      <div class="kpi"><div class="n">${t.ya_era}</div><div class="l">ya eran Loopy</div></div>
+      <div class="kpi"><div class="n">${t.no_loopy}</div><div class="l">no son Loopy</div></div>
+      <div class="kpi verde"><div class="n">${t.canjeados}</div><div class="l">canjearon el 15%</div></div>
+      <div class="kpi"><div class="n">${t.volvieron}</div><div class="l">han comprado desde el evento</div></div>
+    </div>
+    ${d.evento.modalidad==='sorteo' ? `<div class="aviso ${d.evento.sorteo_estado==='sorteado'?'ok':'info'}" style="margin-bottom:10px">🎟️ ${d.evento.sorteo_estado==='sorteado'
+        ? 'Sorteo hecho. Los ganadores están marcados abajo y su premio salió por WhatsApp.'
+        : 'El sorteo se hace solo el ' + fechaHora(d.evento.sorteo_cierra_el) + '.' + (new Date(d.evento.sorteo_cierra_el) < new Date() ? ` <button class="btn chico" onclick="sortearYa('${esc(slug)}')">Sortear ya</button>` : '')}</div>` : ''}
+    ${(d.evento.rifas||[]).map(r => `<div class="aviso ${r.estado==='sorteado'?'ok':'info'}" style="margin-bottom:8px">🎟️ <b>${esc(r.nombre)}</b> · ${r.ganadores} ganadores · ${r.estado==='sorteado' ? 'sorteada el ' + fechaHora(r.ejecutado_at) : 'se sortea el ' + fechaHora(r.sortea_el)}${r.estado!=='sorteado' && new Date(r.sortea_el) < new Date() ? ` <button class="btn chico" onclick="sortearRifa(${r.id},'${esc(slug)}')">Sortear ya</button>` : ''}</div>`).join('')}
+    <div class="fila" style="margin-bottom:10px"><button class="btn oro chico" onclick="escribirEvento('${esc(slug)}')">💬 Escribirles por WhatsApp</button><button class="btn sec chico" onclick="csvEvento()">⬇ Descargar CSV</button></div>
+    <div class="scroll"><table class="tabla"><thead><tr><th>Nombre</th><th>WhatsApp</th><th>Instagram</th><th>Loopy</th><th>Cupón</th><th>Acepta WA</th><th>Cupón por WA</th></tr></thead><tbody>
+    ${d.registros.map(r => { const L = LOOPY[r.loopy]||['—','']; return `<tr>
+      <td data-l="Nombre"><b>${esc(r.nombre)}</b><div class="mini">${fechaHora(r.created_at)}</div></td>
+      <td data-l="WhatsApp">${esc(cel(r.celular))}</td>
+      <td data-l="Instagram">${r.instagram?'@'+esc(r.instagram):'—'}</td>
+      <td data-l="Loopy"><span class="etq ${L[1]}">${L[0]}</span>${r.sellos_despues?`<div class="mini">${r.sellos_despues} compra(s) desde el evento</div>`:''}</td>
+      <td data-l="Cupón">${r.resultado==='participa'?'<span class="etq">Participa</span>':''}${r.resultado==='ganador'?'<span class="etq ok">🏆 Ganador</span> ':''}${r.resultado==='ganador_rifa'?'<span class="etq ok">🏆 Ganó rifa</span> ':''}${r.codigo?`<span class="etq ${r.estado_cupon==='Canjeado'?'ok':''}">${esc(r.codigo)} · ${esc(r.estado_cupon||'')}</span>`:(['participa','ganador_rifa'].includes(r.resultado)?'':`<span class="etq no">${esc(r.resultado)}</span>`)}</td>
+      <td data-l="Acepta WA">${r.opt_in_marketing?'✅':'—'}</td>
+      <td data-l="Cupón por WA">${r.wa_estado==='enviado'?'<span class="etq ok">Enviado</span>':(r.wa_estado?`<span class="etq no" title="${esc(r.wa_error||'')}">${esc(r.wa_estado)}</span>`:'—')}</td></tr>`; }).join('')}
+    </tbody></table></div>`;
+}
+async function sortearRifa(id, slug){
+  if(!confirm('¿Sortear esta rifa ahora? Se avisa a los ganadores por WhatsApp. No se puede repetir.')) return;
+  const d = await api('ccSortearRifa', {rifa:id});
+  alert(d.ok ? `Listo: ${d.ganadores.length} ganador(es) entre ${d.participantes} inscritos.` : d.mensaje);
+  cargarEventos(); detalleEvento(slug);
+}
+async function sortearYa(slug){
+  if(!confirm('¿Hacer el sorteo ahora? Se elige al azar y se avisa a los ganadores por WhatsApp. No se puede repetir.')) return;
+  const d = await api('ccSortear', {evento:slug});
+  alert(d.ok ? `Listo: ${d.ganadores.length} ganador(es) entre ${d.participantes} inscritos.` : d.mensaje);
+  cargarEventos(); detalleEvento(slug);
+}
+function csvEvento(){
+  const d = st.ultimoDetalle; if(!d) return;
+  const cols = ['nombre','celular','email','instagram','created_at','codigo','resultado','estado_cupon','opt_in_marketing','loopy','inscrito','sellos_despues'];
+  const lines = [cols.join(',')].concat(d.registros.map(r => cols.map(c => '"'+String(r[c]==null?'':r[c]).replace(/"/g,'""')+'"').join(',')));
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿'+lines.join('\n')],{type:'text/csv'})); a.download = d.evento.evento+'.csv'; a.click();
+}
+function escribirEvento(slug){ cerrar(); ir('mensajes'); fuente('evento'); $('sevento').value=slug; }
+
+// ══════════ CONTACTOS ══════════
+async function cargarContactos(){
+  const d = await api('ccContactos');
+  if(!d.ok){ $('tablaContactos').innerHTML = `<tr><td><div class="aviso no">${esc(d.mensaje)}</div></td></tr>`; return; }
+  st.contactos = d.contactos;
+  const opt = (arr, txt) => arr.map(x=>`<option value="${esc(x)}">${esc(txt?txt(x):x)}</option>`).join('');
+  const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+  $('ctipo').innerHTML = '<option value="">Todos los tipos</option>'+opt(d.tipos, cap);
+  $('cciudad').innerHTML = '<option value="">Todas las ciudades</option>'+opt(d.ciudades);
+  $('cetq').innerHTML = '<option value="">Todas las etiquetas</option>'+opt(d.etiquetas);
+  $('stipo').innerHTML = opt(d.tipos, cap); $('sciudad').innerHTML = opt(d.ciudades); $('setq').innerHTML = opt(d.etiquetas);
+  const conWA = d.contactos.filter(c => c.cel_norm && !c.opt_out).length;
+  $('kpisContactos').innerHTML = `
+    <div class="kpi"><div class="n">${d.contactos.length}</div><div class="l">contactos</div></div>
+    <div class="kpi verde"><div class="n">${conWA}</div><div class="l">con WhatsApp</div></div>
+    <div class="kpi"><div class="n">${d.contactos.length-d.contactos.filter(c=>c.cel_norm).length}</div><div class="l">solo con @ (falta el celular)</div></div>
+    <div class="kpi"><div class="n">${d.contactos.filter(c=>c.asistio).length}</div><div class="l">ya vinieron a tienda</div></div>`;
+  pintarContactos();
+}
+['cq','ctipo','cciudad','cetq'].forEach(id => $(id).addEventListener('input', pintarContactos));
+function visibles(){
+  const q=$('cq').value.trim().toLowerCase(), t=$('ctipo').value, c=$('cciudad').value, e=$('cetq').value;
+  return st.contactos.filter(x => (!t||x.tipo===t) && (!c||x.ciudad===c) && (!e||(x.etiquetas||[]).includes(e)) &&
+    (!q || (x.nombre||'').toLowerCase().includes(q) || (x.instagram||'').includes(q.replace('@','')) || (x.cel_norm||'').includes(q.replace(/\D/g,'')||'¬')));
+}
+function pintarContactos(){
+  const v = visibles();
+  $('tablaContactos').innerHTML = `<thead><tr><th></th><th>Nombre</th><th>WhatsApp</th><th>Instagram</th><th>Ciudad</th><th>Etiquetas</th><th>Historial</th><th></th></tr></thead><tbody>` +
+    (v.length ? v.map(x => `<tr>
+      <td data-l="">${x.cel_norm && !x.opt_out ? `<input type="checkbox" class="ckbox" ${st.sel.has(x.id)?'checked':''} onchange="marcar(${x.id}, this.checked)">` : ''}</td>
+      <td data-l="Nombre"><b>${esc(x.nombre)}</b><div class="mini">${esc(x.tipo)}${x.seguidores?' · '+miles(x.seguidores)+' seguidores':''}</div></td>
+      <td data-l="WhatsApp">${x.opt_out?'<span class="etq no">Se dio de baja</span>':(x.cel_norm?esc(cel(x.cel_norm)):'<span class="etq wait">Falta</span>')}</td>
+      <td data-l="Instagram">${x.instagram?`<a href="https://instagram.com/${esc(x.instagram)}" target="_blank" style="color:var(--morado)">@${esc(x.instagram)}</a>`:'—'}</td>
+      <td data-l="Ciudad">${esc(x.ciudad||'—')}</td>
+      <td data-l="Etiquetas">${(x.etiquetas||[]).map(t=>`<span class="etq lila">${esc(t)}</span>`).join(' ')||'—'}</td>
+      <td data-l="Historial"><span class="mini">${x.asistio?'Vino'+(x.ultima_tienda?' a '+esc(x.ultima_tienda):''):'No ha venido'}${x.mensajes?` · ${x.mensajes} WA (último ${fecha(x.ultimo_mensaje)})`:''}${x.canjes?` · ${x.canjes} canje(s)`:''}</span></td>
+      <td data-l=""><button class="btn sec chico" onclick="formContacto(${x.id})">Editar</button></td></tr>`).join('')
+     : '<tr><td colspan="8" class="vacio">Nadie con esos filtros.</td></tr>') + '</tbody>';
+  $('cuentaSel').textContent = `${st.sel.size} seleccionados · ${v.length} visibles`;
+  $('btnEnviarSel').disabled = !st.sel.size;
+}
+function marcar(id, on){ on ? st.sel.add(id) : st.sel.delete(id); pintarContactos(); }
+function selTodos(){ visibles().filter(x=>x.cel_norm && !x.opt_out).forEach(x=>st.sel.add(x.id)); pintarContactos(); }
+function enviarASeleccion(){ st.ids=[...st.sel]; ir('mensajes'); fuente('contactos'); }
+
+function formContacto(id){
+  const x = id ? st.contactos.find(c=>c.id===id) : {tipo:'influencer', etiquetas:[]};
+  abrir(`<div class="cab"><h3>${id?'Editar contacto':'Nuevo contacto'}</h3><button class="x" onclick="cerrar()">×</button></div>
+   <div class="pasos">
+    <div class="grid">
+      <label class="campo">Nombre<input type="text" id="fc_nombre" value="${esc(x.nombre||'')}"></label>
+      <label class="campo">Tipo<select id="fc_tipo">${['influencer','modelo','aliado','otro'].map(t=>`<option ${x.tipo===t?'selected':''}>${t}</option>`).join('')}</select></label>
+    </div>
+    <div class="grid">
+      <label class="campo">WhatsApp (10 dígitos)<input type="tel" id="fc_cel" value="${esc(x.cel_norm||'')}" placeholder="3001234567"></label>
+      <label class="campo">Instagram<input type="text" id="fc_ig" value="${esc(x.instagram?'@'+x.instagram:'')}" placeholder="@usuario"></label>
+    </div>
+    <div class="grid">
+      <label class="campo">Ciudad<input type="text" id="fc_ciudad" value="${esc(x.ciudad||'')}"></label>
+      <label class="campo">Seguidores<input type="number" id="fc_seg" value="${esc(x.seguidores||'')}"></label>
+    </div>
+    <div class="grid">
+      <label class="campo">Correo<input type="email" id="fc_email" value="${esc(x.email||'')}"></label>
+      <label class="campo">Nicho<input type="text" id="fc_nicho" value="${esc(x.nicho||'')}" placeholder="fitness, comida, mamá…"></label>
+    </div>
+    <label class="campo">Etiquetas (separadas por coma)<input type="text" id="fc_etq" value="${esc((x.etiquetas||[]).join(', '))}" placeholder="break pm, pauta, vip"></label>
+    <label class="campo">Notas<textarea id="fc_notas" rows="3">${esc(x.notas||'')}</textarea></label>
+    ${id?`<label class="fila" style="font-size:14px"><input type="checkbox" class="ckbox" id="fc_baja" ${x.opt_out?'checked':''}> No quiere recibir mensajes (dado de baja)</label>`:''}
+    <div id="fc_err"></div>
+    <div class="fila"><span class="esp"></span><button class="btn sec" onclick="cerrar()">Cancelar</button><button class="btn" id="fc_ok" onclick="guardarContacto(${id||0})">Guardar</button></div>
+   </div>`);
+}
+async function guardarContacto(id){
+  $('fc_ok').disabled=true;
+  const datos = {id:id||undefined, nombre:$('fc_nombre').value, tipo:$('fc_tipo').value, celular:$('fc_cel').value, instagram:$('fc_ig').value,
+    ciudad:$('fc_ciudad').value, seguidores:$('fc_seg').value, email:$('fc_email').value, nicho:$('fc_nicho').value,
+    etiquetas:$('fc_etq').value, notas:$('fc_notas').value};
+  const x = id ? st.contactos.find(c=>c.id===id) : null;
+  if(x){ ['tier','perfil','consentimiento'].forEach(k => datos[k]=x[k]); }
+  try{
+    const d = await api('ccContactoGuardar', {datos});
+    if(!d.ok){ $('fc_err').innerHTML=`<div class="aviso no">${esc(d.mensaje)}</div>`; $('fc_ok').disabled=false; return; }
+    if(id && $('fc_baja') && $('fc_baja').checked !== !!x.opt_out) await api('ccContactoBaja', {id, baja:$('fc_baja').checked?1:0});
+    cerrar(); cargarContactos();
+  }catch(e){ $('fc_err').innerHTML=`<div class="aviso no">${esc(e.message)}</div>`; $('fc_ok').disabled=false; }
+}
+
+// ══════════ MENSAJES ══════════
+async function cargarPlantillas(){
+  const d = await api('ccPlantillas'); if(!d.ok) return;
+  st.plantillas = d.plantillas;
+  $('reglasEnvio').innerHTML = `Siempre con vista previa. Salen entre las ${esc(d.ventana)} (hora Colombia), máximo ${d.tope_diario} al día (hoy van ${d.enviados_hoy}). A nadie se le escribe dos veces en ${d.dias_sin_repetir} días, y nunca a quien respondió SALIR.`;
+  $('plantillas').innerHTML = d.plantillas.map(p => { const m = META[p.estado_meta]||[p.estado_meta,'']; return `
+    <button class="pl ${st.plantilla===p.clave?'on':''}" data-clave="${p.clave}"><div class="tt">${esc(p.titulo)}</div><div class="dd">${esc(p.descripcion)}</div><span class="etq ${m[1]}">${esc(m[0])}</span></button>`; }).join('');
+  document.querySelectorAll('.pl').forEach(b => b.onclick = () => elegirPlantilla(b.dataset.clave));
+}
+function elegirPlantilla(clave){
+  st.plantilla = clave; st.preview=null; $('resPreview').innerHTML='';
+  document.querySelectorAll('.pl').forEach(b => b.classList.toggle('on', b.dataset.clave===clave));
+  const p = st.plantillas.find(x=>x.clave===clave);
+  const evNombre = st.fuente==='evento' ? (st.eventos.find(e=>e.evento===$('sevento').value)||{}).nombre : '';
+  $('camposPlantilla').innerHTML = Object.entries(p.campos).map(([k,c]) => `
+    <label class="campo">${esc(c.label)} <span class="mini" id="n_${k}">0/${c.max}</span>
+      <input type="text" id="v_${k}" maxlength="${c.max}" placeholder="${esc(c.ejemplo)}" oninput="$('n_${k}').textContent=this.value.length+'/${c.max}'">
+      ${c.sugerencias?`<div class="sugs">${c.sugerencias.map(s=>`<button type="button" onclick="sugerir('${k}', this.textContent)">${esc(s.replace('{evento}', evNombre||'{evento}'))}</button>`).join('')}</div>`:''}
+    </label>`).join('') + (p.lleva_cupon ? `
+    <label class="campo">El cupón de 15% vence en (días)<input type="number" id="v_vig" min="1" max="60" value="15"></label>
+    <div class="mini">Cada persona recibe un código único (empieza por REG) para saber quién vino.</div>` : '') +
+    `<div class="mini">Nombre y código los pone el sistema. Al final va: «${esc(p.footer)}».</div>`;
+}
+function sugerir(k, txt){ const i=$('v_'+k); i.value=txt.replace('{evento}', ''); i.dispatchEvent(new Event('input')); i.focus(); }
+document.querySelectorAll('[data-fuente]').forEach(b => b.onclick = () => fuente(b.dataset.fuente));
+function fuente(f){
+  st.fuente=f; st.preview=null; $('resPreview').innerHTML='';
+  if(f==='evento') st.ids=null;
+  document.querySelectorAll('[data-fuente]').forEach(b => b.classList.toggle('on', b.dataset.fuente===f));
+  $('segContactos').classList.toggle('oculto', f!=='contactos'); $('segEvento').classList.toggle('oculto', f!=='evento');
+  $('segSeleccion').classList.toggle('oculto', !st.ids); $('segFiltros').classList.toggle('oculto', !!st.ids);
+  if(st.ids) $('segSeleccion').innerHTML = `Vas a escribirle a los <b>${st.ids.length}</b> contactos que seleccionaste. <button class="btn sec chico" onclick="st.ids=null;fuente('contactos')">Usar filtros en vez</button>`;
+  if(st.plantilla) elegirPlantilla(st.plantilla);
+}
+const multi = id => [...$(id).selectedOptions].map(o=>o.value);
+function segmento(){
+  if(st.fuente==='evento') return {fuente:'evento', evento:$('sevento').value};
+  if(st.ids) return {fuente:'contactos', ids:st.ids};
+  const s = {fuente:'contactos', tipos:multi('stipo'), ciudades:multi('sciudad'), etiquetas:multi('setq')};
+  if($('sasistio').value) s.asistio = $('sasistio').value==='1';
+  return s;
+}
+function variables(){
+  const p = st.plantillas.find(x=>x.clave===st.plantilla); const v={};
+  Object.keys(p.campos).forEach(k => v[k]=$('v_'+k).value);
+  return v;
+}
+function burbuja(texto, p){
+  const html = esc(texto).replace(/\*([^*\n]+)\*/g,'<b>$1</b>').replace(/_([^_\n]+)_/g,'<i style="color:#8696a0;font-size:12.5px">$1</i>');
+  return `<div class="wa"><div class="burbuja">${html}${p.botones.map(b=>`<span class="bt">${esc(b)}</span>`).join('')}</div></div>`;
+}
+async function preview(){
+  if(!st.plantilla){ $('resPreview').innerHTML='<div class="aviso no">Elige una plantilla en el paso 1.</div>'; return; }
+  $('resPreview').innerHTML='<div class="sub">Calculando…</div>';
+  const p = st.plantillas.find(x=>x.clave===st.plantilla);
+  const params = {plantilla:st.plantilla, segmento:segmento(), variables:variables(), vigencia_dias: $('v_vig')?$('v_vig').value:15};
+  try{
+    const d = await api('ccEnvioPreview', params);
+    if(!d.ok){ $('resPreview').innerHTML=`<div class="aviso no">${esc(d.mensaje)}</div>`; return; }
+    st.preview = {params, elegibles:d.elegibles};
+    const ex = d.exclusiones, L = {sin_celular:'Sin WhatsApp válido', sin_permiso:'No dieron permiso en el formulario', dados_de_baja:'Se dieron de baja',
+      numero_rechazado:'Número que WhatsApp ya rechazó', recibio_hace_poco:'Ya recibieron algo esta semana', duplicado:'Repetidos'};
+    const aprobada = p.estado_meta==='APPROVED';
+    $('resPreview').innerHTML = `
+      <div class="grid" style="align-items:start">
+        <div>${burbuja(d.muestra, p)}<div class="mini" style="margin-top:6px">Ejemplo con el primer nombre de la lista. Cada persona ve su nombre y su código.</div></div>
+        <div class="card">
+          <div class="kpi" style="border:0;padding:0"><div class="n">${d.elegibles}</div><div class="l">personas lo recibirán (de ${d.total})</div></div>
+          ${d.saldran_hoy < d.elegibles ? `<div class="aviso info" style="margin-top:8px">Hoy alcanzan a salir ${d.saldran_hoy} (tope diario). El resto quedará pendiente.</div>`:''}
+          <div class="excl">${Object.entries(ex).filter(([k,v])=>v).map(([k,v])=>`<span>${L[k]}</span><span>−${v}</span>`).join('')||'<span class="mini">Nadie quedó por fuera.</span>'}</div>
+          ${d.nombres.length?`<details style="margin-top:10px"><summary class="mini">Ver nombres</summary><div class="mini">${d.nombres.map(esc).join(' · ')}${d.elegibles>d.nombres.length?' …':''}</div></details>`:''}
+          ${aprobada ? '' : `<div class="aviso no" style="margin-top:10px">Esta plantilla está «${esc((META[p.estado_meta]||[p.estado_meta])[0])}». Se puede enviar cuando Meta la apruebe.</div>`}
+          <button class="btn" style="margin-top:12px;width:100%" id="btnEnviar" ${(!aprobada||!d.saldran_hoy)?'disabled':''} onclick="confirmar()">Enviar a ${d.saldran_hoy} personas</button>
+        </div>
+      </div>`;
+  }catch(e){ $('resPreview').innerHTML=`<div class="aviso no">${esc(e.message)}</div>`; }
+}
+async function confirmar(){
+  if(!st.preview) return;
+  if(!confirm(`¿Enviar el WhatsApp a ${st.preview.elegibles} personas? No se puede deshacer.`)) return;
+  $('btnEnviar').disabled=true; $('btnEnviar').textContent='Enviando…';
+  try{
+    const d = await api('ccEnvioEjecutar', {...st.preview.params, confirmados: st.preview.elegibles});
+    if(!d.ok){ $('resPreview').insertAdjacentHTML('beforeend', `<div class="aviso no" style="margin-top:10px">${esc(d.mensaje)}</div>`); if(d.cambio) preview(); else $('btnEnviar').disabled=false; return; }
+    $('resPreview').innerHTML = `<div class="aviso ok">✅ Saliendo ${d.enviando} mensajes${d.recortados?` (${d.recortados} quedan para mañana)`:''}. Míralos en <a href="#historial" onclick="ir('historial')">Historial de envíos</a>.</div>`;
+    st.preview=null; st.ids=null; st.sel.clear(); cargarPlantillas(); cargarContactos();
+  }catch(e){ $('resPreview').insertAdjacentHTML('beforeend', `<div class="aviso no">${esc(e.message)}</div>`); }
+}
+
+// ══════════ HISTORIAL ══════════
+async function cargarHistorial(){
+  const d = await api('ccEnvios'); if(!d.ok) return;
+  const nom = c => (st.plantillas.find(p=>p.clave===c)||{titulo:c}).titulo;
+  const segTxt = s => s.fuente==='evento' ? 'Evento: '+((st.eventos.find(e=>e.evento===s.evento)||{}).nombre||s.evento) : (s.ids ? s.ids.length+' seleccionados' : ['tipos','ciudades','etiquetas'].map(k=>(s[k]||[]).join(', ')).filter(Boolean).join(' · ') || 'Todos los contactos');
+  $('tablaLotes').innerHTML = `<thead><tr><th>Cuándo</th><th>Plantilla</th><th>A quién</th><th>Enviados</th><th>Canjearon</th><th>Estado</th><th></th></tr></thead><tbody>` +
+   (d.lotes.length ? d.lotes.map(l => `<tr>
+     <td data-l="Cuándo">${fechaHora(l.created_at)}<div class="mini">${esc(l.creado_por)}</div></td>
+     <td data-l="Plantilla">${esc(nom(l.plantilla))}</td>
+     <td data-l="A quién">${esc(segTxt(l.segmento||{}))}</td>
+     <td data-l="Enviados">${l.enviados}${l.fallidos?` <span class="etq no">${l.fallidos} fallaron</span>`:''}${l.pendientes?` <span class="etq wait">${l.pendientes} pendientes</span>`:''}</td>
+     <td data-l="Canjearon">${l.canjeados}</td>
+     <td data-l="Estado"><span class="etq ${l.estado==='terminado'?'ok':(l.estado==='bloqueado'?'no':'wait')}">${esc(l.estado)}</span></td>
+     <td data-l=""><button class="btn sec chico" onclick="detalleLote(${l.id})">Detalle</button></td></tr>`).join('')
+    : '<tr><td colspan="7" class="vacio">Todavía no se ha enviado nada.</td></tr>') + '</tbody>';
+}
+async function detalleLote(id){
+  abrir(`<div class="cab"><h3>Envío #${id}</h3><button class="x" onclick="cerrar()">×</button></div><div class="vacio">Cargando…</div>`);
+  const d = await api('ccEnvioDetalle', {lote:id});
+  const E = {sent:['Enviado',''], delivered:['Entregado','lila'], read:['Leído','ok'], failed:['Falló','no']};
+  $('modal').innerHTML = `<div class="cab"><h3>Envío #${id}</h3><button class="x" onclick="cerrar()">×</button></div><div class="scroll"><table class="tabla"><thead><tr><th>Nombre</th><th>WhatsApp</th><th>Estado</th><th>Cupón</th></tr></thead><tbody>` +
+    d.items.map(i => { const e = i.estado==='fallido' ? ['No salió','no'] : (E[i.entrega]||[i.estado,'']); return `<tr>
+      <td data-l="Nombre">${esc(i.nombre)}</td><td data-l="WhatsApp">${esc(cel(i.cel_norm))}</td>
+      <td data-l="Estado"><span class="etq ${e[1]}">${esc(e[0])}</span></td>
+      <td data-l="Cupón">${i.codigo?`${esc(i.codigo)} · <span class="etq ${i.estado_cupon==='Canjeado'?'ok':''}">${esc(i.estado_cupon||'')}</span>${i.punto_venta?`<div class="mini">${esc(i.punto_venta)}</div>`:''}`:'—'}</td></tr>`; }).join('') + '</tbody></table></div>';
+}
+
+// ── arranque ──
+const ses = leer();
+if(ses){ entrar(ses.s, ses.email); } else { pintarBoton(); }
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Creador de flyers · OAKBERRY</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/cc-assets/flyer.js"></script>
+<style>
+/* Creador de flyers para franquiciados (oct-2026). SOLO arma el flyer: todo
+   pasa en el navegador. El backend solo valida el código y entrega las tiendas
+   (acción flyerAcceso). No crea eventos, no emite cupones, no envía nada. */
+@font-face{font-family:Nexa;src:url(/exacto-assets/fuentes/nexa-slab-bold.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:Nexa;src:url(/exacto-assets/fuentes/nexa-slab-black.woff2) format("woff2");font-weight:900;font-display:swap}
+:root{--crema:#FBF6E9;--crema-cielo:#F5EEE0;--hueso:#EAE1CC;--blanco:#fff;--tinta:#21152A;--tinta-suave:#5C4A66;--gris:#8A7D90;
+  --morado:#4B1F60;--lila:#B79CC8;--lila-suave:#EFE6F4;--oro:#F4B223;--coral:#E04850;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--crema);color:var(--tinta);font:15px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.oculto{display:none!important}
+h1,h2{font-family:Nexa,serif;font-weight:900;color:var(--morado)}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.tarjeta{background:var(--blanco);border-radius:22px;padding:32px 24px;max-width:380px;width:100%;text-align:center;box-shadow:0 10px 40px rgba(75,31,96,.12)}
+.tarjeta p{color:var(--tinta-suave);margin:8px 0 20px;font-size:14px}
+.err{color:var(--coral);font-size:13.5px;min-height:18px;margin-top:10px}
+.barra{background:var(--morado);color:var(--crema);padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));font-family:Nexa,serif;font-weight:900;font-size:18px}
+main{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:16px;align-items:start}
+@media (max-width:900px){main{grid-template-columns:1fr}.previa{order:-1;position:static!important;max-width:420px;margin:0 auto;width:100%}}
+.card{background:var(--blanco);border:1px solid var(--hueso);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.col{display:flex;flex-direction:column;gap:14px}
+h3{font-family:Nexa,serif;font-weight:700;color:var(--morado);font-size:17px}
+label.campo{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--tinta-suave)}
+input[type=text],input[type=url],input[type=password],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--hueso);border-radius:12px;background:var(--blanco);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--lila)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:7px 13px;border-radius:99px;border:1px solid var(--hueso);background:var(--blanco);font-size:13px;color:var(--tinta-suave)}
+.chip.on{background:var(--tinta);border-color:var(--tinta);color:var(--crema)}
+.btn{background:var(--morado);color:var(--crema);border-radius:99px;padding:11px 18px;font-weight:700}
+.btn.sec{background:var(--blanco);color:var(--morado);border:1px solid var(--lila)}
+.previa{position:sticky;top:12px;display:flex;flex-direction:column;gap:10px}
+.previa canvas{width:100%;height:auto;border-radius:16px;box-shadow:0 8px 30px rgba(75,31,96,.18);background:var(--morado)}
+.mini{font-size:12px;color:var(--gris)}
+</style>
+</head>
+<body>
+<section id="login">
+  <div class="tarjeta">
+    <h1>Creador de flyers</h1>
+    <p>Arma el flyer de tu tienda OAKBERRY con el QR listo.<br>Escribe el código que te dio el equipo de mercadeo.</p>
+    <form id="fLogin"><input type="password" id="codigo" placeholder="Código de acceso" autocomplete="off" autocapitalize="characters">
+      <button class="btn" style="width:100%;margin-top:12px" type="submit">Entrar</button></form>
+    <div class="err" id="errLogin"></div>
+  </div>
+</section>
+
+<div id="app" class="oculto">
+  <div class="barra">Creador de flyers · OAKBERRY</div>
+  <main>
+    <div class="col">
+      <div class="card"><h3>1. ¿Qué quieres comunicar?</h3>
+        <div class="chips" id="ideas"></div>
+        <label class="campo">Línea pequeña de arriba<input type="text" id="arriba" maxlength="80"></label>
+        <label class="campo">Titular grande<input type="text" id="titular" maxlength="40"></label>
+        <div class="grid">
+          <label class="campo">Frase al lado del bowl<input type="text" id="lema" maxlength="60"></label>
+          <label class="campo">Sellos sobre el bowl<select id="sellos"><option value="0">Sin sellos</option><option value="1">1 sello</option><option value="2">2 sellos</option></select></label>
+        </div>
+      </div>
+      <div class="card"><h3>2. Tu tienda</h3>
+        <label class="campo">Tienda<select id="tienda"></select></label>
+        <label class="campo">Línea 1 (nombre)<input type="text" id="ubicTitulo" maxlength="80"></label>
+        <label class="campo">Línea 2 (cómo llegar)<input type="text" id="ubicTexto" maxlength="140"></label>
+      </div>
+      <div class="card"><h3>3. ¿A dónde lleva el QR?</h3>
+        <div class="chips" id="destinos"></div>
+        <label class="campo oculto" id="urlL">Link<input type="url" id="url" placeholder="https://…"></label>
+        <label class="campo">Texto bajo el QR<input type="text" id="qrTexto" maxlength="40"></label>
+      </div>
+      <div class="card"><h3>4. Condiciones</h3>
+        <label class="campo">Letra pequeña (vigencia, días, horario…)<textarea id="letra" rows="3" maxlength="220"></textarea></label>
+        <div class="mini">Recuerda: la promoción la aplica tu tienda en caja. Este flyer no crea cupones ni descuentos en el sistema.</div>
+      </div>
+    </div>
+    <div class="previa">
+      <div class="chips"><button class="chip on" data-fmt="afiche">Afiche</button><button class="chip" data-fmt="post">Post 4:5</button><button class="chip" data-fmt="historia">Historia 9:16</button></div>
+      <canvas id="lienzo"></canvas>
+      <button class="btn" id="bajar">⬇ Descargar flyer</button>
+    </div>
+  </main>
+</div>
+
+<script>
+const API = 'https://api.oakberry-cupones.com/';
+const $ = id => document.getElementById(id);
+const st = { tiendas:[], destino:'oakers', fmt:'afiche', loopy:'https://loyalty.is/p32b1k', ig:'https://www.instagram.com/oakberrycol/', t:null };
+const IDEAS = {
+  'Doble sello': {arriba:'Por la compra de tu bowl de 12oz', titular:'Recibe dos sellos', lema:'El açaí #1 en el mundo', sellos:'2', destino:'oakers',
+                  letra:'Válido presentando este flyer en la tienda, de lunes a jueves entre 3 y 6 pm. Aplica hasta agotar existencias.'},
+  'Únete a Oakers': {arriba:'Tu tarjeta de premios OAKBERRY', titular:'Gana bowls gratis', lema:'Suma sellos con cada compra', sellos:'2', destino:'oakers',
+                  letra:'Inscríbete gratis con el QR y presenta tu tarjeta en caja para sumar sellos.'},
+  'Te esperamos': {arriba:'El açaí #1 en el mundo', titular:'Te esperamos', lema:'Bowls, smoothies y más', sellos:'0', destino:'mapa',
+                  letra:'Escanea el QR para llegar a la tienda.'},
+};
+const DESTINOS = {oakers:['Tarjeta Oakers','¡Únete a Oakers!'], instagram:['Instagram','¡Síguenos!'], mapa:['Cómo llegar','¡Cómo llegar!'], otro:['Otro link','¡Escanéalo!']};
+
+$('fLogin').onsubmit = async ev => {
+  ev.preventDefault(); $('errLogin').textContent = 'Entrando…';
+  try{
+    const d = await (await fetch(API+'?'+new URLSearchParams({accion:'flyerAcceso', codigo:$('codigo').value.trim()}))).json();
+    if(!d.ok){ $('errLogin').textContent = d.mensaje || 'Código incorrecto'; return; }
+    try{ sessionStorage.setItem('flyer_codigo', $('codigo').value.trim()); }catch(e){}
+    entrar(d);
+  }catch(e){ $('errLogin').textContent = 'Sin conexión. Intenta de nuevo.'; }
+};
+function entrar(d){
+  st.tiendas = d.tiendas; st.loopy = d.loopy || st.loopy; st.ig = d.instagram || st.ig;
+  $('login').classList.add('oculto'); $('app').classList.remove('oculto');
+  $('tienda').innerHTML = d.tiendas.map((t,i)=>`<option value="${i}">${t.ciudad} · ${t.nombre}</option>`).join('');
+  $('ideas').innerHTML = Object.keys(IDEAS).map(k=>`<button class="chip" data-idea="${k}">${k}</button>`).join('');
+  $('destinos').innerHTML = Object.entries(DESTINOS).map(([k,v])=>`<button class="chip" data-destino="${k}">${v[0]}</button>`).join('');
+  document.querySelectorAll('[data-idea]').forEach(b => b.onclick = () => idea(b.dataset.idea));
+  document.querySelectorAll('[data-destino]').forEach(b => b.onclick = () => { destino(b.dataset.destino); dibujar(); });
+  $('tienda').onchange = () => { tienda(); dibujar(); };
+  ['arriba','titular','lema','sellos','ubicTitulo','ubicTexto','url','qrTexto','letra'].forEach(id => $(id).addEventListener('input', dibujar));
+  idea('Doble sello'); tienda();
+}
+function idea(k){
+  const i = IDEAS[k]; document.querySelectorAll('[data-idea]').forEach(b=>b.classList.toggle('on', b.dataset.idea===k));
+  ['arriba','titular','lema','sellos','letra'].forEach(c => $(c).value = i[c]);
+  destino(i.destino); dibujar();
+}
+function tienda(){
+  const t = st.tiendas[$('tienda').value] || {};
+  $('ubicTitulo').value = 'OAKBERRY ' + (t.nombre || '') + '.';
+  $('ubicTexto').value = t.direccion || '';
+}
+function destino(k){
+  st.destino = k; document.querySelectorAll('[data-destino]').forEach(b=>b.classList.toggle('on', b.dataset.destino===k));
+  $('urlL').classList.toggle('oculto', k!=='otro'); $('qrTexto').value = DESTINOS[k][1];
+}
+function urlQR(){
+  const t = st.tiendas[$('tienda').value] || {};
+  return st.destino==='oakers' ? st.loopy : st.destino==='instagram' ? st.ig
+       : st.destino==='mapa' ? (t.maps_url || 'https://www.oakberry-eventos.com/tiendas') : ($('url').value.trim() || 'https://www.oakberry-cupones.com');
+}
+function datos(){
+  return {arriba:$('arriba').value, titular:$('titular').value, lema:$('lema').value, sellos:$('sellos').value,
+    qrTexto:$('qrTexto').value, url:urlQR(), ubicTitulo:$('ubicTitulo').value, ubicTexto:$('ubicTexto').value,
+    letra:$('letra').value, redes:'@oakberrycol', foto:'bowl-clasico'};
+}
+function dibujar(){ clearTimeout(st.t); st.t = setTimeout(() => OakFlyer.dibujar($('lienzo'), datos(), st.fmt), 120); }
+document.querySelectorAll('[data-fmt]').forEach(b => b.onclick = () => { st.fmt=b.dataset.fmt; document.querySelectorAll('[data-fmt]').forEach(x=>x.classList.toggle('on',x===b)); dibujar(); });
+$('bajar').onclick = async () => {
+  const c = document.createElement('canvas'); await OakFlyer.dibujar(c, datos(), st.fmt);
+  const t = st.tiendas[$('tienda').value] || {};
+  const a = document.createElement('a'); a.download = `flyer-oakberry-${(t.nombre||'tienda').toLowerCase().replace(/[^a-z0-9]+/g,'-')}-${st.fmt}.png`;
+  a.href = c.toDataURL('image/png'); a.click();
+};
+(async () => {
+  let c = null; try{ c = sessionStorage.getItem('flyer_codigo'); }catch(e){}
+  if(!c) return;
+  try{ const d = await (await fetch(API+'?'+new URLSearchParams({accion:'flyerAcceso', codigo:c}))).json(); if(d.ok) entrar(d); }catch(e){}
+})();
+</script>
+</body>
+</html>
