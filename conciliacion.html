@@ -78,6 +78,10 @@
   .pill.r{background:#fbe4e1;color:var(--rojo)}
   .pill.m{background:#e8f3ec;color:var(--verde)}
   .pill.t{background:#fbf0dd;color:var(--oro)}
+  .nit{font-size:12.5px;margin-left:16px;font-weight:600}
+  /* el nombre de la razón social puede ser largo: que envuelva en vez de
+     empujar la última columna fuera de la pantalla */
+  td.rs{white-space:normal;min-width:230px;max-width:340px;line-height:1.35}
 
   /* sub-tabla del desglose por producto */
   tr.det td{background:#faf8f1;padding:0;border-bottom:1px solid #f0ebdd}
@@ -107,7 +111,15 @@
   #gate .logo{font-size:42px}
   #gate h2{font-size:19px;font-weight:800}
   #gate p{color:#6b5b86;font-size:13px;max-width:340px}
-  #gate .err{color:var(--rojo);font-size:12px;font-weight:600;min-height:16px}
+  #gate .err{color:var(--rojo);font-size:12px;font-weight:600;min-height:16px;max-width:360px;line-height:1.5}
+  #gate .err.ok{color:var(--verde)}
+  #gate .o{font-size:12px;color:#8a7ba3;margin-top:6px}
+  #gate form{display:flex;flex-direction:column;gap:8px;width:100%;max-width:340px}
+  #gate input{font-family:inherit;font-size:16px;padding:11px 13px;border-radius:9px;border:1.5px solid var(--morado-c);
+    background:#fff;color:var(--morado);width:100%}
+  #gate .btn{width:100%}
+  #gate .mini{font-size:11.5px;color:#8a7ba3;max-width:340px;margin-top:-4px}
+  .sub a{color:#8a7ba3;font-size:12.5px;margin-left:8px}
   #app{display:none}
   @media(max-width:820px){ .wrap{padding:20px 14px 60px} h1{font-size:21px} .sub{font-size:13px}
     .kpi b{font-size:24px} table{font-size:14px} th,td{padding:10px 12px} .nota{font-size:13px} }
@@ -118,8 +130,14 @@
 <div id="gate">
   <div class="logo">&#129530;</div>
   <h2>Conciliaci&oacute;n de programas</h2>
-  <p>Acceso restringido. Inicia sesi&oacute;n con tu cuenta autorizada de Google.</p>
+  <p>Acceso restringido a los correos autorizados de cada franquicia.</p>
   <div id="gbtn"></div>
+  <div class="o">o entr&aacute; con tu correo, sin cuenta de Google</div>
+  <form id="fmail" autocomplete="on">
+    <input type="email" id="email" placeholder="tu@correo.com" required autocomplete="email" inputmode="email">
+    <button class="btn" type="submit" id="bmail">Enviarme el enlace de acceso</button>
+  </form>
+  <p class="mini">Te llega un enlace al correo. Sirve por 30 minutos y no necesit&aacute;s contrase&ntilde;a.</p>
   <div class="err" id="gerr"></div>
 </div>
 
@@ -164,23 +182,70 @@ const FRANJA_ADQ = '<div class="franja marca"><b>Programa de adquisición.</b> '
   'los asumís vos y aparecen dentro del detalle de cada mes.</div>';
 
 /* ── login ───────────────────────────────────────────── */
-function onCredential(resp) {
+// Tres puertas, un solo API: Google (idtoken), el enlace del correo (?t=) y la
+// sesión de 30 días que cualquiera de los dos deja en localStorage. Quién ve
+// qué lo decide el servidor en todos los casos.
+const SESION_KEY = 'conci_sesion';
+const guardarSesion = s => { try { if (s) localStorage.setItem(SESION_KEY, s); } catch (e) {} };
+const leerSesion = () => { try { return localStorage.getItem(SESION_KEY); } catch (e) { return null; } };
+const borrarSesion = () => { try { localStorage.removeItem(SESION_KEY); } catch (e) {} };
+
+function entrar(body, silencioso) {
   const err = document.getElementById('gerr');
-  err.textContent = 'Verificando…';
-  fetch('/api/conciliacion', {
+  if (!silencioso) { err.className = 'err'; err.textContent = 'Verificando…'; }
+  return fetch('/api/conciliacion', {
     method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idtoken: resp.credential })
+    body: JSON.stringify(body)
   }).then(r => r.json()).then(j => {
-    if (!j.ok) { err.textContent = j.mensaje || 'No autorizado.'; return; }
+    if (!j.ok) {
+      if (body.token) borrarSesion();
+      if (!silencioso) err.textContent = j.mensaje || 'No autorizado.';
+      return false;
+    }
+    guardarSesion(j.sesion);
     D = j;
     document.getElementById('gate').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     montarTabs(); render();
-  }).catch(e => { err.textContent = 'Error de red: ' + e.message; });
+    return true;
+  }).catch(e => { if (!silencioso) err.textContent = 'Error de red: ' + e.message; return false; });
 }
 
+function onCredential(resp) { entrar({ idtoken: resp.credential }); }
+
+function pedirEnlace(ev) {
+  ev.preventDefault();
+  const err = document.getElementById('gerr'), b = document.getElementById('bmail');
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  if (!email) return;
+  b.disabled = true; err.className = 'err'; err.textContent = 'Enviando…';
+  fetch('/api/acceso', {
+    method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  }).then(r => r.json()).then(j => {
+    err.className = j.ok ? 'err ok' : 'err';
+    err.textContent = j.mensaje || (j.ok ? 'Enviado.' : 'No se pudo enviar.');
+  }).catch(e => { err.textContent = 'Error de red: ' + e.message; })
+    .finally(() => { b.disabled = false; });
+}
+
+function salir(ev) { ev.preventDefault(); borrarSesion(); location.reload(); }
+
 window.onload = () => {
-  if (!window.google) { document.getElementById('gerr').textContent = 'No cargó Google Sign-In.'; return; }
+  document.getElementById('fmail').onsubmit = pedirEnlace;
+  // 1) ¿Viene del enlace del correo? Se cambia por sesión y se limpia la URL
+  //    para que el token no quede en el historial ni en un pantallazo.
+  const t = new URLSearchParams(location.search).get('t');
+  if (t) {
+    history.replaceState(null, '', location.pathname);
+    entrar({ token: t });
+  } else {
+    // 2) ¿Ya entró en este aparato en los últimos 30 días?
+    const s = leerSesion();
+    if (s) entrar({ token: s }, true);
+  }
+  // 3) Google, para quien lo tenga. Si el script no cargó, el correo sigue sirviendo.
+  if (!window.google) { document.getElementById('gbtn').innerHTML = '<span class="mini">Google Sign-In no cargó; usá tu correo.</span>'; return; }
   google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onCredential });
   google.accounts.id.renderButton(document.getElementById('gbtn'),
     { theme: 'outline', size: 'large', text: 'signin_with' });
@@ -196,6 +261,7 @@ const filas = () => fil(D.filas);
 /* ── tabs ────────────────────────────────────────────── */
 function montarTabs() {
   const t = [['devolucion', 'Adquisición — te devolvemos'],
+             ['razon', 'Por razón social'],
              ['tienda', 'Adquisición por tienda'],
              ['programas', 'Reactivación y retención — lo asumís vos'],
              ['cruce', 'POS vs página de validación']];
@@ -214,13 +280,16 @@ function render() {
     : 'Mis programas — ' + (D.nombre || '');
   document.getElementById('sub').innerHTML =
     'Datos al <b>' + esc(D.generado) + '</b> &middot; ' + D.meses.length + ' meses &middot; ' +
-    mias + (mias === 1 ? ' tienda' : ' tiendas') + ' &middot; ' + esc(D.email);
+    mias + (mias === 1 ? ' tienda' : ' tiendas') + ' &middot; ' + esc(D.email) +
+    '<a href="#" id="salir">salir</a>';
+  document.getElementById('salir').onclick = salir;
 
   pintarKPIs();
   pintarResumen();
   pintarBarra();
   document.getElementById('vista').innerHTML =
     VISTA === 'devolucion'  ? vistaMes()
+    : VISTA === 'razon'     ? vistaRazon()
     : VISTA === 'tienda'    ? vistaTienda()
     : VISTA === 'programas' ? vistaProgramas()
     : vistaCruce();
@@ -381,6 +450,77 @@ function tablaProducto(mes, prog) {
     '</td></tr></tfoot></table>';
 }
 
+/* ── vista: por razón social ─────────────────────────── */
+// Cuánto se le debe a cada DUEÑO, todas sus tiendas y todos los meses sumados.
+// Se agrupa por el NIT que facturó cada mes, porque es contra esa factura de
+// regalías que entra el crédito: una tienda que cambió de dueño aparece bajo
+// cada NIT en los meses que le tocan. Los meses aún sin factura van con la
+// dueña actual.
+function gruposRazon() {
+  const g = new Map();
+  for (const f of filas()) {
+    const razon = f.razon || 'Sin razón social', nit = f.nit_rs || '';
+    const k = nit + '|' + razon;
+    if (!g.has(k)) g.set(k, { razon, nit, tiendas: new Set(), ordenes: 0, debido: 0,
+                              acreditado: 0, saldo: 0, saldo_iva: 0, filas: [] });
+    const a = g.get(k);
+    a.tiendas.add(f.tienda); a.ordenes += f.ordenes; a.debido += f.debido;
+    a.acreditado += f.acreditado; a.saldo += f.saldo; a.saldo_iva += f.saldo_iva;
+    a.filas.push(f);
+  }
+  return [...g.values()].sort((a, b) => b.saldo - a.saldo || a.razon.localeCompare(b.razon));
+}
+
+function vistaRazon() {
+  const gs = gruposRazon();
+  if (!gs.length) return FRANJA_ADQ + '<div class="nota">Sin movimientos para este filtro.</div>';
+  let cuerpo = '';
+  const tot = { ordenes: 0, debido: 0, acreditado: 0, saldo: 0, saldo_iva: 0 };
+  for (const g of gs) {
+    for (const k in tot) tot[k] += g[k];
+    const key = 'rs|' + g.nit + '|' + g.razon, ab = ABIERTO.has(key);
+    const ts = [...g.tiendas].sort();
+    cuerpo += '<tr class="abrible" data-k="' + key + '"><td class="l rs"><span class="caret">' +
+      (ab ? '&#9660;' : '&#9654;') + '</span><b>' + esc(g.razon) + '</b>' +
+      (g.nit ? '<br><span class="mut nit">NIT ' + esc(g.nit) + '</span>' : '') + '</td>' +
+      '<td class="l">' + (ts.length === 1 ? esc(ts[0])
+        : '<span title="' + esc(ts.join(', ')) + '">' + ts.length + ' tiendas</span>') + '</td>' +
+      '<td>' + num(g.ordenes) + '</td><td>' + cop(g.debido) + '</td><td>' + cop(g.acreditado) + '</td>' +
+      '<td class="' + (g.saldo > 0 ? 'neg' : g.saldo < 0 ? 'ok' : 'mut') + '">' + cop(g.saldo) + '</td>' +
+      '<td class="' + (g.saldo > 0 ? 'neg' : g.saldo < 0 ? 'ok' : 'mut') + '">' + cop(g.saldo_iva) + '</td></tr>' +
+      (ab ? '<tr class="det"><td colspan="7"><div class="det-in">' + tablaRazon(g) + '</div></td></tr>' : '');
+  }
+  return FRANJA_ADQ + '<div class="tablewrap"><table><thead><tr>' +
+    '<th class="l">Razón social</th><th class="l">Tiendas</th><th>Órdenes</th>' +
+    '<th>Devuelve la marca</th><th>Acreditado</th><th>Pendiente</th><th>Pendiente con IVA</th>' +
+    '</tr></thead><tbody>' + cuerpo + '</tbody><tfoot><tr><td class="l">Total</td><td></td><td>' +
+    num(tot.ordenes) + '</td><td>' + cop(tot.debido) + '</td><td>' + cop(tot.acreditado) +
+    '</td><td class="' + (tot.saldo > 0 ? 'neg' : 'mut') + '">' + cop(tot.saldo) +
+    '</td><td class="' + (tot.saldo > 0 ? 'neg' : 'mut') + '">' + cop(tot.saldo_iva) +
+    '</td></tr></tfoot></table></div>';
+}
+
+/* Desglose tienda × mes de una razón social. */
+function tablaRazon(g) {
+  const rows = g.filas.slice().sort((a, b) =>
+    a.tienda.localeCompare(b.tienda) || a.mes.localeCompare(b.mes));
+  const cuerpo = rows.map(f =>
+    '<tr><td class="l"><b>' + esc(f.tienda) + '</b>' +
+    (f.sin_fee ? ' <span class="pill r">sin fee</span>' : '') + '</td>' +
+    '<td class="l">' + mesLargo(f.mes) +
+    (f.mes === D.mes_sin_facturar ? ' <span class="pill">sin facturar</span>' : '') + '</td>' +
+    '<td>' + cop(f.debido) + '</td><td>' + cop(f.acreditado) + '</td>' +
+    '<td class="' + (f.saldo > 0 ? 'neg' : f.saldo < 0 ? 'ok' : 'mut') + '">' + cop(f.saldo) + '</td>' +
+    '<td class="l">' + facturaCelda([f]) + '</td></tr>').join('');
+  return '<h4>' + esc(g.razon) + ' &mdash; detalle por tienda y mes</h4><table><thead><tr>' +
+    '<th class="l">Tienda</th><th class="l">Mes</th><th>Devuelve la marca</th><th>Acreditado</th>' +
+    '<th>Pendiente</th><th class="l">Factura</th></tr></thead><tbody>' + cuerpo +
+    '</tbody><tfoot><tr><td class="l">Total</td><td></td><td>' + cop(suma(rows, 'debido')) +
+    '</td><td>' + cop(suma(rows, 'acreditado')) + '</td><td class="' +
+    (g.saldo > 0 ? 'neg' : g.saldo < 0 ? 'ok' : 'mut') + '">' + cop(g.saldo) +
+    '</td><td></td></tr></tfoot></table>';
+}
+
 /* ── vista: por tienda ───────────────────────────────── */
 function vistaTienda() {
   const rows = filas().slice().sort((a, b) => b.saldo - a.saldo || a.tienda.localeCompare(b.tienda));
@@ -510,7 +650,17 @@ function pintarNota() {
   // general en vez de dejarla vacía, que se veía como un recuadro huérfano.
   n.style.display = VISTA === 'cruce' ? 'none' : 'block';
   if (VISTA === 'cruce') { n.innerHTML = ''; return; }
-  document.getElementById('nota').innerHTML = VISTA === 'programas'
+  document.getElementById('nota').innerHTML = VISTA === 'razon'
+    ? '<b>Cómo se agrupa.</b> Cada fila es una razón social (NIT) con <b>todas sus tiendas y ' +
+      'todos los meses sumados</b>. <b>Pendiente</b> es lo que la marca todavía le debe a ese NIT, ' +
+      'sin IVA; <b>con IVA</b> es el equivalente que recibe la tienda al entrar el crédito contra el ' +
+      'Marketing Fee. Un pendiente <span class="ok">en verde</span> es a favor de la marca: en ese NIT ' +
+      'se acreditó más de lo debido.<br>' +
+      'Se agrupa por el NIT que <b>facturó cada mes</b>, porque es contra esa factura de regalías que ' +
+      'entra el crédito: si una tienda cambió de dueño, sus meses viejos quedan bajo el NIT anterior. ' +
+      'El mes que aún no tiene factura va con la dueña actual.<br>' +
+      'Hacé clic en una razón social para ver el detalle por tienda y mes, con el enlace a cada factura.'
+    : VISTA === 'programas'
     ? '<b>Cómo se calcula.</b> Sale del descuento real aplicado en Toteat, producto por producto. ' +
       '<b>Valor de venta</b> es lo que habrías facturado a precio de carta. ' +
       '<b>Lo que te cuesta</b> es el food cost del P&amp;L: <b>38%</b> del bowl y <b>50%</b> ' +
@@ -539,8 +689,12 @@ function bajarCSV() {
     cols = ['mes', 'tienda', 'prog', 'producto', 'tam', 'uds', 'cop', 'cop_iva', 'costo', 'asume'];
     rows = fil(D.detalle).filter(d => d.prog !== 'Adquisición');
     nombre = 'reactivacion_retencion';
+  } else if (VISTA === 'razon') {
+    cols = ['razon', 'nit', 'tiendas', 'ordenes', 'debido', 'acreditado', 'saldo', 'saldo_iva'];
+    rows = gruposRazon().map(g => ({ ...g, tiendas: [...g.tiendas].sort().join(' ') }));
+    nombre = 'devolucion_por_razon_social';
   } else {
-    cols = ['mes', 'tienda', 'codigo', 'nit', 'ordenes', 'con_codigo', 'sin_codigo',
+    cols = ['mes', 'tienda', 'razon', 'nit_rs', 'codigo', 'nit', 'ordenes', 'con_codigo', 'sin_codigo',
             'bowls_cop', 'toppings_cop', 'debido', 'acreditado', 'saldo', 'saldo_iva',
             'factura', 'sin_fee', 'base_fact', 'base_pos', 'base_gap'];
     rows = filas();

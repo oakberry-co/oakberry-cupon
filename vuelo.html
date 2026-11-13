@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="es" class="vertical">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FBF6E9">
+<title>Vuelo OAKBERRY · Santo Domingo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!--
+  VUELO OAKBERRY — kiosco táctil de la apertura de Santo Domingo (19-sep-2026).
+  Backend: adquisicion/backend/actions/vuelo.py. El servidor decide la ronda y
+  valida el retiro con SU reloj; esta página solo anima.
+
+  FORMATO: tótem VERTICAL (pantalla ~9:16 con la base morada y el logo abajo).
+  El diseño base es vertical; lo que se toca va en la mitad de abajo (arriba
+  queda sobre la cabeza de la gente) y no se repite el logo grande (lo pone la
+  base del tótem). En horizontal (un computador) cae a dos columnas.
+
+  Parámetros:
+    ?evento=sdq-vuelo-prueba   juego de prueba (repite celular, imagen PRUEBA)
+    ?rotar=90 | ?rotar=270     gira la página entera, para un TV montado en
+                               vertical cuyo sistema operativo sigue en horizontal
+    ?vertical=1 | 0            fuerza el formato si la detección se equivoca
+
+  Sistema visual: el de la invitación de la apertura (crema, tinta berenjena,
+  morado oficial #4B1F60, Azeret Mono) — el mismo de /santodomingo/friends.
+  Unidades en vmin (el lado corto): con la página girada, vh/vw apuntan al lado
+  equivocado.
+-->
+<style>
+:root{
+  --crema:#FBF6E9; --hueso:#EAE1CC; --tinta:#21152A; --tinta-suave:#5C4A66;
+  --morado:#4B1F60; --lila:#B79CC8; --oro:#E3A93B; --rojo:#B3261E; --verde:#2F6B3A;
+  --fondo:var(--crema); --texto:var(--tinta); --suave:var(--tinta-suave); --acento:var(--morado);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+html{background:var(--tinta)}
+body{font-family:'Azeret Mono',ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--fondo);
+  color:var(--texto);font-size:3.2vmin;line-height:1.35;transition:background .5s,color .5s;position:relative}
+body.morada{--fondo:var(--morado);--texto:var(--crema);--suave:var(--lila);--acento:var(--oro)}
+[hidden]{display:none!important}
+button{font-family:inherit;border:none;cursor:pointer;color:inherit;background:none}
+
+/* TV vertical con el sistema operativo en horizontal: se gira toda la página. */
+html.rot90 body,html.rot270 body{position:fixed;top:0;left:0;width:100vh;height:100vw;transform-origin:top left}
+html.rot90 body{transform:rotate(90deg) translateY(-100%)}
+html.rot270 body{transform:rotate(-90deg) translateX(-100%)}
+
+.pantalla{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;gap:2.2vmin;padding:6vmin 6vmin 7vmin;text-align:center}
+.bloque{display:flex;flex-direction:column;align-items:center;gap:2vmin;width:100%}
+
+.btn{background:var(--morado);color:var(--crema);font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  font-size:6.6vmin;padding:3.6vmin 5vmin;border-radius:999px;box-shadow:0 1.1vmin 0 var(--tinta);width:88vmin}
+body.morada .btn{background:var(--oro);color:var(--tinta)}
+.btn:active{transform:translateY(.8vmin);box-shadow:0 .3vmin 0 var(--tinta)}
+.btn:disabled{opacity:.45;animation:none}
+.btn-sec{border:.4vmin solid currentColor;border-radius:999px;font-weight:600;font-size:3.8vmin;
+  padding:3vmin 5vmin;text-transform:uppercase;letter-spacing:.08em}
+.eyebrow{font-size:2.8vmin;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--suave)}
+.badge-prueba{position:absolute;top:1.6vmin;right:1.6vmin;background:var(--rojo);color:#fff;font-weight:800;
+  padding:.8vmin 2vmin;border-radius:1vmin;letter-spacing:.1em;font-size:2.4vmin;z-index:50}
+.latido{animation:latido 1.8s ease-in-out infinite}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+/* ── ESPERA ─────────────────────────────────────────────────────────── */
+#espera .lockup{display:none}
+#espera h1{font-size:12.5vmin;font-weight:800;line-height:.92;letter-spacing:-.03em;color:var(--morado)}
+#espera .bajada{font-size:3.8vmin;max-width:40ch}
+.loro-demo{width:15vmin;animation:planeo 3.2s ease-in-out infinite}
+/* Pantalla vertical más corta que 9:16: el loro decorativo cede su lugar. */
+html.vertical.corto .loro-demo{display:none}
+@keyframes planeo{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-2.4vmin) rotate(4deg)}}
+.solo-morada{display:none!important}
+body.morada .solo-morada{display:block!important}
+body.morada .solo-crema{display:none!important}
+.reglas{display:grid;grid-template-columns:1fr 1.25fr;gap:2.4vmin;width:100%;align-items:stretch}
+.caja{border:.4vmin solid var(--tinta);border-radius:2.6vmin;padding:3vmin;text-align:left}
+.caja h3{font-size:3.4vmin;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6vmin}
+.caja p{font-size:2.6vmin;color:var(--tinta-suave);margin-bottom:1.4vmin;line-height:1.3}
+.caja ul{list-style:none;display:grid;gap:1.1vmin}
+.caja li{display:flex;justify-content:space-between;gap:2vmin;font-size:3.6vmin}
+.caja li b{font-weight:800}
+.caja li.agotado{opacity:.35;text-decoration:line-through}
+.caja.morada-box{background:var(--morado);color:var(--crema);border-color:var(--morado)}
+.caja.morada-box p{color:var(--lila)}
+.caja.morada-box li{font-size:3vmin;line-height:1.25}
+.quedan{font-weight:600;color:var(--suave);font-size:3.4vmin}
+.ticker{min-height:2.7em;font-size:2.7vmin;color:var(--suave);max-width:100%}
+.ticker b{color:var(--texto)}
+
+/* ── REGISTRO ───────────────────────────────────────────────────────── */
+#registro{justify-content:flex-start;gap:2.6vmin}
+#registro h2{font-size:9vmin;font-weight:800;color:var(--morado);line-height:1}
+.campos{display:grid;grid-template-columns:1fr;gap:2vmin;width:100%}
+.campo{border:.5vmin solid var(--hueso);border-radius:2vmin;padding:2vmin 3vmin;text-align:left;background:#fff}
+.campo.activo{border-color:var(--morado);box-shadow:0 0 0 .8vmin rgba(75,31,96,.16)}
+.campo label{display:block;font-size:2.6vmin;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-suave)}
+.campo .valor{font-size:7vmin;font-weight:600;min-height:1.3em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.campo.activo .valor::after{content:"";display:inline-block;width:.08em;height:1em;background:var(--morado);
+  vertical-align:-.12em;margin-left:.04em;animation:cursor 1s steps(1) infinite}
+@keyframes cursor{50%{opacity:0}}
+.tyc{display:flex;align-items:center;gap:2.6vmin;text-align:left;font-size:2.8vmin;width:100%;padding:.6vmin 0}
+.check{flex:0 0 auto;width:8.4vmin;height:8.4vmin;border:.6vmin solid var(--morado);border-radius:1.4vmin;
+  display:grid;place-items:center;font-size:6vmin;font-weight:800;color:var(--crema)}
+.check.on{background:var(--morado)}
+/* El teclado y los botones se pegan ABAJO: es la altura de las manos. */
+.zona-teclado{margin-top:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:2.4vmin}
+.teclado{display:grid;gap:1.4vmin;width:100%}
+.fila{display:flex;gap:1.2vmin;justify-content:center}
+.tecla{flex:1 1 0;min-width:0;min-height:11.5vmin;background:#fff;border:.35vmin solid var(--hueso);border-radius:1.6vmin;
+  font-size:5.4vmin;font-weight:600;box-shadow:0 .7vmin 0 var(--hueso)}
+.tecla:active{background:var(--hueso);transform:translateY(.5vmin);box-shadow:none}
+.tecla.ancha{flex:4 1 0;font-size:3.4vmin;letter-spacing:.1em}
+.tecla.accion{flex:2.4 1 0;font-size:3.4vmin}
+.teclado.num{width:72vmin}
+.teclado.num .tecla{min-height:13vmin;font-size:7vmin}
+.teclado.num .tecla.accion{flex:1 1 0;font-size:3.2vmin}
+.error{color:var(--rojo);font-weight:600;min-height:1.4em;font-size:3.6vmin}
+body.morada .error{color:var(--oro)}
+.acciones{display:flex;gap:3vmin;align-items:center;width:100%}
+.acciones .btn{flex:1;width:auto;font-size:5.6vmin}
+#btnSiguiente{font-size:5.6vmin}
+
+/* ── JUEGO ──────────────────────────────────────────────────────────── */
+#juego{padding:0}
+#cielo{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hud{position:absolute;top:8vmin;left:0;right:0;text-align:center;pointer-events:none;padding:0 5vmin}
+#mult{font-size:26vmin;font-weight:800;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums;color:var(--texto)}
+#mult.cayo{color:var(--rojo)}
+#mult.retirado{color:var(--verde)}
+body.morada #mult.retirado{color:var(--oro)}
+#aviso{margin-top:2vmin;font-size:4.6vmin;font-weight:800;letter-spacing:.04em;text-transform:uppercase;min-height:1.3em}
+#nivel{font-size:4vmin;font-weight:600;color:var(--suave);min-height:1.3em}
+.cuenta{position:absolute;inset:0;display:grid;place-items:center;font-size:70vmin;font-weight:800;
+  color:var(--morado);pointer-events:none;line-height:1}
+body.morada .cuenta{color:var(--oro)}
+#btnRetirar{position:absolute;left:6vmin;right:6vmin;bottom:8vmin;width:auto;z-index:5;
+  font-size:12vmin;padding:5vmin 0;background:var(--verde)}
+body.morada #btnRetirar{background:var(--oro);color:var(--tinta)}
+.banner{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);font-size:16vmin;font-weight:800;
+  letter-spacing:-.03em;white-space:nowrap;pointer-events:none;animation:golpe .5s ease-out}
+.banner.cayo{color:var(--rojo)}
+.banner.ok{color:var(--verde)}
+body.morada .banner.ok{color:var(--oro)}
+@keyframes golpe{0%{transform:translateY(-50%) scale(.3);opacity:0}70%{transform:translateY(-50%) scale(1.12);opacity:1}100%{transform:translateY(-50%) scale(1)}}
+
+/* ── RESULTADO ──────────────────────────────────────────────────────── */
+#resultado{justify-content:center;gap:4vmin}
+.res{display:flex;flex-direction:column;align-items:center;gap:3vmin;width:100%}
+#resultado h2{font-size:12vmin;font-weight:800;line-height:.98;letter-spacing:-.03em;color:var(--acento);max-width:14ch}
+#resultado .sub{font-size:4.4vmin;max-width:30ch}
+.qr-wrap{display:flex;flex-direction:column;align-items:center;gap:2.6vmin;background:#fff;color:var(--tinta);
+  border-radius:3vmin;padding:4.4vmin;width:88vmin}
+.qr-wrap p{font-size:4vmin;font-weight:600;max-width:28ch}
+#qr{width:56vmin;height:56vmin}
+#qr img,#qr canvas{width:100%!important;height:100%!important;display:block}
+.loro-caido{width:32vmin;transform:rotate(160deg)}
+.auto{font-size:2.8vmin;color:var(--suave)}
+.confeti{position:absolute;top:-4%;width:2vmin;height:3vmin;pointer-events:none;animation:cae linear forwards;z-index:40}
+@keyframes cae{to{transform:translateY(var(--caida,1200px)) rotate(720deg)}}
+
+/* ── HORIZONTAL (un computador, no el tótem) ────────────────────────── */
+html.horizontal body{font-size:2.1vmin}
+html.horizontal .pantalla{padding:4vmin 5vmin;justify-content:center}
+html.horizontal #espera{display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"a b" "c b";
+  column-gap:6vmin;row-gap:3vmin;align-content:center;align-items:center}
+html.horizontal .bloque-a{grid-area:a} html.horizontal .bloque-b{grid-area:b} html.horizontal .bloque-c{grid-area:c}
+html.horizontal #espera .lockup{display:block;width:30vmin}
+html.horizontal #espera h1{font-size:9vmin}
+html.horizontal .loro-demo{width:12vmin}
+html.horizontal .reglas{grid-template-columns:1fr}
+html.horizontal .btn{width:auto;font-size:4.4vmin;padding:2.4vmin 7vmin}
+html.horizontal .campos{grid-template-columns:1fr 1fr;max-width:1100px}
+html.horizontal #registro h2{font-size:5.6vmin}
+html.horizontal .campo .valor{font-size:4.6vmin}
+html.horizontal .tyc{max-width:1100px}
+html.horizontal .zona-teclado{margin-top:0;max-width:1100px}
+html.horizontal .tecla{min-height:8.4vmin;font-size:3.6vmin;max-width:10vmin}
+html.horizontal .tecla.ancha{max-width:40vmin} html.horizontal .tecla.accion{max-width:16vmin}
+html.horizontal .teclado.num{width:60vmin}
+html.horizontal .teclado.num .tecla{min-height:8.4vmin;font-size:4.4vmin;max-width:none}
+html.horizontal .acciones{justify-content:center}
+html.horizontal .acciones .btn{flex:0 0 auto}
+html.horizontal #mult{font-size:15vmin}
+html.horizontal #btnRetirar{left:50%;right:auto;transform:translateX(-50%);bottom:5vmin;padding:3vmin 12vmin;font-size:8vmin}
+html.horizontal #btnRetirar:active{transform:translateX(-50%) translateY(.6vmin)}
+html.horizontal .qr-wrap{flex-direction:row;width:auto;max-width:1000px;text-align:left}
+html.horizontal #qr{width:30vmin;height:30vmin}
+html.horizontal #resultado h2{font-size:8vmin;max-width:18ch}
+html.horizontal .loro-caido{width:18vmin}
+</style>
+</head>
+<body>
+
+<div class="badge-prueba" id="badgePrueba" hidden>MODO PRUEBA</div>
+
+<!-- ═══ ESPERA ═══ -->
+<section id="espera" class="pantalla">
+  <div class="bloque bloque-a">
+    <img class="lockup" src="/vuelo-lockup-morado.svg" alt="OAKBERRY Açaí Bowls">
+    <p class="eyebrow">Apertura · Plaza Andalucía</p>
+    <h1>VUELO<br>OAKBERRY</h1>
+    <img class="loro-demo" src="/vuelo-loro-morado.svg" alt="">
+    <p class="bajada">El loro despega y el premio sube. Toca <b>RETIRAR</b> antes de que se caiga.</p>
+  </div>
+  <div class="bloque bloque-b">
+    <div class="reglas">
+      <div class="caja">
+        <h3>La escalera</h3>
+        <p>Retira cuando pase de:</p>
+        <ul id="escaleraEspera"></ul>
+      </div>
+      <div class="caja morada-box">
+        <h3>★ Ronda morada</h3>
+        <p>Si el loro se pone morado, aguanta hasta <b>2x</b> y te llevas:</p>
+        <ul id="moradasEspera"></ul>
+      </div>
+    </div>
+  </div>
+  <div class="bloque bloque-c">
+    <p class="quedan" id="quedan"></p>
+    <p class="ticker" id="ticker"></p>
+    <button class="btn latido" id="btnJugar">Toca para jugar</button>
+  </div>
+</section>
+
+<!-- ═══ REGISTRO ═══ -->
+<section id="registro" class="pantalla" hidden>
+  <h2>¿Quién vuela?</h2>
+  <div class="campos">
+    <div class="campo activo" id="campoNombre" data-campo="nombre"><label>Tu nombre</label><div class="valor" id="valNombre"></div></div>
+    <div class="campo" id="campoCel" data-campo="celular"><label>Tu celular</label><div class="valor" id="valCel"></div></div>
+  </div>
+  <div class="tyc" id="tyc"><div class="check" id="check"></div>
+    <span>Acepto las reglas del juego (una jugada por persona, premios hasta agotar existencias) y que OAKBERRY guarde mis datos para contactarme.</span></div>
+  <div class="zona-teclado">
+    <p class="error" id="errorReg"></p>
+    <div class="teclado" id="teclado"></div>
+    <div class="acciones">
+      <button class="btn-sec" id="btnCancelar">Cancelar</button>
+      <button class="btn" id="btnVolar">¡A volar!</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ JUEGO ═══ -->
+<section id="juego" class="pantalla" hidden>
+  <canvas id="cielo"></canvas>
+  <div class="hud">
+    <div id="mult">1.00x</div>
+    <div id="aviso"></div>
+    <div id="nivel"></div>
+  </div>
+  <div class="cuenta" id="cuenta"></div>
+  <div id="bannerSlot"></div>
+  <button class="btn" id="btnRetirar" disabled>RETIRAR</button>
+</section>
+
+<!-- ═══ RESULTADO ═══ -->
+<section id="resultado" class="pantalla" hidden>
+  <div class="res" id="resGana" hidden>
+    <p class="eyebrow" id="resEyebrow"></p>
+    <h2 id="resPremio"></h2>
+    <p class="sub" id="resX"></p>
+    <div class="qr-wrap">
+      <div id="qr"></div>
+      <p>Escanea con la cámara de tu celular y guarda tu premio. Muéstralo en caja en esta compra.</p>
+    </div>
+  </div>
+  <div class="res" id="resPierde" hidden>
+    <img class="loro-caido solo-crema" src="/vuelo-loro-morado.svg" alt="">
+    <img class="loro-caido solo-morada" src="/vuelo-loro.svg" alt="">
+    <h2 id="resPierdeTitulo"></h2>
+    <p class="sub" id="resPierdeTexto"></p>
+  </div>
+  <button class="btn" id="btnSiguiente">Siguiente jugador</button>
+  <p class="auto" id="auto"></p>
+</section>
+
+<script>
+"use strict";
+const API = "https://api.oakberry-cupones.com";
+const QS = new URLSearchParams(location.search);
+const EVENTO = (QS.get("evento") || "sdq-vuelo").toLowerCase();
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// ─── Formato: tótem vertical (base) u horizontal ──────────────────────
+const ROT = ({ "90": "rot90", "270": "rot270", "-90": "rot270" })[QS.get("rotar") || ""];
+function orientar() {
+  const h = document.documentElement;
+  if (ROT) h.classList.add(ROT);
+  const forzado = QS.get("vertical");
+  const vertical = forzado === "1" || !!ROT || (forzado !== "0" && innerHeight >= innerWidth);
+  h.classList.toggle("vertical", vertical);
+  h.classList.toggle("horizontal", !vertical);
+  const largo = ROT ? innerWidth / innerHeight : innerHeight / innerWidth;
+  h.classList.toggle("corto", vertical && largo < 1.72);
+}
+orientar();
+
+// ─── API (JSONP, mismo patrón que ruleta/validar) ─────────────────────
+function jsonp(params, timeoutMs = 9000) {
+  return new Promise((resolve, reject) => {
+    const cb = "cb_" + Math.random().toString(36).slice(2);
+    const s = document.createElement("script");
+    let done = false;
+    const clean = () => { done = true; clearTimeout(t); delete window[cb]; s.remove(); };
+    window[cb] = d => { if (done) return; clean(); resolve(d); };
+    s.onerror = () => { if (done) return; clean(); reject(new Error("red")); };
+    s.src = API + "?" + new URLSearchParams({ ...params, evento: EVENTO, callback: cb });
+    document.head.appendChild(s);
+    const t = setTimeout(() => { if (!done) { clean(); reject(new Error("timeout")); } }, timeoutMs);
+  });
+}
+// Todas las acciones del juego son idempotentes del lado del servidor
+// (despegar por `intento`, retirar/explotar por estado), así que reintentar
+// ante un corte del wifi es seguro.
+async function api(params, intentos = 4) {
+  let err;
+  for (let i = 0; i < intentos; i++) {
+    try { return await jsonp(params); } catch (e) { err = e; await sleep(350 * (i + 1)); }
+  }
+  throw err;
+}
+
+// ─── Navegación entre pantallas ───────────────────────────────────────
+const PANTALLAS = ["espera", "registro", "juego", "resultado"];
+let timerInactividad = 0, timerAuto = 0;
+function ir(nombre) {
+  PANTALLAS.forEach(p => $(p).hidden = p !== nombre);
+  document.body.classList.remove("morada");
+  clearInterval(timerAuto);
+  if (nombre === "espera") cargarTablero();
+  if (nombre === "registro") tocarActividad();
+}
+function tocarActividad() {
+  clearTimeout(timerInactividad);
+  if (!$("registro").hidden) timerInactividad = setTimeout(() => ir("espera"), 90000);
+}
+document.addEventListener("pointerdown", tocarActividad, { passive: true });
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("gesturestart", e => e.preventDefault());
+
+// ─── ESPERA ───────────────────────────────────────────────────────────
+function pct(label) { const m = /(\d+)%/.exec(label); return m ? m[1] + "%" : label; }
+function escapar(s) { return String(s || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+async function cargarTablero() {
+  try {
+    const t = await api({ accion: "vueloTablero" }, 2);
+    if (!t.ok) return;
+    $("badgePrueba").hidden = !t.esPrueba;
+    $("escaleraEspera").innerHTML = t.escalera.map(e =>
+      `<li class="${e.agotado ? "agotado" : ""}"><b>${e.x.toFixed(1)}x</b><b>${pct(e.label)}</b></li>`).join("");
+    $("moradasEspera").innerHTML = t.moradas.length
+      ? t.moradas.map(m => `<li>${escapar(m)}</li>`).join("")
+      : `<li>Ya salieron todos los premios grandes</li>`;
+    $("quedan").textContent = t.abierto
+      ? (t.quedanPremios > 0 ? `Quedan ${t.quedanPremios} premios por salir hoy` : "Ya salieron todos los premios de hoy — ¡gracias por jugar!")
+      : (t.antesDeAbrir ? `El juego abre a las ${t.abreHumano}` : "El juego ya cerró. ¡Gracias por venir!");
+    $("btnJugar").disabled = !t.abierto;
+    $("ticker").innerHTML = t.ganadores.length
+      ? "Últimos ganadores: " + t.ganadores.slice(0, 4).map(g => `<b>${escapar(g.nombre)}</b> · ${escapar(g.premio)}`).join(" &nbsp;✦&nbsp; ")
+      : "";
+  } catch (e) {
+    $("quedan").textContent = "Conectando…";
+  }
+}
+setInterval(() => { if (!$("espera").hidden) cargarTablero(); }, 20000);
+
+$("btnJugar").addEventListener("click", () => {
+  const el = document.documentElement;
+  if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});
+  limpiarRegistro();
+  ir("registro");
+});
+
+// ─── REGISTRO + TECLADO EN PANTALLA ───────────────────────────────────
+// Teclado propio: el teclado del sistema en una pantalla táctil de kiosco tapa
+// la mitad del formulario o directamente no aparece.
+const REG = { nombre: "", celular: "", tyc: false, campo: "nombre" };
+function limpiarRegistro() {
+  Object.assign(REG, { nombre: "", celular: "", tyc: false, campo: "nombre" });
+  $("errorReg").textContent = ""; pintarRegistro();
+}
+function formatoCel(d) {
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return d.slice(0, 3) + "-" + d.slice(3);
+  return d.slice(0, 3) + "-" + d.slice(3, 6) + "-" + d.slice(6);
+}
+function pintarRegistro() {
+  $("valNombre").textContent = REG.nombre;
+  $("valCel").textContent = formatoCel(REG.celular);
+  $("campoNombre").classList.toggle("activo", REG.campo === "nombre");
+  $("campoCel").classList.toggle("activo", REG.campo === "celular");
+  $("check").classList.toggle("on", REG.tyc);
+  $("check").textContent = REG.tyc ? "✓" : "";
+  pintarTeclado();
+}
+function pintarTeclado() {
+  const k = $("teclado");
+  let filas;
+  if (REG.campo === "nombre") {
+    k.className = "teclado";
+    filas = [["Q","W","E","R","T","Y","U","I","O","P"], ["A","S","D","F","G","H","J","K","L","Ñ"],
+             ["Z","X","C","V","B","N","M","⌫"], ["ESPACIO", "SIGUIENTE →"]];
+  } else {
+    k.className = "teclado num";
+    filas = [["1","2","3"], ["4","5","6"], ["7","8","9"], ["← NOMBRE","0","⌫"]];
+  }
+  k.innerHTML = filas.map(f => `<div class="fila">${f.map(t => {
+    const cls = t === "ESPACIO" ? "ancha" : (t.length > 1 && t !== "⌫" ? "accion" : "");
+    return `<button class="tecla ${cls}" data-t="${t}">${t}</button>`;
+  }).join("")}</div>`).join("");
+}
+$("teclado").addEventListener("pointerdown", e => {
+  const b = e.target.closest(".tecla"); if (!b) return;
+  e.preventDefault();
+  const t = b.dataset.t;
+  $("errorReg").textContent = "";
+  if (REG.campo === "nombre") {
+    if (t === "⌫") REG.nombre = REG.nombre.slice(0, -1);
+    else if (t === "ESPACIO") { if (REG.nombre && !REG.nombre.endsWith(" ")) REG.nombre += " "; }
+    else if (t === "SIGUIENTE →") REG.campo = "celular";
+    else if (REG.nombre.length < 40) {
+      const nueva = REG.nombre.length === 0 || REG.nombre.endsWith(" ");
+      REG.nombre += nueva ? t : t.toLowerCase();
+    }
+  } else {
+    if (t === "⌫") REG.celular = REG.celular.slice(0, -1);
+    else if (t === "← NOMBRE") REG.campo = "nombre";
+    else if (REG.celular.length < 10) REG.celular += t;
+  }
+  pintarRegistro();
+});
+$("campoNombre").addEventListener("pointerdown", () => { REG.campo = "nombre"; pintarRegistro(); });
+$("campoCel").addEventListener("pointerdown", () => { REG.campo = "celular"; pintarRegistro(); });
+$("tyc").addEventListener("pointerdown", () => { REG.tyc = !REG.tyc; pintarRegistro(); });
+$("btnCancelar").addEventListener("click", () => ir("espera"));
+
+function nuevoIntento() {
+  return (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+}
+
+let volando = false;
+$("btnVolar").addEventListener("click", async () => {
+  if (volando) return;
+  const nombre = REG.nombre.trim();
+  if (nombre.length < 2) { REG.campo = "nombre"; pintarRegistro(); $("errorReg").textContent = "Escribe tu nombre"; return; }
+  if (REG.celular.length !== 10) { REG.campo = "celular"; pintarRegistro(); $("errorReg").textContent = "Escribe tu celular de 10 dígitos"; return; }
+  if (!REG.tyc) { $("errorReg").textContent = "Acepta las reglas para jugar"; return; }
+  volando = true;
+  $("btnVolar").disabled = true; $("btnVolar").textContent = "Preparando…";
+  try {
+    const r = await api({ accion: "vueloDespegar", nombre, celular: REG.celular, tyc: "true", intento: nuevoIntento() });
+    if (!r.ok) { $("errorReg").textContent = r.mensaje || "No se pudo iniciar"; return; }
+    arrancarVuelo(r);
+  } catch (e) {
+    $("errorReg").textContent = "Sin conexión. Intenta de nuevo en un momento.";
+  } finally {
+    volando = false;
+    $("btnVolar").disabled = false; $("btnVolar").textContent = "¡A volar!";
+  }
+});
+
+// ─── JUEGO ────────────────────────────────────────────────────────────
+const cielo = $("cielo"), ctx = cielo.getContext("2d");
+// El loro del kit es crema (para fondo oscuro): sobre el crema del juego
+// normal era invisible. Morado en ronda normal, crema en ronda morada.
+const loroCrema = new Image(); loroCrema.src = "/vuelo-loro.svg";
+const loroMorado = new Image(); loroMorado.src = "/vuelo-loro-morado.svg";
+let J = null, t0 = 0, fase = "", raf = 0, xFinal = 1, tFinal = 0, tCaida = 0, V = 0.16, XMAX = 10;
+
+function xEn(t) { return t <= 0 ? 1 : Math.min(Math.exp(V * t), XMAX); }
+function ajustarCanvas() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cielo.width = Math.round(cielo.clientWidth * dpr);
+  cielo.height = Math.round(cielo.clientHeight * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener("resize", () => { orientar(); if (!$("juego").hidden) ajustarCanvas(); });
+
+function arrancarVuelo(r) {
+  J = r; V = r.velocidad; XMAX = r.xMax;
+  t0 = performance.now() - r.tVueloS * 1000;
+  fase = "cuenta"; xFinal = 1; tFinal = 0;
+  $("mult").className = ""; $("mult").textContent = "1.00x";
+  $("aviso").textContent = `¡Buen vuelo, ${r.nombre}!`;
+  $("nivel").textContent = "";
+  $("bannerSlot").innerHTML = "";
+  $("btnRetirar").disabled = true;
+  ir("juego");
+  ajustarCanvas();
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(bucle);
+}
+
+function nivelAlcanzado(x) {
+  if (J.ronda === "morada" && x >= J.moradaMinX) return "★ PREMIO GRANDE";
+  const ok = J.escalera.filter(e => !e.agotado && x >= e.x).pop();
+  return ok ? ok.label : "";
+}
+
+function bucle(now) {
+  const t = (now - t0) / 1000;
+  if (fase === "cuenta") {
+    if (t < 0) {
+      $("cuenta").textContent = Math.ceil(-t);
+    } else {
+      $("cuenta").textContent = "";
+      fase = "vuelo";
+      $("btnRetirar").disabled = false;
+      if (J.ronda === "morada") {
+        document.body.classList.add("morada");
+        $("aviso").textContent = `★ ¡Ronda morada! Aguanta hasta ${J.moradaMinX}x`;
+      } else {
+        $("aviso").textContent = "";
+      }
+    }
+  }
+  if (fase === "vuelo") {
+    const x = xEn(t);
+    if (x >= J.crashX) {
+      caer(t);
+    } else {
+      $("mult").textContent = x.toFixed(2) + "x";
+      const n = nivelAlcanzado(x);
+      $("nivel").textContent = n ? "Si retiras ahora: " + n : "Todavía sin premio…";
+    }
+  }
+  dibujar(t);
+  raf = requestAnimationFrame(bucle);
+}
+
+$("btnRetirar").addEventListener("pointerdown", async e => {
+  e.preventDefault();
+  if (fase !== "vuelo") return;
+  const t = (performance.now() - t0) / 1000;
+  xFinal = Math.min(xEn(t), J.crashX - 0.01); tFinal = t;
+  fase = "retirando";
+  $("btnRetirar").disabled = true;
+  $("mult").textContent = xFinal.toFixed(2) + "x";
+  $("mult").className = "retirado";
+  $("nivel").textContent = "";
+  let r = null;
+  try { r = await api({ accion: "vueloRetirar", jugadaId: J.jugadaId, token: J.token, x: xFinal.toFixed(3) }, 6); } catch (err) {}
+  if (!r || !r.ok) {
+    // Sin respuesta tras varios reintentos: el servidor igual cierra la jugada
+    // como abandono. No se le promete nada que no quedó registrado.
+    fase = "fin";
+    mostrarResultado({ estado: "error" });
+    return;
+  }
+  if (r.estado === "exploto") { caer((performance.now() - t0) / 1000, true); return; }
+  fase = "retirado";
+  $("bannerSlot").innerHTML = `<div class="banner ok">¡RETIRADO!</div>`;
+  await sleep(1400);
+  mostrarResultado(r);
+});
+
+async function caer(t, yaConfirmado) {
+  if (fase === "cayendo" || fase === "fin") return;
+  const venia = fase;
+  fase = "cayendo"; tCaida = t;
+  if (venia !== "retirando") { xFinal = J.crashX; tFinal = Math.log(J.crashX) / V; }
+  $("btnRetirar").disabled = true;
+  $("mult").textContent = J.crashX.toFixed(2) + "x";
+  $("mult").className = "cayo";
+  $("nivel").textContent = "";
+  $("bannerSlot").innerHTML = `<div class="banner cayo">¡SE CAYÓ!</div>`;
+  let r = null;
+  if (!yaConfirmado) {
+    try { r = await api({ accion: "vueloExplotar", jugadaId: J.jugadaId, token: J.token }, 6); } catch (e) {}
+  }
+  await sleep(1800);
+  // Si justo el servidor ya había aceptado un retiro (toque en el último
+  // instante), manda lo que quedó registrado.
+  mostrarResultado(r && r.ok ? r : { estado: "exploto", crashX: J.crashX });
+}
+
+function dibujar(t) {
+  const W = cielo.clientWidth, H = cielo.clientHeight;
+  const vertical = document.documentElement.classList.contains("vertical");
+  const morada = document.body.classList.contains("morada");
+  const cTinta = morada ? "#FBF6E9" : "#21152A";
+  const cSuave = morada ? "rgba(251,246,233,.28)" : "rgba(33,21,42,.14)";
+  ctx.clearRect(0, 0, W, H);
+
+  const tv = (fase === "vuelo" || fase === "cuenta") ? Math.max(t, 0) : tFinal;
+  const xv = (fase === "vuelo" || fase === "cuenta") ? xEn(tv) : xFinal;
+  const tMax = Math.max(vertical ? 6 : 7, tv * 1.22);
+  const xTop = Math.max(2.4, xv * 1.3, J.ronda === "morada" ? 2.6 : 0);
+  // Vertical: arriba va el multiplicador y abajo el botón RETIRAR; el cielo es
+  // la franja del medio.
+  const L = W * 0.1, R = W * 0.93;
+  const T = H * (vertical ? 0.33 : 0.3), B = H * (vertical ? 0.76 : 0.78);
+  const px = tt => L + (tt / tMax) * (R - L);
+  const py = xx => B - ((xx - 1) / (xTop - 1)) * (B - T);
+  const u = Math.min(W, H) / 100;
+
+  // Papel cuadriculado (la invitación es papel, no pantalla de casino).
+  ctx.strokeStyle = cSuave; ctx.lineWidth = 1;
+  for (let i = 0; i <= 10; i++) { const gx = L + (R - L) * i / 10; ctx.beginPath(); ctx.moveTo(gx, T - 3 * u); ctx.lineTo(gx, B); ctx.stroke(); }
+
+  // Niveles de la escalera: etiqueta sobre la línea, pegada a la derecha.
+  const fs = Math.max(14, u * (vertical ? 3.2 : 2.2));
+  ctx.font = `600 ${fs}px 'Azeret Mono', monospace`;
+  ctx.textBaseline = "alphabetic"; ctx.textAlign = "right";
+  const niveles = J.escalera.map(e => ({ x: e.x, txt: `${e.x.toFixed(1)}x · ${pct(e.label)}`, agotado: e.agotado }));
+  if (J.ronda === "morada" && fase !== "cuenta") niveles.push({ x: J.moradaMinX, txt: `${J.moradaMinX}x · ★ GRANDE`, grande: true });
+  niveles.forEach(n => {
+    if (n.x > xTop) return;
+    const y = py(n.x);
+    ctx.setLineDash([8, 8]);
+    ctx.strokeStyle = n.grande ? "#E3A93B" : (xv >= n.x ? (morada ? "#E3A93B" : "#2F6B3A") : cSuave);
+    ctx.lineWidth = n.grande ? 3 : 2;
+    ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = n.grande ? "#E3A93B" : cTinta;
+    ctx.globalAlpha = n.agotado ? 0.3 : 1;
+    ctx.fillText(n.txt + (n.agotado ? " (agotado)" : ""), R, y - fs * 0.45);
+    ctx.globalAlpha = 1;
+  });
+
+  // Curva del vuelo.
+  const pasos = 80;
+  ctx.beginPath(); ctx.moveTo(px(0), py(1));
+  for (let i = 1; i <= pasos; i++) { const tt = tv * i / pasos; ctx.lineTo(px(tt), py(xEn(tt))); }
+  ctx.lineTo(px(tv), B); ctx.lineTo(px(0), B); ctx.closePath();
+  ctx.fillStyle = morada ? "rgba(227,169,59,.18)" : "rgba(75,31,96,.12)"; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(px(0), py(1));
+  for (let i = 1; i <= pasos; i++) { const tt = tv * i / pasos; ctx.lineTo(px(tt), py(xEn(tt))); }
+  ctx.strokeStyle = fase === "cayendo" ? "#B3261E" : (morada ? "#E3A93B" : "#4B1F60");
+  ctx.lineWidth = Math.max(4, u * 0.9); ctx.lineCap = "round"; ctx.stroke();
+
+  // Eje.
+  ctx.strokeStyle = cTinta; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(L, T - 3 * u); ctx.lineTo(L, B); ctx.lineTo(R, B); ctx.stroke();
+
+  // El loro, en la punta de la curva.
+  const tam = u * (vertical ? 22 : 14);
+  let lx = px(tv), ly = py(xv), rot = -0.35;
+  if (fase === "cuenta") { ly += Math.sin(performance.now() / 180) * 4; rot = 0; }
+  if (fase === "vuelo") {
+    const dt = 0.25, y2 = py(xEn(tv + dt)), x2 = px(tv + dt);
+    rot = Math.atan2(y2 - ly, x2 - lx) * 0.6;
+  }
+  if (fase === "cayendo") {
+    const s = (performance.now() - t0) / 1000 - tCaida;
+    ly += 0.5 * 26 * u * s * s; lx += 1.2 * u * s; rot = s * 9;
+  }
+  if (fase === "retirado" || fase === "retirando") {
+    ly -= Math.sin(performance.now() / 160) * 6;
+  }
+  const loro = morada ? loroCrema : loroMorado;
+  if (loro.complete && loro.naturalWidth) {
+    const ar = loro.naturalHeight / loro.naturalWidth;
+    ctx.save(); ctx.translate(lx, ly); ctx.rotate(rot);
+    ctx.drawImage(loro, -tam / 2, -tam * ar / 2, tam, tam * ar);
+    ctx.restore();
+  }
+}
+
+// ─── RESULTADO ────────────────────────────────────────────────────────
+function mostrarResultado(r) {
+  cancelAnimationFrame(raf);
+  fase = "fin";
+  const morada = document.body.classList.contains("morada");
+  ir("resultado");
+  if (morada) document.body.classList.add("morada");
+  $("resGana").hidden = true; $("resPierde").hidden = true;
+  let segundos = 12;
+  if (r.gano) {
+    $("resGana").hidden = false;
+    $("resEyebrow").textContent = `¡${J.nombre}, ganaste!`;
+    $("resPremio").textContent = r.premioLabel;
+    $("resX").textContent = `Te retiraste en ${Number(r.retiroX).toFixed(2)}x`;
+    $("qr").innerHTML = "";
+    new QRCode($("qr"), {
+      text: `${location.origin}/vuelo-premio?j=${r.jugadaId}&t=${encodeURIComponent(r.token)}`,
+      width: 600, height: 600, colorDark: "#21152A", colorLight: "#FFFFFF", correctLevel: QRCode.CorrectLevel.M,
+    });
+    confeti();
+    segundos = 60;
+  } else {
+    $("resPierde").hidden = false;
+    if (r.estado === "exploto") {
+      $("resPierdeTitulo").textContent = `¡El loro se cayó en ${Number(r.crashX || J.crashX).toFixed(2)}x!`;
+      $("resPierdeTexto").textContent = "Esta vez no hubo premio. ¡Gracias por jugar, te esperamos adentro!";
+    } else if (r.estado === "retirado") {
+      $("resPierdeTitulo").textContent = `Te bajaste en ${Number(r.retiroX).toFixed(2)}x`;
+      $("resPierdeTexto").textContent = "Muy pronto: la escalera arranca en 1.5x. ¡Gracias por jugar!";
+    } else {
+      $("resPierdeTitulo").textContent = "Se cortó la conexión";
+      $("resPierdeTexto").textContent = "No alcanzamos a registrar tu vuelo. Avísale a alguien del equipo.";
+      segundos = 30;
+    }
+  }
+  const fin = Date.now() + segundos * 1000;
+  const tick = () => {
+    const s = Math.ceil((fin - Date.now()) / 1000);
+    $("auto").textContent = `Siguiente jugador en ${s} s`;
+    if (s <= 0) ir("espera");
+  };
+  tick(); timerAuto = setInterval(tick, 1000);
+}
+$("btnSiguiente").addEventListener("click", () => ir("espera"));
+
+function confeti() {
+  const colores = ["#4B1F60", "#E3A93B", "#B79CC8", "#2F6B3A", "#FBF6E9"];
+  document.body.style.setProperty("--caida", Math.round(document.body.clientHeight * 1.15) + "px");
+  for (let i = 0; i < 90; i++) {
+    const c = document.createElement("div");
+    c.className = "confeti";
+    c.style.left = Math.random() * 100 + "%";
+    c.style.background = colores[i % colores.length];
+    c.style.animationDuration = 2.4 + Math.random() * 2.6 + "s";
+    c.style.animationDelay = Math.random() * 0.8 + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 6500);
+  }
+}
+
+pintarTeclado();
+cargarTablero();
+</script>
+</body>
+</html>

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="es" class="vertical">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FBF6E9">
+<title>La tragamonedas · OAKBERRY</title>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-regular.woff2" as="font" type="font/woff2" crossorigin>
+<!--
+  TRAGAMONEDAS de activación — lanzamiento de país, un día.
+
+  Gira; si gana sube un peldaño de la escalera de premios y decide: se planta o
+  vuelve a girar. Si pierde cae al piso del evento (que puede ser "nada").
+
+  TODO lo decide el servidor: el giro, el premio y hasta los símbolos que caen
+  en los rodillos. Esta pantalla solo anima lo que le responden — si el sorteo
+  viviera acá, cualquiera lo abriría y ganaría.
+
+  Premios, probabilidades y cupos: `crm.slot_niveles` y `crm.slot_config` en
+  BigQuery, por evento. Cambiarlos es un UPDATE, no un despliegue.
+  Backend: /juego/slot/* en crm/api/main.py (Cloud Run de CRM).
+
+  Parámetros: ?evento=slug (con "prueba" no limita a una partida por celular)
+              ?pais=do · ?rotar=90|270 · ?vertical=1|0 · #tablero (para el equipo)
+-->
+<style>
+/* Nexa Slab Book/Bold/Black COMPLETAS (las "FREE" de Drive son demos y dibujan
+   : % - · ¡ ¿ como un sello). No traen ← ⌫ ✓ ✕: esos no se usan en la página. */
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-regular.woff2') format('woff2');font-weight:400;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-bold.woff2') format('woff2');font-weight:600 700;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-black.woff2') format('woff2');font-weight:800 900;font-display:block}
+:root{
+  --crema:#FBF6E9; --crema-cielo:#F5EEE0; --hueso:#EAE1CC; --tinta:#21152A; --tinta-suave:#5C4A66;
+  --morado:#4B1F60; --lila:#B79CC8; --oro:#F4B223; --coral:#E04850; --rojo:#B3261E; --verde:#2F6B3A;
+  --fondo:var(--crema); --texto:var(--tinta);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+body{container-type:size}
+html{background:var(--tinta)}
+body{font-family:'Nexa Slab',Rockwell,'Roboto Slab',Georgia,serif;background:var(--fondo);
+  color:var(--texto);font-size:3.2cqmin;line-height:1.35;transition:background .6s,color .6s;position:relative}
+[hidden]{display:none!important}
+button{font-family:inherit;border:none;cursor:pointer;color:inherit;background:none}
+
+html.rot90 body,html.rot270 body{position:fixed;top:0;left:0;width:100vh;height:100vw;transform-origin:top left}
+html.rot90 body{transform:rotate(90deg) translateY(-100%)}
+html.rot270 body{transform:rotate(-90deg) translateX(-100%)}
+
+.escena{position:absolute;inset:0;z-index:0;background-color:var(--fondo);background-size:cover;
+  background-position:center;transition:background-color .6s}
+.pantalla{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;gap:2.4cqmin;padding:6cqmin 6cqmin 7cqmin;text-align:center}
+.bloque{display:flex;flex-direction:column;align-items:center;gap:2cqmin;width:100%}
+.panel{background:var(--panel);border-radius:3cqmin;padding:3cqmin 4cqmin}
+.eyebrow{font-size:2.8cqmin;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
+
+.btn{background:var(--boton,var(--morado));color:var(--boton-texto,var(--crema));font-weight:800;letter-spacing:.05em;
+  text-transform:uppercase;font-size:6cqmin;padding:3.4cqmin 4cqmin;border-radius:999px;
+  box-shadow:0 1.1cqmin 0 var(--tinta);width:88cqmin;line-height:1.15;white-space:nowrap}
+.btn:active{transform:translateY(.8cqmin);box-shadow:0 .3cqmin 0 var(--tinta)}
+.btn:disabled{opacity:.45;animation:none}
+.btn-sec{border:.4cqmin solid currentColor;border-radius:999px;font-weight:700;font-size:3.8cqmin;
+  padding:3cqmin 5cqmin;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.latido{animation:latido 1.8s ease-in-out infinite}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.badge-prueba{position:absolute;top:1.6cqmin;right:1.6cqmin;background:var(--rojo);color:#fff;font-weight:800;
+  padding:.8cqmin 2cqmin;border-radius:1cqmin;letter-spacing:.1em;font-size:2.4cqmin;z-index:50}
+.auto{font-size:2.8cqmin;opacity:.75;min-height:1.4em}
+
+/* ── PORTADA ─────────────────────────────────────────────────────────── */
+#portada h1{font-size:12.5cqmin;font-weight:900;line-height:.98;letter-spacing:-.01em;
+  color:var(--acento);text-transform:uppercase;text-wrap:balance;max-width:88cqmin}
+#portada .bajada{font-size:4.6cqmin;font-weight:600;max-width:34ch;text-wrap:balance}
+
+/* ── REGISTRO + TECLADO (mismo de EXACTO) ────────────────────────────── */
+#registro{justify-content:flex-start;gap:2.6cqmin}
+#registro h2{font-size:9cqmin;font-weight:900;color:var(--morado);line-height:1;text-transform:uppercase}
+.campos{display:grid;gap:2cqmin;width:100%}
+.campo{border:.5cqmin solid var(--hueso);border-radius:2cqmin;padding:2cqmin 3cqmin;text-align:left;background:#fff;color:var(--tinta)}
+.campo.activo{border-color:var(--morado);box-shadow:0 0 0 .8cqmin rgba(75,31,96,.16)}
+.campo label{display:block;font-size:2.6cqmin;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-suave)}
+.campo .valor .prefijo{color:var(--tinta-suave);font-weight:600;margin-right:.35em}
+.campo .valor{font-size:7cqmin;font-weight:600;min-height:1.3em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.campo.activo .valor::after{content:"";display:inline-block;width:.08em;height:1em;background:var(--morado);
+  vertical-align:-.12em;margin-left:.04em;animation:cursor 1s steps(1) infinite}
+@keyframes cursor{50%{opacity:0}}
+.tyc{display:flex;align-items:center;gap:2.6cqmin;text-align:left;font-size:3cqmin;font-weight:600;width:100%;
+  padding:2cqmin 3cqmin;background:rgba(245,238,224,.86);border-radius:2cqmin}
+.check{flex:0 0 auto;width:8.4cqmin;height:8.4cqmin;border:.6cqmin solid var(--morado);border-radius:1.4cqmin;position:relative;background:#fff}
+.check.on{background:var(--morado)}
+/* La palomita va dibujada: Nexa Slab no trae el glifo ✓. */
+.check.on::after{content:"";position:absolute;left:2.4cqmin;top:.8cqmin;width:2.2cqmin;height:4.2cqmin;
+  border:solid var(--crema);border-width:0 .9cqmin .9cqmin 0;transform:rotate(45deg)}
+.zona-teclado{margin-top:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:2.4cqmin}
+.teclado{display:grid;gap:1.4cqmin;width:100%}
+.fila{display:flex;gap:1.2cqmin;justify-content:center}
+.tecla{flex:1 1 0;min-width:0;min-height:11.5cqmin;background:#fff;color:var(--tinta);border:.35cqmin solid var(--hueso);
+  border-radius:1.6cqmin;font-size:5.4cqmin;font-weight:600;box-shadow:0 .7cqmin 0 var(--hueso)}
+.tecla:active{background:var(--hueso);transform:translateY(.5cqmin);box-shadow:none}
+.tecla.ancha{flex:4 1 0;font-size:3.4cqmin;letter-spacing:.1em}
+.tecla.accion{flex:2.4 1 0;font-size:3.2cqmin;letter-spacing:.06em}
+.teclado.num{width:72cqmin}
+.teclado.num .tecla{min-height:13cqmin;font-size:7cqmin}
+.teclado.num .tecla.accion{flex:1 1 0;font-size:3.2cqmin}
+.error{color:var(--rojo);font-weight:700;min-height:1.4em;font-size:3.6cqmin}
+/* ── Pantalla del QR ──────────────────────────────────────────────────
+   El QR va dibujado (SVG), no en imagen: se ve nítido lo mismo en un
+   celular que en el tótem de 1080 px, y no depende del wifi del evento. */
+.qr-caja{background:#fff;border-radius:3cqmin;padding:3.4cqmin;width:64cqmin;max-width:100%;
+  box-shadow:0 1.2cqmin 0 rgba(33,21,42,.18);display:grid;place-items:center}
+.qr-caja .qr{width:100%;height:auto;display:block}
+.qr-pie{font-size:4cqmin;font-weight:600;max-width:26ch;text-wrap:balance}
+/* Apilado, no lado a lado: "Ya me registré" no cabe en una línea junto a
+   otro botón, y el texto de un botón nunca debe partirse en dos. */
+.acciones{display:flex;flex-direction:column;gap:2cqmin;align-items:center;width:100%}
+.acciones .btn{width:88cqmin;max-width:100%}
+
+
+/* ── SALIR ───────────────────────────────────────────────────────────── */
+.salir{position:absolute;top:1.6cqmin;left:1.6cqmin;z-index:60;
+  background:rgba(33,21,42,.5);color:var(--crema);border-radius:999px;
+  padding:1.4cqmin 3cqmin;font-family:inherit;font-size:2.6cqmin;font-weight:800;
+  letter-spacing:.12em;text-transform:uppercase;border:.3cqmin solid rgba(251,246,233,.3)}
+.salir:active{transform:scale(.96)}
+.salir.confirmar{background:var(--coral);color:#fff;border-color:transparent}
+
+/* ── HORIZONTAL (un computador) ──────────────────────────────────────
+   No hay diseño horizontal aparte: se muestra EL MISMO tótem centrado en 9:16.
+   Sin esta regla el cuerpo ocupa todo el ancho y el teclado no cabe. */
+html.horizontal body{width:min(100vw, calc(100vh * 9 / 16));height:100vh;margin:0 auto;
+  box-shadow:0 0 0 100vmax var(--tinta)}
+
+/* ── Selector de indicativo ─────────────────────────────────────────── */
+.prefijo{color:var(--morado);font-weight:800;margin-right:.35em;padding:.1em .3em;
+  border-radius:.9cqmin;background:rgba(75,31,96,.1);cursor:pointer}
+.paises{position:absolute;left:6cqmin;right:6cqmin;top:34cqmin;z-index:20;
+  background:#fff;border:.5cqmin solid var(--hueso);border-radius:2.4cqmin;padding:2cqmin;
+  display:grid;grid-template-columns:1fr 1fr;gap:1.2cqmin;
+  box-shadow:0 2cqmin 6cqmin rgba(33,21,42,.28);max-height:60cqmin;overflow-y:auto}
+.pais{display:flex;justify-content:space-between;align-items:center;gap:1.4cqmin;
+  padding:2.2cqmin 2.4cqmin;border-radius:1.6cqmin;background:var(--gray-light,#f7f4ff);
+  font-family:inherit;font-size:3cqmin;font-weight:700;color:var(--tinta);text-align:left}
+.pais b{color:var(--morado)}
+.pais.on{background:var(--morado);color:var(--crema)}
+.pais.on b{color:var(--oro)}
+
+/* ── ESCALERA DE PREMIOS (portada) ──────────────────────────────────── */
+.escalera{display:flex;flex-direction:column-reverse;gap:1.2cqmin;width:100%}
+.peldano{display:flex;align-items:center;gap:2.4cqmin;padding:2.2cqmin 3.4cqmin;border-radius:2cqmin;
+  background:var(--panel);font-size:3.6cqmin;font-weight:700;text-align:left}
+.peldano .n{font-weight:900;color:var(--acento);min-width:6cqmin}
+.peldano.mayor{background:var(--oro);color:var(--tinta)}
+.peldano.mayor .n{color:var(--tinta)}
+.peldano.agotado{opacity:.45}
+.peldano.agotado .lbl{text-decoration:line-through}
+
+/* ── MÁQUINA ────────────────────────────────────────────────────────── */
+#maquina{justify-content:space-between}
+.tienes{font-size:3.8cqmin;font-weight:700}
+.tienes b{color:var(--acento)}
+/* ── EL MUEBLE ───────────────────────────────────────────────────────
+   Dibujado con CSS en la paleta de la marca: cuerpo morado, filos dorados y
+   el açaí como remate. No es una foto: escala con la pantalla y no pesa. */
+.mueble{position:relative;width:74cqmin;margin:0 auto;padding:2.6cqmin 2.6cqmin 3.4cqmin;
+  border-radius:9cqmin 9cqmin 4cqmin 4cqmin;
+  background:linear-gradient(180deg,#5C2A72 0%,#4B1F60 45%,#2C1140 100%);
+  border:.8cqmin solid var(--oro);
+  box-shadow:0 2cqmin 5cqmin rgba(10,2,14,.55), inset 0 .6cqmin 0 rgba(251,246,233,.18)}
+.marquesina{display:flex;align-items:center;justify-content:center;gap:2cqmin;
+  background:linear-gradient(180deg,#F4B223,#D99412);color:#2C1140;
+  border-radius:5cqmin;padding:1.6cqmin 3cqmin;margin-bottom:2.6cqmin;
+  font-size:4cqmin;font-weight:900;letter-spacing:.14em;text-transform:uppercase;
+  box-shadow:inset 0 -.5cqmin 0 rgba(0,0,0,.18)}
+.marquesina .baya{width:2.4cqmin;height:2.4cqmin;border-radius:50%;background:#2C1140;
+  box-shadow:0 0 0 .4cqmin rgba(44,17,64,.25)}
+.rodillos{display:flex;gap:1.8cqmin;justify-content:center;background:#14041B;
+  border:.6cqmin solid rgba(251,246,233,.25);border-radius:3cqmin;padding:2.4cqmin;
+  box-shadow:inset 0 .6cqmin 2.4cqmin rgba(0,0,0,.8);position:relative}
+/* Línea de premio: el ojo la usa para leer los tres símbolos como una jugada. */
+.rodillos::after{content:"";position:absolute;left:1.6cqmin;right:1.6cqmin;top:50%;height:.4cqmin;
+  transform:translateY(-50%);background:rgba(244,178,35,.5);border-radius:999px;pointer-events:none}
+.bandeja{margin-top:2.6cqmin;height:3.4cqmin;border-radius:2cqmin;
+  background:linear-gradient(180deg,#1B0722,#2C1140);
+  box-shadow:inset 0 .5cqmin 1.4cqmin rgba(0,0,0,.7)}
+
+/* ── LA PALANCA ─────────────────────────────────────────────────────── */
+.palanca{position:absolute;right:-8.5cqmin;top:12cqmin;width:13cqmin;height:32cqmin;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:none}
+.palanca .base{position:absolute;left:0;top:11cqmin;width:7.5cqmin;height:7.5cqmin;border-radius:50%;
+  background:linear-gradient(180deg,#F4B223,#C98D10);border:.5cqmin solid #2C1140}
+.palanca .vara{position:absolute;left:2.8cqmin;top:-1cqmin;width:2cqmin;height:16cqmin;border-radius:999px;
+  background:linear-gradient(90deg,#C98D10,#F4B223);
+  transform-origin:50% 100%;transition:transform .18s cubic-bezier(.34,1.3,.64,1)}
+.palanca .bola{position:absolute;left:-.4cqmin;top:-5.6cqmin;width:8cqmin;height:8cqmin;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#F07A72,#E04850 55%,#A32A31);
+  box-shadow:0 .8cqmin 1.6cqmin rgba(10,2,14,.5);
+  transition:transform .18s cubic-bezier(.34,1.3,.64,1)}
+.palanca.jalada .vara{transform:scaleY(.42)}
+.palanca.jalada .bola{transform:translateY(9.2cqmin)}
+.palanca.lista .bola{animation:latido 1.8s ease-in-out infinite}
+.pista-palanca{font-size:3.4cqmin;font-weight:800;color:var(--crema);opacity:.9;
+  text-transform:uppercase;letter-spacing:.1em;margin-top:2cqmin;min-height:1.3em}
+.rodillo{width:18cqmin;height:24cqmin;border-radius:2cqmin;background:linear-gradient(180deg,#fffdf7,#e7dfcd);
+  display:grid;place-items:center;font-size:11cqmin;line-height:1;overflow:hidden;
+  box-shadow:inset 0 0 2.4cqmin rgba(0,0,0,.35)}
+.rodillo.girando{animation:vibrar .18s linear infinite}
+@keyframes vibrar{0%,100%{transform:translateY(-.6cqmin)}50%{transform:translateY(.6cqmin)}}
+.rodillos.gana{border-color:var(--verde);box-shadow:0 0 4cqmin rgba(47,107,58,.6)}
+.rodillos.pierde{border-color:var(--rojo)}
+.veredicto{font-size:7cqmin;font-weight:900;text-transform:uppercase;line-height:1.05;min-height:1.1em;color:var(--acento);text-wrap:balance}
+.veredicto-sub{font-size:4cqmin;font-weight:600;min-height:1.3em;text-wrap:balance;max-width:34ch}
+.acciones-juego{display:flex;flex-direction:column;gap:2.2cqmin;width:100%;align-items:center}
+.riesgo{font-size:3cqmin;font-weight:600;opacity:.8}
+
+/* ── PREMIO / SIN PREMIO ────────────────────────────────────────────── */
+#premio h2,#nada h2{font-size:11cqmin;font-weight:900;line-height:1;text-transform:uppercase;color:var(--acento);text-wrap:balance}
+.premio-caja{background:var(--oro);color:var(--tinta);border-radius:3cqmin;padding:3.4cqmin 4cqmin;
+  font-size:6.4cqmin;font-weight:900;text-transform:uppercase;line-height:1.1;width:88cqmin;text-wrap:balance}
+.mostrar{font-size:4cqmin;font-weight:700;text-wrap:balance;max-width:30ch}
+.cuando{font-size:3.6cqmin;font-weight:700;color:var(--crema);opacity:.85;letter-spacing:.06em}
+/* Código del premio: se enseña en caja. No valida nada — está para que dos
+   personas no puedan reclamar con la misma captura. Va grande y monoespaciado
+   porque hay que leerlo y a veces dictarlo. */
+.codigo-caja{background:rgba(251,246,233,.94);border:.5cqmin dashed var(--morado);
+  border-radius:2.4cqmin;padding:2cqmin 4cqmin;display:flex;flex-direction:column;
+  align-items:center;gap:.4cqmin;max-width:88cqmin}
+.codigo-caja .rot{font-size:2.6cqmin;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--tinta-suave)}
+.codigo-caja .cod{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:7.4cqmin;font-weight:800;letter-spacing:.12em;color:var(--morado);line-height:1.05}
+.codigo-caja .vence{font-size:2.7cqmin;font-weight:700;color:var(--rojo)}
+.vaso-caja{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.vaso{height:100%;max-height:46cqmin;width:auto;object-fit:contain}
+.confeti{position:absolute;top:-4%;width:2cqmin;height:3cqmin;pointer-events:none;animation:cae linear forwards;z-index:40}
+@keyframes cae{to{transform:translateY(var(--caida,1200px)) rotate(720deg)}}
+
+/* ── TABLERO DEL EQUIPO ─────────────────────────────────────────────── */
+#tablero{justify-content:flex-start;gap:2.4cqmin}
+#tablero h2{font-size:9cqmin;font-weight:900;text-transform:uppercase;color:var(--acento);line-height:1}
+.stock{display:flex;flex-direction:column;gap:1.4cqmin;width:100%;flex:0 1 auto;min-height:0;overflow:hidden}
+.stock-fila{display:grid;grid-template-columns:1fr auto;gap:2cqmin;align-items:center;padding:2.2cqmin 3cqmin;
+  border-radius:2cqmin;background:rgba(251,246,233,.1);font-size:3.8cqmin;font-weight:700;text-align:left}
+.stock-fila.sin{opacity:.5}
+.stock-fila .q{font-variant-numeric:tabular-nums;font-weight:900}
+.ultimos{font-size:3.2cqmin;font-weight:600;opacity:.85;text-align:left;width:100%}
+.ultimos div{padding:.8cqmin 0;border-bottom:1px solid rgba(251,246,233,.12)}
+#tablero .btn-sec{margin-top:auto}
+</style>
+</head>
+<body>
+<div class="escena" id="escena"></div>
+<button class="salir" id="btnSalir">Salir</button>
+<div class="badge-prueba" id="badgePrueba" hidden>MODO PRUEBA</div>
+
+<!-- ═══ PORTADA ═══ -->
+<section id="portada" class="pantalla">
+  <div class="bloque">
+    <p class="eyebrow" id="pEvento">OAKBERRY</p>
+    <h1 id="pTitulo">La tragamonedas</h1>
+    <p class="bajada">Si ganas, decides: te lo llevas o vuelves a girar por el de arriba.</p>
+  </div>
+  <div class="escalera" id="escalera"></div>
+  <div class="bloque">
+    <button class="btn latido" id="btnJugar">Toca para jugar</button>
+  </div>
+</section>
+
+<!-- ═══ REGISTRO ═══ -->
+<section id="registro" class="pantalla" hidden>
+  <div class="bloque">
+    <h2>Regístrate para jugar</h2>
+    <p class="qr-pie">Escanea el código con la cámara de tu celular y deja tus datos.</p>
+  </div>
+  <div class="qr-caja"><svg class="qr" viewBox="0 0 37 37" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" role="img" aria-label="Codigo QR para registrarte"><rect width="37" height="37" fill="#fff"/><path d="M0 0h7v1h-7zM9 0h2v1h-2zM13 0h5v1h-5zM20 0h2v1h-2zM23 0h2v1h-2zM27 0h2v1h-2zM30 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM10 1h1v1h-1zM14 1h1v1h-1zM16 1h2v1h-2zM20 1h2v1h-2zM23 1h1v1h-1zM26 1h3v1h-3zM30 1h1v1h-1zM36 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h1v1h-1zM11 2h1v1h-1zM13 2h1v1h-1zM15 2h1v1h-1zM17 2h1v1h-1zM23 2h2v1h-2zM27 2h1v1h-1zM30 2h1v1h-1zM32 2h3v1h-3zM36 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h5v1h-5zM15 3h2v1h-2zM18 3h2v1h-2zM23 3h1v1h-1zM26 3h2v1h-2zM30 3h1v1h-1zM32 3h3v1h-3zM36 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM10 4h1v1h-1zM13 4h7v1h-7zM23 4h1v1h-1zM25 4h4v1h-4zM30 4h1v1h-1zM32 4h3v1h-3zM36 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM12 5h1v1h-1zM14 5h7v1h-7zM22 5h1v1h-1zM24 5h2v1h-2zM27 5h2v1h-2zM30 5h1v1h-1zM36 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h7v1h-7zM9 7h2v1h-2zM13 7h2v1h-2zM20 7h3v1h-3zM24 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h1v1h-1zM17 8h1v1h-1zM21 8h2v1h-2zM25 8h1v1h-1zM27 8h1v1h-1zM29 8h1v1h-1zM31 8h1v1h-1zM1 9h1v1h-1zM3 9h1v1h-1zM8 9h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM15 9h1v1h-1zM17 9h1v1h-1zM19 9h2v1h-2zM22 9h1v1h-1zM30 9h2v1h-2zM34 9h1v1h-1zM36 9h1v1h-1zM2 10h8v1h-8zM11 10h2v1h-2zM14 10h1v1h-1zM16 10h1v1h-1zM20 10h3v1h-3zM28 10h1v1h-1zM30 10h4v1h-4zM35 10h2v1h-2zM0 11h4v1h-4zM7 11h1v1h-1zM10 11h3v1h-3zM14 11h2v1h-2zM21 11h1v1h-1zM23 11h1v1h-1zM25 11h1v1h-1zM27 11h3v1h-3zM32 11h2v1h-2zM1 12h2v1h-2zM6 12h1v1h-1zM8 12h6v1h-6zM17 12h5v1h-5zM24 12h2v1h-2zM28 12h3v1h-3zM33 12h1v1h-1zM35 12h2v1h-2zM0 13h1v1h-1zM4 13h1v1h-1zM7 13h1v1h-1zM11 13h1v1h-1zM13 13h1v1h-1zM16 13h7v1h-7zM24 13h2v1h-2zM30 13h2v1h-2zM34 13h3v1h-3zM1 14h2v1h-2zM5 14h2v1h-2zM10 14h1v1h-1zM12 14h2v1h-2zM17 14h2v1h-2zM21 14h3v1h-3zM26 14h1v1h-1zM30 14h3v1h-3zM34 14h3v1h-3zM0 15h1v1h-1zM4 15h2v1h-2zM8 15h2v1h-2zM14 15h2v1h-2zM17 15h2v1h-2zM21 15h2v1h-2zM25 15h2v1h-2zM28 15h2v1h-2zM32 15h1v1h-1zM0 16h4v1h-4zM6 16h2v1h-2zM9 16h1v1h-1zM11 16h2v1h-2zM18 16h2v1h-2zM21 16h1v1h-1zM24 16h1v1h-1zM26 16h2v1h-2zM30 16h1v1h-1zM33 16h2v1h-2zM0 17h2v1h-2zM5 17h1v1h-1zM8 17h1v1h-1zM10 17h1v1h-1zM12 17h2v1h-2zM15 17h10v1h-10zM28 17h6v1h-6zM35 17h2v1h-2zM0 18h2v1h-2zM3 18h2v1h-2zM6 18h2v1h-2zM10 18h1v1h-1zM13 18h1v1h-1zM15 18h2v1h-2zM21 18h2v1h-2zM28 18h1v1h-1zM30 18h7v1h-7zM1 19h3v1h-3zM5 19h1v1h-1zM7 19h1v1h-1zM10 19h1v1h-1zM12 19h2v1h-2zM17 19h2v1h-2zM21 19h1v1h-1zM23 19h1v1h-1zM28 19h2v1h-2zM31 19h5v1h-5zM0 20h1v1h-1zM2 20h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM10 20h2v1h-2zM13 20h4v1h-4zM20 20h2v1h-2zM23 20h4v1h-4zM28 20h1v1h-1zM30 20h1v1h-1zM32 20h2v1h-2zM35 20h1v1h-1zM0 21h3v1h-3zM4 21h2v1h-2zM7 21h1v1h-1zM9 21h1v1h-1zM14 21h1v1h-1zM16 21h1v1h-1zM20 21h2v1h-2zM24 21h1v1h-1zM28 21h1v1h-1zM30 21h2v1h-2zM33 21h1v1h-1zM36 21h1v1h-1zM2 22h1v1h-1zM6 22h1v1h-1zM8 22h2v1h-2zM11 22h4v1h-4zM16 22h2v1h-2zM19 22h1v1h-1zM24 22h3v1h-3zM30 22h1v1h-1zM36 22h1v1h-1zM1 23h1v1h-1zM5 23h1v1h-1zM7 23h6v1h-6zM17 23h1v1h-1zM19 23h8v1h-8zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h1v1h-1zM4 24h1v1h-1zM6 24h1v1h-1zM8 24h3v1h-3zM12 24h3v1h-3zM20 24h2v1h-2zM23 24h3v1h-3zM28 24h1v1h-1zM30 24h1v1h-1zM33 24h1v1h-1zM35 24h2v1h-2zM2 25h2v1h-2zM5 25h1v1h-1zM12 25h2v1h-2zM15 25h3v1h-3zM20 25h1v1h-1zM22 25h1v1h-1zM24 25h2v1h-2zM30 25h1v1h-1zM34 25h3v1h-3zM0 26h1v1h-1zM2 26h2v1h-2zM5 26h2v1h-2zM9 26h1v1h-1zM11 26h2v1h-2zM14 26h1v1h-1zM18 26h2v1h-2zM21 26h1v1h-1zM23 26h4v1h-4zM29 26h5v1h-5zM36 26h1v1h-1zM1 27h1v1h-1zM4 27h2v1h-2zM9 27h1v1h-1zM15 27h1v1h-1zM17 27h2v1h-2zM20 27h4v1h-4zM25 27h5v1h-5zM31 27h1v1h-1zM35 27h1v1h-1zM0 28h8v1h-8zM9 28h1v1h-1zM11 28h1v1h-1zM13 28h1v1h-1zM16 28h2v1h-2zM20 28h2v1h-2zM23 28h2v1h-2zM27 28h6v1h-6zM34 28h1v1h-1zM8 29h1v1h-1zM11 29h2v1h-2zM21 29h3v1h-3zM25 29h4v1h-4zM32 29h2v1h-2zM35 29h2v1h-2zM0 30h7v1h-7zM9 30h1v1h-1zM13 30h1v1h-1zM16 30h1v1h-1zM18 30h1v1h-1zM21 30h2v1h-2zM25 30h4v1h-4zM30 30h1v1h-1zM32 30h2v1h-2zM36 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM15 31h5v1h-5zM21 31h1v1h-1zM23 31h1v1h-1zM28 31h1v1h-1zM32 31h4v1h-4zM0 32h1v1h-1zM2 32h3v1h-3zM6 32h1v1h-1zM9 32h2v1h-2zM13 32h2v1h-2zM16 32h3v1h-3zM21 32h2v1h-2zM25 32h1v1h-1zM28 32h6v1h-6zM35 32h1v1h-1zM0 33h1v1h-1zM2 33h3v1h-3zM6 33h1v1h-1zM8 33h1v1h-1zM10 33h1v1h-1zM15 33h5v1h-5zM22 33h1v1h-1zM25 33h5v1h-5zM31 33h3v1h-3zM35 33h1v1h-1zM0 34h1v1h-1zM2 34h3v1h-3zM6 34h1v1h-1zM9 34h2v1h-2zM12 34h2v1h-2zM15 34h1v1h-1zM19 34h4v1h-4zM24 34h1v1h-1zM27 34h2v1h-2zM31 34h2v1h-2zM34 34h3v1h-3zM0 35h1v1h-1zM6 35h1v1h-1zM10 35h2v1h-2zM14 35h1v1h-1zM16 35h1v1h-1zM21 35h5v1h-5zM27 35h3v1h-3zM31 35h1v1h-1zM33 35h1v1h-1zM0 36h7v1h-7zM8 36h1v1h-1zM10 36h6v1h-6zM17 36h2v1h-2zM20 36h2v1h-2zM25 36h1v1h-1zM28 36h2v1h-2zM33 36h1v1h-1zM35 36h2v1h-2z" fill="#21152A"/></svg></div>
+  <div class="zona-teclado">
+    <p class="error" id="errorReg"></p>
+    <div class="acciones">
+      <button class="btn latido" id="btnEmpezar">Ya me registré</button>
+      <button class="btn-sec" id="btnCancelar">Volver</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MÁQUINA ═══ -->
+<section id="maquina" class="pantalla" hidden>
+  <div class="bloque">
+    <p class="eyebrow" id="mEyebrow"></p>
+    <p class="tienes" id="mTienes"></p>
+  </div>
+  <div class="mueble">
+    <div class="marquesina"><span class="baya"></span>OAKBERRY<span class="baya"></span></div>
+    <div class="rodillos" id="rodillos">
+      <div class="rodillo" id="r0">🫐</div>
+      <div class="rodillo" id="r1">🍌</div>
+      <div class="rodillo" id="r2">🍓</div>
+    </div>
+    <div class="bandeja"></div>
+    <div class="palanca lista" id="palanca" title="Jala la palanca">
+      <div class="base"></div>
+      <div class="vara"></div>
+      <div class="bola"></div>
+    </div>
+  </div>
+  <p class="pista-palanca" id="pistaPalanca">Jala la palanca</p>
+  <div class="bloque">
+    <p class="veredicto" id="mVeredicto"></p>
+    <p class="veredicto-sub" id="mSub"></p>
+  </div>
+  <div class="acciones-juego">
+    <button class="btn" id="btnGirar" hidden>Girar</button>
+    <button class="btn" id="btnVer" hidden>Ver mi resultado</button>
+    <p class="riesgo" id="mRiesgo"></p>
+  </div>
+</section>
+
+<!-- ═══ PREMIO ═══ -->
+<section id="premio" class="pantalla" hidden>
+  <div class="bloque">
+    <p class="eyebrow" id="gNombre"></p>
+    <h2 id="gTitulo">¡Te lo llevas!</h2>
+    <p class="veredicto-sub" id="gSub"></p>
+    <div class="premio-caja" id="gPremio"></div>
+    <p class="cuando" id="gCuando"></p>
+    <div class="codigo-caja" id="gCodigoCaja" hidden>
+      <span class="rot">Código del premio</span>
+      <span class="cod" id="gCodigo"></span>
+      <span class="vence" id="gVence"></span>
+    </div>
+  </div>
+  <div class="vaso-caja"><img class="vaso" src="/reto-assets/vaso.jpg" alt=""></div>
+  <div class="bloque">
+    <p class="mostrar">Tómale una foto a esta pantalla y reclama tu premio en caja.</p>
+    <button class="btn" id="btnOtro">Siguiente jugador</button>
+    <p class="auto" id="gAuto"></p>
+  </div>
+</section>
+
+<!-- ═══ SIN PREMIO ═══ -->
+<section id="nada" class="pantalla" hidden>
+  <div class="bloque">
+    <p class="eyebrow" id="nNombre"></p>
+    <h2>Se fue</h2>
+    <p class="veredicto-sub" id="nSub">Esta vez no se alinearon. ¡Gracias por jugar!</p>
+  </div>
+  <div class="bloque">
+    <button class="btn" id="btnOtro2">Siguiente jugador</button>
+    <p class="auto" id="nAuto"></p>
+  </div>
+</section>
+
+<!-- ═══ TABLERO DEL EQUIPO (con #tablero en la URL) ═══ -->
+<section id="tablero" class="pantalla" hidden>
+  <p class="eyebrow" id="tEvento"></p>
+  <h2>Premios</h2>
+  <div class="stock" id="tStock"></div>
+  <div class="ultimos" id="tUltimos"></div>
+  <button class="btn-sec" id="btnIrJuego">Ir al juego</button>
+</section>
+
+<script>
+"use strict";
+const API = "/juego-api/juego/slot";
+const QS = new URLSearchParams(location.search);
+const EVENTO = (QS.get("evento") || "maquina").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60) || "maquina";
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+// Lo que la persona confirma al tocar "Ya me registré". Los datos personales
+// los guarda el formulario del QR, no nosotros: acá solo queda la partida.
+const AUTORIZACION = "Confirmo que dejé mis datos en el formulario de OAKBERRY y acepto las reglas del juego.";
+
+const ROT = ({ "90": "rot90", "270": "rot270", "-90": "rot270" })[QS.get("rotar") || ""];
+function orientar() {
+  const h = document.documentElement;
+  if (ROT) h.classList.add(ROT);
+  const f = QS.get("vertical");
+  const vertical = f === "1" || !!ROT || (f !== "0" && innerHeight >= innerWidth);
+  h.classList.toggle("vertical", vertical);
+  h.classList.toggle("horizontal", !vertical);
+}
+orientar();
+addEventListener("resize", () => { orientar(); ajustarOpciones(); });
+
+// ─── API ──────────────────────────────────────────────────────────────
+// Mismo origen (rewrite de vercel.json), así que fetch normal. Las dos
+// escrituras son idempotentes (insertId = participacion_id): reintentar es seguro.
+async function api(ruta, cuerpo, intentos = 4) {
+  let err;
+  for (let i = 0; i < intentos; i++) {
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 9000);
+      const r = await fetch(API + ruta, { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...cuerpo, evento: EVENTO, pais: PAIS }), signal: ctl.signal });
+      clearTimeout(t);
+      return await r.json();
+    } catch (e) { err = e; await sleep(400 * (i + 1)); }
+  }
+  throw err;
+}
+
+// ─── Escenas y colores ────────────────────────────────────────────────
+const ASSETS = "/exacto-assets/";
+const CLARO = { fondo: "#F5EEE0", texto: "#21152A", acento: "#4B1F60", panel: "rgba(245,238,224,.86)", boton: "#4B1F60", botonTexto: "#FBF6E9" };
+// Sobre morado un botón morado desaparece: ahí va dorado con texto tinta.
+const OSCURO = { fondo: "#280532", texto: "#FBF6E9", acento: "#F4B223", panel: "rgba(40,5,50,.55)", boton: "#F4B223", botonTexto: "#21152A" };
+const ESCENAS = {
+  portada:  { img: "escena-rio.jpg",      pos: "0% center",  ...CLARO, boton: "#F4B223", botonTexto: "#21152A" },
+  registro: { img: "escena-palmas.jpg",   pos: "center",     ...CLARO },
+  // La máquina va sobre morado: los rodillos claros tienen que brillar.
+  maquina:  { img: "escena-oak.jpg",      pos: "75% center", ...OSCURO, fondo: "#501A64" },
+  premio:   { img: null,                                     ...OSCURO, fondo: "#290533" },
+};
+Object.values(ESCENAS).forEach(e => { if (e.img) new Image().src = ASSETS + e.img; });
+new Image().src = "/reto-assets/vaso.jpg";
+function escena(nombre) {
+  const e = ESCENAS[nombre] || ESCENAS.portada;
+  const el = $("escena");
+  el.style.backgroundImage = e.img ? `url(${ASSETS}${e.img})` : "none";
+  el.style.backgroundPosition = e.pos || "center";
+  const s = document.body.style;
+  s.setProperty("--fondo", e.fondo); s.setProperty("--texto", e.texto);
+  s.setProperty("--acento", e.acento); s.setProperty("--panel", e.panel);
+  s.setProperty("--boton", e.boton); s.setProperty("--boton-texto", e.botonTexto);
+}
+
+// ─── Pantallas, inactividad ───────────────────────────────────────────
+const PANTALLAS = ["portada", "registro", "maquina", "premio", "nada", "tablero"];
+let timerInactividad = 0, timerAuto = 0;
+function ir(nombre) {
+  PANTALLAS.forEach(p => $(p).hidden = p !== nombre);
+  clearInterval(timerAuto);
+  if (nombre === "portada") { escena("portada"); pararReloj(); }
+  tocarActividad();
+}
+function tocarActividad() {
+  clearTimeout(timerInactividad);
+  // Si alguien se va a la mitad, la pantalla vuelve sola a la portada.
+  // El tablero no: lo deja abierto el equipo.
+  if ($("portada").hidden && $("tablero").hidden) timerInactividad = setTimeout(() => ir("portada"), 90000);
+}
+document.addEventListener("pointerdown", tocarActividad, { passive: true });
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("gesturestart", e => e.preventDefault());
+function cuentaAtras(el, segundos, alTerminar) {
+  clearInterval(timerAuto);
+  const fin = Date.now() + segundos * 1000;
+  const tick = () => {
+    const s = Math.ceil((fin - Date.now()) / 1000);
+    el.textContent = `Sigue solo en ${Math.max(0, s)} s`;
+    if (s <= 0) { clearInterval(timerAuto); alTerminar(); }
+  };
+  tick(); timerAuto = setInterval(tick, 1000);
+}
+if (EVENTO.includes("prueba")) $("badgePrueba").hidden = false;
+
+// ─── PORTADA ──────────────────────────────────────────────────────────
+$("btnJugar").addEventListener("click", () => {
+  const el = document.documentElement;
+  if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});
+  limpiarRegistro();
+  escena("registro");
+  ir("registro");
+});
+
+// ─── REGISTRO POR QR ──────────────────────────────────────────────────
+// Ya no pedimos nombre ni celular: la persona escanea el QR, deja sus datos
+// en el formulario y vuelve a confirmar con un botón. Con fila, escribir el
+// nombre y el celular en el teclado en pantalla era lo más lento de todo.
+//
+// OJO: sin celular no hay a quién aplicarle el "un intento por persona".
+// Ese control ahora es físico: la fila y el equipo.
+let PAIS = (QS.get("pais") || "do").toUpperCase();
+function limpiarRegistro() { $("errorReg").textContent = ""; }
+$("btnCancelar").addEventListener("click", () => ir("portada"));
+
+
+
+// ─── PARTIDA ──────────────────────────────────────────────────────────
+const SIMBOLOS = { acai: "🫐", banano: "🍌", fresa: "🍓", granola: "🥣", loro: "🦜", vaso: "🥤" };
+const CARAS = Object.values(SIMBOLOS);
+const J = { id: "", nivel: 0, premio: null, giros: 0, cuando: "" };
+let CFG = { niveles: [], piso: 0, titulo: null, max_giros: 0 };
+let ocupado = false;
+
+async function cargarConfig() {
+  try {
+    const r = await fetch(`${API}/config?evento=${encodeURIComponent(EVENTO)}`).then(x => x.json());
+    if (!r || !r.ok) return;
+    CFG = r;
+    $("pEvento").textContent = r.titulo || "OAKBERRY";
+    pintarEscalera();
+  } catch (e) {}
+}
+function pintarEscalera() {
+  const n = CFG.niveles.length;
+  $("escalera").innerHTML = CFG.niveles.map(x => `
+    <div class="peldano ${x.nivel === n ? "mayor" : ""} ${x.agotado ? "agotado" : ""}">
+      <span class="n">${x.nivel}</span><span class="lbl">${esc(x.label)}</span>
+    </div>`).join("");
+}
+// Pinta el código del premio. Viene del servidor: la pantalla no se lo puede
+// inventar, y es distinto en cada partida.
+function pintarCodigo(r, idCaja, idCod, idVence) {
+  const caja = $(idCaja);
+  if (!caja) return;
+  if (!r || !r.codigo) { caja.hidden = true; return; }
+  $(idCod).textContent = r.codigo;
+  $(idVence).textContent = r.vence ? "Válido hasta el " + r.vence : "";
+  caja.hidden = false;
+}
+function esc(t) { return String(t || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+
+$("btnEmpezar").addEventListener("click", async () => {
+  if (ocupado) return;
+  ocupado = true; $("btnEmpezar").disabled = true; $("btnEmpezar").textContent = "Un momento…";
+  const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  try {
+    const r = await api("/registrar", { participacion_id: id, sin_datos: true, autorizacion: AUTORIZACION });
+    if (!r.ok) { $("errorReg").textContent = r.error || "No se pudo guardar. Intenta de nuevo."; return; }
+    Object.assign(J, { id, nivel: 0, premio: null, giros: 0 });
+    abrirMaquina();
+  } catch (e) {
+    $("errorReg").textContent = "Sin conexión. Intenta de nuevo en un momento.";
+  } finally {
+    ocupado = false; $("btnEmpezar").disabled = false; $("btnEmpezar").textContent = "¡A jugar!";
+  }
+});
+
+// ─── MÁQUINA ──────────────────────────────────────────────────────────
+function abrirMaquina() {
+  escena("maquina");
+  pintarMaquina("", "");
+  ir("maquina");
+}
+// Un solo jalón por persona: el servidor sortea UN premio entre los que todavía
+// tienen cupo. La escalera de antes multiplicaba probabilidades y el fondo del
+// inventario no salía nunca.
+function pintarMaquina(veredicto, sub) {
+  $("btnVer").hidden = true;
+  $("mEyebrow").textContent = "Tu turno";
+  $("mTienes").textContent = "Jala la palanca";
+  $("mVeredicto").textContent = veredicto || "";
+  $("mSub").textContent = sub || "";
+  $("palanca").hidden = false;
+  $("palanca").classList.add("lista");
+  $("pistaPalanca").textContent = "Un jalón, un premio";
+    $("mRiesgo").textContent = "";
+}
+// La base de /reto llama a pararReloj() al volver a la portada. Acá no existía
+// y "Siguiente jugador" reventaba con ReferenceError.
+function pararReloj() { clearInterval(ruleta); girarRodillos(false); }
+
+function girarRodillos(on) {
+  ["r0", "r1", "r2"].forEach(id => $(id).classList.toggle("girando", on));
+}
+let ruleta = 0;
+function animar() {
+  girarRodillos(true);
+  clearInterval(ruleta);
+  ruleta = setInterval(() => {
+    ["r0", "r1", "r2"].forEach(id => { $(id).textContent = CARAS[Math.floor(Math.random() * CARAS.length)]; });
+  }, 70);
+}
+async function frenar(simbolos) {
+  // Frenan uno por uno: es lo que hace que el tercero se sienta largo.
+  clearInterval(ruleta);
+  // 260 ms por rodillo: con fila detrás, 1,3 s de suspenso era demasiado.
+  for (let i = 0; i < 3; i++) {
+    await sleep(260);
+    $("r" + i).textContent = SIMBOLOS[simbolos[i]] || CARAS[0];
+    $("r" + i).classList.remove("girando");
+  }
+}
+
+// Jalar la palanca = girar. Sirve un toque y también arrastrarla hacia abajo:
+// en un tótem la gente la agarra, y quedarse esperando el gesto exacto frustra.
+let jalando = false;
+$("palanca").addEventListener("pointerdown", e => {
+  e.preventDefault();
+  if (ocupado || $("palanca").classList.contains("jalada")) return;
+  jalando = true;
+  $("palanca").classList.add("jalada");
+});
+addEventListener("pointerup", () => {
+  if (!jalando) return;
+  jalando = false;
+  setTimeout(() => $("palanca").classList.remove("jalada"), 260);
+  girar();
+});
+$("palanca").addEventListener("keydown", e => {
+  if (e.code === "Space" || e.code === "Enter") { e.preventDefault(); $("palanca").click(); }
+});
+$("btnGirar").addEventListener("click", () => girar());
+
+async function girar() {
+  if (ocupado) return;
+  ocupado = true;
+  $("palanca").classList.remove("lista");
+  $("pistaPalanca").textContent = "";
+  $("btnGirar").disabled = true;
+  $("mVeredicto").textContent = ""; $("mSub").textContent = ""; $("mRiesgo").textContent = "";
+  $("btnVer").hidden = true;
+  $("rodillos").className = "rodillos";
+  animar();
+  let r = null;
+  try { r = await api("/girar", { participacion_id: J.id }, 3); } catch (e) {}
+  if (!r || (!r.ok && !r.gano)) {
+    clearInterval(ruleta); girarRodillos(false);
+    ocupado = false; $("btnGirar").disabled = false;
+    pintarMaquina("", (r && r.error) || "Sin conexión. Jala otra vez.");
+    return;
+  }
+  await frenar(r.simbolos || ["acai", "acai", "banano"]);
+  ocupado = false;
+  J.nivel = r.nivel || 0; J.premio = r.premio || null; J.cuando = r.cuando || "";
+  J.codigo = r.codigo || null; J.vence = r.vence || "";
+  $("rodillos").className = "rodillos " + (r.gano ? "gana" : "pierde");
+  $("palanca").hidden = true;
+  $("pistaPalanca").textContent = "";
+  $("mVeredicto").textContent = r.gano ? "¡Ganaste!" : "No salió";
+  $("mSub").textContent = r.gano ? r.premio : "Esta vez no se alinearon. ¡Gracias por jugar!";
+  // El cierre no avanza solo: con fila detrás, la pantalla no puede saltar sola.
+  $("btnVer").hidden = false;
+  $("btnVer").textContent = r.gano ? "Ver mi premio" : "Listo";
+  $("btnVer").onclick = () => r.gano ? cerrar(true, "", "") : cerrar(false, "", "");
+}
+
+function cerrar(conPremio, titulo, nota) {
+  escena("premio");
+  if (conPremio) {
+    $("gNombre").textContent = "Tu premio";
+    $("gPremio").textContent = J.premio || "";
+    $("gCuando").textContent = J.cuando || "";
+    pintarCodigo(J, "gCodigoCaja", "gCodigo", "gVence");
+    $("gTitulo").textContent = titulo || "¡Te lo llevas!";
+    $("gSub").textContent = nota || "";
+    ir("premio");
+    confeti();
+    cuentaAtras($("gAuto"), 25, () => ir("portada"));
+  } else {
+    $("nNombre").textContent = "Gracias por jugar";
+    ir("nada");
+    cuentaAtras($("nAuto"), 10, () => ir("portada"));
+  }
+  cargarConfig();   // el cupo pudo haber cambiado
+}
+$("btnOtro").addEventListener("click", () => ir("portada"));
+$("btnOtro2").addEventListener("click", () => ir("portada"));
+
+function confeti() {
+  const colores = ["#F4B223", "#E04850", "#B79CC8", "#FBF6E9", "#7B4A93"];
+  document.body.style.setProperty("--caida", Math.round(document.body.clientHeight * 1.15) + "px");
+  for (let i = 0; i < 80; i++) {
+    const c = document.createElement("div");
+    c.className = "confeti";
+    c.style.left = Math.random() * 100 + "%";
+    c.style.background = colores[i % colores.length];
+    c.style.animationDuration = 2.4 + Math.random() * 2.6 + "s";
+    c.style.animationDelay = Math.random() * 0.8 + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 6500);
+  }
+}
+
+// ─── TABLERO DEL EQUIPO ───────────────────────────────────────────────
+async function cargarTablero() {
+  let r = null;
+  try { r = await fetch(`${API}/tablero?evento=${encodeURIComponent(EVENTO)}`).then(x => x.json()); } catch (e) {}
+  if (!r || !r.ok) { $("tStock").innerHTML = `<p class="ultimos">Sin conexión. Reintentando…</p>`; return; }
+  $("tStock").innerHTML = r.niveles.slice().reverse().map(n => {
+    const quedan = Math.max(0, n.cupo - n.tomados);
+    return `<div class="stock-fila ${quedan ? "" : "sin"}">
+      <span>${esc(n.label)}</span><span class="q">${quedan} de ${n.cupo}</span></div>`;
+  }).join("");
+  $("tUltimos").innerHTML = r.ganadores.length
+    ? r.ganadores.map(g => `<div>${esc(g.premio)} · ${esc(g.hora || "")}</div>`).join("")
+    : `<div>Todavía no se ha entregado nada.</div>`;
+}
+function verTablero() {
+  escena("premio");
+  $("tEvento").textContent = EVENTO;
+  ir("tablero");
+  cargarTablero();
+}
+setInterval(() => { if (!$("tablero").hidden) cargarTablero(); }, 15000);
+$("btnIrJuego").addEventListener("click", () => { history.replaceState(null, "", location.pathname + location.search); ir("portada"); });
+
+function hayPartida() { return !$("maquina").hidden; }
+
+// ─── Salir al menú de juegos ──────────────────────────────────────────
+// Con una partida en curso pide confirmación: en un tótem un roce no puede
+// borrar lo que la persona lleva jugado.
+const HUB = (() => {
+  const q = ["evento=" + encodeURIComponent(EVENTO)];
+  ["pais", "rotar", "vertical"].forEach(k => { if (QS.get(k)) q.push(k + "=" + encodeURIComponent(QS.get(k))); });
+  return "/juegos?" + q.join("&");
+})();
+let pidiendoSalir = 0;
+$("btnSalir").addEventListener("click", () => {
+  if (!hayPartida() || Date.now() - pidiendoSalir < 4000) { location.href = HUB; return; }
+  pidiendoSalir = Date.now();
+  $("btnSalir").textContent = "¿Salir?";
+  $("btnSalir").classList.add("confirmar");
+  setTimeout(() => {
+    if (Date.now() - pidiendoSalir >= 3900) {
+      $("btnSalir").textContent = "Salir";
+      $("btnSalir").classList.remove("confirmar");
+    }
+  }, 4000);
+});
+
+escena("portada");
+cargarConfig();
+if ((location.hash || "").toLowerCase() === "#tablero") verTablero();
+addEventListener("hashchange", () => { if ((location.hash || "").toLowerCase() === "#tablero") verTablero(); });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Consola de Reactivación</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Roboto+Slab:wght@600;800&display=swap">
+<style>
+/* Consola v2 (13-oct-2026). Escritorio primero: barra de secciones fija arriba,
+   resumen antes que detalle, cada bloque responde UNA decisión. Tema claro fijo
+   (decisión de Daniel: su navegador está en oscuro y las páginas duales le salen negras). */
+@font-face{font-family:"Nexa Slab";src:url(/exacto-assets/fuentes/nexa-slab-bold.woff2) format("woff2");font-weight:600 700;font-display:swap}
+@font-face{font-family:"Nexa Slab";src:url(/exacto-assets/fuentes/nexa-slab-black.woff2) format("woff2");font-weight:800 900;font-display:swap}
+:root{
+  color-scheme:light;
+  --fondo:#F4F2F7; --tarjeta:#FFFFFF; --linea:#E4DFEA; --linea-suave:#EFEBF3;
+  --tinta:#1B1524; --tinta-2:#5A5066; --tinta-3:#8A8195;
+  --acai:#5B2B7B; --acai-suave:#EFE7F5;
+  --s-email:#7B47A0; --s-wa:#C9772E; --s-trat:#7B47A0; --s-ctrl:#8E8699;
+  --ok:#1C7A5B; --ok-bg:#E3F2EC; --mal:#A8471B; --mal-bg:#F9E8E0; --ojo:#9A6B00; --ojo-bg:#FBF1D6; --gris-bg:#EEEBF1;
+  --display:"Nexa Slab","Roboto Slab",Georgia,serif;
+  --texto:"Public Sans","Segoe UI",system-ui,sans-serif;
+  --r:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--fondo);color:var(--tinta);font-family:var(--texto);font-size:14.5px;line-height:1.45;font-variant-numeric:tabular-nums}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:0 64px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.005em}
+h2{font-size:21px;color:var(--tinta);font-weight:800}
+h3{font-size:15px;font-weight:700}
+.eyebrow{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--tinta-3);font-weight:700}
+.tiny{font-size:12.5px;color:var(--tinta-3)}
+a{color:var(--acai)}
+
+/* barra superior */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:rgba(244,242,247,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--linea)}
+.top .wrap{display:flex;align-items:center;gap:18px;padding-block:10px;flex-wrap:wrap}
+.marca{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.marca h1{font-size:20px;color:var(--acai);font-weight:800}
+.marca span{font-size:12.5px;color:var(--tinta-3)}
+nav.secciones{display:flex;gap:2px;flex-wrap:wrap}
+nav.secciones a{font-size:13px;font-weight:600;color:var(--tinta-2);text-decoration:none;padding:6px 10px;border-radius:8px;white-space:nowrap}
+nav.secciones a:hover,nav.secciones a:focus-visible{background:var(--acai-suave);color:var(--acai);outline:none}
+.estado-prog{display:flex;gap:6px;flex-wrap:wrap}
+
+/* piezas comunes */
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--gris-bg);color:var(--tinta-2);white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.85}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.mal{background:var(--mal-bg);color:var(--mal)} .pill.ojo{background:var(--ojo-bg);color:var(--ojo)} .pill.acai{background:var(--acai-suave);color:var(--acai)}
+section{padding-top:34px;scroll-margin-top:70px}
+.cabeza{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.cabeza p{margin:4px 0 0;color:var(--tinta-2);max-width:72ch}
+.card{background:var(--tarjeta);border:1px solid var(--linea);border-radius:var(--r);padding:18px 20px;min-width:0}
+.seg{display:inline-flex;background:var(--tarjeta);border:1px solid var(--linea);border-radius:9px;padding:2px}
+.seg button{font:inherit;font-size:13px;font-weight:600;border:0;background:none;color:var(--tinta-2);padding:5px 11px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acai);color:#fff}
+.seg button:focus-visible{outline:2px solid var(--acai);outline-offset:1px}
+.controles{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* alertas */
+.alertas{display:grid;gap:8px;margin-top:18px}
+.alerta{display:grid;grid-template-columns:4px 1fr;background:var(--tarjeta);border:1px solid var(--linea);border-radius:10px;overflow:hidden}
+.alerta i{background:var(--ojo)} .alerta.rojo i{background:var(--mal)}
+.alerta div{padding:10px 14px} .alerta b{display:block;font-size:14px} .alerta span{color:var(--tinta-2);font-size:13.5px}
+.alerta-ok{display:flex;align-items:center;gap:10px;margin-top:18px;color:var(--ok);font-weight:600}
+
+/* el número */
+.numero{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:16px}
+.hero .v{font-family:var(--display);font-size:58px;font-weight:800;line-height:1;color:var(--acai);margin:8px 0 6px}
+.hero .rango{font-size:13.5px;color:var(--tinta-2)}
+.veredicto{margin-top:14px;padding:10px 12px;border-radius:9px;font-size:13.5px;line-height:1.4}
+.veredicto.ok{background:var(--ok-bg);color:#145A43} .veredicto.mal{background:var(--mal-bg);color:#7D3413} .veredicto.ojo{background:var(--ojo-bg);color:#6B4A00}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--linea-suave)}
+.kpi .k{font-size:12px;color:var(--tinta-3);font-weight:600}
+.kpi .v{font-size:19px;font-weight:700;margin-top:1px}
+.kpi .d{font-size:12px;color:var(--tinta-3)}
+.graficos{display:grid;gap:16px;min-width:0}
+.leyenda{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--tinta-2)}
+.leyenda span{display:inline-flex;align-items:center;gap:6px}
+.leyenda i{width:16px;height:0;border-top:2px solid var(--s-trat)} .leyenda i.ctrl{border-top:2px dashed var(--s-ctrl)}
+.leyenda i.bloque{width:10px;height:10px;border:0;border-radius:3px}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:var(--texto);fill:var(--tinta-3);font-size:11px}
+.graf-titulo{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+
+/* tablas */
+.tabla-wrap{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--linea-suave);text-align:left;vertical-align:middle}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--tinta-3);font-weight:700;white-space:nowrap;background:var(--tarjeta)}
+th.ord{cursor:pointer;user-select:none} th.ord:hover{color:var(--acai)}
+td.n,th.n{text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:#FAF8FC}
+.palanca-nombre{min-width:180px} .palanca-nombre b{display:block;font-weight:600} .palanca-nombre span{font-size:12px;color:var(--tinta-3)}
+.canal{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--tinta-2);white-space:nowrap}
+.canal::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--s-email)}
+.canal.wa::before{background:var(--s-wa)}
+td.ci{min-width:280px} .ci-fila{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:center;white-space:nowrap}
+.pos{color:var(--ok);font-weight:600} .neg{color:var(--mal);font-weight:600}
+
+/* disparar */
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form{display:grid;gap:12px}
+label.f{display:grid;gap:5px;font-size:12.5px;font-weight:600;color:var(--tinta-2)}
+input,select{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--linea);border-radius:8px;background:#fff;color:var(--tinta);width:100%;min-width:0}
+input:focus-visible,select:focus-visible{outline:2px solid var(--acai);outline-offset:0;border-color:transparent}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:150px;overflow:auto;padding:2px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--linea);background:#fff;cursor:pointer;color:var(--tinta-2)}
+.chip:has(input:checked){background:var(--acai-suave);border-color:var(--acai);color:var(--acai)}
+.chip input{width:auto;accent-color:var(--acai);margin:0}
+.btn{font:inherit;font-weight:700;font-size:14px;padding:10px 16px;border-radius:9px;border:0;background:var(--acai);color:#fff;cursor:pointer}
+.btn.sec{background:#fff;color:var(--acai);border:1px solid var(--linea)}
+.btn.mini{font-size:12px;padding:5px 9px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}
+.resumen-lote{background:var(--fondo);border-radius:9px;padding:12px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.resumen-lote .v{font-weight:700;font-size:17px} .resumen-lote .k{font-size:11.5px;color:var(--tinta-3)}
+.aviso{font-size:13px;padding:9px 12px;border-radius:8px;background:var(--ojo-bg);color:#6B4A00}
+.msg{font-size:13px} .msg.ok{color:var(--ok)} .msg.err{color:var(--mal)}
+.barra-h{display:grid;grid-template-columns:190px 1fr 70px;gap:10px;align-items:center;font-size:13px;padding:5px 0}
+.barra-h .pista{height:14px;background:var(--linea-suave);border-radius:4px;display:flex;gap:2px;overflow:hidden}
+.barra-h .pista i{display:block;height:100%}
+.vacio{padding:22px;text-align:center;color:var(--tinta-2);background:var(--fondo);border-radius:9px;font-size:13.5px}
+
+/* hoy */
+.tres{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.mini{background:var(--tarjeta);border:1px solid var(--linea);border-radius:10px;padding:12px 14px}
+.mini .v{font-size:24px;font-weight:700;margin-top:2px} .mini .k{font-size:12px;color:var(--tinta-3);font-weight:600} .mini .d{font-size:12px;color:var(--tinta-3)}
+
+/* esta semana */
+.semana-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.techo{height:10px;background:var(--linea-suave);border-radius:5px;overflow:hidden;margin:8px 0 4px}
+.techo i{display:block;height:100%;background:var(--acai);border-radius:5px}
+.decision{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.aviso-t{font-size:12px;color:var(--mal)}
+.escala{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.escala div{background:var(--fondo);border-radius:9px;padding:10px 12px}
+.escala .v{font-weight:700;font-size:18px} .escala .k{font-size:12px;color:var(--tinta-3)}
+tr.foco td:first-child{box-shadow:inset 3px 0 0 var(--acai)}
+
+/* tooltip y pie */
+#tip{position:fixed;pointer-events:none;background:var(--tinta);color:#fff;font-size:12.5px;line-height:1.4;padding:8px 10px;border-radius:8px;z-index:50;max-width:280px;box-shadow:0 6px 18px rgba(27,21,36,.18)}
+.pie{margin-top:40px;font-size:12.5px;color:var(--tinta-3);display:grid;gap:4px}
+.cargando{padding:80px 0;text-align:center;color:var(--tinta-2)}
+.pin{max-width:340px;margin:80px auto;display:grid;gap:10px}
+
+@media (max-width:980px){
+  .numero,.dos,.semana-grid{grid-template-columns:1fr}
+  .tres{grid-template-columns:repeat(2,1fr)}
+  nav.secciones{order:3;width:100%;overflow-x:auto;flex-wrap:nowrap}
+}
+@media (max-width:520px){
+  .wrap{padding-inline:16px}
+  .hero .v{font-size:46px}
+  .barra-h{grid-template-columns:120px 1fr 56px}
+  .resumen-lote{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:no-preference){ .seg button,.chip,nav.secciones a{transition:background .15s,color .15s} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="marca"><h1>Reactivación</h1><span id="actualizado">cargando…</span></div>
+    <nav class="secciones" aria-label="Secciones">
+      <a href="#semana">Esta semana</a><a href="#numero">El número</a><a href="#palancas">¿Funciona?</a><a href="#disparar">Disparar</a><a href="#hoy">Hoy</a><a href="#tiendas">Tiendas</a>
+    </nav>
+    <div class="estado-prog" id="estado-prog"></div>
+  </div>
+</header>
+
+<main class="wrap" id="app"><div class="cargando">Cargando la consola…</div></main>
+<div id="tip" hidden></div>
+
+<!-- Para una vista previa sin API, el build deja aquí el JSON del export (crm/monitoring/export_consola.py). -->
+<script id="datos-incrustados" type="application/json"></script>
+<script>
+"use strict";
+const API = "https://oakberry-reactivacion-api-664413392517.us-central1.run.app";
+// Respaldo si el API no manda las palancas (vista previa). La fuente es CONSOLA_CLAVES en crm/api/main.py.
+const CLAVES_RESPALDO = {
+  T1_INVERTIR:{nombre:"Doble sello a quien acaba de dejar de venir (T1)",cupo_max:10000,costo_unit:700},
+  T2_INVERTIR:{nombre:"Topping premium a quien se está enfriando (T2)",cupo_max:5000,costo_unit:2500},
+  T34_DESCUENTO:{nombre:"Descuento escalado 10→15→20→25 % a dormidos (T3–T4)",cupo_max:3000,costo_unit:2190},
+  T34_MARCA:{nombre:"Recordación sin premio a dormidos (T3–T4)",cupo_max:5000,costo_unit:0},
+  T5_MARCA:{nombre:"Recordación sin premio a perdidos (T5)",cupo_max:8000,costo_unit:0}
+};
+const TIERS_DE = {T1_INVERTIR:["T1"],T2_INVERTIR:["T2"],T34_DESCUENTO:["T3","T4"],T34_MARCA:["T3","T4"],T5_MARCA:["T5"]};
+const MESES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const RX_TIENDA = /^[A-Z]{3}_(TP|FR)_/;
+const ESTADO = {canal:"todos", ventana:"ult4", ordenTienda:"enviados", ciudad:"todas"};
+let D = null, PIN = "";
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const n0 = v => v == null ? "—" : Math.round(v).toLocaleString("es-CO");
+const pct = v => v == null ? "—" : v.toLocaleString("es-CO",{minimumFractionDigits:1,maximumFractionDigits:1}) + " %";
+const pp = v => v == null ? "—" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toLocaleString("es-CO",{maximumFractionDigits:1}) + " pp";
+const sig = v => v == null ? "—" : (v > 0 ? "+" : v < 0 ? "−" : "") + n0(Math.abs(v));
+const corto = t => t.replace(RX_TIENDA, "");
+function plata(v){
+  if (v == null) return "—";
+  const a = Math.abs(v), s = v < 0 ? "−" : "";
+  if (a >= 1e6) return s + "$" + (a/1e6).toLocaleString("es-CO",{maximumFractionDigits:1}) + " MM";
+  if (a >= 1e3) return s + "$" + Math.round(a/1e3).toLocaleString("es-CO") + " mil";
+  return s + "$" + n0(a);
+}
+const fsem = iso => { const [y,m,d] = iso.split("-").map(Number); return d + " " + MESES[m-1]; };
+const masDias = (iso, k) => { const t = new Date(iso + "T12:00:00Z"); t.setUTCDate(t.getUTCDate()+k); return t.toISOString().slice(0,10); };
+
+/* ───────────── tooltip ───────────── */
+const tip = $("tip");
+function verTip(e, html){ tip.innerHTML = html; tip.hidden = false; moverTip(e); }
+function moverTip(e){
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + w > innerWidth - 8) x = e.clientX - w - 14;
+  if (y + h > innerHeight - 8) y = e.clientY - h - 14;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function ocultarTip(){ tip.hidden = true; }
+document.addEventListener("mousemove", e => { if (!tip.hidden) moverTip(e); });
+function conTip(cont, fn){ cont.querySelectorAll("rect[data-i]").forEach(r => { r.onmouseenter = e => verTip(e, fn(+r.dataset.i)); r.onmouseleave = ocultarTip; }); }
+
+/* ───────────── carga ───────────── */
+async function cargar(){
+  const inc = $("datos-incrustados").textContent.trim();
+  try {
+    if (inc) throw new Error("vista previa");   // solo la copia de vista previa trae datos incrustados
+    // Dentro del dashboard (/dashboard/reactivacion) los datos salen de su propia ruta, detrás del login de Google.
+    const enDashboard = /\/reactivacion\/?$/.test(location.pathname);
+    const r = await fetch(enDashboard ? "reactivacion/datos" : `${API}/consola/datos${PIN ? "?pin=" + encodeURIComponent(PIN) : ""}`, {cache:"no-store", credentials:"same-origin"});
+    if (r.status === 403) return pedirPin();
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || "sin datos");
+    D = j;
+  } catch (e) {
+    if (!inc) { $("app").innerHTML = `<div class="cargando">No pude traer los datos de la consola (${esc(e.message)}).</div>`; return; }
+    D = JSON.parse(inc); D.vista_previa = true;
+  }
+  pintar();
+}
+function pedirPin(){
+  $("app").innerHTML = `<form class="pin card" id="f-pin"><h2>Clave de la consola</h2><input id="pin" type="password" autocomplete="current-password" aria-label="Clave"><button class="btn">Entrar</button></form>`;
+  $("f-pin").addEventListener("submit", e => { e.preventDefault(); PIN = $("pin").value; cargar(); });
+}
+
+/* ───────────── página ───────────── */
+function pintar(){
+  const p = D.programa || {}, wa = p.wa || {}, S = D.supuestos;
+  $("actualizado").textContent = `datos de ${D.generado}${D.vista_previa ? " · vista previa" : ""}`;
+  $("estado-prog").innerHTML = [
+    `<span class="pill ${wa.ok ? "ok" : "mal"}" title="${esc(wa.texto)}">WhatsApp ${wa.ok ? "en verde" : "frenado"}</span>`,
+    `<span class="pill ${p.relanzamiento_activo ? "ok" : "ojo"}" title="relanzamiento_activo en config/reactivacion_relanzamiento.json">Relanzamiento ${p.relanzamiento_activo ? "activo" : "apagado"}</span>`,
+    `<span class="pill ${D.disparar ? "ok" : "acai"}" title="CONSOLA_DISPARAR en el API">${D.disparar ? "Lotes se pueden activar" : "Lotes solo se programan"}</span>`
+  ].join("");
+
+  $("app").innerHTML = `
+    ${htmlAlertas()}
+    ${htmlSemana()}
+    <section id="numero">
+      <div class="cabeza">
+        <div><h2>El número</h2><p>Órdenes que <b>no habrían pasado</b> sin el mensaje: cuántos de los que recibieron volvieron a comprar en ${S.ventana_dias} días, menos los que habrían vuelto solos (el grupo de control, que no recibe nada).</p></div>
+        <div class="controles">
+          <div class="seg" role="group" aria-label="Canal" id="seg-canal">${[["todos","Todos"],["email","Email"],["wa","WhatsApp"]].map(([c,t]) => `<button data-v="${c}" aria-pressed="${ESTADO.canal===c}">${t}</button>`).join("")}</div>
+          <div class="seg" role="group" aria-label="Ventana" id="seg-ventana">${[["ult4","Últimas 4 semanas"],["acumulado","Desde el 27 jul"]].map(([v,t]) => `<button data-v="${v}" aria-pressed="${ESTADO.ventana===v}">${t}</button>`).join("")}</div>
+        </div>
+      </div>
+      <div class="numero">
+        <div class="card hero" id="hero"></div>
+        <div class="graficos">
+          <div class="card"><div class="graf-titulo"><h3>Cuántos vuelven, semana a semana</h3>
+            <div class="leyenda"><span><i></i>Recibieron mensaje</span><span><i class="ctrl"></i>Control (no recibieron)</span></div></div>
+            <div id="g-tasas"></div></div>
+          <div class="card"><div class="graf-titulo"><h3>Órdenes incrementales por semana</h3><span class="tiny">barra = estimado · línea = rango probable · gris = aún no cumple ${S.ventana_dias} días</span></div>
+            <div id="g-inc"></div></div>
+        </div>
+      </div>
+    </section>
+    <section id="palancas">
+      <div class="cabeza"><div><h2>¿Funciona o lo apago?</h2><p>Cada palanca contra su propio control, solo con semanas que ya cumplieron ${S.ventana_dias} días. <b>Paga</b>: todo el rango probable está sobre cero y deja plata. Para opinar hacen falta ${S.muestra_t} enviados y ${S.muestra_c} de control.</p></div></div>
+      <div class="card tabla-wrap">${htmlPalancas()}</div>
+    </section>
+    <section id="disparar">
+      <div class="cabeza"><div><h2>¿Disparo o reabro un lote?</h2><p>Quién está listo para recibir hoy, qué lotes hay y cómo programar uno nuevo. Un lote es un cupo de envíos que se agota solo y se reabre solo si paga.</p></div></div>
+      <div class="dos">
+        <div class="card">${htmlElegibles()}</div>
+        <div class="card">${htmlFormLote()}</div>
+      </div>
+      <div class="card" style="margin-top:16px">${htmlLotes()}</div>
+    </section>
+    <section id="hoy">
+      <div class="cabeza"><div><h2>Qué está pasando</h2><p>Lo de hoy y los últimos 30 días de envíos y canjes.</p></div></div>
+      ${htmlHoy()}
+      <div class="dos">
+        <div class="card"><div class="graf-titulo"><h3>Envíos por día</h3><div class="leyenda"><span><i class="bloque" style="background:var(--s-email)"></i>Email</span><span><i class="bloque" style="background:var(--s-wa)"></i>WhatsApp</span></div></div><div id="g-envios"></div></div>
+        <div class="card"><div class="graf-titulo"><h3>Canjes por día</h3><span class="tiny">cupones RET canjeados en caja</span></div><div id="g-canjes"></div></div>
+      </div>
+    </section>
+    <section id="tiendas">
+      <div class="cabeza"><div><h2>Por tienda</h2><p>Tienda habitual del cliente. Las órdenes incrementales por tienda se estiman con el control nacional de cada palanca: sirven para comparar tiendas, no como cifra exacta.</p></div>
+        <div class="controles"><select id="f-ciudad" aria-label="Ciudad" style="width:auto"></select></div></div>
+      <div class="card tabla-wrap" id="t-tiendas"></div>
+    </section>
+    <footer class="pie">
+      <span>Supuestos: ticket sin IVA ${plata(S.ticket)}, margen ${Math.round(S.margen*100)} %. Contribución = venta incremental × margen − descuentos canjeados. El costo de los canales (WhatsApp, email) se mira aparte. Rango probable al 90 %.</span>
+      <span>Sellos Loopy al ${D.ult_sello}. Grupo de control (10 %) desde el ${fsem(S.inicio_control)}. Se recalcula cada hora (crm/monitoring/export_consola.py).</span>
+    </footer>`;
+
+  document.querySelectorAll("#seg-canal button").forEach(b => b.onclick = () => { ESTADO.canal = b.dataset.v; marcarSeg("seg-canal", b); pintarNumero(); });
+  document.querySelectorAll("#seg-ventana button").forEach(b => b.onclick = () => { ESTADO.ventana = b.dataset.v; marcarSeg("seg-ventana", b); pintarNumero(); });
+  pintarNumero();
+  graficoEnvios(); graficoCanjes();
+  iniciarTiendas();
+  iniciarFormLote();
+  document.querySelectorAll("[data-lote]").forEach(b => b.onclick = cambiarLote);
+  document.querySelectorAll("[data-decision]").forEach(b => b.onclick = decidir);
+}
+function marcarSeg(id, b){ document.querySelectorAll(`#${id} button`).forEach(x => x.setAttribute("aria-pressed", x === b)); }
+
+/* ───────────── alertas ───────────── */
+function htmlAlertas(){
+  const a = D.alertas || [];
+  if (!a.length) return `<div class="alerta-ok">● Nada roto: WhatsApp, email, cola y elegibles en orden.</div>`;
+  return `<div class="alertas" role="list">${a.map(x => `<div class="alerta ${x.nivel}" role="listitem"><i></i><div><b>${esc(x.titulo)}</b><span>${esc(x.detalle)}</span></div></div>`).join("")}</div>`;
+}
+
+/* ───────────── esta semana ───────────── */
+function semanaDe(corte){ return {desde: masDias(corte, 1), hasta: masDias(corte, 7)}; }
+function htmlSemana(){
+  const F = D.foco, P = D.propuesta;
+  if (!F || !F.corte || !P) return "";
+  const w = semanaDe(F.corte), foco = F.tiendas.filter(t => t.en_foco);
+  const usado = Math.min(1, P.costo_total / P.techo);
+  const perdidas = foco.reduce((a,t) => a + Math.max(0, t.ordenes_perdidas_sem), 0);
+  const t1 = P.tiendas.reduce((a,t) => a + t.t1_env, 0), t34 = P.tiendas.reduce((a,t) => a + t.t34_env, 0);
+  const filas = F.tiendas.slice(0, 14).map(t => {
+    const e = t.elegibles || {}, pr = P.tiendas.find(x => x.tienda === t.tienda);
+    return `<tr class="${t.en_foco ? "foco" : ""}">
+      <td><b>${esc(corto(t.tienda))}</b> <span class="tiny">${esc(t.ciudad)}</span>${t.en_foco ? ` <span class="pill acai" style="margin-left:4px">en foco</span>` : ""}${t.avisos.length ? `<div class="aviso-t">${esc(t.avisos.map(x => x.split(":")[0]).join(" · "))}</div>` : ""}</td>
+      <td class="n">${plata(t.venta_2s)}</td>
+      <td class="n"><span class="${t.cambio_pct < 0 ? "neg" : "pos"}">${t.cambio_pct > 0 ? "+" : ""}${pct(t.cambio_pct)}</span></td>
+      <td class="n">${pp(t.relativo_pp)}</td>
+      <td class="n">${n0(t.ordenes_perdidas_sem)}</td>
+      <td class="n">${t.cambio_delivery_pct == null ? "—" : (t.cambio_delivery_pct > 0 ? "+" : "") + pct(t.cambio_delivery_pct)}</td>
+      <td class="n">${n0(e.T1 || 0)} · ${n0((e.T3 || 0) + (e.T4 || 0))} · ${n0(e.T5 || 0)}</td>
+      <td class="n">${pr ? plata(pr.costo) : "—"}</td></tr>`; }).join("");
+  return `<section id="semana">
+    <div class="cabeza"><div><h2>Esta semana · ${fsem(w.desde)} al ${fsem(w.hasta)}</h2>
+      <p>Corte del domingo ${fsem(F.corte)}: las tiendas cuya venta <b>en tienda</b> más cayó en las dos últimas semanas frente a las seis anteriores, descontando lo que cayó toda la red (${pct(F.mediana_red)}). Delivery se muestra solo como contexto: Loopy no lo mueve.</p></div></div>
+    <div class="semana-grid">
+      <div class="card">
+        <div class="eyebrow">Propuesta</div>
+        <h3 style="margin-top:6px">${foco.length} tiendas en foco · ${n0(t1 + t34)} clientes</h3>
+        <div class="tiny" style="margin-top:4px">${n0(t1)} reciben doble sello (T1, probado) · ${n0(t34)} entran al experimento de dormidos (T3–T4)</div>
+        <div class="techo" aria-label="Uso del techo semanal"><i style="width:${(100*usado).toFixed(0)}%"></i></div>
+        <div class="tiny">Descuentos esperados <b style="color:var(--tinta)">${plata(P.costo_total)}</b> de un techo de ${plata(P.techo)}${P.recorte > 0 ? ` · recortado ${Math.round(P.recorte*100)} % para no pasarse` : ""}</div>
+        <div class="escala">
+          <div><div class="k">Órdenes que perdieron por semana</div><div class="v">${n0(perdidas)}</div></div>
+          <div><div class="k">Órdenes extra esperadas (T1)</div><div class="v">${t1 ? n0(P.inc_t1) : "—"}</div></div>
+        </div>
+        ${t1 ? "" : `<div class="aviso" style="margin-top:10px">Hoy no hay clientes T1 listos: se destraban con el día 1 del relanzamiento. Mientras tanto la propuesta es solo el experimento de dormidos.</div>`}
+        <div class="tiny" style="margin-top:10px">${esc(P.nota)} El experimento corre en toda la red para llenar sus grupos; estas tiendas entran primero y completas.</div>
+        <div class="decision">
+          <button class="btn" data-decision="aprobada" ${D.vista_previa ? "disabled title=\"Vista previa\"" : ""}>Aprobar</button>
+          <button class="btn sec" data-decision="ajustar" ${D.vista_previa ? "disabled" : ""}>Ajustar</button>
+          <button class="btn sec" data-decision="saltada" ${D.vista_previa ? "disabled" : ""}>Saltar esta semana</button>
+        </div>
+        <span class="msg" id="decision-msg" role="status"></span>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Cosecha</div>
+        <h3 style="margin-top:6px">Qué devolvió lo de hace tres semanas</h3>
+        ${D.cosecha ? "" : `<div class="vacio" style="margin-top:10px;text-align:left">La primera cosecha llega 21 días después de la primera semana aprobada. Mientras tanto, el programa de las últimas 4 semanas maduras dejó <b>${sig(D.numero.todos.ult4.inc)}</b> órdenes extra (rango ${sig(D.numero.todos.ult4.inc_lo)} a ${sig(D.numero.todos.ult4.inc_hi)}) por ${plata(D.numero.todos.ult4.gasto)} en descuentos. Detalle en <a href="#numero">El número</a>.</div>`}
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+        <h3>Tiendas, de mayor a menor caída en tienda</h3>
+        <div class="tabla-wrap" style="margin-top:6px"><table><thead><tr><th>Tienda</th><th class="n">Venta en tienda, 2 sem</th><th class="n">Cambio</th><th class="n">vs red</th><th class="n">Órd. perdidas/sem</th><th class="n">Delivery</th><th class="n" title="T1 · T3–T4 · T5">Listos T1 · T3–4 · T5</th><th class="n">Descuentos</th></tr></thead><tbody>${filas}</tbody></table></div>
+    </div>
+  </section>`;
+}
+async function decidir(e){
+  const b = e.currentTarget, msg = $("decision-msg");
+  b.disabled = true; msg.className = "msg"; msg.textContent = "Guardando…";
+  try {
+    const r = await fetch(`${API}/consola/propuesta`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({decision:b.dataset.decision, corte:D.foco.corte, tiendas:D.foco.foco, costo:D.propuesta.costo_total, pin:PIN})});
+    const j = await r.json(); if (!j.ok) throw new Error(j.error);
+    msg.className = "msg ok"; msg.textContent = {aprobada:"Aprobada. Sale con los envíos de la semana.", ajustar:"Anotado: ajustamos antes de disparar.", saltada:"Semana saltada."}[b.dataset.decision];
+  } catch (err) { b.disabled = false; msg.className = "msg err"; msg.textContent = `No se guardó: ${err.message}.`; }
+}
+
+/* ───────────── el número ───────────── */
+function pintarNumero(){
+  const N = D.numero[ESTADO.canal], b = N[ESTADO.ventana], prev = N.prev4;
+  if (!b.enviados) { $("hero").innerHTML = `<div class="vacio">Sin envíos maduros en esta ventana.</div>`; graficoTasas(N.serie); graficoInc(N.serie); return; }
+  const ventanaTxt = ESTADO.ventana === "ult4" ? `semanas del ${fsem(b.desde)} al ${fsem(masDias(b.hasta,6))}` : `del ${fsem(b.desde)} al ${fsem(masDias(b.hasta,6))}`;
+  let vclase, vtxt;
+  if (b.inc_lo > 0) { vclase = "ok"; vtxt = `<b>Suma de verdad.</b> Incluso en el escenario bajo trajo ${n0(b.inc_lo)} órdenes que no iban a pasar.`; }
+  else if (b.inc_hi < 0) { vclase = "mal"; vtxt = `<b>Resta.</b> Los que recibieron mensaje volvieron menos que el control. Mirá abajo qué palanca arrastra el número.`; }
+  else { vclase = "ojo"; vtxt = `<b>Todavía no se distingue de cero.</b> El rango va de ${sig(b.inc_lo)} a ${sig(b.inc_hi)}. Mirá abajo qué palancas sí pagan.`; }
+  $("hero").innerHTML = `
+    <div class="eyebrow">Órdenes incrementales</div>
+    <div class="v">${sig(b.inc)}</div>
+    <div class="rango">rango probable ${sig(b.inc_lo)} a ${sig(b.inc_hi)}<br>${ventanaTxt}</div>
+    ${ESTADO.ventana === "ult4" && prev.enviados ? `<div class="tiny" style="margin-top:4px">4 semanas anteriores: ${sig(prev.inc)} (${sig(prev.inc_lo)} a ${sig(prev.inc_hi)})</div>` : ""}
+    <div class="veredicto ${vclase}">${vtxt}</div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Volvieron a comprar</div><div class="v">${n0(b.volvieron)}</div><div class="d">${pct(b.volvieron_pct)} de ${n0(b.enviados)} · control ${pct(b.control_pct)}</div></div>
+      <div class="kpi"><div class="k">Venta incremental</div><div class="v">${plata(b.venta_inc)}</div><div class="d">sin IVA · órdenes × ticket</div></div>
+      <div class="kpi"><div class="k">Contribución neta</div><div class="v ${b.neto >= 0 ? "pos" : "neg"}">${plata(b.neto)}</div><div class="d">descuentos canjeados: ${plata(b.gasto)}</div></div>
+      <div class="kpi"><div class="k">Tasa de canje</div><div class="v">${pct(b.canje_pct)}</div><div class="d">${n0(b.canjes)} canjes · canjear no prueba que funcione</div></div>
+    </div>
+    ${N.en_curso.enviados ? `<div class="tiny" style="margin-top:12px">Aún sin madurar: ${n0(N.en_curso.enviados)} enviados desde el ${fsem(N.en_curso.desde)}.</div>` : ""}`;
+  graficoTasas(N.serie); graficoInc(N.serie);
+}
+
+function graficoTasas(serie){
+  const W = 760, H = 210, m = {l:40,r:14,t:12,b:24};
+  const vals = serie.flatMap(s => [s.volvieron_pct, s.control_pct]).filter(v => v != null);
+  const top = Math.max(10, Math.ceil(Math.max(...vals)/10)*10);
+  const x = i => m.l + (serie.length === 1 ? 0 : i*(W-m.l-m.r)/(serie.length-1));
+  const y = v => m.t + (H-m.t-m.b)*(1 - v/top);
+  const ult = serie.findLastIndex(s => s.maduro);
+  const tramo = (k, desde, hasta) => serie.map((s,i) => [i,s]).filter(([i,s]) => i >= desde && i <= hasta && s[k] != null)
+    .map(([i,s],j) => `${j?"L":"M"}${x(i).toFixed(1)},${y(s[k]).toFixed(1)}`).join("");
+  const grid = [0, top/2, top].map(v => `<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--linea-suave)"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end">${v} %</text>`).join("");
+  const xc = ult >= 0 && ult < serie.length-1 ? (x(ult)+x(ult+1))/2 : null;
+  const zona = xc != null ? `<rect x="${xc}" y="${m.t}" width="${W-m.r-xc}" height="${H-m.t-m.b}" fill="var(--fondo)"/><text x="${W-m.r-4}" y="${m.t+12}" text-anchor="end">en curso</text>` : "";
+  const puntos = serie.map((s,i) => s.volvieron_pct == null ? "" : `<circle cx="${x(i)}" cy="${y(s.volvieron_pct)}" r="4" fill="${s.maduro ? "var(--s-trat)" : "#fff"}" stroke="var(--s-trat)" stroke-width="2"/>`).join("")
+    + serie.map((s,i) => `<rect x="${x(i)-14}" y="${m.t}" width="28" height="${H-m.t-m.b}" fill="transparent" data-i="${i}"/>`).join("");
+  const ejex = serie.map((s,i) => (i % Math.ceil(serie.length/8) === 0 || i === serie.length-1) ? `<text x="${x(i)}" y="${H-6}" text-anchor="middle">${fsem(s.sem)}</text>` : "").join("");
+  $("g-tasas").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Porcentaje que vuelve a comprar: recibieron mensaje contra control, por semana">
+    ${zona}${grid}
+    <path d="${tramo("control_pct",0,ult)}" fill="none" stroke="var(--s-ctrl)" stroke-width="2" stroke-dasharray="5 4"/>
+    <path d="${tramo("control_pct",ult,serie.length)}" fill="none" stroke="var(--s-ctrl)" stroke-width="1.5" stroke-dasharray="2 4"/>
+    <path d="${tramo("volvieron_pct",0,ult)}" fill="none" stroke="var(--s-trat)" stroke-width="2"/>
+    <path d="${tramo("volvieron_pct",ult,serie.length)}" fill="none" stroke="var(--s-trat)" stroke-width="1.5" stroke-dasharray="2 4"/>
+    ${puntos}${ejex}</svg>`;
+  conTip($("g-tasas"), i => { const s = serie[i];
+    return `<b>Semana del ${fsem(s.sem)}</b>${s.maduro ? "" : " · en curso, cifras parciales"}<br>Recibieron: ${pct(s.volvieron_pct)} volvió (${n0(s.volvieron)} de ${n0(s.enviados)})<br>Control: ${pct(s.control_pct)} (de ${n0(s.control)})<br>Canjes: ${n0(s.canjes)}`; });
+}
+function graficoInc(serie){
+  const W = 760, H = 190, m = {l:40,r:14,t:10,b:24};
+  const vals = serie.flatMap(s => [s.inc_lo, s.inc_hi]).filter(v => v != null);
+  const lo = Math.min(0, ...vals), hi = Math.max(10, ...vals);
+  const paso = (W-m.l-m.r)/serie.length, bw = Math.min(30, paso*0.55);
+  const x = i => m.l + paso*i + paso/2;
+  const y = v => m.t + (H-m.t-m.b)*(hi - v)/(hi - lo);
+  const grid = [...new Set([lo, 0, hi])].map(v => `<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${v===0?"var(--tinta-3)":"var(--linea-suave)"}"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end">${sig(v)}</text>`).join("");
+  const barras = serie.map((s,i) => {
+    const hit = `<rect x="${x(i)-paso/2}" y="${m.t}" width="${paso}" height="${H-m.t-m.b}" fill="transparent" data-i="${i}"/>`;
+    if (!s.maduro || s.inc == null) return `<rect x="${x(i)-bw/2}" y="${y(0)-2}" width="${bw}" height="4" rx="2" fill="var(--linea)"/>${hit}`;
+    const y0 = y(0), y1 = y(s.inc), h = Math.max(2, Math.abs(y1-y0));
+    const col = s.inc_lo > 0 ? "var(--ok)" : s.inc_hi < 0 ? "var(--mal)" : "var(--s-trat)";
+    return `<line x1="${x(i)}" x2="${x(i)}" y1="${y(s.inc_hi)}" y2="${y(s.inc_lo)}" stroke="var(--tinta-3)" stroke-width="1.5"/>
+      <rect x="${x(i)-bw/2}" y="${Math.min(y0,y1)}" width="${bw}" height="${h}" rx="3" fill="${col}" opacity=".88"/>${hit}`;
+  }).join("");
+  const ejex = serie.map((s,i) => (i % Math.ceil(serie.length/8) === 0 || i === serie.length-1) ? `<text x="${x(i)}" y="${H-6}" text-anchor="middle">${fsem(s.sem)}</text>` : "").join("");
+  $("g-inc").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Órdenes incrementales por semana con rango probable">${grid}${barras}${ejex}</svg>`;
+  conTip($("g-inc"), i => { const s = serie[i];
+    return s.maduro && s.inc != null
+      ? `<b>Semana del ${fsem(s.sem)}</b><br>${sig(s.inc)} órdenes incrementales<br>rango ${sig(s.inc_lo)} a ${sig(s.inc_hi)}<br>contribución ${plata(s.neto)}`
+      : `<b>Semana del ${fsem(s.sem)}</b><br>Aún no cumple ${D.supuestos.ventana_dias} días: madura el ${fsem(masDias(s.sem, 6 + D.supuestos.ventana_dias))}.<br>Hasta ahora volvió ${pct(s.volvieron_pct)} vs control ${pct(s.control_pct)}.`; });
+}
+
+/* ───────────── palancas ───────────── */
+const VEREDICTO = {paga:["ok","Paga"], dudosa:["ojo","Prometedora"], no_paga:["mal","No paga"], muestra:["", "Falta muestra"]};
+const TIER_TXT = {T1:"acaba de dejar de venir", T2:"se está enfriando", T3:"dormido", T4:"dormido hace rato", T5:"perdido"};
+const OFERTA_TXT = {doble_sello:"Doble sello", topping:"Topping premium", bowl:"Bowl gratis", descuento:"Descuento", recordacion:"Recordación sin premio", otro:"Otro"};
+function ciSvg(lf, ver){
+  if (!lf) return `<span class="tiny">sin control</span>`;
+  const W = 150, H = 26, lim = 20, cx = v => 10 + (W-20)*(Math.max(-lim, Math.min(lim, v)) + lim)/(2*lim);
+  const col = ver === "paga" ? "var(--ok)" : ver === "no_paga" ? "var(--mal)" : ver === "dudosa" ? "var(--ojo)" : "var(--tinta-3)";
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Diferencia ${pp(lf.pp)}, rango ${pp(lf.lo)} a ${pp(lf.hi)}">
+    <line x1="${cx(0)}" x2="${cx(0)}" y1="2" y2="${H-2}" stroke="var(--tinta-3)" stroke-dasharray="2 2"/>
+    <line x1="${cx(lf.lo)}" x2="${cx(lf.hi)}" y1="${H/2}" y2="${H/2}" stroke="${col}" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+    <circle cx="${cx(lf.pp)}" cy="${H/2}" r="5" fill="${col}" stroke="#fff" stroke-width="2"/></svg>`;
+}
+function htmlPalancas(){
+  const P = D.palancas || [];
+  if (!P.length) return `<div class="vacio">Todavía no hay envíos con control.</div>`;
+  return `<table><thead><tr><th>Veredicto</th><th>Palanca</th><th>Canal</th><th class="n">Vuelven a comprar</th><th>Diferencia vs control <span style="text-transform:none;letter-spacing:0;font-weight:500">(escala −20 a +20 pp)</span></th><th class="n">Órd. inc.</th><th class="n">Gasto</th><th class="n">Contribución</th></tr></thead><tbody>
+    ${P.map(p => { const [c,t] = VEREDICTO[p.veredicto]; const lf = p.lift || {};
+      return `<tr><td><span class="pill ${c}">${t}</span></td>
+        <td class="palanca-nombre"><b>${esc(OFERTA_TXT[p.oferta] || p.oferta)} · ${esc(p.tier)}</b><span>${esc(TIER_TXT[p.tier] || "")}</span></td>
+        <td><span class="canal ${p.canal}">${p.canal === "wa" ? "WhatsApp" : "Email"}</span></td>
+        <td class="n">${pct(lf.pt)} <span class="tiny">de ${n0(p.enviados)}</span><br><span class="tiny">control ${pct(lf.pc)} de ${n0(p.control)}</span></td>
+        <td class="ci"><div class="ci-fila">${ciSvg(p.lift, p.veredicto)}<span><span class="${lf.pp>0?"pos":lf.pp<0?"neg":""}">${pp(lf.pp)}</span><br><span class="tiny">${pp(lf.lo)} a ${pp(lf.hi)}</span></span></div></td>
+        <td class="n">${sig(p.inc)}</td><td class="n">${plata(p.gasto)}</td>
+        <td class="n"><span class="${p.neto>=0?"pos":"neg"}">${plata(p.neto)}</span></td></tr>`; }).join("")}
+  </tbody></table>`;
+}
+
+/* ───────────── disparar ───────────── */
+const MOTIVO = {sin_whatsapp:"No tiene WhatsApp", sin_cambio_de_estado:"Ya se tocó en este tier", descanso_35d:"Descanso de 35 días", suprimido_retouch:"Re-toque suprimido", ciudad_pausada:"Ciudad pausada", numero_bloqueado:"Número bloqueado", email_suprimido:"Se dio de baja del email", tarjeta_duplicada:"Tarjeta duplicada", tope_3_toques:"Ya tuvo 3 toques", ya_canjeo:"Ya canjeó", sin_email:"Sin correo", ya_reactivado:"Ya volvió"};
+function htmlElegibles(){
+  const E = D.elegibles || {por_tier:[], bloqueos:[]};
+  const max = Math.max(1, ...E.por_tier.map(t => t.wa + t.email));
+  const filas = E.por_tier.map(t => `<div class="barra-h"><span><b>${t.tier}</b> <span class="tiny">${esc(t.nombre)}</span></span>
+    <span class="pista" title="WhatsApp ${n0(t.wa)} · Email ${n0(t.email)}">${t.wa ? `<i style="width:${100*t.wa/max}%;background:var(--s-wa)"></i>` : ""}${t.email ? `<i style="width:${100*t.email/max}%;background:var(--s-email)"></i>` : ""}</span>
+    <span style="text-align:right"><b>${n0(t.wa + t.email)}</b></span></div>`).join("");
+  const bl = E.bloqueos.filter(b => b.motivo !== "fuera_de_tier").slice(0,7).map(b => `<tr><td>${esc(MOTIVO[b.motivo] || b.motivo)}</td><td class="n">${n0(b.wa)}</td><td class="n">${n0(b.email)}</td></tr>`).join("");
+  return `<h3>Listos para recibir hoy</h3>
+    <div class="leyenda" style="margin:8px 0 6px"><span><i class="bloque" style="background:var(--s-wa)"></i>WhatsApp</span><span><i class="bloque" style="background:var(--s-email)"></i>Email</span></div>
+    ${filas}
+    <h3 style="margin-top:20px">Por qué el resto no está listo</h3>
+    <div class="tabla-wrap"><table><thead><tr><th>Motivo</th><th class="n">WhatsApp</th><th class="n">Email</th></tr></thead><tbody>${bl}</tbody></table></div>`;
+}
+const claves = () => D.claves || CLAVES_RESPALDO;
+const tiendasConocidas = () => (D.tiendas||[]).filter(t => RX_TIENDA.test(t.tienda));
+const marcados = id => [...$(id).querySelectorAll("input:checked")].map(i => i.value);
+function htmlFormLote(){
+  const ciudades = [...new Set(tiendasConocidas().map(t => t.ciudad).filter(Boolean))].sort();
+  return `<h3>Programar un lote</h3>
+  <form class="form" id="f-lote" style="margin-top:10px">
+    <label class="f" for="l-clave">Palanca</label><select id="l-clave" style="margin-top:-7px">${Object.entries(claves()).map(([k,v]) => `<option value="${k}">${esc(v.nombre)}</option>`).join("")}</select>
+    <div class="f"><span class="tiny"><b style="color:var(--tinta-2)">Ciudades</b> · ninguna marcada = todas</span><div class="chips" id="l-ciudades">${ciudades.map((c,i) => `<label class="chip"><input type="checkbox" id="l-c${i}" value="${esc(c)}">${esc(c)}</label>`).join("")}</div></div>
+    <div class="f"><span class="tiny"><b style="color:var(--tinta-2)">Tiendas</b> · ninguna marcada = todas las de esas ciudades</span><div class="chips" id="l-tiendas"></div></div>
+    <div class="dos" style="gap:12px">
+      <label class="f">Cupo de envíos<input id="l-cupo" type="number" min="1" step="50" value="300"></label>
+      <label class="f">Quién paga<select id="l-pagador"><option value="marca">La marca</option><option value="franquiciado">El franquiciado</option></select></label>
+    </div>
+    <label class="f">Nota<input id="l-nota" maxlength="300" placeholder="Para qué es este lote"></label>
+    <div class="resumen-lote" id="l-resumen"></div>
+    ${D.disparar ? "" : `<div class="aviso">Piloto: el lote queda <b>programado</b> y no envía nada hasta que la marca prenda el disparo.</div>`}
+    <div class="controles"><button class="btn" id="l-enviar">Programar lote</button><span class="msg" id="l-msg" role="status"></span></div>
+  </form>`;
+}
+function iniciarFormLote(){
+  if (!$("f-lote")) return;
+  const resumen = () => {
+    const k = $("l-clave").value, c = claves()[k], tiers = TIERS_DE[k] || [];
+    const cs = marcados("l-ciudades"), ts = marcados("l-tiendas");
+    const disp = (D.elegibles?.por_tienda||[]).filter(e => tiers.includes(e.tier) && (!cs.length || cs.includes(e.ciudad)) && (!ts.length || ts.includes(e.tienda))).reduce((a,e) => a + e.n, 0);
+    const cupo = Math.max(0, +$("l-cupo").value || 0), real = Math.min(cupo, c.cupo_max);
+    $("l-resumen").innerHTML = `<div><div class="k">Listos hoy en la selección</div><div class="v">${n0(disp)}</div></div>
+      <div><div class="k">Envíos del lote</div><div class="v">${n0(real)}</div></div>
+      <div><div class="k">Premios, como máximo</div><div class="v">${plata(real * c.costo_unit)}</div></div>
+      ${cupo > c.cupo_max ? `<div class="msg err" style="grid-column:1/-1">El tope de esta palanca es ${n0(c.cupo_max)} envíos por lote.</div>`
+        : cupo > disp ? `<div class="tiny" style="grid-column:1/-1">Hoy hay menos clientes listos que el cupo: el lote se llena a medida que caen al tier.</div>` : ""}`;
+    $("l-enviar").disabled = !cupo || cupo > c.cupo_max;
+  };
+  const pintarChipsTiendas = () => {
+    const cs = marcados("l-ciudades"), antes = new Set(marcados("l-tiendas"));
+    const ts = tiendasConocidas().filter(t => !cs.length || cs.includes(t.ciudad)).map(t => t.tienda).sort();
+    $("l-tiendas").innerHTML = ts.map(t => `<label class="chip"><input type="checkbox" value="${esc(t)}" ${antes.has(t)?"checked":""}>${esc(corto(t))}</label>`).join("") || `<span class="tiny">Sin tiendas con historial en esas ciudades.</span>`;
+    $("l-tiendas").querySelectorAll("input").forEach(i => i.onchange = resumen);
+    resumen();
+  };
+  $("l-ciudades").querySelectorAll("input").forEach(i => i.onchange = pintarChipsTiendas);
+  $("l-clave").onchange = resumen; $("l-cupo").oninput = resumen;
+  pintarChipsTiendas();
+  $("f-lote").addEventListener("submit", async e => {
+    e.preventDefault();
+    const msg = $("l-msg"); msg.className = "msg"; msg.textContent = "Programando…";
+    const body = {clave:$("l-clave").value, cupo:+$("l-cupo").value, pagador:$("l-pagador").value, nota:$("l-nota").value,
+      ciudades:marcados("l-ciudades"), tiendas:marcados("l-tiendas"), pin:PIN, creado_por:"consola"};
+    try {
+      if (D.vista_previa) throw new Error("esta es una vista previa sin conexión al servicio");
+      const r = await fetch(`${API}/consola/lote`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error);
+      msg.className = "msg ok"; msg.textContent = `Programado: ${n0(j.cupo)} envíos, premios hasta ${plata(j.costo_max)}. Aparece en la lista con la próxima actualización.`;
+    } catch (err) { msg.className = "msg err"; msg.textContent = `No se programó: ${err.message}.`; }
+  });
+}
+const ESTADO_LOTE = {programada:["acai","Programado"], activa:["ok","Enviando"], agotada:["","Agotado"], pausada:["ojo","Pausado"], apagada:["mal","Apagado"]};
+function htmlLotes(){
+  const L = D.lotes;
+  if (L == null) return `<h3>Lotes</h3><div class="vacio" style="margin-top:10px">La tabla de lotes nace el día 1 del relanzamiento. Hasta entonces los envíos salen por los crons diarios, sin cupo.</div>`;
+  if (!L.length) return `<h3>Lotes</h3><div class="vacio" style="margin-top:10px">No hay lotes todavía. Programá el primero arriba.</div>`;
+  const C = claves();
+  return `<h3>Lotes</h3><div class="tabla-wrap" style="margin-top:8px"><table><thead><tr><th>Estado</th><th>Palanca</th><th class="n">Lote</th><th class="n">Enviados / cupo</th><th>Dónde</th><th class="n">Diferencia</th><th class="n">Contribución</th><th>¿Paga?</th><th></th></tr></thead><tbody>
+  ${L.map(l => { const [c,t] = ESTADO_LOTE[l.estado] || ["", l.estado];
+    const donde = [...(l.ciudades||[]), ...(l.tiendas||[]).map(corto)].join(", ") || "Toda la red";
+    const id = `${esc(l.clave)}|${l.lote_n}`, acc = [];
+    if (l.estado === "programada" || l.estado === "pausada") acc.push(`<button class="btn mini" data-lote="${id}|activa" ${D.disparar ? "" : `disabled title="El disparo está apagado (piloto)"`}>Activar</button>`);
+    if (l.estado === "activa") acc.push(`<button class="btn mini sec" data-lote="${id}|pausada">Pausar</button>`);
+    if (l.estado !== "apagada") acc.push(`<button class="btn mini sec" data-lote="${id}|apagada">Apagar</button>`);
+    return `<tr><td><span class="pill ${c}">${t}</span></td><td>${esc(C[l.clave]?.nombre || l.clave)}</td><td class="n">#${l.lote_n}</td>
+      <td class="n">${n0(l.toques)} / ${n0(l.cupo)}</td><td>${esc(donde)}</td><td class="n">${l.lift_pp == null ? "—" : pp(l.lift_pp)}</td>
+      <td class="n">${plata(l.neto)}</td><td>${l.confiable ? (l.neto >= 0 && l.lift_pp > 0 ? `<span class="pill ok">Sí</span>` : `<span class="pill mal">No</span>`) : `<span class="tiny">falta muestra</span>`}</td>
+      <td style="white-space:nowrap">${acc.join(" ")}</td></tr>`; }).join("")}</tbody></table></div>`;
+}
+async function cambiarLote(e){
+  const b = e.currentTarget, [clave, n, estado] = b.dataset.lote.split("|");
+  b.disabled = true;
+  try {
+    const r = await fetch(`${API}/consola/lote/estado`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({clave, lote_n:+n, estado, pin:PIN})});
+    const j = await r.json(); if (!j.ok) throw new Error(j.error);
+    b.textContent = "Listo";
+  } catch (err) { b.disabled = false; b.title = err.message; b.textContent = "No se pudo"; }
+}
+
+/* ───────────── hoy ───────────── */
+function htmlHoy(){
+  const H = D.hoy || {}, k = D.canales_7d || {};
+  const c = (canal, est) => (H.cola_hoy||[]).filter(x => x.canal === canal && x.estado === est).reduce((a,x) => a + x.n, 0);
+  const prox = H.proximo ? H.proximo.slice(11) + (H.proximo.slice(0,10) !== D.generado.slice(0,10) ? " del " + fsem(H.proximo.slice(0,10)) : "") : "—";
+  return `<div class="tres">
+    <div class="mini"><div class="k">Enviados hoy</div><div class="v">${n0(c("email","sent") + c("wa","sent"))}</div><div class="d">email ${n0(c("email","sent"))} · WhatsApp ${n0(c("wa","sent"))}</div></div>
+    <div class="mini"><div class="k">En cola para hoy</div><div class="v">${n0(c("email","pending") + c("wa","pending"))}</div><div class="d">próximo envío: ${esc(prox)}</div></div>
+    <div class="mini"><div class="k">Canjes hoy</div><div class="v">${n0(H.canjes_hoy)}</div><div class="d">en caja, cupones RET</div></div>
+    <div class="mini"><div class="k">Últimos 7 días</div><div class="v">${n0((k.email_7d||0) + (k.wa_7d||0))}</div><div class="d">email ${n0(k.email_7d)} · WhatsApp ${n0(k.wa_7d)} · bajas ${n0(k.bajas_7d)}</div></div>
+  </div>`;
+}
+function dias30(){ const fin = D.generado.slice(0,10); return Array.from({length:30}, (_,i) => masDias(fin, i-29)); }
+function barrasDia(cont, v, capas, etiqueta, tipFn){
+  const W = 560, H = 180, m = {l:36,r:8,t:8,b:22};
+  const max = Math.max(5, ...v.map(x => capas.reduce((a,[k]) => a + x[k], 0)));
+  const paso = (W-m.l-m.r)/v.length, bw = paso - 2, y = n => (H-m.t-m.b)*n/max;
+  const barras = v.map((x,i) => { let base = H-m.b, out = ""; const x0 = m.l + i*paso + 1;
+    capas.forEach(([k,col]) => { const h = y(x[k]); if (h) { out += `<rect x="${x0}" y="${base-h}" width="${bw}" height="${h}" fill="${col}"/>`; base -= h + 2; } });
+    return out + `<rect x="${x0-1}" y="${m.t}" width="${paso}" height="${H-m.t-m.b}" fill="transparent" data-i="${i}"/>`; }).join("");
+  const ejes = `<line x1="${m.l}" x2="${W-m.r}" y1="${H-m.b}" y2="${H-m.b}" stroke="var(--linea)"/><line x1="${m.l}" x2="${W-m.r}" y1="${m.t}" y2="${m.t}" stroke="var(--linea-suave)"/><text x="${m.l-6}" y="${m.t+4}" text-anchor="end">${n0(max)}</text><text x="${m.l-6}" y="${H-m.b+4}" text-anchor="end">0</text>`
+    + [0, 10, 20, 29].map(i => `<text x="${m.l + i*paso + paso/2}" y="${H-6}" text-anchor="middle">${fsem(v[i].d)}</text>`).join("");
+  $(cont).innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${etiqueta}">${ejes}${barras}</svg>`;
+  conTip($(cont), i => tipFn(v[i]));
+}
+function graficoEnvios(){
+  const dia = D.hoy.diario || [];
+  const v = dias30().map(d => ({d, email:dia.filter(x => x.d===d && x.canal==="email").reduce((a,x)=>a+x.enviados,0), wa:dia.filter(x => x.d===d && x.canal==="wa").reduce((a,x)=>a+x.enviados,0)}));
+  barrasDia("g-envios", v, [["email","var(--s-email)"],["wa","var(--s-wa)"]], "Envíos por día, email y WhatsApp", x => `<b>${fsem(x.d)}</b><br>Email ${n0(x.email)} · WhatsApp ${n0(x.wa)}`);
+}
+function graficoCanjes(){
+  const cj = D.hoy.canjes_dia || [];
+  const v = dias30().map(d => ({d, n:cj.find(x => x.d===d)?.n || 0}));
+  barrasDia("g-canjes", v, [["n","var(--acai)"]], "Canjes por día", x => `<b>${fsem(x.d)}</b><br>${n0(x.n)} canjes`);
+}
+
+/* ───────────── tiendas ───────────── */
+function iniciarTiendas(){
+  const ciudades = [...new Set(tiendasConocidas().map(t => t.ciudad).filter(Boolean))].sort();
+  $("f-ciudad").innerHTML = `<option value="todas">Todas las ciudades</option>` + ciudades.map(c => `<option>${esc(c)}</option>`).join("");
+  $("f-ciudad").onchange = e => { ESTADO.ciudad = e.target.value; pintarTiendas(); };
+  pintarTiendas();
+}
+function pintarTiendas(){
+  const COLS = [["tienda","Tienda"],["ciudad","Ciudad"],["enviados","Enviados"],["canjes","Canjes"],["volvieron_pct","Vuelven"],["volvieron_pct_4sem","Vuelven, 4 sem"],["inc_est","Órd. inc. (est.)"],["costo","Premios"],["elegibles_hoy","Listos hoy"]];
+  const k = ESTADO.ordenTienda;
+  const T = tiendasConocidas().filter(t => ESTADO.ciudad === "todas" || t.ciudad === ESTADO.ciudad)
+    .sort((a,b) => typeof a[k] === "string" ? a[k].localeCompare(b[k]) : (b[k] ?? -1e9) - (a[k] ?? -1e9));
+  const otros = (D.tiendas||[]).filter(t => !RX_TIENDA.test(t.tienda)).reduce((a,t) => a + t.enviados, 0);
+  $("t-tiendas").innerHTML = `<table><thead><tr>${COLS.map(([c,t],i) => `<th class="ord ${i>1?"n":""}" data-k="${c}" aria-sort="${c===k?"descending":"none"}" tabindex="0">${t}${c===k?" ↓":""}</th>`).join("")}</tr></thead><tbody>
+    ${T.map(t => `<tr><td><b>${esc(corto(t.tienda))}</b> <span class="tiny">${t.tienda.includes("_TP_") ? "propia" : "franquicia"}</span></td><td>${esc(t.ciudad)}</td>
+      <td class="n">${n0(t.enviados)}</td><td class="n">${n0(t.canjes)}</td><td class="n">${pct(t.volvieron_pct)}</td><td class="n">${pct(t.volvieron_pct_4sem)}</td>
+      <td class="n"><span class="${t.inc_est>0?"pos":t.inc_est<0?"neg":""}">${sig(t.inc_est)}</span></td><td class="n">${plata(t.costo)}</td><td class="n">${n0(t.elegibles_hoy)}</td></tr>`).join("")}
+  </tbody></table>${otros ? `<div class="tiny" style="padding:10px 10px 0">${n0(otros)} envíos a clientes sin tienda habitual reconocida no salen en la tabla.</div>` : ""}`;
+  $("t-tiendas").querySelectorAll("th.ord").forEach(th => { th.onclick = () => { ESTADO.ordenTienda = th.dataset.k; pintarTiendas(); }; th.onkeydown = e => { if (e.key === "Enter") th.onclick(); }; });
+}
+
+cargar();
+</script>
+</body>
+</html>

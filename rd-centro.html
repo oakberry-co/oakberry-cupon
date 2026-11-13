@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F5EEE0">
+<meta name="robots" content="noindex, nofollow">
+<title>Centro de cupones RD · OAKBERRY</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="stylesheet" href="/rd-assets/kit.css">
+<style>
+#login{margin-top:60px}
+.progBox{margin-top:8px;background:var(--crema);border:2px dashed var(--morado);padding:10px;border-radius:12px}
+.detalleCab{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+</style>
+</head>
+<body class="panel-ancho">
+<main>
+  <img class="sol" src="/rd-assets/sol-loro.png" alt="" aria-hidden="true">
+  <img class="pajaros" src="/rd-assets/pajaros.png" alt="" aria-hidden="true">
+  <img class="loro" src="/rd-assets/loro-vuela.png" alt="" aria-hidden="true" style="right:8%">
+
+  <div id="login" class="tarjeta login-caja">
+    <img src="/rd-assets/wordmark.svg" alt="OAKBERRY" style="width:170px;height:auto;margin:0 auto 14px;display:block">
+    <h2>Centro de cupones <span class="solo-rd">Solo RD</span></h2>
+    <p class="chico" style="margin:6px 0 18px">Entra con tu correo @manelfoods.com</p>
+    <div id="gbtn" style="display:flex;justify-content:center"></div>
+    <p class="mini" id="avisoLogin" style="margin-top:10px"></p>
+  </div>
+
+  <div id="app" class="oculto">
+    <div class="cabeza">
+      <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+        <img class="marca" src="/rd-assets/wordmark.svg" alt="OAKBERRY" width="3600" height="472">
+        <div><h1>Centro de cupones <span class="solo-rd">Solo República Dominicana</span></h1>
+          <p class="sub">Campañas de cupones en el POS Foodology de Plaza Andalucía y Agora Mall. Cada campaña trae su QR, su flyer y su landing de registro. Los usos se leen de Foodology cada hora.</p></div>
+      </div>
+      <div class="yo"><span id="yo"></span> · <a href="#" id="salir">salir</a></div>
+    </div>
+
+    <div class="tarjeta oculto" id="avisoToken" style="margin-top:16px;background:#FBE9E7;border-color:var(--rojo)">
+      <h2 style="color:var(--rojo)">⚠️ Acceso a Foodology vencido</h2>
+      <p id="avisoTokenTxt" style="font-weight:600;line-height:1.5"></p>
+      <p class="mini" style="margin-top:8px">Las campañas que se creen ahora quedan en espera y se completan solas cuando el token se renueve. Las personas que se registren por un QR quedan guardadas y reciben su cupón después.</p>
+    </div>
+    <div class="rejilla">
+      <div>
+        <section class="tarjeta">
+          <h2>Nueva campaña</h2>
+          <div class="campo"><label>Programa</label>
+            <div style="display:flex;gap:8px"><select id="prefijo" class="kit" style="flex:1"></select><button class="pildora chica oro" id="nuevoProg" title="Nuevo diminutivo" style="height:50px">+ nuevo</button></div></div>
+          <div id="progForm" class="progBox oculto">
+            <div class="dos"><div class="campo"><label>Diminutivo (3 letras)</label><input id="npPrefijo" class="kit" maxlength="3" placeholder="ALI" style="text-transform:uppercase"></div>
+            <div class="campo"><label>Nombre</label><input id="npNombre" class="kit" placeholder="Alianzas"></div></div>
+            <button class="pildora chica" id="npGuardar">Guardar programa</button>
+          </div>
+          <div class="campo"><label>Nombre de la campaña</label><input id="nombre" class="kit" placeholder="Gym Fit · octubre"></div>
+          <div class="campo"><label>Descuento</label>
+            <div class="seg" id="tipo"><button data-t="PCT" class="on">% de la orden</button><button data-t="BOWL">Bowl fijo</button></div>
+            <div id="pctBox" class="seg" style="margin-top:8px"><button data-v="10">10%</button><button data-v="15" class="on">15%</button><button data-v="20">20%</button><button data-v="25">25%</button><button data-v="100">100%</button></div>
+            <div id="bowlBox" class="seg oculto" style="margin-top:8px"><button data-b="9oz">9 oz · RD$520</button><button data-b="12oz" class="on">12 oz · RD$620</button></div>
+            <p class="mini" style="margin-top:6px">Bowl fijo = monto en caja, sin toppings extra. Lo que pase de ahí se paga.</p></div>
+          <div class="dos"><div class="campo"><label>Usos por cupón</label><input id="usos" class="kit" type="number" min="1" max="50" value="1"></div>
+          <div class="campo"><label>Cantidad de cupones</label><input id="cantidad" class="kit" type="number" min="1" max="300" value="20"></div></div>
+          <div class="campo"><label>Vence el (fecha real en el POS)</label><input id="vence" class="kit" type="date"></div>
+          <div class="dos"><div class="campo"><label>Horas para reclamarlo</label><input id="reclamoHoras" class="kit" type="number" min="0" max="1440" placeholder="sin límite"></div>
+          <div class="campo"><label>Días para usarlo</label><input id="usoDias" class="kit" type="number" min="0" max="90" placeholder="hasta la fecha"></div></div>
+          <p class="mini">Reclamar: desde que creas la campaña, la gente tiene esas horas para registrarse por el QR. Usar: días completos que ve el cliente desde que recibe el cupón (se habla de «hasta el 23/10», sin horas); en el POS sigue valiendo hasta la fecha real, y cuando queda un tercio del plazo le llega un recordatorio por WhatsApp si no lo ha usado.</p>
+          <div class="resumen" id="resumen"></div>
+          <button class="pildora" id="crear" style="margin-top:14px">Crear campaña</button>
+        </section>
+      </div>
+      <div>
+        <section class="tarjeta tabla">
+          <h2>Campañas</h2>
+          <table class="kit"><thead><tr><th>Campaña</th><th>Descuento</th><th>Cupones</th><th>Entregados</th><th>Reclamados</th><th>Vence</th><th>Estado</th></tr></thead><tbody id="campanas"></tbody></table>
+        </section>
+        <section class="tarjeta oculto" id="detalle">
+          <div class="detalleCab">
+            <div><h2 id="dTitulo"></h2><p class="mini" id="dSub"></p></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="pildora chica blanca" id="dRefrescar">Actualizar</button><button class="pildora chica blanca" id="dCsv">CSV</button><button class="pildora chica" id="dCerrar"></button></div>
+          </div>
+          <div class="kpis" id="dKpis" style="margin-top:12px"></div>
+          <p class="mini" style="margin-top:10px">Landing de registro: <a class="link" id="dLanding" target="_blank"></a></p>
+          <div class="artes" id="dArtes"></div>
+          <div class="tabla"><table class="kit"><thead><tr><th>Cupón</th><th>Entregado a</th><th>WhatsApp</th><th>Redes</th><th>Usos</th><th>Vence (cliente)</th><th>Último uso</th><th>WA</th><th>Recordatorio</th><th></th></tr></thead><tbody id="dCupones"></tbody></table></div>
+          <div id="dSinCupo" class="mini" style="margin-top:10px"></div>
+        </section>
+      </div>
+    </div>
+    <p class="pie">OAKBERRY República Dominicana · los cupones viven en el POS Foodology (Plaza Andalucía y Agora Mall)</p>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "https://api.oakberry-cupones.com/";
+const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com';
+const KEY = "oak_rd_centro";
+const $ = id => document.getElementById(id);
+const st = {s:null, tipo:"PCT", pct:15, bowl:"12oz", campanas:[], sel:null, detalle:null};
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2600); }
+const f = s => s ? new Date(s).toLocaleString("es-DO",{timeZone:"America/Santo_Domingo",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "—";
+const fd = s => s ? new Date(s+"T12:00:00").toLocaleDateString("es-DO",{day:"2-digit",month:"2-digit",year:"numeric"}) : "—";
+function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function guardar(s,email){ try{ localStorage.setItem(KEY, JSON.stringify({s,email,t:Date.now()})); }catch(e){} }
+function leer(){ try{ const d=JSON.parse(localStorage.getItem(KEY)||"null"); if(d && Date.now()-d.t < 11.5*3600e3) return d; }catch(e){} return null; }
+function salir(msg){ try{ localStorage.removeItem(KEY); }catch(e){} st.s=null; $("app").classList.add("oculto"); $("login").classList.remove("oculto"); $("avisoLogin").textContent=msg||""; pintarBoton(); }
+async function onCredential(resp){
+  $("avisoLogin").textContent="Entrando…";
+  try{
+    const d = await (await fetch(API+"?accion=ccSesion", {headers:{Authorization:"Bearer "+resp.credential}})).json();
+    if(!d.ok){ $("avisoLogin").textContent = d.mensaje || "Solo correos @manelfoods.com."; return; }
+    guardar(d.sesion, d.email); entrar(d.sesion, d.email);
+  }catch(e){ $("avisoLogin").textContent="Sin conexión con el servidor."; }
+}
+function pintarBoton(){
+  if(!window.google || !google.accounts) return setTimeout(pintarBoton, 300);
+  google.accounts.id.initialize({client_id:CLIENT_ID, callback:onCredential});
+  google.accounts.id.renderButton($("gbtn"), {theme:"outline", size:"large", shape:"pill", text:"signin_with", locale:"es"});
+}
+function entrar(s,email){ st.s=s; $("yo").textContent=email; $("login").classList.add("oculto"); $("app").classList.remove("oculto"); cargarProgramas(); cargarCampanas(); salud(); setInterval(salud, 5*60*1000); }
+async function salud(){
+  try{ const d = await api("rdcSalud"); if(!d.ok) return;
+    const mal = d.foodology === "token_vencido";
+    $("avisoToken").classList.toggle("oculto", !mal);
+    if(mal) $("avisoTokenTxt").textContent = d.mensajeToken + " Contacto: " + d.contacto + ".";
+    else if(d.foodology === "error"){ $("avisoToken").classList.remove("oculto"); $("avisoTokenTxt").textContent = "Foodology no responde en este momento: " + (d.detalle||"") + ". Si persiste, avísale a " + d.contacto + "."; }
+  }catch(e){}
+}
+async function api(accion, params){
+  const q = new URLSearchParams({accion, s:st.s}); for(const [k,v] of Object.entries(params||{})) q.set(k, v);
+  let d; try{ d = await (await fetch(API+"?"+q.toString())).json(); }catch(e){ throw new Error("Sin conexión con el servidor"); }
+  if(d && d.auth===false){ salir("Tu sesión venció. Vuelve a entrar."); throw new Error("sesión"); }
+  return d;
+}
+$("salir").addEventListener("click", e=>{ e.preventDefault(); salir(); });
+async function cargarProgramas(){
+  const d = await api("rdcProgramas"); if(!d.ok) return;
+  $("prefijo").innerHTML = d.programas.filter(p=>p.activo).map(p=>`<option value="${p.prefijo}">${p.prefijo} · ${esc(p.nombre)}</option>`).join(""); resumen();
+}
+$("nuevoProg").addEventListener("click", ()=>$("progForm").classList.toggle("oculto"));
+$("npGuardar").addEventListener("click", async ()=>{
+  const d = await api("rdcProgramaCrear", {prefijo:$("npPrefijo").value, nombre:$("npNombre").value});
+  if(!d.ok) return toast(d.mensaje||"No se pudo"); toast("Programa "+d.prefijo+" guardado"); $("progForm").classList.add("oculto"); await cargarProgramas(); $("prefijo").value=d.prefijo; resumen();
+});
+$("tipo").querySelectorAll("button").forEach(b=>b.addEventListener("click", ()=>{ st.tipo=b.dataset.t; $("tipo").querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b)); $("pctBox").classList.toggle("oculto", st.tipo!=="PCT"); $("bowlBox").classList.toggle("oculto", st.tipo!=="BOWL"); resumen(); }));
+$("pctBox").querySelectorAll("button").forEach(b=>b.addEventListener("click", ()=>{ st.pct=+b.dataset.v; $("pctBox").querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b)); resumen(); }));
+$("bowlBox").querySelectorAll("button").forEach(b=>b.addEventListener("click", ()=>{ st.bowl=b.dataset.b; $("bowlBox").querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b)); resumen(); }));
+["nombre","usos","cantidad","vence","prefijo","reclamoHoras","usoDias"].forEach(id=>$(id).addEventListener("input", resumen));
+(function(){ const d=new Date(); d.setMonth(d.getMonth()+1); $("vence").value = d.toISOString().slice(0,10); })();
+function beneficio(){ return st.tipo==="PCT" ? st.pct+"% de descuento en toda la orden" : (st.bowl==="9oz" ? "1 bowl The One 9 oz" : "1 bowl Classic 12 oz")+" con toppings ilimitados (RD$"+(st.bowl==="9oz"?520:620)+")"; }
+function resumen(){
+  const n=+$("cantidad").value||0, u=+$("usos").value||0;
+  const rh=+$("reclamoHoras").value||0, ud=+$("usoDias").value||0;
+  const hrs = h => h<48 ? h+" horas" : Math.round(h/24)+" días";
+  $("resumen").innerHTML = `Se crearán <b>${n} cupones</b> con prefijo <b>${$("prefijo").value||"—"}</b>, cada uno con <b>${beneficio()}</b>, hasta <b>${u} uso${u===1?"":"s"}</b> por cupón, válidos en el POS hasta <b>${fd($("vence").value)}</b>.`
+    + (rh ? ` Se puede reclamar durante <b>${hrs(rh)}</b> desde ahora.` : "") + (ud ? ` El cliente ve <b>${ud} día${ud===1?"":"s"}</b> para usarlo y recibe recordatorio.` : "")
+    + ` Tiempo estimado: ~${Math.max(1,Math.round(n*0.9+8))} s.`;
+}
+$("crear").addEventListener("click", async ()=>{
+  const btn=$("crear"); btn.disabled=true; btn.textContent="Creando…";
+  try{
+    const d = await api("rdcCampanaCrear", {prefijo:$("prefijo").value, nombre:$("nombre").value, descuentoTipo:st.tipo, descuentoValor:st.tipo==="PCT"?st.pct:"", bowl:st.bowl, usos:$("usos").value, cantidad:$("cantidad").value, vence:$("vence").value, reclamoHoras:$("reclamoHoras").value, usoHoras:(+$("usoDias").value||0)*24});
+    if(!d.ok) return toast(d.mensaje||"No se pudo crear");
+    toast("Campaña creada. Los cupones se están generando en Foodology…"); $("nombre").value="";
+    await cargarCampanas(); abrir(d.id); vigilar(d.id);
+  }catch(e){ toast(e.message); } finally{ btn.disabled=false; btn.textContent="Crear campaña"; }
+});
+function vigilar(id){ let n=0; const t=setInterval(async ()=>{ await cargarCampanas(); const c=st.campanas.find(x=>x.id===id); if(st.sel===id) abrir(id, true); if(!c || c.estado!=="creando" || ++n>120) clearInterval(t); }, 4000); }
+async function cargarCampanas(){
+  const d = await api("rdcCampanas"); if(!d.ok) return; st.campanas=d.campanas;
+  $("campanas").innerHTML = d.campanas.map(c=>`<tr data-id="${c.id}" class="${st.sel===c.id?"sel":""}" style="cursor:pointer">
+    <td><b>${esc(c.nombre)}</b><br><span class="mini">${c.prefijo} · ${esc(c.programa)} · ${esc(c.creado_por.split("@")[0])}</span></td>
+    <td>${esc(c.beneficio)}</td><td>${c.creados}/${c.cantidad}</td><td>${c.entregados}</td><td>${c.reclamados}</td><td>${fd(c.vence)}</td>
+    <td>${estadoPill(c)}</td></tr>`).join("") || `<tr><td colspan="7" class="mini">Todavía no hay campañas. Crea la primera a la izquierda.</td></tr>`;
+  $("campanas").querySelectorAll("tr[data-id]").forEach(tr=>tr.addEventListener("click", ()=>abrir(+tr.dataset.id)));
+}
+function estadoPill(c){ return c.estado==="lista" ? '<span class="pill ok">lista</span>' : c.estado==="creando" ? `<span class="pill pend">creando ${c.creados}/${c.cantidad}</span>` : c.estado==="error" ? (String(c.error||"").startsWith("TOKEN_VENCIDO") ? '<span class="pill err" title="Se completa sola cuando se renueve el token">token vencido · en espera</span>' : `<span class="pill err" title="${esc(c.error)}">error</span>`) : '<span class="pill off">cerrada</span>'; }
+async function abrir(id, silencioso){
+  st.sel=id; if(!silencioso) $("detalle").classList.remove("oculto");
+  const d = await api("rdcCampanaDetalle", {id}); if(!d.ok) return toast(d.mensaje||"Error"); st.detalle=d; const c=d.campana;
+  $("campanas").querySelectorAll("tr[data-id]").forEach(tr=>tr.classList.toggle("sel", +tr.dataset.id===id));
+  $("dTitulo").textContent = c.nombre; $("dSub").textContent = `${c.prefijo} · ${c.programa} · ${c.beneficio} · ${c.usos} uso${c.usos===1?"":"s"} por cupón · vence en POS ${fd(c.vence)}` + (c.reclamo_horas?` · reclamar en ${c.reclamo_horas} h`:"") + (c.uso_horas?` · ${Math.round(c.uso_horas/24)} día(s) para usar (recordatorio)`:"") + ` · creada por ${c.creado_por}`;
+  const entregados=d.cupones.filter(k=>k.registro_id).length, reclamados=d.cupones.reduce((a,k)=>a+(k.times_used||0),0), conUso=d.cupones.filter(k=>k.times_used>0).length;
+  $("dKpis").innerHTML = [["Cupones",`${c.creados}/${c.cantidad}`],["Entregados",entregados],["Usos reclamados",reclamados],["Cupones con uso",conUso],["Sin cupo",d.sinCupo.length]].map(([t,v])=>`<div class="kpi"><b>${v}</b><span>${t}</span></div>`).join("");
+  $("dLanding").textContent = c.landing; $("dLanding").href = c.landing;
+  $("dArtes").innerHTML = c.estado==="creando" ? `<span class="pill pend">Generando cupones ${c.creados}/${c.cantidad}… el QR y el flyer salen al terminar.</span>` :
+    (c.qr_url ? `<div><img src="${c.qr_url}?v=${Date.now()}" width="150" height="150" alt="QR"><a class="pildora chica blanca" href="${c.qr_url}" download target="_blank">Descargar QR</a></div>` : "") +
+    (c.flyer_url ? `<div><img src="${c.flyer_url}?v=${Date.now()}" width="150" alt="Flyer"><a class="pildora chica blanca" href="${c.flyer_url}" download target="_blank">Descargar flyer</a></div>` : "");
+  $("dCerrar").textContent = c.estado==="cerrada" ? "Reabrir" : "Cerrar campaña"; $("dCerrar").classList.toggle("oculto", !["lista","cerrada"].includes(c.estado));
+  $("dCupones").innerHTML = d.cupones.map(k=>`<tr><td class="cod">${k.codigo}</td>
+    <td>${k.nombre?esc(k.nombre):'<span class="pill off">libre</span>'}${k.asignado_at?`<br><span class="mini">${f(k.asignado_at)}</span>`:""}</td>
+    <td>${k.celular?"+1 "+k.celular:"—"}</td>
+    <td>${k.instagram?`<a class="link" href="https://instagram.com/${esc(k.instagram)}" target="_blank">@${esc(k.instagram)}</a>`:""}${k.tiktok?` <a class="link" href="https://tiktok.com/@${esc(k.tiktok)}" target="_blank">tt:@${esc(k.tiktok)}</a>`:""}</td>
+    <td><span class="barra"><i style="width:${Math.min(100,(k.times_used||0)*100/c.usos)}%"></i></span>${k.times_used||0}/${c.usos}</td>
+    <td>${k.usar_hasta?new Date(k.usar_hasta).toLocaleDateString("es-DO",{timeZone:"America/Santo_Domingo",day:"2-digit",month:"2-digit",year:"numeric"}):"—"}</td>
+    <td>${f(k.ultimo_uso_at)}</td>
+    <td>${k.registro_id ? (k.wa_estado==="enviado"?'<span class="pill ok">enviado</span>':`<span class="pill ${k.wa_estado==="fallido"?"err":"pend"}" title="${esc(k.wa_error||"")}">${k.wa_estado}</span>`) : ""}</td>
+    <td>${k.recordatorio_estado?`<span class="pill ${k.recordatorio_estado==="enviado"?"ok":"err"}">${k.recordatorio_estado}</span>`:(k.usar_hasta&&!k.times_used?'<span class="pill pend">pendiente</span>':"—")}</td>
+    <td>${k.registro_id?`<button class="pildora chica blanca" data-r="${k.registro_id}">Reenviar WA</button>`:""}</td></tr>`).join("");
+  $("dCupones").querySelectorAll("button[data-r]").forEach(b=>b.addEventListener("click", async ()=>{ b.disabled=true; const r=await api("rdcReenviar",{registroId:b.dataset.r}); toast(r.ok?"WhatsApp reenviado":"No salió: "+(r.detalle||"")); abrir(id,true); }));
+  $("dSinCupo").innerHTML = d.sinCupo.length ? "<b>Llegaron sin cupo:</b> " + d.sinCupo.map(x=>`${esc(x.nombre)} (+1 ${x.celular})`).join(", ") : "";
+}
+$("dRefrescar").addEventListener("click", ()=>{ if(st.sel) abrir(st.sel,true); cargarCampanas(); });
+$("dCerrar").addEventListener("click", async ()=>{ const c=st.detalle.campana; const r=await api("rdcCampanaEstado",{id:c.id, cerrar:c.estado==="cerrada"?"0":"1"}); toast(r.ok?"Listo":"No se pudo"); cargarCampanas(); abrir(c.id,true); });
+$("dCsv").addEventListener("click", ()=>{
+  if(!st.detalle) return; const c=st.detalle.campana;
+  const cab=["codigo","nombre","celular","instagram","tiktok","times_used","max_usos","asignado_at","primer_uso_at","ultimo_uso_at","wa_estado"];
+  const rows=[cab.join(",")].concat(st.detalle.cupones.map(k=>cab.map(h=>`"${String(h==="max_usos"?c.usos:(k[h]??"")).replace(/"/g,'""')}"`).join(",")));
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob(["﻿"+rows.join("\n")],{type:"text/csv"})); a.download=`cupones_${c.slug}.csv`; a.click();
+});
+const prev = leer(); if(prev){ entrar(prev.s, prev.email); } else { pintarBoton(); }
+</script>
+</body>
+</html>

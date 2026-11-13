@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es" class="vertical">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F5EEE0">
+<title>Juegos OAKBERRY</title>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-regular.woff2" as="font" type="font/woff2" crossorigin>
+<!--
+  LANDING DE LOS JUEGOS — se escoge cuál jugar y se abre con el mismo evento.
+
+  El `?evento=` (y el `?pais=` si viene) se arrastran a los tres links: si se
+  perdieran, el juego escribiría en otro evento y los premios saldrían de otro
+  cupo. Cada juego trae un botón "Salir" que devuelve acá.
+-->
+<style>
+/* Nexa Slab Book/Bold/Black COMPLETAS (las "FREE" de Drive son demos y dibujan
+   : % - · ¡ ¿ como un sello). No traen ← ⌫ ✓ ✕: esos no se usan en la página. */
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-regular.woff2') format('woff2');font-weight:400;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-bold.woff2') format('woff2');font-weight:600 700;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-black.woff2') format('woff2');font-weight:800 900;font-display:block}
+:root{
+  --crema:#FBF6E9; --crema-cielo:#F5EEE0; --hueso:#EAE1CC; --tinta:#21152A; --tinta-suave:#5C4A66;
+  --morado:#4B1F60; --lila:#B79CC8; --oro:#F4B223; --coral:#E04850; --rojo:#B3261E; --verde:#2F6B3A;
+  --fondo:var(--crema); --texto:var(--tinta);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+body{container-type:size}
+html{background:var(--tinta)}
+body{font-family:'Nexa Slab',Rockwell,'Roboto Slab',Georgia,serif;background:var(--fondo);
+  color:var(--texto);font-size:3.2cqmin;line-height:1.35;transition:background .6s,color .6s;position:relative}
+[hidden]{display:none!important}
+button{font-family:inherit;border:none;cursor:pointer;color:inherit;background:none}
+
+html.rot90 body,html.rot270 body{position:fixed;top:0;left:0;width:100vh;height:100vw;transform-origin:top left}
+html.rot90 body{transform:rotate(90deg) translateY(-100%)}
+html.rot270 body{transform:rotate(-90deg) translateX(-100%)}
+
+.escena{position:absolute;inset:0;z-index:0;background-color:var(--fondo);background-size:cover;
+  background-position:center;transition:background-color .6s}
+.pantalla{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;gap:2.4cqmin;padding:6cqmin 6cqmin 7cqmin;text-align:center}
+.bloque{display:flex;flex-direction:column;align-items:center;gap:2cqmin;width:100%}
+.panel{background:var(--panel);border-radius:3cqmin;padding:3cqmin 4cqmin}
+.eyebrow{font-size:2.8cqmin;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
+
+.btn{background:var(--boton,var(--morado));color:var(--boton-texto,var(--crema));font-weight:800;letter-spacing:.05em;
+  text-transform:uppercase;font-size:6cqmin;padding:3.4cqmin 4cqmin;border-radius:999px;
+  box-shadow:0 1.1cqmin 0 var(--tinta);width:88cqmin;line-height:1.15;white-space:nowrap}
+.btn:active{transform:translateY(.8cqmin);box-shadow:0 .3cqmin 0 var(--tinta)}
+.btn:disabled{opacity:.45;animation:none}
+.btn-sec{border:.4cqmin solid currentColor;border-radius:999px;font-weight:700;font-size:3.8cqmin;
+  padding:3cqmin 5cqmin;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.latido{animation:latido 1.8s ease-in-out infinite}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.badge-prueba{position:absolute;top:1.6cqmin;right:1.6cqmin;background:var(--rojo);color:#fff;font-weight:800;
+  padding:.8cqmin 2cqmin;border-radius:1cqmin;letter-spacing:.1em;font-size:2.4cqmin;z-index:50}
+.auto{font-size:2.8cqmin;opacity:.75;min-height:1.4em}
+
+/* ── PORTADA ─────────────────────────────────────────────────────────── */
+#portada h1{font-size:12.5cqmin;font-weight:900;line-height:.98;letter-spacing:-.01em;
+  color:var(--acento);text-transform:uppercase;text-wrap:balance;max-width:88cqmin}
+#portada .bajada{font-size:4.6cqmin;font-weight:600;max-width:34ch;text-wrap:balance}
+
+/* ── REGISTRO + TECLADO (mismo de EXACTO) ────────────────────────────── */
+#registro{justify-content:flex-start;gap:2.6cqmin}
+#registro h2{font-size:9cqmin;font-weight:900;color:var(--morado);line-height:1;text-transform:uppercase}
+.campos{display:grid;gap:2cqmin;width:100%}
+.campo{border:.5cqmin solid var(--hueso);border-radius:2cqmin;padding:2cqmin 3cqmin;text-align:left;background:#fff;color:var(--tinta)}
+.campo.activo{border-color:var(--morado);box-shadow:0 0 0 .8cqmin rgba(75,31,96,.16)}
+.campo label{display:block;font-size:2.6cqmin;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-suave)}
+.campo .valor .prefijo{color:var(--tinta-suave);font-weight:600;margin-right:.35em}
+.campo .valor{font-size:7cqmin;font-weight:600;min-height:1.3em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.campo.activo .valor::after{content:"";display:inline-block;width:.08em;height:1em;background:var(--morado);
+  vertical-align:-.12em;margin-left:.04em;animation:cursor 1s steps(1) infinite}
+@keyframes cursor{50%{opacity:0}}
+.tyc{display:flex;align-items:center;gap:2.6cqmin;text-align:left;font-size:3cqmin;font-weight:600;width:100%;
+  padding:2cqmin 3cqmin;background:rgba(245,238,224,.86);border-radius:2cqmin}
+.check{flex:0 0 auto;width:8.4cqmin;height:8.4cqmin;border:.6cqmin solid var(--morado);border-radius:1.4cqmin;position:relative;background:#fff}
+.check.on{background:var(--morado)}
+/* La palomita va dibujada: Nexa Slab no trae el glifo ✓. */
+.check.on::after{content:"";position:absolute;left:2.4cqmin;top:.8cqmin;width:2.2cqmin;height:4.2cqmin;
+  border:solid var(--crema);border-width:0 .9cqmin .9cqmin 0;transform:rotate(45deg)}
+.zona-teclado{margin-top:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:2.4cqmin}
+.teclado{display:grid;gap:1.4cqmin;width:100%}
+.fila{display:flex;gap:1.2cqmin;justify-content:center}
+.tecla{flex:1 1 0;min-width:0;min-height:11.5cqmin;background:#fff;color:var(--tinta);border:.35cqmin solid var(--hueso);
+  border-radius:1.6cqmin;font-size:5.4cqmin;font-weight:600;box-shadow:0 .7cqmin 0 var(--hueso)}
+.tecla:active{background:var(--hueso);transform:translateY(.5cqmin);box-shadow:none}
+.tecla.ancha{flex:4 1 0;font-size:3.4cqmin;letter-spacing:.1em}
+.tecla.accion{flex:2.4 1 0;font-size:3.2cqmin;letter-spacing:.06em}
+.teclado.num{width:72cqmin}
+.teclado.num .tecla{min-height:13cqmin;font-size:7cqmin}
+.teclado.num .tecla.accion{flex:1 1 0;font-size:3.2cqmin}
+.error{color:var(--rojo);font-weight:700;min-height:1.4em;font-size:3.6cqmin}
+.acciones{display:flex;gap:3cqmin;align-items:center;width:100%}
+.acciones .btn{flex:1;width:auto;font-size:5.6cqmin}
+
+
+/* ── HORIZONTAL: el MISMO tótem centrado en 9:16 ─────────────────────── */
+html.horizontal body{width:min(100vw, calc(100vh * 9 / 16));height:100vh;margin:0 auto;
+  box-shadow:0 0 0 100vmax var(--tinta)}
+
+/* El título ocupaba tres líneas y dejaba un hueco entre él y las tarjetas. */
+#portada h1{font-size:9.5cqmin;max-width:20ch}
+
+/* ── LOS TRES JUEGOS ─────────────────────────────────────────────────── */
+.juegos{display:flex;flex-direction:column;gap:2.4cqmin;width:100%}
+.juego{display:flex;align-items:center;gap:3cqmin;width:100%;text-align:left;
+  background:var(--crema);color:var(--tinta);border-radius:3cqmin;padding:2.8cqmin;
+  box-shadow:0 1.1cqmin 0 var(--tinta);text-decoration:none;
+  transition:transform .12s}
+.juego:active{transform:translateY(.8cqmin);box-shadow:0 .3cqmin 0 var(--tinta)}
+.juego .ficha{flex:0 0 auto;width:14cqmin;height:14cqmin;border-radius:2.4cqmin;
+  display:grid;place-items:center;font-size:7cqmin;background:var(--morado)}
+.juego:nth-child(2) .ficha{background:var(--oro)}
+.juego:nth-child(3) .ficha{background:var(--coral)}
+.juego:nth-child(4) .ficha{background:var(--verde)}
+.juego h2{font-size:4.8cqmin;font-weight:900;line-height:1.05;text-transform:uppercase;letter-spacing:-.01em}
+.juego p{font-size:3.4cqmin;font-weight:600;color:var(--tinta-suave);margin-top:.6cqmin}
+.juego .flecha{margin-left:auto;font-size:6cqmin;font-weight:900;color:var(--morado);opacity:.55}
+</style>
+</head>
+<body>
+<div class="escena" id="escena"></div>
+<div class="badge-prueba" id="badgePrueba" hidden>MODO PRUEBA</div>
+
+<section id="portada" class="pantalla">
+  <div class="bloque">
+    <p class="eyebrow" id="pEvento">OAKBERRY</p>
+    <h1>¿Cuál quieres jugar?</h1>
+  </div>
+  <div class="juegos">
+    <a class="juego" id="jLoro" href="#">
+      <span class="ficha">🦜</span>
+      <span><h2>El vuelo del loro</h2><p>Salta palmeras: mientras más lejos, mejor</p></span>
+      <span class="flecha">→</span>
+    </a>
+    <a class="juego" id="jContador" href="#">
+      <span class="ficha">🎯</span>
+      <span><h2>Detén el contador</h2><p>Párala en el número exacto y sube de premio</p></span>
+      <span class="flecha">→</span>
+    </a>
+  </div>
+  <p class="note">Mientras más avances, mejor el premio. Hasta agotar existencias.</p>
+</section>
+
+<script>
+"use strict";
+const QS = new URLSearchParams(location.search);
+const EVENTO = (QS.get("evento") || "rd").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60) || "rd";
+const $ = id => document.getElementById(id);
+
+// Formato: vertical (base) u horizontal, igual que los juegos
+const ROT = ({ "90": "rot90", "270": "rot270", "-90": "rot270" })[QS.get("rotar") || ""];
+function orientar() {
+  const h = document.documentElement;
+  if (ROT) h.classList.add(ROT);
+  const f = QS.get("vertical");
+  const vertical = f === "1" || !!ROT || (f !== "0" && innerHeight >= innerWidth);
+  h.classList.toggle("vertical", vertical);
+  h.classList.toggle("horizontal", !vertical);
+}
+orientar();
+addEventListener("resize", orientar);
+
+if (EVENTO.includes("prueba")) $("badgePrueba").hidden = false;
+
+// El evento (y el país, si viene) viajan a los tres juegos.
+const extra = ["evento=" + encodeURIComponent(EVENTO)];
+["pais", "rotar", "vertical"].forEach(k => { if (QS.get(k)) extra.push(k + "=" + encodeURIComponent(QS.get(k))); });
+const cola = "?" + extra.join("&");
+// Solo quedan el corredor y el contador. /reto y /maquina siguen vivos por URL
+// directa, con los mismos premios y cupos, pero fuera de esta pantalla.
+$("jLoro").href = "/loro" + cola;
+// El contador ahora corre sobre nuestro sistema: mismos premios, mismos cupos
+// y mismo centro de mando que los otros tres. (/exacto sigue vivo aparte, con
+// su propia lista de premios, para la apertura.)
+$("jContador").href = "/contador" + cola;
+
+document.body.style.setProperty("--fondo", "#F5EEE0");
+document.body.style.setProperty("--texto", "#21152A");
+document.body.style.setProperty("--acento", "#4B1F60");
+document.body.style.setProperty("--panel", "rgba(245,238,224,.86)");
+$("escena").style.backgroundImage = "url('/exacto-assets/escena-rio.jpg')";
+$("escena").style.backgroundPosition = "0% center";
+
+// El título del evento lo pone el mismo centro de mando que los premios.
+fetch("/juego-api/juego/slot/config?evento=" + encodeURIComponent(EVENTO))
+  .then(r => r.json())
+  .then(r => { if (r && r.ok && r.titulo) $("pEvento").textContent = r.titulo; })
+  .catch(() => {});
+</script>
+</body>
+</html>

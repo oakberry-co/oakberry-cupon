@@ -642,7 +642,8 @@ function setSello(val) {
 
 // El gate de sello Loopy solo aplica a cupones de adquisición; se oculta para RET/BDY.
 function toggleSelloGate(codigo) {
-  const esReact = /^(RET|BDY)/.test(codigo || "");
+  // Los premios de los juegos (RD-XXXXXX → 8 chars) tampoco llevan sello Loopy.
+  const esReact = /^(RET|BDY)/.test(codigo || "") || /^RD[A-Z0-9]{6}$/.test(codigo || "");
   const g = document.getElementById("selloGate");
   if (g) g.style.display = esReact ? "none" : "";
 }
@@ -726,6 +727,19 @@ async function cargarTodo() {
   } catch(e) { return false; }
 }
 
+// Tiendas fuera de Colombia: el CSV maestro de /tiendas es solo CO. Sin esto la
+// caja de Plaza Andalucía no tenía cómo escoger su tienda (17-oct-2026). El
+// nombre es el mismo de la tabla `tiendas` de Postgres (pais = DO).
+const TIENDAS_EXTRA = { "Santo Domingo": ["Plaza Andalucia"] };
+
+function agregarTiendasExtra() {
+  const sel = document.getElementById("ciudad");
+  Object.entries(TIENDAS_EXTRA).forEach(([c, ts]) => {
+    _cache[JSON.stringify({accion:"obtenerTiendas", ciudad: c})] = { tiendas: ts };
+    if (![...sel.options].some(o => o.value === c)) sel.add(new Option(c, c));
+  });
+}
+
 async function cargarCiudades() {
   try {
     const data = await fetchGETCached({ accion: "obtenerCiudades" });
@@ -760,7 +774,7 @@ async function validar() {
   if (!_loopy) return mostrarResultado(false, "Indica si el cliente tiene tarjeta Loopy", []);
   const esReactivacion = /^(RET|BDY)/.test(codigo);
   // El gate de sello Loopy aplica SOLO a cupones de adquisición (no a RET/BDY de reactivación).
-  if (!esReactivacion && !_sello) return mostrarResultado(false, "⚠️ Marca la casilla 'Confirmo: tarjeta Loopy + sello' para poder validar", []);
+  if (!esReactivacion && !/^RD[A-Z0-9]{6}$/.test(codigo) && !_sello) return mostrarResultado(false, "⚠️ Marca la casilla 'Confirmo: tarjeta Loopy + sello' para poder validar", []);
 
   const perfilCliente = (_nuevo === "SI" ? "Cliente nuevo" : "Ya nos conocía")
                       + " · "
@@ -853,13 +867,49 @@ async function validar() {
     return;
   }
 
+  // ── Routing premios de los juegos de evento (17-oct-2026) ──
+  //    La pantalla del ganador (loro, tragamonedas, trivia, contador) muestra
+  //    RD-XXXXXX; el input se come el guion → 8 caracteres que empiezan por RD.
+  //    No choca con nadie: adquisición es de 5 y los prefijos de eventos de 7.
+  //    El backend lo cruza con la partida, exige 15 días desde que se ganó y
+  //    lo deja canjeado (un solo uso).
+  const esPremioJuego = codigo.length === 8 && /^RD/.test(codigo);
+  if (esPremioJuego) {
+    try {
+      const res = await fetch(
+        `${REACT_API}/juego/premio/validar?codigo=${encodeURIComponent(codigo)}`
+        + `&tienda=${encodeURIComponent(tienda)}&ciudad=${encodeURIComponent(ciudad)}`
+      ).then(r => r.json());
+      if (res.ok) {
+        document.getElementById("codigo").value = "";
+        const lineas = res.mensaje.split("\n");
+        mostrarResultado(true, lineas[0], lineas.slice(1));
+      } else {
+        mostrarError(res.mensaje || "no existe");
+      }
+    } catch(e) {
+      mostrarError("Error de conexión, intenta de nuevo");
+    } finally {
+      btn.classList.remove("loading");
+      btn.disabled = false;
+    }
+    return;
+  }
+
   // ── Routing Eventos con cupo (apertura Santo Domingo) ──
-  //    RDA = invitación de apertura (2 bowls) · RDP = preapertura (1 bowl 9oz).
+  //    RDA = invitación de apertura (2 bowls) · RDP = preapertura (1 bowl 9oz)
+  //    · RDF = friends & family (15% sobre la orden).
   //    Son auto-inscripciones desde oakberry-eventos.com/santodomingo. El
   //    backend valida ventana de fechas, tienda y país, y le dice al cajero
   //    QUÉ ENTREGAR — sin nombrar ningún POS: en RD el punto de venta lo opera
   //    el franquiciado con su propio sistema.
-  const esEvento = codigo.length === 7 && /^(RDA|RDP)/.test(codigo);
+  //    Todo prefijo nuevo de `eventos` tiene que entrar ACÁ: RDF se emitió
+  //    desde el 10-sep sin esta línea, y en caja habría caído a la ruta de 5
+  //    caracteres → "Formato de código inválido" con un cupón bueno en la mano.
+  //    RDX = premio del juego EXACTO del tótem de la apertura (15 días).
+  //    PUR = Purple Day Colombia (27-sep-2026): 1 bowl 7oz, cualquier tienda CO.
+  //    EVT = evento del centro de control · REG = regalo por WhatsApp (15% toda la orden, oct-2026).
+  const esEvento = codigo.length === 7 && /^(RDA|RDP|RDF|RDX|PUR|EVT|REG)/.test(codigo);
   if (esEvento) {
     try {
       const res = await fetchGET({ accion: "eventoCanjear", codigo, tienda, ciudad });
@@ -1250,6 +1300,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   } else {
     await cargarCiudades();
   }
+  agregarTiendasExtra();
 });
 
 document.getElementById("codigo").addEventListener("input", function() {

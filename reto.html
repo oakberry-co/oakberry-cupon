@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es" class="vertical">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FBF6E9">
+<title>¿A qué hora comes OAKBERRY?</title>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-regular.woff2" as="font" type="font/woff2" crossorigin>
+<!--
+  ¿A QUÉ HORA COMES OAKBERRY? — juego de eventos del día a día.
+
+  Las mismas 6 preguntas del concurso interno (/franquiciados). Sirve para
+  capturar nombre + celular y contar la lógica nueva (OAKBERRY no es postre, es
+  comida, a cualquier hora). El premio sube con los aciertos y con el tiempo,
+  y sale de la escalera del evento (hasta agotar existencias); un intento por
+  celular. El lead se graba al
+  registrarse, antes de jugar.
+  El equipo ve quién va ganando en /reto?evento=…#tablero. Backend: /juego/evento/* en el Cloud Run de CRM
+  (crm/api/main.py) → crm.juego_evento_participantes / _resultados.
+
+  Sistema visual de EXACTO (/exacto): Nexa Slab, escenas del kit, 9:16 en cqmin.
+  Parámetros: ?evento=nombre-del-evento (con "prueba" en el nombre = prueba)
+              ?pais=do (celular dominicano; por defecto Colombia)
+              ?rotar=90|270 · ?vertical=1|0
+  Si cambian las preguntas, cambia también JUEGO_CLAVE en el backend.
+-->
+<style>
+/* Nexa Slab Book/Bold/Black COMPLETAS (las "FREE" de Drive son demos y dibujan
+   : % - · ¡ ¿ como un sello). No traen ← ⌫ ✓ ✕: esos no se usan en la página. */
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-regular.woff2') format('woff2');font-weight:400;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-bold.woff2') format('woff2');font-weight:600 700;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-black.woff2') format('woff2');font-weight:800 900;font-display:block}
+:root{
+  --crema:#FBF6E9; --crema-cielo:#F5EEE0; --hueso:#EAE1CC; --tinta:#21152A; --tinta-suave:#5C4A66;
+  --morado:#4B1F60; --lila:#B79CC8; --oro:#F4B223; --coral:#E04850; --rojo:#B3261E; --verde:#2F6B3A;
+  --fondo:var(--crema); --texto:var(--tinta);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+body{container-type:size}
+html{background:var(--tinta)}
+body{font-family:'Nexa Slab',Rockwell,'Roboto Slab',Georgia,serif;background:var(--fondo);
+  color:var(--texto);font-size:3.2cqmin;line-height:1.35;transition:background .6s,color .6s;position:relative}
+[hidden]{display:none!important}
+button{font-family:inherit;border:none;cursor:pointer;color:inherit;background:none}
+
+html.rot90 body,html.rot270 body{position:fixed;top:0;left:0;width:100vh;height:100vw;transform-origin:top left}
+html.rot90 body{transform:rotate(90deg) translateY(-100%)}
+html.rot270 body{transform:rotate(-90deg) translateX(-100%)}
+
+.escena{position:absolute;inset:0;z-index:0;background-color:var(--fondo);background-size:cover;
+  background-position:center;transition:background-color .6s}
+.pantalla{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;gap:2.4cqmin;padding:6cqmin 6cqmin 7cqmin;text-align:center}
+.bloque{display:flex;flex-direction:column;align-items:center;gap:2cqmin;width:100%}
+.panel{background:var(--panel);border-radius:3cqmin;padding:3cqmin 4cqmin}
+.eyebrow{font-size:2.8cqmin;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
+
+.btn{background:var(--boton,var(--morado));color:var(--boton-texto,var(--crema));font-weight:800;letter-spacing:.05em;
+  text-transform:uppercase;font-size:6cqmin;padding:3.4cqmin 4cqmin;border-radius:999px;
+  box-shadow:0 1.1cqmin 0 var(--tinta);width:88cqmin;line-height:1.15;white-space:nowrap}
+.btn:active{transform:translateY(.8cqmin);box-shadow:0 .3cqmin 0 var(--tinta)}
+.btn:disabled{opacity:.45;animation:none}
+.btn-sec{border:.4cqmin solid currentColor;border-radius:999px;font-weight:700;font-size:3.8cqmin;
+  padding:3cqmin 5cqmin;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.latido{animation:latido 1.8s ease-in-out infinite}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.badge-prueba{position:absolute;top:1.6cqmin;right:1.6cqmin;background:var(--rojo);color:#fff;font-weight:800;
+  padding:.8cqmin 2cqmin;border-radius:1cqmin;letter-spacing:.1em;font-size:2.4cqmin;z-index:50}
+.auto{font-size:2.8cqmin;opacity:.75;min-height:1.4em}
+
+/* ── PORTADA ─────────────────────────────────────────────────────────── */
+#portada h1{font-size:12.5cqmin;font-weight:900;line-height:.98;letter-spacing:-.01em;
+  color:var(--acento);text-transform:uppercase;text-wrap:balance;max-width:88cqmin}
+#portada .bajada{font-size:4.6cqmin;font-weight:600;max-width:34ch;text-wrap:balance}
+
+/* ── REGISTRO + TECLADO (mismo de EXACTO) ────────────────────────────── */
+#registro{justify-content:flex-start;gap:2.6cqmin}
+#registro h2{font-size:9cqmin;font-weight:900;color:var(--morado);line-height:1;text-transform:uppercase}
+.campos{display:grid;gap:2cqmin;width:100%}
+.campo{border:.5cqmin solid var(--hueso);border-radius:2cqmin;padding:2cqmin 3cqmin;text-align:left;background:#fff;color:var(--tinta)}
+.campo.activo{border-color:var(--morado);box-shadow:0 0 0 .8cqmin rgba(75,31,96,.16)}
+.campo label{display:block;font-size:2.6cqmin;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-suave)}
+.campo .valor .prefijo{color:var(--tinta-suave);font-weight:600;margin-right:.35em}
+.campo .valor{font-size:7cqmin;font-weight:600;min-height:1.3em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.campo.activo .valor::after{content:"";display:inline-block;width:.08em;height:1em;background:var(--morado);
+  vertical-align:-.12em;margin-left:.04em;animation:cursor 1s steps(1) infinite}
+@keyframes cursor{50%{opacity:0}}
+.tyc{display:flex;align-items:center;gap:2.6cqmin;text-align:left;font-size:3cqmin;font-weight:600;width:100%;
+  padding:2cqmin 3cqmin;background:rgba(245,238,224,.86);border-radius:2cqmin}
+.check{flex:0 0 auto;width:8.4cqmin;height:8.4cqmin;border:.6cqmin solid var(--morado);border-radius:1.4cqmin;position:relative;background:#fff}
+.check.on{background:var(--morado)}
+/* La palomita va dibujada: Nexa Slab no trae el glifo ✓. */
+.check.on::after{content:"";position:absolute;left:2.4cqmin;top:.8cqmin;width:2.2cqmin;height:4.2cqmin;
+  border:solid var(--crema);border-width:0 .9cqmin .9cqmin 0;transform:rotate(45deg)}
+.zona-teclado{margin-top:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:2.4cqmin}
+.teclado{display:grid;gap:1.4cqmin;width:100%}
+.fila{display:flex;gap:1.2cqmin;justify-content:center}
+.tecla{flex:1 1 0;min-width:0;min-height:11.5cqmin;background:#fff;color:var(--tinta);border:.35cqmin solid var(--hueso);
+  border-radius:1.6cqmin;font-size:5.4cqmin;font-weight:600;box-shadow:0 .7cqmin 0 var(--hueso)}
+.tecla:active{background:var(--hueso);transform:translateY(.5cqmin);box-shadow:none}
+.tecla.ancha{flex:4 1 0;font-size:3.4cqmin;letter-spacing:.1em}
+.tecla.accion{flex:2.4 1 0;font-size:3.2cqmin;letter-spacing:.06em}
+.teclado.num{width:72cqmin}
+.teclado.num .tecla{min-height:13cqmin;font-size:7cqmin}
+.teclado.num .tecla.accion{flex:1 1 0;font-size:3.2cqmin}
+.error{color:var(--rojo);font-weight:700;min-height:1.4em;font-size:3.6cqmin}
+/* ── Pantalla del QR ──────────────────────────────────────────────────
+   El QR va dibujado (SVG), no en imagen: se ve nítido lo mismo en un
+   celular que en el tótem de 1080 px, y no depende del wifi del evento. */
+.qr-caja{background:#fff;border-radius:3cqmin;padding:3.4cqmin;width:64cqmin;max-width:100%;
+  box-shadow:0 1.2cqmin 0 rgba(33,21,42,.18);display:grid;place-items:center}
+.qr-caja .qr{width:100%;height:auto;display:block}
+.qr-pie{font-size:4cqmin;font-weight:600;max-width:26ch;text-wrap:balance}
+/* Apilado, no lado a lado: "Ya me registré" no cabe en una línea junto a
+   otro botón, y el texto de un botón nunca debe partirse en dos. */
+.acciones{display:flex;flex-direction:column;gap:2cqmin;align-items:center;width:100%}
+.acciones .btn{width:88cqmin;max-width:100%}
+
+/* ── Selector de indicativo ─────────────────────────────────────────── */
+.prefijo{color:var(--morado);font-weight:800;margin-right:.35em;padding:.1em .3em;
+  border-radius:.9cqmin;background:rgba(75,31,96,.1);cursor:pointer}
+.paises{position:absolute;left:6cqmin;right:6cqmin;top:34cqmin;z-index:20;
+  background:#fff;border:.5cqmin solid var(--hueso);border-radius:2.4cqmin;padding:2cqmin;
+  display:grid;grid-template-columns:1fr 1fr;gap:1.2cqmin;
+  box-shadow:0 2cqmin 6cqmin rgba(33,21,42,.28);max-height:60cqmin;overflow-y:auto}
+.pais{display:flex;justify-content:space-between;align-items:center;gap:1.4cqmin;
+  padding:2.2cqmin 2.4cqmin;border-radius:1.6cqmin;background:var(--gray-light,#f7f4ff);
+  font-family:inherit;font-size:3cqmin;font-weight:700;color:var(--tinta);text-align:left}
+.pais b{color:var(--morado)}
+.pais.on{background:var(--morado);color:var(--crema)}
+.pais.on b{color:var(--oro)}
+
+/* ── PREGUNTA ────────────────────────────────────────────────────────── */
+.progreso{display:flex;gap:1.8cqmin;justify-content:center}
+.progreso i{width:3cqmin;height:3cqmin;border-radius:50%;border:.5cqmin solid currentColor;display:block}
+.progreso i.ok{background:currentColor}
+.qtexto{font-size:7cqmin;font-weight:900;line-height:1.12;text-wrap:balance}
+.tiempo{width:88cqmin;height:1.8cqmin;border-radius:999px;background:var(--panel);overflow:hidden}
+.tiempo i{display:block;height:100%;width:100%;background:var(--acento);border-radius:999px;transform-origin:left}
+.tiempo.poco i{background:var(--coral)}
+.opciones{display:flex;flex-direction:column;gap:3cqmin;width:100%;align-items:center}
+/* Las opciones van un poco más anchas que los botones de acción y con menos
+   relleno lateral: "Todo el día: desayuno, almuerzo o cena" es larga y, como
+   todas se achican juntas hasta caber en una línea, cada cqmin cuenta. */
+.opcion{width:92cqmin;background:#fff;color:var(--tinta);border-radius:999px;font-weight:700;
+  font-size:5cqmin;padding:3.6cqmin 2.6cqmin;box-shadow:0 1.1cqmin 0 var(--tinta);line-height:1.15;
+  white-space:nowrap;overflow:hidden}
+.opcion:active{transform:translateY(.8cqmin);box-shadow:0 .3cqmin 0 var(--tinta)}
+.opcion.bien{background:var(--verde);color:var(--crema)}
+.opcion.mal{background:var(--rojo);color:var(--crema)}
+.opciones.bloqueadas .opcion:not(.bien):not(.mal){opacity:.5}
+
+/* ── RESPUESTA ───────────────────────────────────────────────────────── */
+#respuesta h2{margin-top:1cqmin;font-size:15cqmin;font-weight:900;line-height:.95;color:var(--acento);text-transform:uppercase}
+.era{font-size:4.2cqmin;font-weight:600;max-width:32ch}
+.era b{font-weight:800}
+.dato{font-size:6cqmin;font-weight:700;line-height:1.22;max-width:88cqmin;text-wrap:balance}
+
+/* ── FINAL ───────────────────────────────────────────────────────────── */
+/* A 16cqmin "QUEDASTE" tocaba los bordes; con #10 o más parte en dos líneas. */
+.cuando{font-size:3.6cqmin;font-weight:700;color:var(--acento);letter-spacing:.06em;min-height:1.2em}
+/* Código del premio: se enseña en caja. No valida nada — está para que dos
+   personas no puedan reclamar con la misma captura. Va grande y monoespaciado
+   porque hay que leerlo y a veces dictarlo. */
+.codigo-caja{background:rgba(251,246,233,.94);border:.5cqmin dashed var(--morado);
+  border-radius:2.4cqmin;padding:2cqmin 4cqmin;display:flex;flex-direction:column;
+  align-items:center;gap:.4cqmin;max-width:88cqmin}
+.codigo-caja .rot{font-size:2.6cqmin;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--tinta-suave)}
+.codigo-caja .cod{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:7.4cqmin;font-weight:800;letter-spacing:.12em;color:var(--morado);line-height:1.05}
+.codigo-caja .vence{font-size:2.7cqmin;font-weight:700;color:var(--rojo)}
+.premio-caja{background:var(--oro);color:var(--tinta);border-radius:3cqmin;padding:3cqmin 4cqmin;
+  font-size:6cqmin;font-weight:900;text-transform:uppercase;line-height:1.1;width:88cqmin;text-wrap:balance}
+#final .puesto{font-size:12.5cqmin;font-weight:900;line-height:.95;text-transform:uppercase;color:var(--acento);max-width:88cqmin;text-wrap:balance}
+#final .sub{font-size:4.6cqmin;font-weight:600;max-width:32ch;text-wrap:balance}
+.logica-mini{font-size:3.8cqmin;font-weight:700;text-wrap:balance}
+.logica-mini em{font-style:normal;color:var(--acento)}
+.confeti{position:absolute;top:-4%;width:2cqmin;height:3cqmin;pointer-events:none;animation:cae linear forwards;z-index:40}
+@keyframes cae{to{transform:translateY(var(--caida,1200px)) rotate(720deg)}}
+
+/* ── TABLERO (lo mira el equipo durante el evento) ───────────────────── */
+#tablero{justify-content:flex-start;gap:3cqmin}
+#tablero h2{font-size:10cqmin;font-weight:900;line-height:1;text-transform:uppercase;color:var(--acento)}
+#tablero .sub{font-size:4cqmin;font-weight:600}
+/* Top 5: el ganador y cuatro de respaldo por si no está al cierre. Con 10 filas
+   el botón se salía de pantalla; y aunque crezca, la lista nunca lo empuja. */
+.lista{display:flex;flex-direction:column;gap:1.6cqmin;width:100%;margin-top:1cqmin;flex:0 1 auto;min-height:0;overflow:hidden}
+.fila-tab{display:grid;grid-template-columns:9cqmin 1fr auto 15cqmin;gap:2cqmin;align-items:center;
+  padding:2.4cqmin 3cqmin;border-radius:2cqmin;background:rgba(251,246,233,.1);text-align:left;font-size:4cqmin}
+.fila-tab .pos{font-weight:900}
+.fila-tab .nom{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fila-tab .nom small{display:block;font-size:.72em;font-weight:600;opacity:.7}
+.fila-tab .ac{font-weight:600;opacity:.85}
+.fila-tab .tm{font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.fila-tab.primero{background:var(--oro);color:var(--tinta)}
+.fila-tab.primero .nom small{opacity:.8}
+.vacio{font-size:4.4cqmin;font-weight:600;opacity:.8;margin-top:6cqmin}
+#tablero .btn-sec{margin-top:auto}
+/* Recortado de escena-vaso.jpg; el fondo de la pantalla es el mismo #290533 de
+   la ilustración, así que el recorte no deja borde. Se encoge con el espacio. */
+.vaso-caja{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.vaso{height:100%;max-height:62cqmin;width:auto;object-fit:contain}
+
+/* ── SALIR ───────────────────────────────────────────────────────────── */
+.salir{position:absolute;top:1.6cqmin;left:1.6cqmin;z-index:60;
+  background:rgba(33,21,42,.5);color:var(--crema);border-radius:999px;
+  padding:1.4cqmin 3cqmin;font-family:inherit;font-size:2.6cqmin;font-weight:800;
+  letter-spacing:.12em;text-transform:uppercase;border:.3cqmin solid rgba(251,246,233,.3)}
+.salir:active{transform:scale(.96)}
+.salir.confirmar{background:var(--coral);color:#fff;border-color:transparent}
+
+/* ── HORIZONTAL (un computador): el MISMO tótem centrado en 9:16 ────── */
+html.horizontal body{width:min(100vw, calc(100vh * 9 / 16));height:100vh;margin:0 auto;
+  box-shadow:0 0 0 100vmax var(--tinta)}
+</style>
+</head>
+<body>
+<div class="escena" id="escena"></div>
+<button class="salir" id="btnSalir">Salir</button>
+<div class="badge-prueba" id="badgePrueba" hidden>MODO PRUEBA</div>
+
+<!-- ═══ PORTADA ═══ -->
+<section id="portada" class="pantalla">
+  <div class="bloque panel">
+    <p class="eyebrow">6 preguntas · 12 s · un intento</p>
+    <h1>¿A qué hora comes OAKBERRY?</h1>
+    <p class="bajada">Mientras más aciertes, mejor el premio. Hasta agotar existencias.</p>
+  </div>
+  <div class="bloque">
+    <button class="btn latido" id="btnJugar">Toca para jugar</button>
+  </div>
+</section>
+
+<!-- ═══ REGISTRO ═══ -->
+<section id="registro" class="pantalla" hidden>
+  <div class="bloque">
+    <h2>Regístrate para jugar</h2>
+    <p class="qr-pie">Escanea el código con la cámara de tu celular y deja tus datos.</p>
+  </div>
+  <div class="qr-caja"><svg class="qr" viewBox="0 0 37 37" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" role="img" aria-label="Codigo QR para registrarte"><rect width="37" height="37" fill="#fff"/><path d="M0 0h7v1h-7zM9 0h2v1h-2zM13 0h5v1h-5zM20 0h2v1h-2zM23 0h2v1h-2zM27 0h2v1h-2zM30 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM10 1h1v1h-1zM14 1h1v1h-1zM16 1h2v1h-2zM20 1h2v1h-2zM23 1h1v1h-1zM26 1h3v1h-3zM30 1h1v1h-1zM36 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h1v1h-1zM11 2h1v1h-1zM13 2h1v1h-1zM15 2h1v1h-1zM17 2h1v1h-1zM23 2h2v1h-2zM27 2h1v1h-1zM30 2h1v1h-1zM32 2h3v1h-3zM36 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h5v1h-5zM15 3h2v1h-2zM18 3h2v1h-2zM23 3h1v1h-1zM26 3h2v1h-2zM30 3h1v1h-1zM32 3h3v1h-3zM36 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM10 4h1v1h-1zM13 4h7v1h-7zM23 4h1v1h-1zM25 4h4v1h-4zM30 4h1v1h-1zM32 4h3v1h-3zM36 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM12 5h1v1h-1zM14 5h7v1h-7zM22 5h1v1h-1zM24 5h2v1h-2zM27 5h2v1h-2zM30 5h1v1h-1zM36 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h7v1h-7zM9 7h2v1h-2zM13 7h2v1h-2zM20 7h3v1h-3zM24 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h1v1h-1zM17 8h1v1h-1zM21 8h2v1h-2zM25 8h1v1h-1zM27 8h1v1h-1zM29 8h1v1h-1zM31 8h1v1h-1zM1 9h1v1h-1zM3 9h1v1h-1zM8 9h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM15 9h1v1h-1zM17 9h1v1h-1zM19 9h2v1h-2zM22 9h1v1h-1zM30 9h2v1h-2zM34 9h1v1h-1zM36 9h1v1h-1zM2 10h8v1h-8zM11 10h2v1h-2zM14 10h1v1h-1zM16 10h1v1h-1zM20 10h3v1h-3zM28 10h1v1h-1zM30 10h4v1h-4zM35 10h2v1h-2zM0 11h4v1h-4zM7 11h1v1h-1zM10 11h3v1h-3zM14 11h2v1h-2zM21 11h1v1h-1zM23 11h1v1h-1zM25 11h1v1h-1zM27 11h3v1h-3zM32 11h2v1h-2zM1 12h2v1h-2zM6 12h1v1h-1zM8 12h6v1h-6zM17 12h5v1h-5zM24 12h2v1h-2zM28 12h3v1h-3zM33 12h1v1h-1zM35 12h2v1h-2zM0 13h1v1h-1zM4 13h1v1h-1zM7 13h1v1h-1zM11 13h1v1h-1zM13 13h1v1h-1zM16 13h7v1h-7zM24 13h2v1h-2zM30 13h2v1h-2zM34 13h3v1h-3zM1 14h2v1h-2zM5 14h2v1h-2zM10 14h1v1h-1zM12 14h2v1h-2zM17 14h2v1h-2zM21 14h3v1h-3zM26 14h1v1h-1zM30 14h3v1h-3zM34 14h3v1h-3zM0 15h1v1h-1zM4 15h2v1h-2zM8 15h2v1h-2zM14 15h2v1h-2zM17 15h2v1h-2zM21 15h2v1h-2zM25 15h2v1h-2zM28 15h2v1h-2zM32 15h1v1h-1zM0 16h4v1h-4zM6 16h2v1h-2zM9 16h1v1h-1zM11 16h2v1h-2zM18 16h2v1h-2zM21 16h1v1h-1zM24 16h1v1h-1zM26 16h2v1h-2zM30 16h1v1h-1zM33 16h2v1h-2zM0 17h2v1h-2zM5 17h1v1h-1zM8 17h1v1h-1zM10 17h1v1h-1zM12 17h2v1h-2zM15 17h10v1h-10zM28 17h6v1h-6zM35 17h2v1h-2zM0 18h2v1h-2zM3 18h2v1h-2zM6 18h2v1h-2zM10 18h1v1h-1zM13 18h1v1h-1zM15 18h2v1h-2zM21 18h2v1h-2zM28 18h1v1h-1zM30 18h7v1h-7zM1 19h3v1h-3zM5 19h1v1h-1zM7 19h1v1h-1zM10 19h1v1h-1zM12 19h2v1h-2zM17 19h2v1h-2zM21 19h1v1h-1zM23 19h1v1h-1zM28 19h2v1h-2zM31 19h5v1h-5zM0 20h1v1h-1zM2 20h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM10 20h2v1h-2zM13 20h4v1h-4zM20 20h2v1h-2zM23 20h4v1h-4zM28 20h1v1h-1zM30 20h1v1h-1zM32 20h2v1h-2zM35 20h1v1h-1zM0 21h3v1h-3zM4 21h2v1h-2zM7 21h1v1h-1zM9 21h1v1h-1zM14 21h1v1h-1zM16 21h1v1h-1zM20 21h2v1h-2zM24 21h1v1h-1zM28 21h1v1h-1zM30 21h2v1h-2zM33 21h1v1h-1zM36 21h1v1h-1zM2 22h1v1h-1zM6 22h1v1h-1zM8 22h2v1h-2zM11 22h4v1h-4zM16 22h2v1h-2zM19 22h1v1h-1zM24 22h3v1h-3zM30 22h1v1h-1zM36 22h1v1h-1zM1 23h1v1h-1zM5 23h1v1h-1zM7 23h6v1h-6zM17 23h1v1h-1zM19 23h8v1h-8zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h1v1h-1zM4 24h1v1h-1zM6 24h1v1h-1zM8 24h3v1h-3zM12 24h3v1h-3zM20 24h2v1h-2zM23 24h3v1h-3zM28 24h1v1h-1zM30 24h1v1h-1zM33 24h1v1h-1zM35 24h2v1h-2zM2 25h2v1h-2zM5 25h1v1h-1zM12 25h2v1h-2zM15 25h3v1h-3zM20 25h1v1h-1zM22 25h1v1h-1zM24 25h2v1h-2zM30 25h1v1h-1zM34 25h3v1h-3zM0 26h1v1h-1zM2 26h2v1h-2zM5 26h2v1h-2zM9 26h1v1h-1zM11 26h2v1h-2zM14 26h1v1h-1zM18 26h2v1h-2zM21 26h1v1h-1zM23 26h4v1h-4zM29 26h5v1h-5zM36 26h1v1h-1zM1 27h1v1h-1zM4 27h2v1h-2zM9 27h1v1h-1zM15 27h1v1h-1zM17 27h2v1h-2zM20 27h4v1h-4zM25 27h5v1h-5zM31 27h1v1h-1zM35 27h1v1h-1zM0 28h8v1h-8zM9 28h1v1h-1zM11 28h1v1h-1zM13 28h1v1h-1zM16 28h2v1h-2zM20 28h2v1h-2zM23 28h2v1h-2zM27 28h6v1h-6zM34 28h1v1h-1zM8 29h1v1h-1zM11 29h2v1h-2zM21 29h3v1h-3zM25 29h4v1h-4zM32 29h2v1h-2zM35 29h2v1h-2zM0 30h7v1h-7zM9 30h1v1h-1zM13 30h1v1h-1zM16 30h1v1h-1zM18 30h1v1h-1zM21 30h2v1h-2zM25 30h4v1h-4zM30 30h1v1h-1zM32 30h2v1h-2zM36 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM15 31h5v1h-5zM21 31h1v1h-1zM23 31h1v1h-1zM28 31h1v1h-1zM32 31h4v1h-4zM0 32h1v1h-1zM2 32h3v1h-3zM6 32h1v1h-1zM9 32h2v1h-2zM13 32h2v1h-2zM16 32h3v1h-3zM21 32h2v1h-2zM25 32h1v1h-1zM28 32h6v1h-6zM35 32h1v1h-1zM0 33h1v1h-1zM2 33h3v1h-3zM6 33h1v1h-1zM8 33h1v1h-1zM10 33h1v1h-1zM15 33h5v1h-5zM22 33h1v1h-1zM25 33h5v1h-5zM31 33h3v1h-3zM35 33h1v1h-1zM0 34h1v1h-1zM2 34h3v1h-3zM6 34h1v1h-1zM9 34h2v1h-2zM12 34h2v1h-2zM15 34h1v1h-1zM19 34h4v1h-4zM24 34h1v1h-1zM27 34h2v1h-2zM31 34h2v1h-2zM34 34h3v1h-3zM0 35h1v1h-1zM6 35h1v1h-1zM10 35h2v1h-2zM14 35h1v1h-1zM16 35h1v1h-1zM21 35h5v1h-5zM27 35h3v1h-3zM31 35h1v1h-1zM33 35h1v1h-1zM0 36h7v1h-7zM8 36h1v1h-1zM10 36h6v1h-6zM17 36h2v1h-2zM20 36h2v1h-2zM25 36h1v1h-1zM28 36h2v1h-2zM33 36h1v1h-1zM35 36h2v1h-2z" fill="#21152A"/></svg></div>
+  <div class="zona-teclado">
+    <p class="error" id="errorReg"></p>
+    <div class="acciones">
+      <button class="btn latido" id="btnEmpezar">Ya me registré</button>
+      <button class="btn-sec" id="btnCancelar">Volver</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PREGUNTA ═══ -->
+<section id="pregunta" class="pantalla" hidden>
+  <div class="bloque panel">
+    <p class="eyebrow" id="qNum"></p>
+    <div class="progreso" id="qProgreso"></div>
+    <h2 class="qtexto" id="qTexto"></h2>
+  </div>
+  <div class="bloque">
+    <div class="tiempo" id="qTiempo"><i id="qBarra"></i></div>
+    <div class="opciones" id="qOpciones"></div>
+  </div>
+</section>
+
+<!-- ═══ RESPUESTA ═══ -->
+<section id="respuesta" class="pantalla" hidden>
+  <div class="bloque panel">
+    <p class="eyebrow" id="rNum"></p>
+    <h2 id="rTitulo"></h2>
+    <p class="era" id="rEra" hidden></p>
+  </div>
+  <p class="dato panel" id="rDato"></p>
+  <div class="bloque">
+    <button class="btn" id="btnSiguiente"></button>
+  </div>
+</section>
+
+<!-- ═══ FINAL ═══ -->
+<section id="final" class="pantalla" hidden>
+  <div class="bloque">
+    <p class="eyebrow" id="fResumen"></p>
+    <h2 class="puesto" id="fPuesto"></h2>
+    <div class="premio-caja" id="fPremio" hidden></div>
+    <p class="cuando" id="fCuando"></p>
+    <div class="codigo-caja" id="fCodigoCaja" hidden>
+      <span class="rot">Código del premio</span>
+      <span class="cod" id="fCodigo"></span>
+      <span class="vence" id="fVence"></span>
+    </div>
+    <p class="sub" id="fSub"></p>
+  </div>
+  <div class="vaso-caja"><img class="vaso" src="/reto-assets/vaso.jpg" alt=""></div>
+  <div class="bloque">
+    <p class="logica-mini">Esto no va después de tu comida. <em>Esto es tu comida.</em></p>
+    <button class="btn" id="btnOtro">Siguiente jugador</button>
+    <p class="auto" id="fAuto"></p>
+  </div>
+</section>
+
+<!-- ═══ TABLERO (solo con #tablero en la URL) ═══ -->
+<section id="tablero" class="pantalla" hidden>
+  <p class="eyebrow" id="tEvento"></p>
+  <h2>¿Quién va ganando?</h2>
+  <p class="sub" id="tSub"></p>
+  <div class="lista" id="tLista"></div>
+  <button class="btn-sec" id="btnIrJuego">Ir al juego</button>
+</section>
+
+<script>
+"use strict";
+const API = "/juego-api/juego/evento";
+const QS = new URLSearchParams(location.search);
+const EVENTO = (QS.get("evento") || "eventos").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60) || "eventos";
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// ─── Las 6 preguntas. `bien` = índice de la correcta (debe coincidir con
+//     JUEGO_CLAVE del backend). `dato` sirve igual si acertó o no: es lo que
+//     la persona se lleva del juego.
+const PREGUNTAS = [
+  { q: "¿A qué horas puedes pedir tu bowl OAKBERRY?",
+    op: ["Solo por la tarde", "Todo el día: desayuno, almuerzo o cena", "Solo después de almorzar"], bien: 1,
+    dato: "OAKBERRY no es solo de tarde: es tu desayuno, tu almuerzo o tu cena, cuando quieras." },
+  { q: "Si quieres que tu bowl te reemplace una comida completa, ¿cuál pides?",
+    op: ["9 oz", "12 oz", "22 oz para compartir"], bien: 1,
+    dato: "El 12 oz está pensado justo para eso: el mismo sabor, en el tamaño que sí llena." },
+  { q: "Verdadero o falso: puedes pedir tu OAKBERRY a domicilio para desayunar sin salir de casa.",
+    op: ["Verdadero", "Falso"], bien: 0,
+    dato: "Pídelo temprano y te llega mientras te alistas." },
+  { q: "¿De dónde viene el açaí de OAKBERRY?",
+    op: ["Del Amazonas", "Es un sabor artificial", "No se sabe"], bien: 0,
+    dato: "Directo del Amazonas, con proveedores seleccionados. Por eso sabe como sabe." },
+  { q: "¿Qué logra un bowl OAKBERRY de 12 oz en adelante?",
+    op: ["Que llene de verdad", "Solo un antojo pasajero", "Lo mismo que un postre cualquiera"], bien: 0,
+    dato: "Te sostiene. No es solo un capricho dulce: es una comida de verdad." },
+  { q: "Completa la frase: “Esto no va después de tu comida. Esto es tu ____.”",
+    op: ["postre", "antojo", "comida"], bien: 2,
+    dato: "En OAKBERRY el açaí no es solo postre: puede ser tu próxima comida." },
+];
+const SEGUNDOS = 12;
+// Corto a propósito: con las reglas completas ocupaba 4 líneas y en pantallas
+// cortas empujaba los botones fuera. Las reglas van en la portada.
+// Lo que la persona confirma al tocar "Ya me registré". Los datos personales
+// los guarda el formulario del QR, no nosotros: acá solo queda la partida.
+const AUTORIZACION = "Confirmo que dejé mis datos en el formulario de OAKBERRY y acepto las reglas del juego.";
+
+// ─── Formato: vertical (base) u horizontal, igual que EXACTO ─────────────
+const ROT = ({ "90": "rot90", "270": "rot270", "-90": "rot270" })[QS.get("rotar") || ""];
+function orientar() {
+  const h = document.documentElement;
+  if (ROT) h.classList.add(ROT);
+  const f = QS.get("vertical");
+  const vertical = f === "1" || !!ROT || (f !== "0" && innerHeight >= innerWidth);
+  h.classList.toggle("vertical", vertical);
+  h.classList.toggle("horizontal", !vertical);
+}
+orientar();
+addEventListener("resize", () => { orientar(); ajustarOpciones(); });
+
+// ─── API ──────────────────────────────────────────────────────────────
+// Mismo origen (rewrite de vercel.json), así que fetch normal. Las dos
+// escrituras son idempotentes (insertId = participacion_id): reintentar es seguro.
+async function api(ruta, cuerpo, intentos = 4) {
+  let err;
+  for (let i = 0; i < intentos; i++) {
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 9000);
+      const r = await fetch(API + ruta, { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...cuerpo, evento: EVENTO, pais: PAIS }), signal: ctl.signal });
+      clearTimeout(t);
+      return await r.json();
+    } catch (e) { err = e; await sleep(400 * (i + 1)); }
+  }
+  throw err;
+}
+
+// ─── Escenas y colores ────────────────────────────────────────────────
+const ASSETS = "/exacto-assets/";
+const CLARO = { fondo: "#F5EEE0", texto: "#21152A", acento: "#4B1F60", panel: "rgba(245,238,224,.86)", boton: "#4B1F60", botonTexto: "#FBF6E9" };
+// Sobre morado un botón morado desaparece: ahí va dorado con texto tinta.
+const OSCURO = { fondo: "#280532", texto: "#FBF6E9", acento: "#F4B223", panel: "rgba(40,5,50,.55)", boton: "#F4B223", botonTexto: "#21152A" };
+const ESCENAS = {
+  portada:  { img: "escena-rio.jpg",      pos: "0% center",  ...CLARO, boton: "#F4B223", botonTexto: "#21152A" },
+  registro: { img: "escena-palmas.jpg",   pos: "center",     ...CLARO },
+  p1:       { img: "escena-palmas.jpg",   pos: "center",     ...CLARO },
+  p2:       { img: "escena-edificio.jpg", pos: "80% bottom", ...CLARO },
+  // Al 60% asomaba la avioneta encima de la pregunta: se encuadra al borde derecho.
+  p3:       { img: "escena-rio.jpg",      pos: "100% bottom", ...CLARO },
+  p4:       { img: "escena-palmas.jpg",   pos: "30% center", ...CLARO },
+  p5:       { img: "escena-edificio.jpg", pos: "80% bottom", ...CLARO },
+  p6:       { img: "escena-oak.jpg",      pos: "75% center", ...OSCURO, fondo: "#501A64" },
+  // El vaso ES el mensaje final: "esto es tu comida".
+  final:    { img: null,                                 ...OSCURO, fondo: "#290533" },
+};
+Object.values(ESCENAS).forEach(e => { if (e.img) new Image().src = ASSETS + e.img; });
+new Image().src = "/reto-assets/vaso.jpg";
+function escena(nombre) {
+  const e = ESCENAS[nombre] || ESCENAS.portada;
+  const el = $("escena");
+  el.style.backgroundImage = e.img ? `url(${ASSETS}${e.img})` : "none";
+  el.style.backgroundPosition = e.pos || "center";
+  const s = document.body.style;
+  s.setProperty("--fondo", e.fondo); s.setProperty("--texto", e.texto);
+  s.setProperty("--acento", e.acento); s.setProperty("--panel", e.panel);
+  s.setProperty("--boton", e.boton); s.setProperty("--boton-texto", e.botonTexto);
+}
+
+// ─── Pantallas, inactividad ───────────────────────────────────────────
+const PANTALLAS = ["portada", "registro", "pregunta", "respuesta", "final", "tablero"];
+let timerInactividad = 0, timerAuto = 0;
+function ir(nombre) {
+  PANTALLAS.forEach(p => $(p).hidden = p !== nombre);
+  clearInterval(timerAuto);
+  if (nombre === "portada") { escena("portada"); pararReloj(); }
+  tocarActividad();
+}
+function tocarActividad() {
+  clearTimeout(timerInactividad);
+  // Si alguien se va a la mitad, la pantalla vuelve sola a la portada.
+  // El tablero no: lo deja abierto el equipo.
+  if ($("portada").hidden && $("tablero").hidden) timerInactividad = setTimeout(() => ir("portada"), 90000);
+}
+document.addEventListener("pointerdown", tocarActividad, { passive: true });
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("gesturestart", e => e.preventDefault());
+function cuentaAtras(el, segundos, alTerminar) {
+  clearInterval(timerAuto);
+  const fin = Date.now() + segundos * 1000;
+  const tick = () => {
+    const s = Math.ceil((fin - Date.now()) / 1000);
+    el.textContent = `Sigue solo en ${Math.max(0, s)} s`;
+    if (s <= 0) { clearInterval(timerAuto); alTerminar(); }
+  };
+  tick(); timerAuto = setInterval(tick, 1000);
+}
+if (EVENTO.includes("prueba")) $("badgePrueba").hidden = false;
+
+// ─── PORTADA ──────────────────────────────────────────────────────────
+$("btnJugar").addEventListener("click", () => {
+  const el = document.documentElement;
+  if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});
+  limpiarRegistro();
+  escena("registro");
+  ir("registro");
+});
+
+// ─── REGISTRO POR QR ──────────────────────────────────────────────────
+// Ya no pedimos nombre ni celular: la persona escanea el QR, deja sus datos
+// en el formulario y vuelve a confirmar con un botón. Con fila, escribir el
+// nombre y el celular en el teclado en pantalla era lo más lento de todo.
+//
+// OJO: sin celular no hay a quién aplicarle el "un intento por persona".
+// Ese control ahora es físico: la fila y el equipo.
+let PAIS = (QS.get("pais") || "do").toUpperCase();
+function limpiarRegistro() { $("errorReg").textContent = ""; }
+$("btnCancelar").addEventListener("click", () => ir("portada"));
+
+// ─── PARTIDA ──────────────────────────────────────────────────────────
+const J = { id: "", i: 0, respuestas: [], tiempos: [] };
+let ocupado = false;
+$("btnEmpezar").addEventListener("click", async () => {
+  if (ocupado) return;
+  ocupado = true; $("btnEmpezar").disabled = true; $("btnEmpezar").textContent = "Un momento…";
+  const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  try {
+    // El dato se guarda ANTES de jugar: es lo que el evento vino a buscar.
+    const r = await api("/registrar", { participacion_id: id, sin_datos: true, autorizacion: AUTORIZACION });
+    if (!r.ok) { $("errorReg").textContent = r.error || "No se pudo guardar. Intenta de nuevo."; return; }
+    Object.assign(J, { id, i: 0, respuestas: [], tiempos: [] });
+    mostrarPregunta();
+  } catch (e) {
+    $("errorReg").textContent = "Sin conexión. Intenta de nuevo en un momento.";
+  } finally {
+    ocupado = false; $("btnEmpezar").disabled = false; $("btnEmpezar").textContent = "¡A jugar!";
+  }
+});
+
+// ─── PREGUNTA ─────────────────────────────────────────────────────────
+let raf = 0, t0 = 0, respondida = false;
+function pintarProgreso(el, hechas) {
+  el.innerHTML = PREGUNTAS.map((_, k) => `<i class="${k < hechas ? "ok" : ""}"></i>`).join("");
+}
+function mostrarPregunta() {
+  const p = PREGUNTAS[J.i];
+  escena("p" + (J.i + 1));
+  $("qNum").textContent = `Pregunta ${J.i + 1} de ${PREGUNTAS.length}`;
+  pintarProgreso($("qProgreso"), J.i);
+  $("qTexto").textContent = p.q;
+  $("qOpciones").className = "opciones";
+  $("qOpciones").innerHTML = p.op.map((o, k) => `<button class="opcion" data-k="${k}"><span>${o}</span></button>`).join("");
+  respondida = false;
+  ir("pregunta");
+  ajustarOpciones();
+  t0 = performance.now();
+  $("qTiempo").classList.remove("poco");
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(reloj);
+}
+// Una opción larga ("Todo el día: desayuno, almuerzo o cena") no puede partirse
+// en dos líneas: se achica hasta caber.
+function ajustarOpciones() {
+  const bs = [...document.querySelectorAll("#pregunta:not([hidden]) .opcion")];
+  if (!bs.length) return;
+  bs.forEach(b => b.style.fontSize = "");
+  let px = parseFloat(getComputedStyle(bs[0]).fontSize);
+  const min = px * 0.6;
+  const noCabe = () => bs.some(b => b.scrollWidth > b.clientWidth);
+  while (noCabe() && px > min) { px *= 0.95; bs.forEach(b => b.style.fontSize = px + "px"); }
+}
+function reloj(now) {
+  const resta = SEGUNDOS * 1000 - (now - t0);
+  $("qBarra").style.transform = `scaleX(${Math.max(0, resta) / (SEGUNDOS * 1000)})`;
+  $("qTiempo").classList.toggle("poco", resta < 4000);
+  if (resta <= 0) { responder(-1, SEGUNDOS * 1000); return; }
+  raf = requestAnimationFrame(reloj);
+}
+function pararReloj() { cancelAnimationFrame(raf); }
+$("qOpciones").addEventListener("pointerdown", e => {
+  const b = e.target.closest(".opcion"); if (!b) return;
+  e.preventDefault();
+  // El tiempo que decide el premio: desde que apareció la pregunta hasta el
+  // instante del toque (timeStamp del evento, no cuando corre el handler).
+  responder(parseInt(b.dataset.k, 10), (e.timeStamp || performance.now()) - t0);
+});
+async function responder(k, ms) {
+  if (respondida) return;
+  respondida = true;
+  pararReloj();
+  const p = PREGUNTAS[J.i];
+  J.respuestas.push(k);
+  J.tiempos.push(Math.round(Math.min(Math.max(ms, 0), SEGUNDOS * 1000)));
+  const botones = [...document.querySelectorAll(".opcion")];
+  $("qOpciones").classList.add("bloqueadas");
+  if (botones[p.bien]) botones[p.bien].classList.add("bien");
+  if (k >= 0 && k !== p.bien && botones[k]) botones[k].classList.add("mal");
+  await sleep(750);
+  mostrarRespuesta(k);
+}
+
+// ─── RESPUESTA ────────────────────────────────────────────────────────
+function mostrarRespuesta(k) {
+  const p = PREGUNTAS[J.i];
+  const acerto = k === p.bien;
+  $("rNum").textContent = `Pregunta ${J.i + 1} de ${PREGUNTAS.length}`;
+  $("rTitulo").textContent = acerto ? "¡Así es!" : (k < 0 ? "¡Tiempo!" : "¡Casi!");
+  $("rEra").hidden = acerto;
+  $("rEra").innerHTML = acerto ? "" : `Era: <b>${p.op[p.bien]}</b>`;
+  $("rDato").textContent = p.dato;
+  $("btnSiguiente").textContent = J.i < PREGUNTAS.length - 1 ? "Siguiente" : "Ver mi resultado";
+  ir("respuesta");
+}
+$("btnSiguiente").addEventListener("click", () => {
+  if (J.i < PREGUNTAS.length - 1) { J.i += 1; mostrarPregunta(); }
+  else mostrarFinal();
+});
+
+// ─── FINAL ────────────────────────────────────────────────────────────
+const segundos = ms => (ms / 1000).toFixed(1).replace(".", ",") + " s";
+async function mostrarFinal() {
+  if (ocupado) return; ocupado = true;
+  const btn = $("btnSiguiente");
+  btn.disabled = true; btn.textContent = "Guardando…";
+  const aciertos = J.respuestas.filter((k, i) => k === PREGUNTAS[i].bien).length;
+  const local = J.tiempos.reduce((a, b) => a + b, 0);
+  let r = null;
+  try { r = await api("/terminar", { participacion_id: J.id, respuestas: J.respuestas, tiempos: J.tiempos }, 3); } catch (e) {}
+  ocupado = false; btn.disabled = false;
+
+  $("fResumen").textContent = `${aciertos} de ${PREGUNTAS.length} · ${segundos(r && r.ok ? r.elapsed_ms : local)}`;
+  if (r && r.ok && r.premio) {
+    // El premio se gana con aciertos y tiempo: quien no llega, se va sin nada.
+    $("fPuesto").textContent = aciertos === PREGUNTAS.length ? "¡Las 6!" : "¡Te llevas!";
+    $("fPremio").textContent = r.premio;
+    $("fPremio").hidden = false;
+    $("fCuando").textContent = r.cuando || "";
+    pintarCodigo(r, "fCodigoCaja", "fCodigo", "fVence");
+    $("fSub").textContent = "Tómale una foto a esta pantalla y reclama tu premio en caja.";
+  } else if (r && r.ok && r.puesto) {
+    $("fPuesto").textContent = `Quedaste #${r.puesto}`;
+    $("fPremio").hidden = true;
+    $("fCuando").textContent = "";
+    $("fSub").textContent = `De ${r.jugadores} jugadores.`;
+  } else {
+    // Sin respuesta del servidor no inventamos un puesto: se avisa al equipo.
+    $("fPremio").hidden = true;
+    $("fCuando").textContent = "";
+    $("fPuesto").textContent = "¡Listo!";
+    $("fSub").textContent = (r && r.error ? r.error + " " : "No pudimos guardar tu tiempo. ") + "Avísale a alguien del equipo.";
+  }
+  escena("final");
+  ir("final");
+  if (r && r.ok && r.puesto === 1) confeti();
+  cuentaAtras($("fAuto"), 15, () => ir("portada"));
+}
+function confeti() {
+  const colores = ["#F4B223", "#E04850", "#B79CC8", "#FBF6E9", "#7B4A93"];
+  document.body.style.setProperty("--caida", Math.round(document.body.clientHeight * 1.15) + "px");
+  for (let i = 0; i < 80; i++) {
+    const c = document.createElement("div");
+    c.className = "confeti";
+    c.style.left = Math.random() * 100 + "%";
+    c.style.background = colores[i % colores.length];
+    c.style.animationDuration = 2.4 + Math.random() * 2.6 + "s";
+    c.style.animationDelay = Math.random() * 0.8 + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 6500);
+  }
+}
+
+// ─── TABLERO ──────────────────────────────────────────────────────────
+// Pinta el código del premio. Viene del servidor: la pantalla no se lo puede
+// inventar, y es distinto en cada partida.
+function pintarCodigo(r, idCaja, idCod, idVence) {
+  const caja = $(idCaja);
+  if (!caja) return;
+  if (!r || !r.codigo) { caja.hidden = true; return; }
+  $(idCod).textContent = r.codigo;
+  $(idVence).textContent = r.vence ? "Válido hasta el " + r.vence : "";
+  caja.hidden = false;
+}
+function esc(t) { return String(t || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+async function cargarTablero() {
+  let r = null;
+  try { r = await fetch(`/juego-api/juego/evento/tablero?evento=${encodeURIComponent(EVENTO)}`).then(x => x.json()); } catch (e) {}
+  if (!r || !r.ok) { $("tSub").textContent = "Sin conexión. Reintentando…"; return; }
+  $("tSub").textContent = `${r.jugadores} ${r.jugadores === 1 ? "jugador" : "jugadores"} · el puesto lo da acertar más, en menos tiempo`;
+  $("tLista").innerHTML = r.tablero.length ? r.tablero.slice(0, 5).map(f => `
+    <div class="fila-tab ${f.puesto === 1 ? "primero" : ""}">
+      <span class="pos">#${f.puesto}</span>
+      <span class="nom">${esc(f.nombre) || "Jugador"}<small>${esc(f.hora || "")}</small></span>
+      <span class="ac">${f.score}/${f.total}</span>
+      <span class="tm">${f.ms == null ? "–" : segundos(f.ms)}</span>
+    </div>`).join("") : `<p class="vacio">Todavía no ha jugado nadie.</p>`;
+}
+function verTablero() {
+  escena("final");
+  $("tEvento").textContent = EVENTO;
+  ir("tablero");
+  cargarTablero();
+}
+setInterval(() => { if (!$("tablero").hidden) cargarTablero(); }, 15000);
+$("btnIrJuego").addEventListener("click", () => { history.replaceState(null, "", location.pathname + location.search); ir("portada"); });
+
+$("btnOtro").addEventListener("click", () => ir("portada"));
+
+function hayPartida() { return !$("pregunta").hidden || !$("respuesta").hidden; }
+
+// ─── Salir al menú de juegos ──────────────────────────────────────────
+// Con una partida en curso pide confirmación: en un tótem un roce no puede
+// borrar lo que la persona lleva jugado.
+const HUB = (() => {
+  const q = ["evento=" + encodeURIComponent(EVENTO)];
+  ["pais", "rotar", "vertical"].forEach(k => { if (QS.get(k)) q.push(k + "=" + encodeURIComponent(QS.get(k))); });
+  return "/juegos?" + q.join("&");
+})();
+let pidiendoSalir = 0;
+$("btnSalir").addEventListener("click", () => {
+  if (!hayPartida() || Date.now() - pidiendoSalir < 4000) { location.href = HUB; return; }
+  pidiendoSalir = Date.now();
+  $("btnSalir").textContent = "¿Salir?";
+  $("btnSalir").classList.add("confirmar");
+  setTimeout(() => {
+    if (Date.now() - pidiendoSalir >= 3900) {
+      $("btnSalir").textContent = "Salir";
+      $("btnSalir").classList.remove("confirmar");
+    }
+  }, 4000);
+});
+
+escena("portada");
+if ((location.hash || "").toLowerCase() === "#tablero") verTablero();
+// Cambiar solo el #tablero en la misma pestaña no recarga la página.
+addEventListener("hashchange", () => { if ((location.hash || "").toLowerCase() === "#tablero") verTablero(); });
+</script>
+</body>
+</html>

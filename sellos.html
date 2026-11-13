@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Suma tu sello · OAKBERRY</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F5EEE0">
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-regular.woff2" as="font" type="font/woff2" crossorigin>
+<!--
+  SELLOS POR RAPPI — el cliente suma su sello Loopy con la factura de su pedido.
+  Sistema visual = el de los juegos de eventos (SISTEMA-VISUAL.md): Nexa Slab, escenas
+  ilustradas de fondo, paneles crema translúcidos y botones píldora con sombra sólida.
+  A diferencia del tótem, esta página tiene formulario y SCROLL: se mide en rem, no en cqmin.
+  Backend: api.oakberry-cupones.com (actions/sellos_rappi.py).
+-->
+<style>
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-regular.woff2') format('woff2');font-weight:400;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-bold.woff2') format('woff2');font-weight:600 700;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-black.woff2') format('woff2');font-weight:800 900;font-display:block}
+/* Una columna móvil sobre una escena fija; cada paso cambia de escena (río → palmas → noche morada) */
+:root{color-scheme:light;
+  --crema:#FBF6E9;--crema-cielo:#F5EEE0;--hueso:#EAE1CC;--tinta:#21152A;--tinta-suave:#5C4A66;
+  --morado:#4B1F60;--lila:#B79CC8;--oro:#F4B223;--coral:#E04850;--rojo:#B3261E;--verde:#2F6B3A;
+  --fondo:var(--crema-cielo);--texto:var(--tinta);--acento:var(--morado);--panel:rgba(245,238,224,.88);
+  --boton:var(--oro);--boton-texto:var(--tinta);
+  --slab:'Nexa Slab',Rockwell,'Roboto Slab',Georgia,serif}
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{background:var(--tinta)}
+body{margin:0;min-height:100vh;font-family:var(--slab);font-size:17px;line-height:1.35;color:var(--texto);background:var(--fondo);transition:background .6s,color .6s}
+button{font-family:inherit;cursor:pointer}
+.escena{position:fixed;inset:0;z-index:0;background-color:var(--fondo);background-size:cover;background-position:center;transition:background-color .6s}
+.pagina{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px}
+.badge-prueba{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:10px;background:var(--rojo);color:#fff;font-weight:800;padding:4px 10px;border-radius:6px;letter-spacing:.1em;font-size:11px;z-index:50}
+.cabeza{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:6px}
+.cabeza img{height:20px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.85;margin:0}
+h1{font-size:clamp(34px,10.5vw,46px);font-weight:900;line-height:.98;letter-spacing:-.01em;text-transform:uppercase;color:var(--acento);margin:0;text-wrap:balance}
+.bajada{font-size:17px;font-weight:600;max-width:30ch;margin:0;text-wrap:balance}
+.pasos{display:flex;gap:6px;padding:0 8px}
+.pasos i{flex:1;height:6px;border-radius:9px;background:rgba(33,21,42,.15)}
+.pasos i.on{background:var(--acento)}
+.panel{background:var(--panel);border-radius:18px;padding:20px 18px;display:flex;flex-direction:column;gap:14px;backdrop-filter:blur(2px)}
+h2{font-size:30px;font-weight:900;line-height:1;text-transform:uppercase;color:var(--acento);margin:0;text-wrap:balance}
+.stack{display:flex;flex-direction:column;gap:14px}
+label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-suave)}
+label small{font-size:12px;letter-spacing:0;text-transform:none;font-weight:400}
+input[type=text],input[type=tel],input[type=email],input[type=date]{font-family:var(--slab);font-size:21px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--tinta);background:#fff;border:2.5px solid var(--hueso);border-radius:12px;padding:12px 14px;width:100%;min-width:0}
+input::placeholder{color:#B5A9BB;font-weight:400}
+input:focus{outline:none;border-color:var(--morado);box-shadow:0 0 0 4px rgba(75,31,96,.16)}
+.ayuda{font-size:14px;color:var(--tinta-suave);margin:0}
+.btn{display:block;width:100%;text-align:center;text-decoration:none;border:0;background:var(--boton);color:var(--boton-texto);font-weight:800;letter-spacing:.05em;text-transform:uppercase;font-size:20px;padding:16px 18px;border-radius:999px;box-shadow:0 5px 0 var(--tinta);line-height:1.15}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--tinta)}
+.btn:disabled{opacity:.5}
+.btn-morado{--boton:var(--morado);--boton-texto:var(--crema)}
+.btn-sec{white-space:nowrap;display:block;width:100%;text-align:center;background:transparent;color:var(--acento);border:2.5px solid currentColor;border-radius:999px;font-weight:700;font-size:15px;padding:13px 16px;text-transform:uppercase;letter-spacing:.08em}
+.btn-link{background:none;border:0;color:var(--acento);font-size:15px;font-weight:700;text-decoration:underline;padding:4px 0;align-self:center}
+.btn:focus-visible,.btn-sec:focus-visible,.btn-link:focus-visible,.chip:focus-visible,input:focus-visible{outline:3px solid var(--oro);outline-offset:3px}
+.latido{animation:latido 1.8s ease-in-out infinite}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+.o{display:flex;align-items:center;gap:10px;color:var(--tinta-suave);font-size:13px;text-transform:uppercase;letter-spacing:.14em}
+.o::before,.o::after{content:"";flex:1;height:2px;background:var(--hueso)}
+#lector{width:100%;border-radius:12px;overflow:hidden}
+.hola{background:#fff;border-radius:12px;padding:12px 14px;font-size:16px}
+.hola b{color:var(--morado)}
+/* casilla dibujada, igual a la de los juegos */
+.check{flex-direction:row;align-items:center;gap:12px;text-transform:none;letter-spacing:0;font-size:14px;font-weight:600;color:var(--tinta);cursor:pointer}
+.check input{appearance:none;-webkit-appearance:none;flex:0 0 auto;width:30px;height:30px;border:3px solid var(--morado);border-radius:7px;background:#fff;position:relative;margin:0;cursor:pointer}
+.check input:checked{background:var(--morado)}
+.check input:checked::after{content:"";position:absolute;left:8px;top:2px;width:8px;height:15px;border:solid var(--crema);border-width:0 4px 4px 0;transform:rotate(45deg)}
+.check a{color:var(--morado)}
+.msg{border-radius:14px;padding:13px 16px;font-weight:700;font-size:15px;text-align:center}
+.msg.ok{background:#E3F0E5;color:var(--verde)}
+.msg.warn{background:#FDF0CF;color:#6E4B00}
+.msg.err{background:#FBE1E2;color:var(--rojo)}
+/* Resultado: escena oscura con el loro */
+.loro{width:min(62%,260px);align-self:center;filter:drop-shadow(0 8px 0 rgba(0,0,0,.18));animation:vuela 2.6s ease-in-out infinite}
+@keyframes vuela{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+.sello-num{display:flex;align-items:baseline;justify-content:center;gap:10px}
+.sello-num b{font-size:64px;font-weight:900;color:var(--oro);line-height:1;font-variant-numeric:tabular-nums}
+.sello-num span{font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.12em}
+.prods{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.prods li{background:rgba(251,246,233,.14);border:1.5px solid rgba(251,246,233,.3);border-radius:999px;padding:4px 10px;font-size:13px}
+.nps{display:grid;grid-template-columns:repeat(11,1fr);gap:4px}
+.nps-ejes{display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:.1em;opacity:.8}
+.chips{display:flex;flex-direction:column;gap:8px}
+.chip{font-family:var(--slab);font-size:16px;font-weight:600;border:2px solid rgba(251,246,233,.35);background:rgba(251,246,233,.1);color:var(--crema);border-radius:12px;padding:12px 14px;text-align:left}
+.nps .chip{text-align:center;padding:10px 0;font-size:15px;font-variant-numeric:tabular-nums}
+.chip.on{background:var(--oro);color:var(--tinta);border-color:var(--oro)}
+.gracias{color:var(--oro);font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin:0;text-align:center}
+.oscuro .panel{background:var(--panel);color:var(--crema)}
+.oscuro .ayuda{color:var(--lila)}
+footer{font-size:12px;text-align:center;opacity:.85;padding:0 12px;color:var(--texto)}
+.demo{position:relative;z-index:5;font-family:var(--slab)}
+.demo summary{display:block;text-align:center;list-style:none;cursor:pointer;background:var(--tinta);color:var(--crema);border-radius:999px;padding:12px 14px;font-weight:800;font-size:13px;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 3px 0 rgba(0,0,0,.3)}
+.demo summary::-webkit-details-marker{display:none}
+.demo .lista{margin-top:8px;background:#fff;color:var(--tinta);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:2px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.demo .lista p{margin:8px 8px 2px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-suave)}
+.demo .lista button{background:none;border:0;text-align:left;padding:9px 10px;border-radius:8px;font-size:15px;color:var(--tinta)}
+.demo .lista button:hover,.demo .lista button:focus-visible{background:var(--crema-cielo)}
+@media (max-width:360px){.nps{grid-template-columns:repeat(6,1fr)}}
+/* Pantalla ancha: la columna se corre a la derecha para que el avión con la pancarta
+   (centro de escena-rio, ~32–64% del ancho) quede libre a la izquierda en vez de detrás del título. */
+@media (min-width:1000px) and (min-aspect-ratio:4/3){
+  .pagina{margin:0 5vw 0 auto}
+  .escena{background-position:center !important}
+}
+@media (prefers-reduced-motion:reduce){.latido,.loro{animation:none}}
+.pantalla-no .wallet{display:block}
+.listo{font-size:17px;text-align:center;margin:0}
+</style>
+</head>
+<body>
+<div class="escena" id="escena"></div>
+<div class="badge-prueba" id="prueba" hidden>MODO PRUEBA</div>
+<div class="pagina">
+  <details class="demo" id="demo" hidden><summary>Ver ventanas (demo)</summary><div class="lista" id="demoLista"></div></details>
+  <header class="cabeza">
+    <img src="/email-logo-purple.png" alt="OAKBERRY" id="logo">
+    <h1 id="titulo">Tu Rappi también suma sellos</h1>
+    <p class="bajada" id="bajada">Ten a mano la factura que venía en tu bolsa.</p>
+  </header>
+  <div class="pasos" id="barra" aria-hidden="true"><i id="p1" class="on"></i><i id="p2"></i><i id="p3"></i></div>
+
+  <!-- PASO 1: ¿tienes tarjeta? -->
+  <section class="panel" id="paso1">
+    <p class="eyebrow">Paso 1 de 3</p>
+    <h2>¿Tienes tarjeta OAKBERRY?</h2>
+    <p class="ayuda">Es la tarjeta de sellos que llevas en el celular. Con ella cada pedido te acerca a un bowl gratis.</p>
+    <button class="btn btn-morado" id="siTengo" type="button">Sí, ya la tengo</button>
+    <button class="btn" id="noTengo" type="button">No, quiero crearla</button>
+  </section>
+
+  <!-- NO TENGO: crear la tarjeta y volver -->
+  <section class="panel" id="crearTarjeta" hidden>
+    <p class="eyebrow">Antes de empezar</p>
+    <h2>Crea tu tarjeta OAKBERRY</h2>
+    <p class="ayuda">Es gratis y la guardas en tu celular. Cuando la tengas, vuelves aquí y sumas el sello de este pedido.</p>
+    <div id="formCrear" class="stack">
+      <label>Nombre y apellido<input id="cNombre" type="text" autocomplete="name" placeholder="Tu nombre y apellido"></label>
+      <label>Correo<input id="cEmail" type="email" autocomplete="email" placeholder="tucorreo@gmail.com"></label>
+      <label>Celular<input id="cCelular" type="tel" inputmode="numeric" autocomplete="tel" placeholder="300 123 4567"></label>
+      <label>Tu cumpleaños <small>Opcional, para darte algo ese día.</small><input id="cCumple" type="date" min="1930-01-01" max="2012-12-31"></label>
+      <label class="check"><input id="cAcepta" type="checkbox"> <span>Acepto el tratamiento de mis datos para el programa de lealtad de OAKBERRY según la <a href="/tyc" target="_blank" rel="noopener">política de datos</a>.</span></label>
+      <button class="btn" id="btnCrear" type="button">Crear mi tarjeta</button>
+    </div>
+    <div id="creada" class="stack" hidden>
+      <p class="listo" id="creadaMsg">¡Tu tarjeta está lista!</p>
+      <a class="btn btn-morado" id="cWallet" href="#" target="_blank" rel="noopener">Guardar tarjeta</a>
+      <button class="btn latido" id="cSeguir" type="button">Sumar mi sello</button>
+    </div>
+    <button class="btn-link" id="volver1" type="button">Volver</button>
+  </section>
+
+  <!-- PASO 2: factura -->
+  <section class="panel" id="paso2" hidden>
+    <p class="eyebrow">Paso 2 de 3</p>
+    <h2>Tu factura</h2>
+    <button class="btn-sec" id="btnQR" type="button">Escanear el QR</button>
+    <div id="lector" hidden></div>
+    <div class="o">o escríbelo</div>
+    <label>Número de factura
+      <input id="factura" type="text" autocomplete="off" autocapitalize="characters" placeholder="OKZT-96768">
+      <small>Arriba, donde dice «Factura electrónica de venta Nº».</small>
+    </label>
+    <label>Total pagado
+      <input id="total" type="text" inputmode="numeric" autocomplete="off" placeholder="26.200">
+    </label>
+    <button class="btn latido" id="sig2" type="button">Continuar</button>
+  </section>
+
+  <!-- PASO 3: tus datos -->
+  <section class="panel" id="paso3" hidden>
+    <p class="eyebrow">Paso 3 de 3</p>
+    <h2 id="t3">Busquemos tu tarjeta</h2>
+    <div id="bloqueBuscar" class="stack">
+      <label>El correo de tu tarjeta
+        <input id="email" type="email" autocomplete="email" placeholder="tucorreo@gmail.com">
+      </label>
+      <button class="btn btn-morado" id="buscar" type="button">Buscar mi tarjeta</button>
+      <button class="btn-link" id="aCrear" type="button" hidden>No la encuentro: crear mi tarjeta</button>
+    </div>
+    <div id="bloqueDatos" class="stack" hidden>
+      <div class="hola" id="hola"></div>
+      <label id="wNombre" hidden>Nombre y apellido
+        <input id="nombre" type="text" autocomplete="name" placeholder="Tu nombre y apellido">
+      </label>
+      <label id="wCelular" hidden>Celular
+        <input id="celular" type="tel" inputmode="numeric" autocomplete="tel" placeholder="300 123 4567">
+      </label>
+      <label id="wU4" hidden>Últimos 4 dígitos del «ID ORDEN»
+        <input id="ultimos4" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="9600">
+      </label>
+      <label class="check"><input id="acepta" type="checkbox"> <span>Acepto el tratamiento de mis datos para el programa de lealtad de OAKBERRY según la <a href="/tyc" target="_blank" rel="noopener">política de datos</a>.</span></label>
+      <button class="btn latido" id="enviar" type="button">Sumar mi sello</button>
+    </div>
+  </section>
+
+  <div id="msg" class="msg" hidden role="status"></div>
+
+  <!-- RESULTADO + pregunta -->
+  <section class="panel" id="final" hidden>
+    <img class="loro" src="/exacto-assets/loro-vuela.png" alt="">
+    <h2 id="tFinal" style="text-align:center">¡Sumaste tu sello!</h2>
+    <div id="detalle" class="stack" style="text-align:center"></div>
+    <a class="btn" id="verTarjeta" href="#" target="_blank" rel="noopener" hidden>Ver mi tarjeta</a>
+  </section>
+  <section class="panel" id="encuesta" hidden>
+    <p class="eyebrow" style="text-align:center">Una pregunta rápida</p>
+    <div id="preguntas" class="stack"></div>
+  </section>
+
+  <footer>OAKBERRY Colombia · Un sello por pedido · Facturas de los últimos 7 días</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+const API = "https://api.oakberry-cupones.com/";
+// Enlace al registro propio de Loopy. Vacío = la tarjeta se crea con el formulario de esta página.
+const LOOPY_REGISTRO_URL = "";
+const $ = id => document.getElementById(id);
+const st = {canal:"manual", reclamo:null, celular:"", email:""};
+const esc = s => String(s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const emailOk = v => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v||"").trim());
+const celOk = v => /^3\d{9}$/.test(String(v||"").replace(/\D/g,"").slice(-10));
+
+// ── Escenas (las de los juegos): río → palmas → noche morada ───────────────────────
+const CLARO = {fondo:"#F5EEE0", texto:"#21152A", acento:"#4B1F60", panel:"rgba(245,238,224,.88)"};
+const OSCURO = {fondo:"#290533", texto:"#FBF6E9", acento:"#F4B223", panel:"rgba(40,5,50,.6)"};
+const ESCENAS = {rio:{img:"escena-rio.jpg", pos:"0% center", ...CLARO}, palmas:{img:"escena-palmas.jpg", pos:"center", ...CLARO}, noche:{img:null, ...OSCURO}};
+Object.values(ESCENAS).forEach(e => { if (e.img) new Image().src = "/exacto-assets/" + e.img; });
+function escena(n){
+  const e = ESCENAS[n], el = $("escena"), s = document.body.style;
+  el.style.backgroundImage = e.img ? "url(/exacto-assets/" + e.img + ")" : "none";
+  el.style.backgroundPosition = e.pos || "center";
+  s.setProperty("--fondo", e.fondo); s.setProperty("--texto", e.texto); s.setProperty("--acento", e.acento); s.setProperty("--panel", e.panel);
+  document.body.classList.toggle("oscuro", n === "noche");
+  $("logo").src = n === "noche" ? "/email-logo-cream.png" : "/email-logo-purple.png";
+}
+
+// ── Navegación: una sola tarjeta visible a la vez ───────────────────────────────────
+const VISTAS = {paso1:["rio",1], crearTarjeta:["palmas",1], paso2:["rio",2], paso3:["palmas",3], final:["noche",4]};
+function ir(v){
+  Object.keys(VISTAS).forEach(k => $(k).hidden = k !== v);
+  $("encuesta").hidden = true; limpiar();
+  const [esc_, n] = VISTAS[v]; escena(esc_);
+  ["p1","p2","p3"].forEach((id,i) => $(id).classList.toggle("on", i < n));
+  $("barra").hidden = v === "final" || v === "crearTarjeta";
+  $("titulo").hidden = v !== "paso1"; $("bajada").hidden = v !== "paso1";
+  window.scrollTo({top:0});
+}
+function aviso(tipo, texto){ const m=$("msg"); m.className="msg "+tipo; m.textContent=texto; m.hidden=false; m.scrollIntoView({behavior:"smooth",block:"nearest"}); }
+function limpiar(){ $("msg").hidden = true; }
+async function cargando(btn, texto, fn){ const t = btn.textContent; btn.disabled = true; btn.textContent = texto;
+  try { return await fn(); } catch(e){ aviso("err","No pudimos conectarnos. Revisa tu internet e intenta de nuevo."); } finally { btn.disabled = false; btn.textContent = t; } }
+
+// ── Paso 1: ¿tienes tarjeta? ────────────────────────────────────────────────────────
+$("siTengo").onclick = () => ir("paso2");
+$("noTengo").onclick = () => {
+  if (LOOPY_REGISTRO_URL) { window.open(LOOPY_REGISTRO_URL, "_blank", "noopener"); }
+  ir("crearTarjeta"); $("formCrear").hidden = false; $("creada").hidden = true;
+};
+$("volver1").onclick = () => ir("paso1");
+$("btnCrear").onclick = () => {
+  const d = {nombre:$("cNombre").value.trim(), email:$("cEmail").value.trim(), celular:$("cCelular").value, cumple:$("cCumple").value};
+  if (d.nombre.length < 2) return aviso("err","Escribe tu nombre.");
+  if (!emailOk(d.email)) return aviso("err","Escribe un correo válido.");
+  if (!celOk(d.celular)) return aviso("err","Escribe tu celular de 10 dígitos.");
+  if (!$("cAcepta").checked) return aviso("err","Para crear tu tarjeta necesitamos que aceptes el tratamiento de datos.");
+  return cargando($("btnCrear"), "Creando tu tarjeta…", async () => {
+    const r = await api({accion:"sellosRappiCrearTarjeta", ...d, acepta:"1"});
+    if (!r.ok) return aviso("err", r.mensaje || "Intenta de nuevo.");
+    limpiar(); $("formCrear").hidden = true; $("creada").hidden = false;
+    $("creadaMsg").textContent = r.mensaje; $("cWallet").href = r.walletUrl;
+    $("email").value = r.email || d.email;      // al volver, el correo ya está puesto
+  });
+};
+$("cSeguir").onclick = () => ir("paso2");
+
+// ── Paso 2: factura ─────────────────────────────────────────────────────────────────
+// El QR de la factura electrónica (DIAN) suele traer "NumFac: XXX" y "ValTolFac: 26200.00".
+function leerQR(txt){ return {num:(txt.match(/NumFac[:=]\s*([A-Z0-9\-]+)/i)||[])[1], tot:(txt.match(/Val(?:Tol|Tot)Fac[:=]\s*([\d.,]+)/i)||[])[1]}; }
+$("btnQR").onclick = async () => {
+  if (typeof Html5Qrcode === "undefined") return aviso("warn","No pudimos abrir la cámara. Escribe los datos a mano.");
+  limpiar(); $("lector").hidden = false;
+  const lector = new Html5Qrcode("lector");
+  try {
+    await lector.start({facingMode:"environment"}, {fps:10, qrbox:230}, async txt => {
+      await lector.stop(); $("lector").hidden = true;
+      const {num, tot} = leerQR(txt);
+      if (num) $("factura").value = num;
+      if (tot) $("total").value = tot;
+      st.canal = "qr";
+      if (num && tot) aviso("ok","Leímos tu factura. Revisa los datos y continúa.");
+      else { aviso("warn","Leímos el QR pero no trae el número o el total. Escríbelos a mano."); console.log("QR factura:", txt); }
+    });
+  } catch(e){ $("lector").hidden = true; aviso("warn","No pudimos abrir la cámara. Escribe los datos a mano."); }
+};
+$("sig2").onclick = () => {
+  if (!/\d{3,}/.test($("factura").value)) return aviso("err","Escribe el número de la factura (ej. OKZT-96768).");
+  if ($("total").value.replace(/\D/g,"").length < 4) return aviso("err","Escribe el total que pagaste (ej. 26.200).");
+  ir("paso3"); $("bloqueBuscar").hidden = false; $("bloqueDatos").hidden = true; $("aCrear").hidden = true;
+  $("t3").textContent = "Busquemos tu tarjeta";
+};
+
+// ── Paso 3: tus datos (por correo: todas las tarjetas lo tienen) ────────────────────
+$("buscar").onclick = () => {
+  const email = $("email").value.trim();
+  if (!emailOk(email)) return aviso("err","Escribe un correo válido.");
+  return cargando($("buscar"), "Buscando tu tarjeta…", async () => {
+    const r = await api({accion:"sellosRappiIdentificar", email});
+    if (!r.ok) return aviso("err", r.mensaje || "Intenta de nuevo.");
+    if (!r.encontrada) { aviso("warn", r.mensaje); $("aCrear").hidden = false; return; }
+    limpiar(); st.email = email;
+    const falta = new Set(r.faltan || []);
+    $("bloqueBuscar").hidden = true; $("bloqueDatos").hidden = false; $("wU4").hidden = true;
+    $("wCelular").hidden = !falta.has("celular"); $("wNombre").hidden = !falta.has("nombre");
+    const pide = [falta.has("celular") ? "tu celular" : "", falta.has("nombre") ? "tu nombre" : ""].filter(Boolean).join(" y ");
+    $("hola").innerHTML = "¡Hola" + (r.nombre ? " <b>" + esc(r.nombre) + "</b>" : "") + "! Encontramos tu tarjeta." +
+      (pide ? " Ayúdanos con " + pide + " para avisarte de tus premios." : "");
+    $("t3").textContent = "¡Ya casi!";
+  });
+};
+$("aCrear").onclick = () => { $("cEmail").value = $("email").value; $("noTengo").onclick(); };
+
+$("enviar").onclick = () => {
+  const cel = $("celular").value.replace(/\D/g,"").slice(-10);
+  if (!$("wNombre").hidden && $("nombre").value.trim().length < 2) return aviso("err","Escribe tu nombre.");
+  if (!$("wCelular").hidden && !celOk(cel)) return aviso("err","Escribe tu celular de 10 dígitos.");
+  if (!$("acepta").checked) return aviso("err","Para sumar tu sello necesitamos que aceptes el tratamiento de datos.");
+  st.celular = $("wCelular").hidden ? "" : cel;
+  return cargando($("enviar"), "Verificando tu factura…", async () => {
+    const r = await api({accion:"sellosRappiReclamar", factura:$("factura").value, total:$("total").value,
+      ultimos4:$("ultimos4").value, celular:st.celular, email:st.email, nombre:$("nombre").value, acepta:"1", canal:st.canal});
+    if (r.estado === "ultimos4") { $("wU4").hidden = false; aviso("warn", r.mensaje); $("ultimos4").focus(); }
+    else if (r.estado === "acreditado" || r.estado === "pendiente") resultado(r);
+    else aviso(r.ok ? "ok" : "err", r.mensaje || "Algo salió mal. Intenta de nuevo.");
+  });
+};
+
+// ── Resultado + pregunta ────────────────────────────────────────────────────────────
+function resultado(r){
+  st.reclamo = r.reclamoId; ir("final");
+  if (r.estado === "pendiente") {
+    $("tFinal").textContent = "¡Factura recibida!"; $("verTarjeta").hidden = true;
+    $("detalle").innerHTML = "<p class='ayuda' style='font-size:16px'>Tu pedido es reciente, así que lo estamos verificando. Tu sello llega solo en las próximas horas; no tienes que hacer nada más.</p>";
+  } else {
+    $("tFinal").textContent = "¡Sumaste tu sello!";
+    const prods = (r.productos||[]).map(p => "<li>" + esc(p) + "</li>").join("");
+    $("detalle").innerHTML = "<div class='sello-num'><b>" + esc(r.sellosTarjeta) + "</b><span>sellos en tu tarjeta</span></div>" +
+      (prods ? "<p class='ayuda'>Lo que pediste</p><ul class='prods'>" + prods + "</ul>" : "");
+    $("verTarjeta").href = r.walletUrl || "#"; $("verTarjeta").hidden = !r.walletUrl;
+  }
+  if (r.preguntas && r.preguntas.length) pintarEncuesta(r.preguntas);
+}
+function pintarEncuesta(preguntas){
+  const cont = $("preguntas"); cont.innerHTML = "";
+  preguntas.forEach(q => {
+    const box = document.createElement("div"); box.className = "stack";
+    box.innerHTML = "<p style='margin:0;font-size:19px;font-weight:700;text-align:center;text-wrap:balance'>" + esc(q.texto) + "</p>";
+    const grupo = document.createElement("div"); grupo.className = q.id === "nps" ? "nps" : "chips";
+    Object.entries(q.opciones).forEach(([val, etiqueta]) => {
+      const c = document.createElement("button"); c.type = "button"; c.className = "chip"; c.textContent = etiqueta;
+      c.onclick = async () => {
+        grupo.querySelectorAll(".chip").forEach(x => { x.classList.remove("on"); x.disabled = true; }); c.classList.add("on");
+        try { await api({accion:"sellosRappiResponder", reclamoId:st.reclamo, celular:st.celular, email:st.email, pregunta:q.id, respuesta:val}); } catch(e){}
+        const ok = document.createElement("p"); ok.className = "gracias"; ok.textContent = "¡Gracias!"; box.appendChild(ok);
+      };
+      grupo.appendChild(c);
+    });
+    box.appendChild(grupo);
+    if (q.id === "nps") { const ej = document.createElement("div"); ej.className = "nps-ejes"; ej.innerHTML = "<span>Nada probable</span><span>Muy probable</span>"; box.appendChild(ej); }
+    cont.appendChild(box);
+  });
+  $("encuesta").hidden = false;
+}
+
+// ── MODO DEMO (?demo=1 o #demo): respuestas ficticias, no toca el backend ni Loopy ──
+const DEMO = new URLSearchParams(location.search).has("demo") || location.hash === "#demo";
+const PREG = {
+  nps:{id:"nps",texto:"Del 0 al 10, ¿qué tan probable es que recomiendes OAKBERRY a un amigo?",opciones:Object.fromEntries([...Array(11).keys()].map(i=>[String(i),String(i)]))},
+  donde:{id:"donde",texto:"¿Dónde comes OAKBERRY más seguido?",opciones:{tienda:"En la tienda",domicilio:"A domicilio",ambos:"Las dos por igual"}},
+  frecuencia:{id:"frecuencia",texto:"¿Cada cuánto comes OAKBERRY?",opciones:{semana:"Cada semana",quincena:"Cada quince días",mes:"Una vez al mes",ocasional:"De vez en cuando"}},
+  mas_seguido:{id:"mas_seguido",texto:"¿Qué te haría pedirlo más seguido?",opciones:{precio:"Un mejor precio",novedades:"Sabores o toppings nuevos",cerca:"Tenerlo más cerca",tamano:"Un tamaño más pequeño",nada:"Así está perfecto"}},
+};
+let demoPregunta = "nps";
+function demoApi(p){
+  const f = String(p.factura||"").replace(/\D/g,"");
+  switch (p.accion) {
+    case "sellosRappiContexto": return {ok:true, ambiente:"demo"};
+    case "sellosRappiCrearTarjeta": return {ok:true, estado:"creada", email:p.email, walletUrl:"#", mensaje:"¡Tu tarjeta está lista!"};
+    case "sellosRappiIdentificar":
+      if (/^tiene@/.test(p.email)) return {ok:true,encontrada:true,nombre:"Daniela",faltan:[]};
+      if (/^faltan@/.test(p.email)) return {ok:true,encontrada:true,nombre:"Daniela",faltan:["celular","nombre"]};
+      return {ok:true,encontrada:false,mensaje:"No encontramos una tarjeta con ese correo. Revisa si usaste otro, o crea tu tarjeta."};
+    case "sellosRappiReclamar":
+      if (f.endsWith("2222")) return {ok:true,estado:"pendiente",reclamoId:2,preguntas:[PREG[demoPregunta]]};
+      if (f.endsWith("3333") && !p.ultimos4) return {ok:false,estado:"ultimos4",mensaje:"Necesitamos un dato más: escribe los últimos 4 dígitos del «ID ORDEN» que aparece en tu factura."};
+      if (f.endsWith("4444")) return {ok:false,estado:"ya_reclamada",mensaje:"Esta factura ya sumó su sello."};
+      if (f.endsWith("5555")) return {ok:false,estado:"fuera_ventana",mensaje:"Esta factura tiene más de 7 días. Solo se pueden registrar pedidos de la última semana."};
+      if (f.endsWith("6666")) return {ok:false,estado:"bloqueado",mensaje:"Hiciste demasiados intentos. Intenta de nuevo mañana."};
+      return {ok:true,estado:"acreditado",reclamoId:1,sellosTarjeta:4,walletUrl:"#",productos:["BOWL THE ONE 9 oz","BANANO","NIBS DE CACAO","GRANOLA ALMENDRAS"],preguntas:[PREG[demoPregunta]]};
+    case "sellosRappiResponder": return {ok:true};
+  }
+  return {ok:false};
+}
+async function api(params){
+  if (DEMO) { await new Promise(r => setTimeout(r, 400)); return demoApi(params); }
+  const r = await fetch(API + "?" + new URLSearchParams(params).toString());
+  return r.json();
+}
+
+ir("paso1");
+api({accion:"sellosRappiContexto"}).then(c => { if (c && c.ambiente === "test") $("prueba").hidden = false; }).catch(()=>{});
+
+if (DEMO) {
+  const reiniciar = () => { ["factura","total","email","nombre","celular","ultimos4","cNombre","cEmail","cCelular","cCumple"].forEach(id => $(id).value = "");
+    $("acepta").checked = false; $("cAcepta").checked = false; ir("paso1"); };
+  const aPaso3 = (fac) => { reiniciar(); ir("paso2"); $("factura").value = "OKZT-" + fac; $("total").value = "26.200"; $("sig2").click(); };
+  const buscarCon = async (email) => { $("email").value = email; await $("buscar").onclick(); };
+  const enviar = async () => { if (!$("wNombre").hidden) $("nombre").value = "Daniela Gómez"; if (!$("wCelular").hidden) $("celular").value = "3001234567";
+    $("acepta").checked = true; await $("enviar").onclick(); };
+  const llenarCrear = () => { $("cNombre").value = "Daniela Gómez"; $("cEmail").value = "daniela@ejemplo.com"; $("cCelular").value = "3001234567"; $("cAcepta").checked = true; };
+  const sello = (preg) => async () => { demoPregunta = preg; aPaso3("1111"); await buscarCon("tiene@demo.co"); await enviar(); };
+  const V = [
+    ["Paso 1: ¿tienes tarjeta?"],
+    ["¿Tienes tarjeta OAKBERRY?", reiniciar],
+    ["No tengo: crear tarjeta", () => { reiniciar(); $("noTengo").click(); }],
+    ["Tarjeta creada: guardarla y seguir", async () => { reiniciar(); $("noTengo").click(); llenarCrear(); await $("btnCrear").onclick(); }],
+    ["Paso 2: la factura"],
+    ["Factura vacía", () => { reiniciar(); $("siTengo").click(); }],
+    ["Error: falta el número", () => { reiniciar(); $("siTengo").click(); $("sig2").click(); }],
+    ["Paso 3: tus datos"],
+    ["Buscar por correo", () => aPaso3("96768")],
+    ["Encontrada, no falta nada", async () => { aPaso3("96768"); await buscarCon("tiene@demo.co"); }],
+    ["Encontrada, falta celular y nombre", async () => { aPaso3("96768"); await buscarCon("faltan@demo.co"); }],
+    ["Correo no encontrado", async () => { aPaso3("96768"); await buscarCon("nadie@demo.co"); }],
+    ["Pide últimos 4 del ID ORDEN", async () => { aPaso3("3333"); await buscarCon("tiene@demo.co"); await enviar(); }],
+    ["Error: factura ya usada", async () => { aPaso3("4444"); await buscarCon("tiene@demo.co"); await enviar(); }],
+    ["Error: más de 7 días", async () => { aPaso3("5555"); await buscarCon("tiene@demo.co"); await enviar(); }],
+    ["Error: demasiados intentos", async () => { aPaso3("6666"); await buscarCon("tiene@demo.co"); await enviar(); }],
+    ["Resultado"],
+    ["Sello sumado + recomendación 0-10", sello("nps")],
+    ["Sello sumado + ¿dónde comes?", sello("donde")],
+    ["Sello sumado + ¿cada cuánto?", sello("frecuencia")],
+    ["Sello sumado + ¿qué te haría volver?", sello("mas_seguido")],
+    ["Factura pendiente (pedido reciente)", async () => { demoPregunta = "donde"; aPaso3("2222"); await buscarCon("tiene@demo.co"); await enviar(); }],
+  ];
+  const lista = $("demoLista");
+  V.forEach(([nombre, fn]) => {
+    if (!fn) { const t = document.createElement("p"); t.textContent = nombre; lista.appendChild(t); return; }
+    const b = document.createElement("button"); b.type = "button"; b.textContent = nombre;
+    b.onclick = async () => { $("demo").open = false; await fn(); window.scrollTo({top:0, behavior:"smooth"}); };
+    lista.appendChild(b);
+  });
+  $("demo").hidden = false;
+}
+</script>
+</body>
+</html>

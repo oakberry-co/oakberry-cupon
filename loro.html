@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="es" class="vertical">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F5EEE0">
+<title>El vuelo del loro · OAKBERRY</title>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-regular.woff2" as="font" type="font/woff2" crossorigin>
+<!--
+  EL VUELO DEL LORO — corredor infinito de activación, tercer juego de eventos.
+
+  La persona escoge por cuál premio va y esa elección define la dificultad:
+  más premio = más metros y más velocidad. Corre saltando palmeras de açaí; si
+  llega a la meta se lo lleva, si choca no. El premio elegido queda RESERVADO
+  mientras la partida vive (backend), para no prometer dos veces el mismo.
+
+  Todo el dibujo es propio: el loro es el arte de marca (exacto-assets) y las
+  palmeras se dibujan en canvas. El mundo se mide en METROS, no en píxeles, para
+  que la dificultad signifique lo mismo en un tótem y en un celular.
+
+  Premios: crm.loro_niveles (label, meta_m, velocidad, cupo) por evento.
+  Backend: /juego/loro/* en crm/api/main.py.
+  Parámetros: ?evento=slug · ?pais=do · ?rotar=90|270 · #tablero
+-->
+<style>
+/* Nexa Slab Book/Bold/Black COMPLETAS (las "FREE" de Drive son demos y dibujan
+   : % - · ¡ ¿ como un sello). No traen ← ⌫ ✓ ✕: esos no se usan en la página. */
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-regular.woff2') format('woff2');font-weight:400;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-bold.woff2') format('woff2');font-weight:600 700;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-black.woff2') format('woff2');font-weight:800 900;font-display:block}
+:root{
+  --crema:#FBF6E9; --crema-cielo:#F5EEE0; --hueso:#EAE1CC; --tinta:#21152A; --tinta-suave:#5C4A66;
+  --morado:#4B1F60; --lila:#B79CC8; --oro:#F4B223; --coral:#E04850; --rojo:#B3261E; --verde:#2F6B3A;
+  --fondo:var(--crema); --texto:var(--tinta);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+body{container-type:size}
+html{background:var(--tinta)}
+body{font-family:'Nexa Slab',Rockwell,'Roboto Slab',Georgia,serif;background:var(--fondo);
+  color:var(--texto);font-size:3.2cqmin;line-height:1.35;transition:background .6s,color .6s;position:relative}
+[hidden]{display:none!important}
+button{font-family:inherit;border:none;cursor:pointer;color:inherit;background:none}
+
+html.rot90 body,html.rot270 body{position:fixed;top:0;left:0;width:100vh;height:100vw;transform-origin:top left}
+html.rot90 body{transform:rotate(90deg) translateY(-100%)}
+html.rot270 body{transform:rotate(-90deg) translateX(-100%)}
+
+.escena{position:absolute;inset:0;z-index:0;background-color:var(--fondo);background-size:cover;
+  background-position:center;transition:background-color .6s}
+.pantalla{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;gap:2.4cqmin;padding:6cqmin 6cqmin 7cqmin;text-align:center}
+.bloque{display:flex;flex-direction:column;align-items:center;gap:2cqmin;width:100%}
+.panel{background:var(--panel);border-radius:3cqmin;padding:3cqmin 4cqmin}
+.eyebrow{font-size:2.8cqmin;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
+
+.btn{background:var(--boton,var(--morado));color:var(--boton-texto,var(--crema));font-weight:800;letter-spacing:.05em;
+  text-transform:uppercase;font-size:6cqmin;padding:3.4cqmin 4cqmin;border-radius:999px;
+  box-shadow:0 1.1cqmin 0 var(--tinta);width:88cqmin;line-height:1.15;white-space:nowrap}
+.btn:active{transform:translateY(.8cqmin);box-shadow:0 .3cqmin 0 var(--tinta)}
+.btn:disabled{opacity:.45;animation:none}
+.btn-sec{border:.4cqmin solid currentColor;border-radius:999px;font-weight:700;font-size:3.8cqmin;
+  padding:3cqmin 5cqmin;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.latido{animation:latido 1.8s ease-in-out infinite}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.badge-prueba{position:absolute;top:1.6cqmin;right:1.6cqmin;background:var(--rojo);color:#fff;font-weight:800;
+  padding:.8cqmin 2cqmin;border-radius:1cqmin;letter-spacing:.1em;font-size:2.4cqmin;z-index:50}
+.auto{font-size:2.8cqmin;opacity:.75;min-height:1.4em}
+
+/* ── PORTADA ─────────────────────────────────────────────────────────── */
+#portada h1{font-size:12.5cqmin;font-weight:900;line-height:.98;letter-spacing:-.01em;
+  color:var(--acento);text-transform:uppercase;text-wrap:balance;max-width:88cqmin}
+#portada .bajada{font-size:4.6cqmin;font-weight:600;max-width:34ch;text-wrap:balance}
+
+/* ── REGISTRO + TECLADO (mismo de EXACTO) ────────────────────────────── */
+#registro{justify-content:flex-start;gap:2.6cqmin}
+#registro h2{font-size:9cqmin;font-weight:900;color:var(--morado);line-height:1;text-transform:uppercase}
+.campos{display:grid;gap:2cqmin;width:100%}
+.campo{border:.5cqmin solid var(--hueso);border-radius:2cqmin;padding:2cqmin 3cqmin;text-align:left;background:#fff;color:var(--tinta)}
+.campo.activo{border-color:var(--morado);box-shadow:0 0 0 .8cqmin rgba(75,31,96,.16)}
+.campo label{display:block;font-size:2.6cqmin;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-suave)}
+.campo .valor .prefijo{color:var(--tinta-suave);font-weight:600;margin-right:.35em}
+.campo .valor{font-size:7cqmin;font-weight:600;min-height:1.3em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.campo.activo .valor::after{content:"";display:inline-block;width:.08em;height:1em;background:var(--morado);
+  vertical-align:-.12em;margin-left:.04em;animation:cursor 1s steps(1) infinite}
+@keyframes cursor{50%{opacity:0}}
+.tyc{display:flex;align-items:center;gap:2.6cqmin;text-align:left;font-size:3cqmin;font-weight:600;width:100%;
+  padding:2cqmin 3cqmin;background:rgba(245,238,224,.86);border-radius:2cqmin}
+.check{flex:0 0 auto;width:8.4cqmin;height:8.4cqmin;border:.6cqmin solid var(--morado);border-radius:1.4cqmin;position:relative;background:#fff}
+.check.on{background:var(--morado)}
+/* La palomita va dibujada: Nexa Slab no trae el glifo ✓. */
+.check.on::after{content:"";position:absolute;left:2.4cqmin;top:.8cqmin;width:2.2cqmin;height:4.2cqmin;
+  border:solid var(--crema);border-width:0 .9cqmin .9cqmin 0;transform:rotate(45deg)}
+.zona-teclado{margin-top:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:2.4cqmin}
+.teclado{display:grid;gap:1.4cqmin;width:100%}
+.fila{display:flex;gap:1.2cqmin;justify-content:center}
+.tecla{flex:1 1 0;min-width:0;min-height:11.5cqmin;background:#fff;color:var(--tinta);border:.35cqmin solid var(--hueso);
+  border-radius:1.6cqmin;font-size:5.4cqmin;font-weight:600;box-shadow:0 .7cqmin 0 var(--hueso)}
+.tecla:active{background:var(--hueso);transform:translateY(.5cqmin);box-shadow:none}
+.tecla.ancha{flex:4 1 0;font-size:3.4cqmin;letter-spacing:.1em}
+.tecla.accion{flex:2.4 1 0;font-size:3.2cqmin;letter-spacing:.06em}
+.teclado.num{width:72cqmin}
+.teclado.num .tecla{min-height:13cqmin;font-size:7cqmin}
+.teclado.num .tecla.accion{flex:1 1 0;font-size:3.2cqmin}
+.error{color:var(--rojo);font-weight:700;min-height:1.4em;font-size:3.6cqmin}
+/* ── Pantalla del QR ──────────────────────────────────────────────────
+   El QR va dibujado (SVG), no en imagen: se ve nítido lo mismo en un
+   celular que en el tótem de 1080 px, y no depende del wifi del evento. */
+.qr-caja{background:#fff;border-radius:3cqmin;padding:3.4cqmin;width:64cqmin;max-width:100%;
+  box-shadow:0 1.2cqmin 0 rgba(33,21,42,.18);display:grid;place-items:center}
+.qr-caja .qr{width:100%;height:auto;display:block}
+.qr-pie{font-size:4cqmin;font-weight:600;max-width:26ch;text-wrap:balance}
+/* Apilado, no lado a lado: "Ya me registré" no cabe en una línea junto a
+   otro botón, y el texto de un botón nunca debe partirse en dos. */
+.acciones{display:flex;flex-direction:column;gap:2cqmin;align-items:center;width:100%}
+.acciones .btn{width:88cqmin;max-width:100%}
+
+
+/* ── SALIR ───────────────────────────────────────────────────────────── */
+.salir{position:absolute;top:1.6cqmin;left:1.6cqmin;z-index:60;
+  background:rgba(33,21,42,.5);color:var(--crema);border-radius:999px;
+  padding:1.4cqmin 3cqmin;font-family:inherit;font-size:2.6cqmin;font-weight:800;
+  letter-spacing:.12em;text-transform:uppercase;border:.3cqmin solid rgba(251,246,233,.3)}
+.salir:active{transform:scale(.96)}
+.salir.confirmar{background:var(--coral);color:#fff;border-color:transparent}
+
+/* ── HORIZONTAL (un computador): el MISMO tótem centrado en 9:16 ────── */
+html.horizontal body{width:min(100vw, calc(100vh * 9 / 16));height:100vh;margin:0 auto;
+  box-shadow:0 0 0 100vmax var(--tinta)}
+
+/* ── Selector de indicativo ─────────────────────────────────────────── */
+.prefijo{color:var(--morado);font-weight:800;margin-right:.35em;padding:.1em .3em;
+  border-radius:.9cqmin;background:rgba(75,31,96,.1);cursor:pointer}
+.paises{position:absolute;left:6cqmin;right:6cqmin;top:34cqmin;z-index:20;
+  background:#fff;border:.5cqmin solid var(--hueso);border-radius:2.4cqmin;padding:2cqmin;
+  display:grid;grid-template-columns:1fr 1fr;gap:1.2cqmin;
+  box-shadow:0 2cqmin 6cqmin rgba(33,21,42,.28);max-height:60cqmin;overflow-y:auto}
+.pais{display:flex;justify-content:space-between;align-items:center;gap:1.4cqmin;
+  padding:2.2cqmin 2.4cqmin;border-radius:1.6cqmin;background:var(--gray-light,#f7f4ff);
+  font-family:inherit;font-size:3cqmin;font-weight:700;color:var(--tinta);text-align:left}
+.pais b{color:var(--morado)}
+.pais.on{background:var(--morado);color:var(--crema)}
+.pais.on b{color:var(--oro)}
+
+/* ── ESCALERA DE PREMIOS ────────────────────────────────────────────── */
+/* Con el "quedan N" cada peldaño creció una línea: se compensa apretando el
+   alto, si no el botón de jugar se sale de pantalla. */
+.escalera{display:flex;flex-direction:column-reverse;gap:1.1cqmin;width:100%}
+.peldano{display:flex;align-items:center;justify-content:space-between;gap:2cqmin;width:100%;
+  padding:1.25cqmin 3cqmin;border-radius:2cqmin;background:var(--panel);color:var(--texto);
+  font-family:inherit;font-size:3.8cqmin;font-weight:700;text-align:left;border:.35cqmin solid transparent}
+.peldano .m{font-weight:800;color:var(--acento);white-space:nowrap}
+/* Cuántos quedan: el dato que la gente pregunta en el stand. Va bajo el
+   nombre, chiquito, para no competir con la meta. */
+.peldano .lbl{display:flex;flex-direction:column;gap:.1cqmin;line-height:1.15}
+.peldano .quedan{font-size:2.5cqmin;font-weight:600;opacity:.72;line-height:1.1}
+.peldano .quedan.pocos{color:var(--coral);opacity:1}
+.peldano.mayor{background:var(--oro);color:var(--tinta)}
+.peldano.mayor .m{color:var(--tinta)}
+.peldano.agotado{opacity:.45}
+.peldano.agotado .lbl{text-decoration:line-through}
+#elegir .peldano:active:not(:disabled){transform:scale(.98)}
+#elegir .peldano:not(:disabled){border-color:rgba(75,31,96,.25);box-shadow:0 .7cqmin 0 rgba(33,21,42,.18)}
+#elegir h2{font-size:8cqmin;font-weight:900;text-transform:uppercase;color:var(--morado);line-height:1}
+#elegir .sub{font-size:3.8cqmin;font-weight:600}
+
+/* ── CARRERA ────────────────────────────────────────────────────────── */
+#carrera{padding:0;justify-content:flex-start}
+#lienzo{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+.hud{position:relative;z-index:2;width:100%;padding:5cqmin 5cqmin 0;display:flex;flex-direction:column;gap:1.6cqmin}
+.hud-fila{display:flex;justify-content:space-between;align-items:baseline;font-weight:800}
+.hud-meta{font-size:3.4cqmin;color:var(--tinta-suave)}
+.hud-dist{font-size:6cqmin;color:var(--morado);font-variant-numeric:tabular-nums}
+.barra{width:100%;height:1.8cqmin;border-radius:999px;background:rgba(75,31,96,.16);overflow:hidden}
+.barra i{display:block;height:100%;width:100%;background:var(--morado);border-radius:999px;transform-origin:left;transform:scaleX(0);transition:transform .12s linear}
+.pista{position:absolute;left:0;right:0;bottom:6cqmin;z-index:2;text-align:center;
+  font-size:3.4cqmin;font-weight:700;color:var(--tinta-suave)}
+.cuenta{position:absolute;inset:0;z-index:3;display:grid;place-items:center;
+  font-size:22cqmin;font-weight:900;color:var(--morado);text-shadow:0 1cqmin 0 rgba(251,246,233,.8)}
+/* Ningún paso de la carrera avanza solo: antes el juego se quedaba congelado
+   mientras el servidor respondía y no se sabía si se había trabado. */
+.aviso{position:absolute;left:6cqmin;right:6cqmin;top:26cqmin;z-index:3;text-align:center;
+  font-size:6cqmin;font-weight:900;text-transform:uppercase;color:var(--morado);
+  text-shadow:0 .6cqmin 0 rgba(251,246,233,.9);opacity:0;transform:scale(.9);
+  transition:opacity .25s,transform .25s;pointer-events:none}
+.aviso.on{opacity:1;transform:scale(1)}
+.velo{position:absolute;inset:0;z-index:4;display:grid;place-items:center;
+  background:rgba(40,5,50,.55);padding:6cqmin;backdrop-filter:blur(2px)}
+.velo-caja{background:var(--crema);border-radius:3cqmin;padding:6cqmin 5cqmin;
+  /* 88cqmin como los demás bloques: con width:100% el hijo se salía del área
+     del velo y quedaba 43 px por fuera a la derecha. */
+  width:88cqmin;max-width:100%;
+  display:flex;flex-direction:column;align-items:center;gap:2.4cqmin;text-align:center;
+  box-shadow:0 2cqmin 6cqmin rgba(20,4,26,.4)}
+.velo-t{font-size:10cqmin;font-weight:900;line-height:1;text-transform:uppercase;color:var(--morado);text-wrap:balance}
+.velo-s{font-size:4.2cqmin;font-weight:600;color:var(--tinta);text-wrap:balance;max-width:28ch}
+
+/* ── PREMIO / SIN PREMIO / TABLERO ──────────────────────────────────── */
+#premio h2,#nada h2{font-size:11cqmin;font-weight:900;line-height:1;text-transform:uppercase;color:var(--acento);text-wrap:balance}
+.premio-caja{background:var(--oro);color:var(--tinta);border-radius:3cqmin;padding:3.4cqmin 4cqmin;
+  font-size:6.4cqmin;font-weight:900;text-transform:uppercase;line-height:1.1;width:88cqmin;text-wrap:balance}
+.mostrar{font-size:4cqmin;font-weight:700;text-wrap:balance;max-width:30ch}
+.cuando{font-size:3.6cqmin;font-weight:700;color:var(--crema);opacity:.85;letter-spacing:.06em}
+/* Código del premio: se enseña en caja. No valida nada — está para que dos
+   personas no puedan reclamar con la misma captura. Va grande y monoespaciado
+   porque hay que leerlo y a veces dictarlo. */
+.codigo-caja{background:rgba(251,246,233,.94);border:.5cqmin dashed var(--morado);
+  border-radius:2.4cqmin;padding:2cqmin 4cqmin;display:flex;flex-direction:column;
+  align-items:center;gap:.4cqmin;max-width:88cqmin}
+.codigo-caja .rot{font-size:2.6cqmin;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--tinta-suave)}
+.codigo-caja .cod{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:7.4cqmin;font-weight:800;letter-spacing:.12em;color:var(--morado);line-height:1.05}
+.codigo-caja .vence{font-size:2.7cqmin;font-weight:700;color:var(--rojo)}
+.metros-fin{font-size:9cqmin;font-weight:900;color:var(--acento);font-variant-numeric:tabular-nums}
+.sub-fin{font-size:4.2cqmin;font-weight:600;max-width:32ch;text-wrap:balance}
+.vaso-caja{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.vaso{height:100%;max-height:44cqmin;width:auto;object-fit:contain}
+.confeti{position:absolute;top:-4%;width:2cqmin;height:3cqmin;pointer-events:none;animation:cae linear forwards;z-index:40}
+@keyframes cae{to{transform:translateY(var(--caida,1200px)) rotate(720deg)}}
+#tablero{justify-content:flex-start;gap:2.4cqmin}
+#tablero h2{font-size:9cqmin;font-weight:900;text-transform:uppercase;color:var(--acento);line-height:1}
+.stock{display:flex;flex-direction:column;gap:1.4cqmin;width:100%;flex:0 1 auto;min-height:0;overflow:hidden}
+.stock-fila{display:grid;grid-template-columns:1fr auto;gap:2cqmin;align-items:center;padding:2.2cqmin 3cqmin;
+  border-radius:2cqmin;background:rgba(251,246,233,.1);font-size:3.8cqmin;font-weight:700;text-align:left}
+.stock-fila.sin{opacity:.5}
+.stock-fila .q{font-variant-numeric:tabular-nums;font-weight:900}
+.ultimos{font-size:3.2cqmin;font-weight:600;opacity:.85;text-align:left;width:100%}
+.ultimos div{padding:.8cqmin 0;border-bottom:1px solid rgba(251,246,233,.12)}
+#tablero .btn-sec{margin-top:auto}
+</style>
+</head>
+<body>
+<div class="escena" id="escena"></div>
+<button class="salir" id="btnSalir">Salir</button>
+<div class="badge-prueba" id="badgePrueba" hidden>MODO PRUEBA</div>
+
+<section id="portada" class="pantalla">
+  <div class="bloque">
+    <p class="eyebrow" id="pEvento">OAKBERRY</p>
+    <h1>El vuelo del loro</h1>
+    <p class="bajada">Salta las palmeras. Mientras más lejos llegues, mejor el premio.</p>
+  </div>
+  <div class="escalera" id="escalera"></div>
+  <div class="bloque"><button class="btn latido" id="btnJugar">Toca para jugar</button></div>
+</section>
+
+<section id="registro" class="pantalla" hidden>
+  <div class="bloque">
+    <h2>Regístrate para jugar</h2>
+    <p class="qr-pie">Escanea el código con la cámara de tu celular y deja tus datos.</p>
+  </div>
+  <div class="qr-caja"><svg class="qr" viewBox="0 0 37 37" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" role="img" aria-label="Codigo QR para registrarte"><rect width="37" height="37" fill="#fff"/><path d="M0 0h7v1h-7zM9 0h2v1h-2zM13 0h5v1h-5zM20 0h2v1h-2zM23 0h2v1h-2zM27 0h2v1h-2zM30 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM10 1h1v1h-1zM14 1h1v1h-1zM16 1h2v1h-2zM20 1h2v1h-2zM23 1h1v1h-1zM26 1h3v1h-3zM30 1h1v1h-1zM36 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h1v1h-1zM11 2h1v1h-1zM13 2h1v1h-1zM15 2h1v1h-1zM17 2h1v1h-1zM23 2h2v1h-2zM27 2h1v1h-1zM30 2h1v1h-1zM32 2h3v1h-3zM36 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h5v1h-5zM15 3h2v1h-2zM18 3h2v1h-2zM23 3h1v1h-1zM26 3h2v1h-2zM30 3h1v1h-1zM32 3h3v1h-3zM36 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM10 4h1v1h-1zM13 4h7v1h-7zM23 4h1v1h-1zM25 4h4v1h-4zM30 4h1v1h-1zM32 4h3v1h-3zM36 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM12 5h1v1h-1zM14 5h7v1h-7zM22 5h1v1h-1zM24 5h2v1h-2zM27 5h2v1h-2zM30 5h1v1h-1zM36 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h7v1h-7zM9 7h2v1h-2zM13 7h2v1h-2zM20 7h3v1h-3zM24 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h1v1h-1zM17 8h1v1h-1zM21 8h2v1h-2zM25 8h1v1h-1zM27 8h1v1h-1zM29 8h1v1h-1zM31 8h1v1h-1zM1 9h1v1h-1zM3 9h1v1h-1zM8 9h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM15 9h1v1h-1zM17 9h1v1h-1zM19 9h2v1h-2zM22 9h1v1h-1zM30 9h2v1h-2zM34 9h1v1h-1zM36 9h1v1h-1zM2 10h8v1h-8zM11 10h2v1h-2zM14 10h1v1h-1zM16 10h1v1h-1zM20 10h3v1h-3zM28 10h1v1h-1zM30 10h4v1h-4zM35 10h2v1h-2zM0 11h4v1h-4zM7 11h1v1h-1zM10 11h3v1h-3zM14 11h2v1h-2zM21 11h1v1h-1zM23 11h1v1h-1zM25 11h1v1h-1zM27 11h3v1h-3zM32 11h2v1h-2zM1 12h2v1h-2zM6 12h1v1h-1zM8 12h6v1h-6zM17 12h5v1h-5zM24 12h2v1h-2zM28 12h3v1h-3zM33 12h1v1h-1zM35 12h2v1h-2zM0 13h1v1h-1zM4 13h1v1h-1zM7 13h1v1h-1zM11 13h1v1h-1zM13 13h1v1h-1zM16 13h7v1h-7zM24 13h2v1h-2zM30 13h2v1h-2zM34 13h3v1h-3zM1 14h2v1h-2zM5 14h2v1h-2zM10 14h1v1h-1zM12 14h2v1h-2zM17 14h2v1h-2zM21 14h3v1h-3zM26 14h1v1h-1zM30 14h3v1h-3zM34 14h3v1h-3zM0 15h1v1h-1zM4 15h2v1h-2zM8 15h2v1h-2zM14 15h2v1h-2zM17 15h2v1h-2zM21 15h2v1h-2zM25 15h2v1h-2zM28 15h2v1h-2zM32 15h1v1h-1zM0 16h4v1h-4zM6 16h2v1h-2zM9 16h1v1h-1zM11 16h2v1h-2zM18 16h2v1h-2zM21 16h1v1h-1zM24 16h1v1h-1zM26 16h2v1h-2zM30 16h1v1h-1zM33 16h2v1h-2zM0 17h2v1h-2zM5 17h1v1h-1zM8 17h1v1h-1zM10 17h1v1h-1zM12 17h2v1h-2zM15 17h10v1h-10zM28 17h6v1h-6zM35 17h2v1h-2zM0 18h2v1h-2zM3 18h2v1h-2zM6 18h2v1h-2zM10 18h1v1h-1zM13 18h1v1h-1zM15 18h2v1h-2zM21 18h2v1h-2zM28 18h1v1h-1zM30 18h7v1h-7zM1 19h3v1h-3zM5 19h1v1h-1zM7 19h1v1h-1zM10 19h1v1h-1zM12 19h2v1h-2zM17 19h2v1h-2zM21 19h1v1h-1zM23 19h1v1h-1zM28 19h2v1h-2zM31 19h5v1h-5zM0 20h1v1h-1zM2 20h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM10 20h2v1h-2zM13 20h4v1h-4zM20 20h2v1h-2zM23 20h4v1h-4zM28 20h1v1h-1zM30 20h1v1h-1zM32 20h2v1h-2zM35 20h1v1h-1zM0 21h3v1h-3zM4 21h2v1h-2zM7 21h1v1h-1zM9 21h1v1h-1zM14 21h1v1h-1zM16 21h1v1h-1zM20 21h2v1h-2zM24 21h1v1h-1zM28 21h1v1h-1zM30 21h2v1h-2zM33 21h1v1h-1zM36 21h1v1h-1zM2 22h1v1h-1zM6 22h1v1h-1zM8 22h2v1h-2zM11 22h4v1h-4zM16 22h2v1h-2zM19 22h1v1h-1zM24 22h3v1h-3zM30 22h1v1h-1zM36 22h1v1h-1zM1 23h1v1h-1zM5 23h1v1h-1zM7 23h6v1h-6zM17 23h1v1h-1zM19 23h8v1h-8zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h1v1h-1zM4 24h1v1h-1zM6 24h1v1h-1zM8 24h3v1h-3zM12 24h3v1h-3zM20 24h2v1h-2zM23 24h3v1h-3zM28 24h1v1h-1zM30 24h1v1h-1zM33 24h1v1h-1zM35 24h2v1h-2zM2 25h2v1h-2zM5 25h1v1h-1zM12 25h2v1h-2zM15 25h3v1h-3zM20 25h1v1h-1zM22 25h1v1h-1zM24 25h2v1h-2zM30 25h1v1h-1zM34 25h3v1h-3zM0 26h1v1h-1zM2 26h2v1h-2zM5 26h2v1h-2zM9 26h1v1h-1zM11 26h2v1h-2zM14 26h1v1h-1zM18 26h2v1h-2zM21 26h1v1h-1zM23 26h4v1h-4zM29 26h5v1h-5zM36 26h1v1h-1zM1 27h1v1h-1zM4 27h2v1h-2zM9 27h1v1h-1zM15 27h1v1h-1zM17 27h2v1h-2zM20 27h4v1h-4zM25 27h5v1h-5zM31 27h1v1h-1zM35 27h1v1h-1zM0 28h8v1h-8zM9 28h1v1h-1zM11 28h1v1h-1zM13 28h1v1h-1zM16 28h2v1h-2zM20 28h2v1h-2zM23 28h2v1h-2zM27 28h6v1h-6zM34 28h1v1h-1zM8 29h1v1h-1zM11 29h2v1h-2zM21 29h3v1h-3zM25 29h4v1h-4zM32 29h2v1h-2zM35 29h2v1h-2zM0 30h7v1h-7zM9 30h1v1h-1zM13 30h1v1h-1zM16 30h1v1h-1zM18 30h1v1h-1zM21 30h2v1h-2zM25 30h4v1h-4zM30 30h1v1h-1zM32 30h2v1h-2zM36 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM15 31h5v1h-5zM21 31h1v1h-1zM23 31h1v1h-1zM28 31h1v1h-1zM32 31h4v1h-4zM0 32h1v1h-1zM2 32h3v1h-3zM6 32h1v1h-1zM9 32h2v1h-2zM13 32h2v1h-2zM16 32h3v1h-3zM21 32h2v1h-2zM25 32h1v1h-1zM28 32h6v1h-6zM35 32h1v1h-1zM0 33h1v1h-1zM2 33h3v1h-3zM6 33h1v1h-1zM8 33h1v1h-1zM10 33h1v1h-1zM15 33h5v1h-5zM22 33h1v1h-1zM25 33h5v1h-5zM31 33h3v1h-3zM35 33h1v1h-1zM0 34h1v1h-1zM2 34h3v1h-3zM6 34h1v1h-1zM9 34h2v1h-2zM12 34h2v1h-2zM15 34h1v1h-1zM19 34h4v1h-4zM24 34h1v1h-1zM27 34h2v1h-2zM31 34h2v1h-2zM34 34h3v1h-3zM0 35h1v1h-1zM6 35h1v1h-1zM10 35h2v1h-2zM14 35h1v1h-1zM16 35h1v1h-1zM21 35h5v1h-5zM27 35h3v1h-3zM31 35h1v1h-1zM33 35h1v1h-1zM0 36h7v1h-7zM8 36h1v1h-1zM10 36h6v1h-6zM17 36h2v1h-2zM20 36h2v1h-2zM25 36h1v1h-1zM28 36h2v1h-2zM33 36h1v1h-1zM35 36h2v1h-2z" fill="#21152A"/></svg></div>
+  <div class="zona-teclado">
+    <p class="error" id="errorReg"></p>
+    <div class="acciones">
+      <button class="btn latido" id="btnEmpezar">Ya me registré</button>
+      <button class="btn-sec" id="btnCancelar">Volver</button>
+    </div>
+  </div>
+</section>
+
+<section id="carrera" class="pantalla" hidden>
+  <canvas id="lienzo"></canvas>
+  <div class="hud">
+    <div class="hud-fila"><span class="hud-meta" id="hMeta"></span><span class="hud-dist" id="hDist">0 m</span></div>
+    <div class="barra"><i id="hBarra"></i></div>
+  </div>
+  <p class="pista" id="pista">Toca la pantalla para saltar</p>
+  <div class="cuenta" id="cuenta" hidden>3</div>
+  <div class="aviso" id="aviso"></div>
+  <div class="velo" id="velo" hidden>
+    <div class="velo-caja">
+      <p class="velo-t" id="veloT"></p>
+      <p class="velo-s" id="veloS"></p>
+      <button class="btn" id="btnVelo"></button>
+    </div>
+  </div>
+</section>
+
+<section id="premio" class="pantalla" hidden>
+  <div class="bloque">
+    <p class="eyebrow" id="gNombre"></p>
+    <h2>¡Llegaste!</h2>
+    <div class="premio-caja" id="gPremio"></div>
+    <p class="cuando" id="gCuando"></p>
+    <div class="codigo-caja" id="gCodigoCaja" hidden>
+      <span class="rot">Código del premio</span>
+      <span class="cod" id="gCodigo"></span>
+      <span class="vence" id="gVence"></span>
+    </div>
+  </div>
+  <div class="vaso-caja"><img class="vaso" src="/reto-assets/vaso.jpg" alt=""></div>
+  <div class="bloque">
+    <p class="mostrar">Tómale una foto a esta pantalla y reclama tu premio en caja.</p>
+    <button class="btn" id="btnOtro">Siguiente jugador</button>
+    <p class="auto" id="gAuto"></p>
+  </div>
+</section>
+
+<section id="nada" class="pantalla" hidden>
+  <div class="bloque">
+    <p class="eyebrow" id="nNombre"></p>
+    <h2>¡Casi!</h2>
+    <p class="metros-fin" id="nMetros"></p>
+    <p class="sub-fin" id="nSub"></p>
+  </div>
+  <div class="bloque">
+    <button class="btn" id="btnOtro2">Siguiente jugador</button>
+    <p class="auto" id="nAuto"></p>
+  </div>
+</section>
+
+<section id="tablero" class="pantalla" hidden>
+  <p class="eyebrow" id="tEvento"></p>
+  <h2>Premios</h2>
+  <div class="stock" id="tStock"></div>
+  <div class="ultimos" id="tUltimos"></div>
+  <button class="btn-sec" id="btnIrJuego">Ir al juego</button>
+</section>
+
+<script>
+"use strict";
+const API = "/juego-api/juego/loro";
+const QS = new URLSearchParams(location.search);
+const EVENTO = (QS.get("evento") || "loro").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60) || "loro";
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+// Lo que la persona confirma al tocar "Ya me registré". Los datos personales
+// los guarda el formulario del QR, no nosotros: acá solo queda la partida.
+const AUTORIZACION = "Confirmo que dejé mis datos en el formulario de OAKBERRY y acepto las reglas del juego.";
+
+const ROT = ({ "90": "rot90", "270": "rot270", "-90": "rot270" })[QS.get("rotar") || ""];
+function orientar() {
+  const h = document.documentElement;
+  if (ROT) h.classList.add(ROT);
+  const f = QS.get("vertical");
+  const vertical = f === "1" || !!ROT || (f !== "0" && innerHeight >= innerWidth);
+  h.classList.toggle("vertical", vertical);
+  h.classList.toggle("horizontal", !vertical);
+}
+orientar();
+addEventListener("resize", () => { orientar(); ajustarOpciones(); });
+
+// ─── API ──────────────────────────────────────────────────────────────
+// Mismo origen (rewrite de vercel.json), así que fetch normal. Las dos
+// escrituras son idempotentes (insertId = participacion_id): reintentar es seguro.
+async function api(ruta, cuerpo, intentos = 4) {
+  let err;
+  for (let i = 0; i < intentos; i++) {
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 9000);
+      const r = await fetch(API + ruta, { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...cuerpo, evento: EVENTO, pais: PAIS }), signal: ctl.signal });
+      clearTimeout(t);
+      return await r.json();
+    } catch (e) { err = e; await sleep(400 * (i + 1)); }
+  }
+  throw err;
+}
+
+// ─── Escenas y colores ────────────────────────────────────────────────
+const ASSETS = "/exacto-assets/";
+const CLARO = { fondo: "#F5EEE0", texto: "#21152A", acento: "#4B1F60", panel: "rgba(245,238,224,.86)", boton: "#4B1F60", botonTexto: "#FBF6E9" };
+// Sobre morado un botón morado desaparece: ahí va dorado con texto tinta.
+const OSCURO = { fondo: "#280532", texto: "#FBF6E9", acento: "#F4B223", panel: "rgba(40,5,50,.55)", boton: "#F4B223", botonTexto: "#21152A" };
+const ESCENAS = {
+  portada:  { img: "escena-rio.jpg",    pos: "0% center",  ...CLARO, boton: "#F4B223", botonTexto: "#21152A" },
+  registro: { img: "escena-palmas.jpg", pos: "center",     ...CLARO },
+  // La carrera se dibuja entera en el canvas: el fondo de la página estorba.
+  carrera:  { img: null,                                   ...CLARO, fondo: "#F5EEE0" },
+  premio:   { img: null,                                   ...OSCURO, fondo: "#290533" },
+};
+Object.values(ESCENAS).forEach(e => { if (e.img) new Image().src = ASSETS + e.img; });
+new Image().src = "/reto-assets/vaso.jpg";
+function escena(nombre) {
+  const e = ESCENAS[nombre] || ESCENAS.portada;
+  const el = $("escena");
+  el.style.backgroundImage = e.img ? `url(${ASSETS}${e.img})` : "none";
+  el.style.backgroundPosition = e.pos || "center";
+  const s = document.body.style;
+  s.setProperty("--fondo", e.fondo); s.setProperty("--texto", e.texto);
+  s.setProperty("--acento", e.acento); s.setProperty("--panel", e.panel);
+  s.setProperty("--boton", e.boton); s.setProperty("--boton-texto", e.botonTexto);
+}
+
+// ─── Pantallas, inactividad ───────────────────────────────────────────
+const PANTALLAS = ["portada", "registro", "carrera", "premio", "nada", "tablero"];
+let timerInactividad = 0, timerAuto = 0;
+function ir(nombre) {
+  PANTALLAS.forEach(p => $(p).hidden = p !== nombre);
+  clearInterval(timerAuto);
+  if (nombre === "portada") { escena("portada"); pararReloj(); ocupado = false; registro = null; }
+  tocarActividad();
+}
+function tocarActividad() {
+  clearTimeout(timerInactividad);
+  // Si alguien se va a la mitad, la pantalla vuelve sola a la portada.
+  // El tablero no: lo deja abierto el equipo.
+  if ($("portada").hidden && $("tablero").hidden) timerInactividad = setTimeout(() => ir("portada"), 90000);
+}
+document.addEventListener("pointerdown", tocarActividad, { passive: true });
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("gesturestart", e => e.preventDefault());
+function cuentaAtras(el, segundos, alTerminar) {
+  clearInterval(timerAuto);
+  const fin = Date.now() + segundos * 1000;
+  const tick = () => {
+    const s = Math.ceil((fin - Date.now()) / 1000);
+    el.textContent = `Sigue solo en ${Math.max(0, s)} s`;
+    if (s <= 0) { clearInterval(timerAuto); alTerminar(); }
+  };
+  tick(); timerAuto = setInterval(tick, 1000);
+}
+if (EVENTO.includes("prueba")) $("badgePrueba").hidden = false;
+
+// ─── PORTADA ──────────────────────────────────────────────────────────
+$("btnJugar").addEventListener("click", () => {
+  const el = document.documentElement;
+  if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});
+  limpiarRegistro();
+  escena("registro");
+  ir("registro");
+});
+
+// ─── REGISTRO POR QR ──────────────────────────────────────────────────
+// Ya no pedimos nombre ni celular: la persona escanea el QR, deja sus datos
+// en el formulario y vuelve a confirmar con un botón. Con fila, escribir el
+// nombre y el celular en el teclado en pantalla era lo más lento de todo.
+//
+// OJO: sin celular no hay a quién aplicarle el "un intento por persona".
+// Ese control ahora es físico: la fila y el equipo.
+let PAIS = (QS.get("pais") || "do").toUpperCase();
+function limpiarRegistro() { $("errorReg").textContent = ""; }
+$("btnCancelar").addEventListener("click", () => ir("portada"));
+
+
+
+$("btnEmpezar").addEventListener("click", async () => {
+  if (ocupado) return;
+  ocupado = true;
+  const id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  Object.assign(J, { id, nivel: 0, label: "", meta: 0, v0: 0 });
+
+  // El registro viaja MIENTRAS el jugador lee la pantalla de "¡A correr!",
+  // no antes. Con fila, ese segundo de espera es la diferencia entre que el
+  // juego se sienta ágil o trabado. Si el guardado falla, se avisa ahí mismo
+  // y se devuelve: nadie corre sin quedar registrado.
+  await (cfgPedida || cargarConfig());   // los metros los manda el servidor, no la caché
+  arrancarCarrera();
+  registro = api("/registrar", { participacion_id: id, sin_datos: true, autorizacion: AUTORIZACION })
+    .then(r => {
+      if (r && r.ok) return true;
+      mostrarVelo("Un momento", (r && r.error) || "No se pudo guardar. Intenta de nuevo.",
+                  "Volver", () => { ocupado = false; ir("registro"); escena("registro"); });
+      return false;
+    })
+    .catch(() => {
+      mostrarVelo("Sin conexión", "No pudimos guardar tus datos. Avísale a alguien del equipo.",
+                  "Volver", () => { ocupado = false; ir("registro"); escena("registro"); });
+      return false;
+    });
+});
+
+// ─── ESTADO ───────────────────────────────────────────────────────────
+const J = { id: "", nivel: 0, label: "", meta: 0, v0: 0 };
+let MARCAS = [];
+let CFG = { niveles: [], titulo: null };
+let ocupado = false;
+let registro = null;   // promesa del registro: corre mientras el jugador lee
+
+// "Quedan N": sale del servidor, que es el que lleva la cuenta contra el cupo
+// del día y el del evento. Si el premio no tiene tope, no se muestra número.
+function restan(x) {
+  if (x.agotado) return `<span class="quedan pocos">se acabó por hoy</span>`;
+  if (x.quedan == null) return "";
+  const pocos = x.quedan <= 3 ? " pocos" : "";
+  // "hoy" cuando lo que aprieta es el tope del día: sin eso, la pantalla y el
+  // centro de mando parecían contradecirse (21 en el evento, 10 hoy).
+  const cuando = x.limita === "dia" ? " hoy" : "";
+  return `<span class="quedan${pocos}">quedan ${x.quedan}${cuando}</span>`;
+}
+// Pinta el código del premio. Viene del servidor: la pantalla no se lo puede
+// inventar, y es distinto en cada partida.
+function pintarCodigo(r, idCaja, idCod, idVence) {
+  const caja = $(idCaja);
+  if (!caja) return;
+  if (!r || !r.codigo) { caja.hidden = true; return; }
+  $(idCod).textContent = r.codigo;
+  $(idVence).textContent = r.vence ? "Válido hasta el " + r.vence : "";
+  caja.hidden = false;
+}
+function esc(t) { return String(t || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+// La escalera se pinta AL INSTANTE con la última que se vio, y se corrige
+// sola cuando contesta el servidor. Con el wifi del evento esa consulta puede
+// tardar segundos y la pantalla quedaba en blanco justo donde la gente mira.
+const CACHE_ESCALERA = "escalera_loro_" + EVENTO;
+let cfgPedida = null;
+
+function escaleraGuardada() {
+  try {
+    const g = JSON.parse(localStorage.getItem(CACHE_ESCALERA) || "null");
+    if (!g || !g.niveles || !g.niveles.length) return;
+    CFG = g;
+    $("pEvento").textContent = g.titulo || "OAKBERRY";
+    pintarEscalera();
+  } catch (e) {}
+}
+
+async function cargarConfig() {
+  cfgPedida = (async () => {
+    try {
+      const r = await fetch(`${API}/config?evento=${encodeURIComponent(EVENTO)}`).then(x => x.json());
+      if (!r || !r.ok) return false;
+      CFG = r;
+      try { localStorage.setItem(CACHE_ESCALERA, JSON.stringify(r)); } catch (e) {}
+      $("pEvento").textContent = r.titulo || "OAKBERRY";
+      pintarEscalera();
+      return true;
+    } catch (e) { return false; }
+  })();
+  return cfgPedida;
+}
+function pintarEscalera() {
+  const n = CFG.niveles.length;
+  $("escalera").innerHTML = CFG.niveles.map(x => `
+    <div class="peldano ${x.nivel === n ? "mayor" : ""} ${x.agotado ? "agotado" : ""}">
+      <span class="lbl">${esc(x.label)}${restan(x)}</span>
+      <span class="m">${x.agotado ? "agotado" : x.meta_m + " m"}</span>
+    </div>`).join("");
+}
+
+// ═══ LA CARRERA ═══════════════════════════════════════════════════════
+// Mundo en METROS, no en píxeles: así la dificultad que define el premio
+// (velocidad y meta) significa lo mismo en un tótem y en un celular.
+const cv = $("lienzo"), cx = cv.getContext("2d");
+const LORO = new Image(); LORO.src = "/exacto-assets/loro-vuela.png";
+let W = 0, H = 0, PXM = 0, SUELO = 0;
+let raf = 0;   // id del requestAnimationFrame, para poder cancelarlo
+
+function medir() {
+  const r = cv.getBoundingClientRect();
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  W = r.width; H = r.height;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  PXM = W / 8;              // ~8 metros a la vista: el loro y las palmeras se ven
+  SUELO = H * 0.70;
+}
+addEventListener("resize", () => { if (!$("carrera").hidden) medir(); });
+
+const G = { corriendo: false, dist: 0, v: 0, t0: 0, ult: 0, palmas: [], nubes: [], polvo: [],
+            y: 0, vy: 0, enSuelo: true, saltos: 0, giro: 0, apretado: 0, cuenta: 3, muerto: false };
+// Calibrado para que el tope del salto quede en ~2,1 m (palmeras hasta 1,70)
+// y el loro esté en el aire ~0,8 s: suficiente para pasar, no para flotar.
+// El segundo salto es más corto que el primero: da ~1,1 m extra sobre donde
+// se dispare, así que la altura total depende de CUÁNDO se toca. Ahí está la
+// habilidad — no es un botón de volar.
+const SALTO = { impulso: -9.0, gravedad: 26, sostener: -9, doble: -7.6 };   // metros/s
+// Metros sin palmeras al comenzar: lo justo para entender el control.
+const PISTA_LIBRE = 15;
+// A esta distancia el loro ya va al doble de velocidad y ahí se queda.
+const RAMPA_V = 700;
+// El servidor rechaza como imposible cualquier carrera por encima de 14 m/s:
+// la velocidad nunca puede pasar de aquí o le anularía la partida a alguien.
+const V_TOPE = 13.9;
+
+// La velocidad ya no sube parejo: va y viene. En un juego de saltar lo que
+// de verdad cuesta es perder el ritmo, y un vaivén lo rompe mucho mejor que
+// ir más rápido. El vaivén SIEMPRE resta (nunca sube de la base), así que el
+// tope del servidor se respeta solo.
+function velocidadEn(dist) {
+  const base = J.v0 * (1 + Math.min(1, dist / RAMPA_V));
+  const amp = 0.02 + 0.13 * Math.min(1, dist / (J.meta || 700));
+  // Dos ondas de distinto largo: con una sola, el vaivén tenía ritmo y se le
+  // cogía el tiempo. Sumadas no se repiten igual en toda la carrera.
+  const onda = 0.6 * Math.sin(dist / 24) + 0.4 * Math.sin(dist / 9.3 + 1.7);
+  return Math.min(V_TOPE, base * (1 - amp + amp * onda));
+}
+
+// Qué tan adentro va la carrera. Cuenta desde el TERCER premio, no desde el
+// arranque: hasta ahí el juego es amable para que los premios de abajo salgan,
+// y de ahí en adelante empieza a apretar. 1 es el premio mayor, y no se corta
+// ahí — pasado el mayor sigue apretando, si no, quien juega bien se queda
+// corriendo para siempre.
+function avance() {
+  const suave = MARCAS.length > 2 ? MARCAS[2].meta_m : 200;   // hasta el 3er premio
+  const tope = J.meta || 700;
+  return Math.max(0, (G.dist - suave) / Math.max(1, tope - suave));
+}
+
+function nuevaPalma(desde) {
+  const p = avance();
+  const q = Math.min(1, p);
+  // El hueco se mide en TIEMPO, no en metros: un múltiplo fijo de la velocidad
+  // dejaba la misma ventana de reacción a los 900 m que a los 40, y el juego
+  // nunca se ponía difícil de verdad. Ahora la ventana se cierra: holgada
+  // hasta el tercer premio y ~0,92-1,02 s en el premio mayor. El piso de
+  // 0,82 s es el techo del juego: sin él, quien juega perfecto correría para
+  // siempre.
+  let seg = Math.max(0.82, 1.22 - 0.30 * p) + Math.random() * Math.max(0.10, 0.45 - 0.30 * p);
+  // Y de vez en cuando una pegada: dos palmeras casi encimadas. Es lo que
+  // rompe el piloto automático — con huecos parejos, el juego se pasa de
+  // memoria y deja de emocionar.
+  if (Math.random() < 0.12 + 0.22 * q) seg *= 0.80;
+  const hueco = G.v * seg;
+
+  // Tres formas, no una. Mientras más adentro, más seguido salen las duras:
+  // así el tramo del premio mayor deja de ser el mismo obstáculo repetido y
+  // no se puede pasar de memoria.
+  //   doble → ancha: hay que librar las dos de un salto. Por eso va más BAJA:
+  //           ancha y alta a la vez no la libra ningún salto.
+  //   flaca → angosta y casi al tope de altura.
+  //   normal → la de siempre, que también crece con la carrera.
+  // Al arrancar casi todo es la palmera de siempre: ahí es donde salen los
+  // premios de abajo y no queremos secarlos. Las formas duras aparecen
+  // mientras más adentro, que es donde está el premio mayor.
+  const r = Math.random();
+  const pGigante = q < 0.35 ? 0 : 0.05 + 0.18 * q;   // solo aparece ya adentro
+  const pDoble = 0.03 + 0.28 * q;
+  const pFlaca = 0.06 + 0.20 * q;
+  let tipo, alto, ancho;
+  if (r < pGigante) {
+    // Gigante: más alta que un salto sencillo. Obliga al doble salto, y por
+    // eso no sale antes del tercer premio — antes sería injusta.
+    tipo = 3;
+    ancho = 0.5 + Math.random() * 0.18;
+    alto  = 2.05 + Math.random() * 0.30;
+  } else if (r < pGigante + pDoble) {
+    tipo = 1;
+    // El ancho se mide en TIEMPO de cruce, no en metros: a 7 m/s una doble de
+    // 2,5 m no la libra ningún salto, y a 14 m/s esa misma es un suspiro.
+    ancho = Math.min(2.6, Math.max(1.15, G.v * (0.15 + Math.random() * 0.07)));
+    alto  = 0.98 + 0.20 * q + Math.random() * 0.20;
+  } else if (r < pGigante + pDoble + pFlaca) {
+    tipo = 2;
+    ancho = 0.40 + Math.random() * 0.14;
+    alto  = Math.min(1.64, 1.18 + 0.30 * q + Math.random() * 0.16);
+  } else {
+    tipo = 0;
+    ancho = 0.62 + Math.random() * 0.22;
+    alto  = Math.min(1.64, (1.05 + 0.26 * q) + Math.random() * (0.45 - 0.10 * q));
+  }
+  return { x: desde + hueco, alto, ancho, tipo, semilla: Math.random() * 10 };
+}
+function reiniciarMundo() {
+  Object.assign(G, { corriendo: false, dist: 0, v: J.v0, t0: 0, ult: 0, y: 0, vy: 0,
+                     enSuelo: true, saltos: 0, giro: 0, apretado: 0, cuenta: 3, muerto: false,
+                     palmas: [], polvo: [],
+                     nubes: Array.from({ length: 5 }, () => ({ x: Math.random() * 14, y: 0.1 + Math.random() * 0.3, e: 0.5 + Math.random() * 0.8 })) });
+  // Nadie gana nada de arranque: el premio se salta, no se recibe. Solo hay
+  // una pista corta (~2 s a la velocidad inicial) para entender que se toca
+  // para saltar; de ahí en adelante hay palmeras hasta el primer premio.
+  let x = PISTA_LIBRE;
+  for (let i = 0; i < 6; i++) { const p = nuevaPalma(x); G.palmas.push(p); x = p.x; }
+}
+
+function arrancarCarrera() {
+  escena("carrera");
+  ir("carrera");
+  medir();
+  J.v0 = CFG.v0 || 7;
+  J.nivel = 0; J.label = "";
+  MARCAS = (CFG.niveles || []).filter(n => n.meta_m).sort((a, b) => a.meta_m - b.meta_m);
+  J.meta = MARCAS.length ? MARCAS[MARCAS.length - 1].meta_m : 700;
+  reiniciarMundo();
+  pintarHud(0);
+  dibujar();
+  const primera = MARCAS[0];
+  mostrarVelo("¡A correr!",
+    `Toca para saltar. Toca OTRA VEZ en el aire y saltas más alto. Si llegas a los ${primera ? primera.meta_m : 40} m te ganas ${primera ? primera.label : "tu premio"}, y de ahí sube.`,
+    "¡Empezar!", cuentaYArrancar);
+}
+function mostrarVelo(titulo, sub, boton, alTocar) {
+  $("veloT").textContent = titulo;
+  $("veloS").textContent = sub;
+  $("btnVelo").textContent = boton;
+  $("btnVelo").disabled = false;
+  $("velo").hidden = false;
+  $("btnVelo").onclick = alTocar;
+}
+async function cuentaYArrancar() {
+  $("velo").hidden = true;
+  $("cuenta").hidden = false;
+  $("cuenta").textContent = "3";
+  // La cuenta corre y el registro termina de viajar al mismo tiempo: lo que
+  // se espera es lo que falte, no la suma de los dos.
+  const cuenta = new Promise(listo => {
+    let n = 3;
+    const tic = setInterval(() => {
+      n -= 1;
+      if (n > 0) { $("cuenta").textContent = String(n); return; }
+      clearInterval(tic); listo();
+    }, 300);
+  });
+  // Nadie corre sin quedar registrado. Si el guardado falló, su propio velo
+  // ya tomó la pantalla y acá no se sigue.
+  const [, ok] = await Promise.all([cuenta, registro || Promise.resolve(true)]);
+  if (ok === false) { $("cuenta").hidden = true; return; }
+  $("cuenta").textContent = "¡YA!";
+  setTimeout(() => { $("cuenta").hidden = true; }, 300);
+  G.corriendo = true; G.t0 = performance.now(); G.ult = G.t0;
+  raf = requestAnimationFrame(bucle);
+}
+
+function saltar() {
+  if (!G.corriendo || G.muerto) return;
+  if (G.enSuelo) {
+    G.vy = SALTO.impulso; G.enSuelo = false; G.saltos = 1; G.apretado = 0.14; aletear();
+  } else if (G.saltos < 2) {
+    G.vy = SALTO.doble; G.saltos = 2; G.apretado = 0.10; aletear();
+  }
+}
+function aletear() { G.giro = -0.28; }
+$("carrera").addEventListener("pointerdown", e => {
+  if (!$("velo").hidden) return;   // el velo tiene su propio botón
+  e.preventDefault(); saltar();
+});
+$("carrera").addEventListener("pointerup", () => { G.apretado = 0; });
+addEventListener("keydown", e => {
+  if ($("carrera").hidden) return;
+  if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); saltar(); }
+});
+
+// La base de /reto llama a pararReloj() al volver a la portada. Acá no existía
+// y "Siguiente jugador" reventaba con ReferenceError.
+function pararReloj() { cancelAnimationFrame(raf); G.corriendo = false; }
+function pintarHud(dist) {
+  const sig = MARCAS.find(m => dist < m.meta_m);
+  $("hDist").textContent = Math.floor(dist) + " m";
+  $("hMeta").textContent = J.label
+    ? `Tienes: ${J.label}` + (sig ? ` · ${sig.label} a ${sig.meta_m} m` : " · ¡el mayor!")
+    : (sig ? `${sig.label} a los ${sig.meta_m} m` : "");
+  const desde = J.nivel ? ((MARCAS.find(m => m.nivel === J.nivel) || {}).meta_m || 0) : 0;
+  const hasta = sig ? sig.meta_m : desde + 1;
+  $("hBarra").style.transform = `scaleX(${Math.max(0, Math.min(1, (dist - desde) / (hasta - desde)))})`;
+}
+let avisoTimer = 0;
+function anunciar(txt) {
+  const el = $("aviso");
+  el.textContent = txt; el.classList.add("on");
+  clearTimeout(avisoTimer);
+  avisoTimer = setTimeout(() => el.classList.remove("on"), 1600);
+}
+
+function bucle(ahora) {
+  const dt = Math.min(0.05, (ahora - G.ult) / 1000);
+  G.ult = ahora;
+  if (G.corriendo && !G.muerto) avanzar(dt);
+  dibujar();
+  if (!G.muerto) raf = requestAnimationFrame(bucle);
+}
+
+function avanzar(dt) {
+  // La velocidad sube con la distancia hasta el doble de la inicial (el
+  // servidor usa el mismo tope para saber si un tiempo es posible). Va contra
+  // una distancia FIJA, no contra el premio mayor: si no, alejar el premio
+  // mayor aflojaba la velocidad de toda la carrera.
+  G.v = velocidadEn(G.dist);
+  G.dist += G.v * dt;
+
+  // Salto: un toque corto salta menos que uno sostenido; eso es lo que hace
+  // que se sienta con peso y no como un muñeco que sube siempre igual.
+  if (!G.enSuelo) {
+    if (G.apretado > 0 && G.vy < 0) { G.vy += SALTO.sostener * dt; G.apretado -= dt; }
+    G.vy += SALTO.gravedad * dt;
+    G.y += G.vy * dt;
+    if (G.y >= 0) {
+      G.y = 0; G.vy = 0; G.enSuelo = true; G.saltos = 0; G.apretado = 0;
+      for (let i = 0; i < 6; i++) G.polvo.push({ x: -0.15 + Math.random() * 0.3, y: 0, vx: -1 - Math.random(), vy: -0.6 - Math.random(), vida: 0.45 });
+    }
+  }
+  // El giro vuelve solo a cero: sin esto el loro se ve rígido.
+  G.giro += (0 - G.giro) * Math.min(1, dt * 7) + (G.enSuelo ? 0 : G.vy * dt * 0.06);
+  G.polvo.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 4 * dt; p.vida -= dt; });
+  G.polvo = G.polvo.filter(p => p.vida > 0);
+  G.nubes.forEach(n => { n.x -= G.v * 0.06 * n.e * dt; if (n.x < -3) { n.x = 14; n.y = 0.1 + Math.random() * 0.3; } });
+
+  // Palmas
+  while (G.palmas.length && G.palmas[G.palmas.length - 1].x - G.dist < 30) {
+    G.palmas.push(nuevaPalma(G.palmas[G.palmas.length - 1].x));
+  }
+  G.palmas = G.palmas.filter(p => p.x - G.dist > -4);
+
+  // Choque: el loro ocupa ~0.8 m de ancho y 0.85 m de alto, con margen amable.
+  const lx = 2.2, lw = 0.72, lh = 0.8;
+  for (const p of G.palmas) {
+    const dx = p.x - G.dist;
+    if (dx < lx + lw && dx + p.ancho > lx + 0.1) {
+      const pies = -G.y;                       // altura del loro sobre el suelo
+      if (pies < p.alto - 0.12) { return chocar(); }
+    }
+  }
+  // Al pasar una marca el premio sube solo. No hay meta final: se corre hasta
+  // chocar y se conserva lo alcanzado.
+  const alcanzada = MARCAS.filter(m => G.dist >= m.meta_m).pop();
+  if (alcanzada && alcanzada.nivel !== J.nivel) {
+    J.nivel = alcanzada.nivel; J.label = alcanzada.label;
+    anunciar("¡" + alcanzada.label + "!");
+  }
+  pintarHud(G.dist);
+}
+
+// ─── DIBUJO ───────────────────────────────────────────────────────────
+function cielo() {
+  const g = cx.createLinearGradient(0, 0, 0, SUELO);
+  g.addColorStop(0, "#F7E9C9"); g.addColorStop(0.45, "#F3DCD8"); g.addColorStop(1, "#E7CBDF");
+  cx.fillStyle = g; cx.fillRect(0, 0, W, SUELO);
+  cx.fillStyle = "#F4B223";
+  cx.beginPath(); cx.arc(W * 0.66, H * 0.14, W * 0.13, 0, 7); cx.fill();
+  cx.fillStyle = "rgba(255,255,255,.8)";
+  G.nubes.forEach(n => {
+    const x = n.x * PXM, y = n.y * H, r = PXM * 0.45 * n.e;
+    cx.beginPath();
+    cx.arc(x, y, r, 0, 7); cx.arc(x + r * 0.9, y + r * 0.15, r * 0.72, 0, 7); cx.arc(x - r * 0.9, y + r * 0.2, r * 0.62, 0, 7);
+    cx.fill();
+  });
+}
+
+// Tres capas de fondo a distinta velocidad. Antes eran filas de palmeras
+// pegadas que a ojo se leían como una reja; los cerros dan profundidad sin ruido.
+function cerros(desfase, alto, color) {
+  cx.fillStyle = color;
+  cx.beginPath();
+  cx.moveTo(0, SUELO);
+  for (let x = 0; x <= W; x += W / 24) {
+    const m = (x / PXM) + G.dist * desfase;
+    cx.lineTo(x, SUELO - alto * (0.55 + 0.45 * Math.sin(m * 0.35) * Math.cos(m * 0.11)));
+  }
+  cx.lineTo(W, SUELO); cx.closePath(); cx.fill();
+}
+function palmeraLejana(x, alto, tono) {
+  cx.save(); cx.translate(x, SUELO); cx.fillStyle = tono;
+  cx.fillRect(-alto * 0.035, -alto, alto * 0.07, alto);
+  for (let i = -2; i <= 2; i++) {
+    if (i === 0) continue;
+    cx.beginPath(); cx.moveTo(0, -alto);
+    cx.quadraticCurveTo(i * alto * 0.2, -alto - alto * 0.18, i * alto * 0.38, -alto + alto * 0.06);
+    cx.quadraticCurveTo(i * alto * 0.18, -alto - alto * 0.04, 0, -alto + alto * 0.02);
+    cx.fill();
+  }
+  cx.restore();
+}
+function suelo() {
+  const g = cx.createLinearGradient(0, SUELO, 0, H);
+  g.addColorStop(0, "#4B1F60"); g.addColorStop(1, "#2C1140");
+  cx.fillStyle = g; cx.fillRect(0, SUELO, W, H - SUELO);
+  cx.strokeStyle = "#21152A"; cx.lineWidth = Math.max(2, PXM * 0.03);
+  cx.beginPath(); cx.moveTo(0, SUELO); cx.lineTo(W, SUELO); cx.stroke();
+  // Matas que pasan pegadas a la cámara: es lo que hace sentir la velocidad.
+  cx.fillStyle = "rgba(183,156,200,.35)";
+  for (let i = 0; i < 14; i++) {
+    const paso = 2.1;
+    const x = ((i * paso - (G.dist * 1.35) % paso) + 14 * paso) % (14 * paso) * PXM;
+    const alto = PXM * (0.12 + ((i * 13) % 7) / 7 * 0.12);
+    const y = SUELO + PXM * 0.08 + ((i * 29) % 5) / 5 * (H - SUELO) * 0.5;
+    cx.beginPath(); cx.moveTo(x, y); cx.lineTo(x + alto * 0.35, y - alto); cx.lineTo(x + alto * 0.7, y); cx.fill();
+  }
+  cx.fillStyle = "rgba(251,246,233,.18)";
+  for (let i = 0; i < 20; i++) {
+    const paso = 1.7;
+    const x = ((i * paso - (G.dist * 0.9) % paso) + 20 * paso) % (20 * paso) * PXM;
+    cx.fillRect(x, SUELO + PXM * 0.05 + ((i * 37) % 60) / 60 * (H - SUELO) * 0.7, PXM * 0.12, PXM * 0.025);
+  }
+}
+
+// Una palmera se dibuja sola; la forma decide cuántas y de qué grosor.
+// La fronda va aparte del tronco: si las hojas se midieran por el tronco, la
+// palmera flaca saldría con hojas de juguete y no se leería como obstáculo.
+function palmaAcai(p) {
+  const x = (p.x - G.dist) * PXM, alto = p.alto * PXM, ancho = p.ancho * PXM;
+  if (p.tipo === 1) {
+    // Doble: dos troncos dentro del mismo ancho, con sombra compartida.
+    cx.save(); cx.translate(x, SUELO);
+    cx.fillStyle = "rgba(33,21,42,.25)";
+    cx.beginPath(); cx.ellipse(ancho * .5, 0, ancho * 0.62, PXM * 0.07, 0, 0, 7); cx.fill();
+    cx.restore();
+    const tronco = Math.min(ancho * 0.30, PXM * 0.7);
+    unaPalma(x, tronco, alto * 0.88, PXM * 0.52, p.semilla, false);
+    unaPalma(x + ancho - tronco, tronco, alto, PXM * 0.58, p.semilla + 2.1, false);
+    return;
+  }
+  // Flaca y gigante: tronco angosto pero fronda normal, para que se vean de
+  // lejos. La gigante lleva fronda más grande: tiene que gritar "doble salto".
+  const fronda = p.tipo === 3 ? PXM * 0.78 : p.tipo === 2 ? PXM * 0.6 : ancho;
+  unaPalma(x, ancho, alto, fronda, p.semilla, true);
+}
+
+function unaPalma(x, ancho, alto, fronda, semilla, conSombra) {
+  cx.save(); cx.translate(x, SUELO);
+  // sombra en el piso
+  if (conSombra) {
+    cx.fillStyle = "rgba(33,21,42,.25)";
+    cx.beginPath(); cx.ellipse(ancho * .5, 0, ancho * 0.75, PXM * 0.07, 0, 0, 7); cx.fill();
+  }
+  // tronco, con una curva leve para que no sea un palo
+  cx.fillStyle = "#2C1140";
+  cx.beginPath();
+  cx.moveTo(ancho * 0.28, 0);
+  cx.quadraticCurveTo(ancho * 0.1, -alto * 0.6, ancho * 0.34, -alto);
+  cx.lineTo(ancho * 0.66, -alto);
+  cx.quadraticCurveTo(ancho * 0.5, -alto * 0.6, ancho * 0.72, 0);
+  cx.closePath(); cx.fill();
+  // Hojas en un morado más fuerte que los cerros: si comparten tono, el
+  // obstáculo se lee como fondo y la gente choca sin entender por qué.
+  cx.fillStyle = "#4B1F60";
+  const base = { x: ancho * 0.5, y: -alto };
+  for (let i = -2; i <= 2; i++) {
+    const s = Math.sin(semilla + i) * 0.12;
+    cx.beginPath(); cx.moveTo(base.x, base.y);
+    cx.quadraticCurveTo(base.x + i * fronda * 0.75, base.y - fronda * (0.85 + s), base.x + i * fronda * 1.5, base.y + fronda * (0.22 + s));
+    cx.quadraticCurveTo(base.x + i * fronda * 0.7, base.y - fronda * 0.22, base.x, base.y + fronda * 0.1);
+    cx.fill();
+  }
+  // racimo de açaí
+  cx.fillStyle = "#14041B";
+  for (let i = 0; i < 7; i++) {
+    const a = semilla + i;
+    cx.beginPath(); cx.arc(base.x + Math.cos(a) * fronda * 0.3, base.y + fronda * 0.28 + Math.sin(a) * fronda * 0.18, fronda * 0.11, 0, 7); cx.fill();
+  }
+  cx.restore();
+}
+function loro() {
+  const x = 2.2 * PXM, y = SUELO + G.y * PXM;
+  const alto = PXM * 1.05;
+  const escala = LORO.width ? alto / LORO.height : 1;
+  const an = (LORO.width || 100) * escala;
+  // sombra: se achica al saltar, que es lo que da la sensación de altura
+  const h = Math.min(1, -G.y / 2.4);
+  cx.fillStyle = `rgba(33,21,42,${0.26 * (1 - h)})`;
+  cx.beginPath(); cx.ellipse(x + an * 0.4, SUELO + 2, an * 0.42 * (1 - h * 0.5), PXM * 0.08 * (1 - h * 0.4), 0, 0, 7); cx.fill();
+  cx.save();
+  cx.translate(x + an * 0.4, y - alto * 0.5);
+  cx.rotate(G.giro);
+  // aleteo y trote: un bamboleo suave, no un sprite que salta de cuadro en cuadro
+  const bat = G.enSuelo ? Math.sin(G.dist * 7) * 0.06 : Math.sin(performance.now() / 70) * 0.13;
+  const sq = G.apretado > 0 ? 1.06 : 1;
+  cx.scale(1 / sq, sq * (1 + bat * 0.35));
+  if (LORO.complete && LORO.width) cx.drawImage(LORO, -an * 0.5, -alto * 0.5 + bat * alto * 0.12, an, alto);
+  cx.restore();
+  // polvo al aterrizar
+  cx.fillStyle = "rgba(251,246,233,.7)";
+  G.polvo.forEach(p => {
+    cx.globalAlpha = Math.max(0, p.vida / 0.45);
+    cx.beginPath(); cx.arc(x + (0.3 + p.x) * PXM, SUELO + p.y * PXM, PXM * 0.05, 0, 7); cx.fill();
+  });
+  cx.globalAlpha = 1;
+}
+function dibujar() {
+  cx.clearRect(0, 0, W, H);
+  cielo();
+  cerros(0.06, H * 0.20, "rgba(183,156,200,.55)");
+  cerros(0.14, H * 0.13, "rgba(123,74,147,.65)");
+  // palmeras sueltas a media distancia, bien separadas
+  for (let i = 0; i < 4; i++) {
+    const paso = 7.5;
+    const x = ((i * paso - (G.dist * 0.3) % paso) + 4 * paso) % (4 * paso) * PXM;
+    palmeraLejana(x, PXM * 2.1, "rgba(80,26,100,.4)");
+  }
+  suelo();
+  G.palmas.forEach(p => { const dx = (p.x - G.dist); if (dx > -2 && dx < 13) palmaAcai(p); });
+  loro();
+}
+
+// ─── CIERRE ───────────────────────────────────────────────────────────
+function chocar() {
+  G.muerto = true; G.corriendo = false;
+  dibujar();
+  const sig = MARCAS.find(m => G.dist < m.meta_m);
+  mostrarVelo("¡Pum!",
+    `${Math.floor(G.dist)} m. ` + (J.label ? `Te llevas ${J.label}.` : "")
+    + (sig ? ` ${sig.label} estaba a ${sig.meta_m} m.` : ""),
+    "Ver mi premio", () => irAlResultado());
+}
+async function irAlResultado() {
+  $("btnVelo").disabled = true;
+  $("btnVelo").textContent = "Guardando…";
+  await cerrar();
+  $("velo").hidden = true;
+}
+async function cerrar() {
+  const ms = Math.round(performance.now() - G.t0);
+  const metros = Math.floor(G.dist);
+  let r = null;
+  try { r = await api("/terminar", { participacion_id: J.id, metros, ms }, 3); } catch (e) {}
+  const gano = r && r.ok && r.gano;   // el nivel lo decide el servidor
+  escena("premio");
+  if (gano) {
+    $("gNombre").textContent = "Tu premio";
+    $("gPremio").textContent = r.premio;
+    $("gCuando").textContent = r.cuando || "";
+    pintarCodigo(r, "gCodigoCaja", "gCodigo", "gVence");
+    ir("premio");
+    confeti();
+    cuentaAtras($("gAuto"), 25, () => ir("portada"));
+  } else {
+    $("nNombre").textContent = "Gracias por jugar";
+    $("nMetros").textContent = `${metros} m`;
+    $("nSub").textContent = "No pudimos guardar tu carrera. Avísale a alguien del equipo.";
+    ir("nada");
+    cuentaAtras($("nAuto"), 10, () => ir("portada"));
+  }
+  cargarConfig();
+}
+$("btnOtro").addEventListener("click", () => ir("portada"));
+$("btnOtro2").addEventListener("click", () => ir("portada"));
+
+function confeti() {
+  const colores = ["#F4B223", "#E04850", "#B79CC8", "#FBF6E9", "#7B4A93"];
+  document.body.style.setProperty("--caida", Math.round(document.body.clientHeight * 1.15) + "px");
+  for (let i = 0; i < 80; i++) {
+    const c = document.createElement("div");
+    c.className = "confeti";
+    c.style.left = Math.random() * 100 + "%";
+    c.style.background = colores[i % colores.length];
+    c.style.animationDuration = 2.4 + Math.random() * 2.6 + "s";
+    c.style.animationDelay = Math.random() * 0.8 + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 6500);
+  }
+}
+
+// ─── TABLERO DEL EQUIPO ───────────────────────────────────────────────
+async function cargarTablero() {
+  let r = null;
+  try { r = await fetch(`${API}/tablero?evento=${encodeURIComponent(EVENTO)}`).then(x => x.json()); } catch (e) {}
+  if (!r || !r.ok) { $("tStock").innerHTML = `<p class="ultimos">Sin conexión. Reintentando…</p>`; return; }
+  $("tStock").innerHTML = r.niveles.slice().reverse().map(n => {
+    const quedan = Math.max(0, n.cupo - n.tomados);
+    return `<div class="stock-fila ${quedan ? "" : "sin"}"><span>${esc(n.label)}</span><span class="q">${quedan} de ${n.cupo}</span></div>`;
+  }).join("");
+  $("tUltimos").innerHTML = r.carreras.length
+    ? r.carreras.map(c => `<div>${c.gano ? "🎁 " + esc(c.premio) : esc(c.metros) + " m"} · ${esc(c.hora || "")}</div>`).join("")
+    : `<div>Todavía no ha corrido nadie.</div>`;
+}
+function verTablero() {
+  escena("premio");
+  $("tEvento").textContent = EVENTO;
+  ir("tablero");
+  cargarTablero();
+}
+setInterval(() => { if (!$("tablero").hidden) cargarTablero(); }, 15000);
+$("btnIrJuego").addEventListener("click", () => { history.replaceState(null, "", location.pathname + location.search); ir("portada"); });
+
+function hayPartida() { return !$("carrera").hidden && G && G.corriendo; }
+
+// ─── Salir al menú de juegos ──────────────────────────────────────────
+// Con una partida en curso pide confirmación: en un tótem un roce no puede
+// borrar lo que la persona lleva jugado.
+const HUB = (() => {
+  const q = ["evento=" + encodeURIComponent(EVENTO)];
+  ["pais", "rotar", "vertical"].forEach(k => { if (QS.get(k)) q.push(k + "=" + encodeURIComponent(QS.get(k))); });
+  return "/juegos?" + q.join("&");
+})();
+let pidiendoSalir = 0;
+$("btnSalir").addEventListener("click", () => {
+  if (!hayPartida() || Date.now() - pidiendoSalir < 4000) { location.href = HUB; return; }
+  pidiendoSalir = Date.now();
+  $("btnSalir").textContent = "¿Salir?";
+  $("btnSalir").classList.add("confirmar");
+  setTimeout(() => {
+    if (Date.now() - pidiendoSalir >= 3900) {
+      $("btnSalir").textContent = "Salir";
+      $("btnSalir").classList.remove("confirmar");
+    }
+  }, 4000);
+});
+
+escena("portada");
+escaleraGuardada();   // lo último que se vio, al instante
+cargarConfig();       // y el servidor corrige
+if ((location.hash || "").toLowerCase() === "#tablero") verTablero();
+addEventListener("hashchange", () => { if ((location.hash || "").toLowerCase() === "#tablero") verTablero(); });
+
+</script>
+</body>
+</html>

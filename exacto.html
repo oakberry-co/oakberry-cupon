@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es" class="vertical">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FBF6E9">
+<title>EXACTO OAKBERRY · Santo Domingo</title>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-regular.woff2" as="font" type="font/woff2" crossorigin>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!--
+  EXACTO OAKBERRY — juego de HABILIDAD del tótem de la apertura de Santo Domingo.
+  Backend: adquisicion/backend/actions/exacto.py. Separado de Vuelo (/vuelo).
+
+  Mecánica (v2): la persona ESCOGE el premio y el premio define cuántas rondas
+  tiene que pasar (15% = 1 … año de açaí = 5). En cada ronda un contador 00–99
+  corre como reloj de tarjetas, la pantalla dice "para en el 37" y hay que
+  tocar justo cuando lo muestra. Cada ronda va un poco más rápida y cambia el
+  fondo; falla una y pierde. El premio es un código de un solo uso para la caja.
+
+  La habilidad se mide con el reloj de ESTA pantalla (ms desde que arrancó el
+  contador): a 30 números por segundo cada número dura 33 ms y la latencia del
+  wifi no puede decidir quién gana. El servidor acota ese dato contra su reloj.
+
+  Parámetros: ?evento=sdq-exacto-prueba · ?rotar=90|270 · ?vertical=1|0
+  (mismos que /vuelo). Unidades en cqmin (lado corto del <body>): con la página girada o en un PC, vmin miente.
+-->
+<style>
+/* Tipografía de marca: Nexa Slab (Fontfabric), de la carpeta de fuentes de Daniel
+   (Drive 10ERtzG_WPCJh2DBtmmWGIuskcyJIa7Ot). Recortada a latín + puntuación y en
+   WOFF2 (~21 KB c/u): Book (400), Bold (700) y Black (900), las tres versiones
+   COMPLETAS. NO usar "Nexa Slab Regular FREE" ni "Bold FREE" de esa carpeta: son
+   demos y dibujan : % - · ¡ ¿ / ( ) como un sello "available in the full version".
+   font-display:block — en el kiosco es preferible un instante en blanco a ver
+   el juego saltar de una fuente a otra en plena cuenta regresiva. */
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-regular.woff2') format('woff2');font-weight:400;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-bold.woff2') format('woff2');font-weight:600 700;font-display:block}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-black.woff2') format('woff2');font-weight:800 900;font-display:block}
+:root{
+  --crema:#FBF6E9; --hueso:#EAE1CC; --tinta:#21152A; --tinta-suave:#5C4A66;
+  --morado:#4B1F60; --lila:#B79CC8; --oro:#E3A93B; --rojo:#B3261E; --verde:#2F6B3A;
+  --fondo:var(--crema); --texto:var(--tinta);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+body{container-type:size}
+html{background:var(--tinta)}
+body{font-family:'Nexa Slab',Rockwell,'Roboto Slab',Georgia,serif;background:var(--fondo);
+  color:var(--texto);font-size:3.2cqmin;line-height:1.35;transition:background .6s,color .6s;position:relative}
+[hidden]{display:none!important}
+button{font-family:inherit;border:none;cursor:pointer;color:inherit;background:none}
+
+html.rot90 body,html.rot270 body{position:fixed;top:0;left:0;width:100vh;height:100vw;transform-origin:top left}
+html.rot90 body{transform:rotate(90deg) translateY(-100%)}
+html.rot270 body{transform:rotate(-90deg) translateX(-100%)}
+
+.pantalla{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;gap:2.4cqmin;padding:6cqmin 6cqmin 7cqmin;text-align:center}
+.bloque{display:flex;flex-direction:column;align-items:center;gap:2cqmin;width:100%}
+.btn{background:var(--boton,var(--morado));color:var(--boton-texto,var(--crema));font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  font-size:6cqmin;padding:3.4cqmin 4cqmin;border-radius:999px;box-shadow:0 1.1cqmin 0 var(--tinta);width:88cqmin;line-height:1.15}
+.btn:active{transform:translateY(.8cqmin);box-shadow:0 .3cqmin 0 var(--tinta)}
+.btn:disabled{opacity:.45;animation:none}
+.btn small{display:block;font-size:.5em;letter-spacing:.06em;font-weight:600;margin-top:.6cqmin;opacity:.9}
+.btn.claro{background:var(--crema);color:var(--tinta)}
+.btn.oro{background:var(--oro);color:var(--tinta)}
+.btn-sec{border:.4cqmin solid currentColor;border-radius:999px;font-weight:600;font-size:3.8cqmin;
+  padding:3cqmin 5cqmin;text-transform:uppercase;letter-spacing:.08em}
+.eyebrow{font-size:2.8cqmin;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.75}
+.salir{position:absolute;top:1.6cqmin;left:1.6cqmin;z-index:60;
+  background:rgba(33,21,42,.5);color:var(--crema);border-radius:999px;
+  padding:1.4cqmin 3cqmin;font-family:inherit;font-size:2.6cqmin;font-weight:800;
+  letter-spacing:.12em;text-transform:uppercase;border:.3cqmin solid rgba(251,246,233,.3)}
+.salir:active{transform:scale(.96)}
+.salir.confirmar{background:#E04850;color:#fff;border-color:transparent}
+.badge-prueba{position:absolute;top:1.6cqmin;right:1.6cqmin;background:var(--rojo);color:#fff;font-weight:800;
+  padding:.8cqmin 2cqmin;border-radius:1cqmin;letter-spacing:.1em;font-size:2.4cqmin;z-index:50}
+.latido{animation:latido 1.8s ease-in-out infinite}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+/* ── ESCENAS (kit de assets OAKBERRY: Drive 1j3WUcP92_px6cPz5OkudmXLPJKqvj48B) ──
+   Cada momento del juego es una escena del viaje del loro: letras OAK en la
+   espera, palmas → edificio → río en los niveles 1–3, OAK oscuro en el 4 y el
+   sol dorado en el premio mayor. Las piezas sueltas venían sobre blanco y se
+   pasaron a PNG transparente quitando SOLO el blanco conectado al borde (si se
+   quita todo lo claro, la cara del loro y la nube desaparecen). */
+.escena{position:absolute;inset:0;z-index:0;background-color:var(--fondo);background-size:cover;
+  background-position:center;transition:background-color .6s}
+.deco{position:absolute;pointer-events:none;z-index:0;opacity:0;transition:opacity .6s}
+.deco.on{opacity:1}
+#decoLoro{width:48cqmin;top:10cqmin;left:-55cqmin;animation:cruzar 13s linear infinite}
+@keyframes cruzar{0%{transform:translate(0,4cqmin)}50%{transform:translate(80cqmin,-3cqmin)}100%{transform:translate(170cqmin,2cqmin)}}
+#decoSol{width:86cqmin;left:7cqmin;top:22%}
+#decoPajaros{width:62cqmin;top:5cqmin;left:19cqmin}
+.pantalla{z-index:1}
+.panel{background:var(--panel);border-radius:3cqmin;padding:2cqmin 4cqmin;width:auto}
+
+/* ── EMBUDO ─────────────────────────────────────────────────────────── */
+/* La sombra va en el contenedor: el clip-path de cada tramo recorta cualquier sombra propia, y sin
+   borde el tramo del nivel actual se funde con el fondo, que es de su mismo color. */
+.embudo{display:flex;flex-direction:column;align-items:center;gap:1cqmin;width:100%;filter:drop-shadow(0 .5cqmin .5cqmin rgba(0,0,0,.3))}
+.tramo{position:relative;display:flex;align-items:center;justify-content:center;gap:2cqmin;
+  height:9.4cqmin;font-weight:800;font-size:3cqmin;letter-spacing:.01em;white-space:nowrap;
+  clip-path:polygon(0 0,100% 0,96% 100%,4% 100%);transition:transform .3s,opacity .3s}
+.tramo .n{font-size:2.6cqmin;opacity:.75;font-weight:600}
+.tramo.actual{transform:scale(1.05)}
+.tramo.superado::before{content:"✓";font-size:3.6cqmin}
+.tramo.agotado{opacity:.35}
+.tramo.agotado .lbl{text-decoration:line-through}
+.embudo.mini .tramo{height:6.6cqmin;font-size:2.5cqmin}
+.embudo.mini .tramo .n{font-size:2cqmin}
+.embudo.mini .tramo:not(.actual):not(.superado){opacity:.45}
+.tramo{flex-direction:column;gap:0;line-height:1.12}
+.tramo .rondas{font-size:.76em;font-weight:600;opacity:.85}
+.embudo.elegir{gap:1.8cqmin}
+.embudo.elegir .tramo{height:13.2cqmin;font-size:4.2cqmin;cursor:pointer}
+.embudo.elegir .tramo.elegible:active{transform:scale(.96)}
+#eleccion h2{font-size:15cqmin;font-weight:900;line-height:.95;letter-spacing:-.01em;color:var(--acento);margin-top:1cqmin}
+.toca-premio{font-size:5.4cqmin;font-weight:800;color:var(--crema);text-transform:uppercase;letter-spacing:.06em;
+  animation:latido 1.8s ease-in-out infinite;text-shadow:0 .4cqmin 1cqmin rgba(0,0,0,.35)}
+#eleccion .sub{font-size:5cqmin;font-weight:600;max-width:30ch;margin-top:1cqmin}
+.progreso{display:flex;gap:1.8cqmin;justify-content:center;margin:.8cqmin 0}
+.progreso i{width:3.6cqmin;height:3.6cqmin;border-radius:50%;border:.55cqmin solid currentColor;display:block}
+.progreso i.ok{background:currentColor}
+
+/* ── ESPERA ─────────────────────────────────────────────────────────── */
+#espera h1{font-size:19cqmin;font-weight:900;line-height:.9;letter-spacing:-.01em;color:var(--acento,var(--morado))}
+#espera .bajada{font-size:4.6cqmin;max-width:24ch;font-weight:600}
+.reloj-demo{display:flex;gap:1.6cqmin}
+.demo{display:flex;flex-direction:column;align-items:center;gap:1.6cqmin;margin-top:2cqmin}
+.demo-meta{font-size:3.4cqmin;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--acento)}
+.reloj-demo .carta{transition:background .25s}
+.reloj-demo.acierto{animation:rebote .55s ease-out}
+@keyframes rebote{0%{transform:scale(1)}40%{transform:scale(1.14)}70%{transform:scale(.96)}100%{transform:scale(1)}}
+.quedan{font-weight:600;font-size:3.4cqmin}
+.ticker{min-height:2.7em;font-size:2.7cqmin;opacity:.8;max-width:100%}
+
+/* ── REGISTRO (igual que Vuelo) ─────────────────────────────────────── */
+#registro{justify-content:flex-start;gap:2.6cqmin}
+#registro h2{font-size:9cqmin;font-weight:800;color:var(--morado);line-height:1}
+.campos{display:grid;grid-template-columns:1fr;gap:2cqmin;width:100%}
+.campo{border:.5cqmin solid var(--hueso);border-radius:2cqmin;padding:2cqmin 3cqmin;text-align:left;background:#fff;color:var(--tinta)}
+.campo.activo{border-color:var(--morado);box-shadow:0 0 0 .8cqmin rgba(75,31,96,.16)}
+.campo label{display:block;font-size:2.6cqmin;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-suave)}
+.campo .valor{font-size:7cqmin;font-weight:600;min-height:1.3em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.campo.activo .valor::after{content:"";display:inline-block;width:.08em;height:1em;background:var(--morado);
+  vertical-align:-.12em;margin-left:.04em;animation:cursor 1s steps(1) infinite}
+@keyframes cursor{50%{opacity:0}}
+.tyc{display:flex;align-items:center;gap:2.6cqmin;text-align:left;font-size:2.8cqmin;width:100%;padding:.6cqmin 0}
+.check{flex:0 0 auto;width:8.4cqmin;height:8.4cqmin;border:.6cqmin solid var(--morado);border-radius:1.4cqmin;
+  display:grid;place-items:center;font-size:6cqmin;font-weight:800;color:var(--crema)}
+.check.on{background:var(--morado)}
+.zona-teclado{margin-top:auto;width:100%;display:flex;flex-direction:column;align-items:center;gap:2.4cqmin}
+.teclado{display:grid;gap:1.4cqmin;width:100%}
+.fila{display:flex;gap:1.2cqmin;justify-content:center}
+.tecla{flex:1 1 0;min-width:0;min-height:11.5cqmin;background:#fff;color:var(--tinta);border:.35cqmin solid var(--hueso);
+  border-radius:1.6cqmin;font-size:5.4cqmin;font-weight:600;box-shadow:0 .7cqmin 0 var(--hueso)}
+.tecla:active{background:var(--hueso);transform:translateY(.5cqmin);box-shadow:none}
+.tecla.ancha{flex:4 1 0;font-size:3.4cqmin;letter-spacing:.1em}
+.tecla.accion{flex:2.4 1 0;font-size:3.4cqmin}
+.teclado.num{width:72cqmin}
+.teclado.num .tecla{min-height:13cqmin;font-size:7cqmin}
+.teclado.num .tecla.accion{flex:1 1 0;font-size:3.2cqmin}
+.error{color:var(--rojo);font-weight:600;min-height:1.4em;font-size:3.6cqmin}
+.acciones{display:flex;gap:3cqmin;align-items:center;width:100%}
+.acciones .btn{flex:1;width:auto;font-size:5.6cqmin}
+
+/* ── RELOJ DE TARJETAS ──────────────────────────────────────────────── */
+.reloj{display:flex;gap:2.4cqmin;justify-content:center}
+.carta{outline:.5cqmin solid rgba(251,246,233,.22);position:relative;width:34cqmin;height:46cqmin;border-radius:3cqmin;background:var(--tinta);color:var(--crema);
+  display:grid;place-items:center;font-size:36cqmin;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;
+  box-shadow:0 2cqmin 4cqmin rgba(0,0,0,.28), inset 0 0 0 .5cqmin rgba(255,255,255,.06);overflow:hidden}
+.carta::after{content:"";position:absolute;left:0;right:0;top:50%;height:.6cqmin;background:rgba(0,0,0,.55)}
+.carta.flip{animation:flip .09s ease-out}
+@keyframes flip{0%{transform:scaleY(.86)}100%{transform:scaleY(1)}}
+.reloj-demo .carta{width:15cqmin;height:20cqmin;font-size:15cqmin;border-radius:1.6cqmin}
+.reloj.acierto .carta{background:var(--verde)}
+.reloj.fallo .carta{background:var(--rojo)}
+
+/* ── JUEGO ──────────────────────────────────────────────────────────── */
+#juego{justify-content:space-between}
+#juego .meta{font-size:5cqmin;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+#juego .objetivo{font-size:30cqmin;font-weight:800;line-height:.9;letter-spacing:-.04em}
+#juego .premio-en-juego{font-size:3.8cqmin;font-weight:600}
+#juego .toca{font-size:6.4cqmin;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+#juego .cuenta{font-size:9cqmin;font-weight:800;min-height:1.2em}
+
+/* ── DECISIÓN / FALLO / PREMIO ──────────────────────────────────────── */
+#decision h2,#premio h2{color:var(--acento)}
+#decision h2,#fallo h2{font-size:15cqmin;font-weight:800;line-height:.95;letter-spacing:-.03em}
+#decision .sub,#fallo .sub{font-size:4.4cqmin;max-width:30ch;font-weight:600}
+.opciones{display:flex;flex-direction:column;gap:3cqmin;width:100%;align-items:center}
+.aviso-riesgo{font-size:3cqmin;opacity:.8}
+#premio h2{font-size:11cqmin;font-weight:800;line-height:1;letter-spacing:-.03em;max-width:14ch}
+.codigo{font-size:13cqmin;font-weight:800;letter-spacing:.12em;background:var(--crema);color:var(--tinta);
+  border-radius:2.4cqmin;padding:1.6cqmin 4cqmin;border:.6cqmin dashed var(--tinta)}
+.vence{font-size:3.6cqmin;font-weight:600}
+.guardar{display:flex;align-items:center;gap:3cqmin;background:#fff;color:var(--tinta);border-radius:3cqmin;
+  padding:3cqmin;width:88cqmin;text-align:left}
+.guardar p{font-size:3.4cqmin;font-weight:600}
+#qr{width:30cqmin;height:30cqmin;flex:0 0 auto}
+#qr img,#qr canvas{width:100%!important;height:100%!important;display:block}
+.wa-ok{font-size:4cqmin;font-weight:800;color:var(--verde);background:#fff;border-radius:999px;padding:1.4cqmin 4cqmin}
+.auto{font-size:2.8cqmin;opacity:.7}
+.confeti{position:absolute;top:-4%;width:2cqmin;height:3cqmin;pointer-events:none;animation:cae linear forwards;z-index:40}
+@keyframes cae{to{transform:translateY(var(--caida,1200px)) rotate(720deg)}}
+
+/* ── HORIZONTAL (un computador) ─────────────────────────────────────
+   No hay diseño horizontal aparte: se muestra EL MISMO tótem, centrado y en
+   proporción 9:16. Así lo que se revisa en el PC es lo que se ve en la tienda.
+   Por eso todas las medidas van en cqmin (lado corto del <body>), no en cqmin
+   (lado corto de la ventana): en una ventana ancha, cqmin sería el alto y todo
+   saldría gigante dentro del marco angosto. */
+html.horizontal body{width:min(100vw, calc(100vh * 9 / 16));height:100vh;margin:0 auto;
+  box-shadow:0 0 0 100vmax var(--tinta)}
+</style>
+</head>
+<body>
+<div class="escena" id="escena"></div>
+<img class="deco" id="decoSol" src="/exacto-assets/sol-loro.png" alt="">
+<img class="deco" id="decoLoro" src="/exacto-assets/loro-vuela.png" alt="">
+<img class="deco" id="decoPajaros" src="/exacto-assets/pajaros.png" alt="">
+
+<button class="salir" id="btnSalir">Salir</button>
+<div class="badge-prueba" id="badgePrueba" hidden>MODO PRUEBA</div>
+
+<!-- ═══ ESPERA ═══ -->
+<section id="espera" class="pantalla">
+  <div class="bloque">
+    <p class="eyebrow">Apertura · Plaza Andalucía</p>
+    <h1>EXACTO</h1>
+    <p class="bajada">Para el contador en el número exacto.</p>
+    <div class="demo">
+      <p class="demo-meta" id="demoMeta">&nbsp;</p>
+      <div class="reloj reloj-demo" id="demoReloj"><div class="carta" id="demo1">0</div><div class="carta" id="demo2">0</div></div>
+    </div>
+  </div>
+  <div class="embudo" id="embudoEspera"></div>
+  <div class="bloque">
+    <p class="quedan panel" id="quedan"></p>
+    <button class="btn latido" id="btnJugar">Toca para jugar</button>
+  </div>
+</section>
+
+<!-- ═══ REGISTRO ═══ -->
+<section id="registro" class="pantalla" hidden>
+  <h2>¿Quién juega?</h2>
+  <div class="campos">
+    <div class="campo activo" id="campoNombre"><label>Tu nombre</label><div class="valor" id="valNombre"></div></div>
+    <div class="campo" id="campoCel"><label>Tu celular (WhatsApp)</label><div class="valor" id="valCel"></div></div>
+  </div>
+  <div class="tyc" id="tyc"><div class="check" id="check"></div>
+    <span>Acepto las reglas del juego (una partida por persona, premios hasta agotar existencias) y que OAKBERRY me escriba por WhatsApp y guarde mis datos.</span></div>
+  <div class="zona-teclado">
+    <p class="error" id="errorReg"></p>
+    <div class="teclado" id="teclado"></div>
+    <div class="acciones">
+      <button class="btn-sec" id="btnCancelar">Cancelar</button>
+      <button class="btn" id="btnEmpezar">¡A jugar!</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ELECCIÓN DEL PREMIO ═══ -->
+<section id="eleccion" class="pantalla" hidden>
+  <div class="bloque">
+    <h2>¿QUÉ QUIERES GANAR?</h2>
+    <p class="sub">Más premio, más rondas.<br>Si fallas una, pierdes.</p>
+  </div>
+  <div class="bloque">
+    <p class="toca-premio">👇 Toca tu premio</p>
+    <div class="embudo elegir" id="embudoEleccion"></div>
+  </div>
+  <p class="error panel" id="errorEleccion" hidden></p>
+</section>
+
+<!-- ═══ JUEGO ═══ -->
+<section id="juego" class="pantalla" hidden>
+  <div class="bloque panel">
+    <p class="meta" id="jNivel"></p>
+    <div class="progreso" id="jProgreso"></div>
+    <p class="eyebrow">Para en el</p>
+    <p class="objetivo" id="jObjetivo"></p>
+    <p class="premio-en-juego" id="jPremio"></p>
+  </div>
+  <div class="reloj" id="reloj"><div class="carta" id="c1">–</div><div class="carta" id="c2">–</div></div>
+  <div class="bloque panel">
+    <p class="cuenta" id="jCuenta"></p>
+    <p class="toca" id="jToca">Toca la pantalla</p>
+  </div>
+</section>
+
+<!-- ═══ RONDA SUPERADA ═══ -->
+<section id="decision" class="pantalla" hidden>
+  <div class="bloque panel">
+    <p class="eyebrow" id="dNivel"></p>
+    <h2>¡EXACTO!</h2>
+    <p class="sub" id="dSub"></p>
+    <div class="progreso" id="dProgreso"></div>
+  </div>
+  <div class="opciones">
+    <button class="btn" id="btnSeguir"></button>
+    <p class="aviso-riesgo panel" id="dRiesgo"></p>
+    <p class="auto" id="dAuto"></p>
+  </div>
+</section>
+
+<!-- ═══ FALLO ═══ -->
+<section id="fallo" class="pantalla" hidden>
+  <div class="bloque">
+    <p class="eyebrow" id="fNivel"></p>
+    <div class="reloj fallo" id="fReloj"><div class="carta" id="f1"></div><div class="carta" id="f2"></div></div>
+  </div>
+  <div class="bloque">
+    <h2 id="fTitulo"></h2>
+    <p class="sub" id="fSub"></p>
+  </div>
+  <div class="bloque">
+    <button class="btn" id="btnFalloSiguiente">Siguiente jugador</button>
+    <p class="auto" id="fAuto"></p>
+  </div>
+</section>
+
+<!-- ═══ PREMIO ═══ -->
+<section id="premio" class="pantalla" hidden>
+  <div class="bloque">
+    <p class="eyebrow" id="pNombre"></p>
+    <h2 id="pPremio"></h2>
+  </div>
+  <div class="bloque">
+    <div class="codigo" id="pCodigo"></div>
+    <p class="vence" id="pVence"></p>
+    <p class="wa-ok" id="pWaOk" hidden>✓ Te lo mandamos por WhatsApp</p>
+  </div>
+  <div class="guardar">
+    <div id="qr"></div>
+    <p id="pGuardar">Escanea con tu celular para guardar el código en tu WhatsApp. Úsalo hoy mismo en caja o cuando vuelvas.</p>
+  </div>
+  <div class="bloque">
+    <button class="btn" id="btnPremioSiguiente">Siguiente jugador</button>
+    <p class="auto" id="pAuto"></p>
+  </div>
+</section>
+
+<script>
+"use strict";
+const API = "https://api.oakberry-cupones.com";
+const QS = new URLSearchParams(location.search);
+const EVENTO = (QS.get("evento") || "sdq-exacto").toLowerCase();
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const dos = n => String(n).padStart(2, "0");
+
+// ─── Formato: tótem vertical (base) u horizontal ──────────────────────
+const ROT = ({ "90": "rot90", "270": "rot270", "-90": "rot270" })[QS.get("rotar") || ""];
+function orientar() {
+  const h = document.documentElement;
+  if (ROT) h.classList.add(ROT);
+  const f = QS.get("vertical");
+  const vertical = f === "1" || !!ROT || (f !== "0" && innerHeight >= innerWidth);
+  h.classList.toggle("vertical", vertical);
+  h.classList.toggle("horizontal", !vertical);
+}
+orientar();
+addEventListener("resize", orientar);
+
+// ─── API (JSONP) ──────────────────────────────────────────────────────
+function jsonp(params, timeoutMs = 9000) {
+  return new Promise((resolve, reject) => {
+    const cb = "cb_" + Math.random().toString(36).slice(2);
+    const s = document.createElement("script");
+    let done = false;
+    const clean = () => { done = true; clearTimeout(t); delete window[cb]; s.remove(); };
+    window[cb] = d => { if (done) return; clean(); resolve(d); };
+    s.onerror = () => { if (done) return; clean(); reject(new Error("red")); };
+    s.src = API + "?" + new URLSearchParams({ ...params, evento: EVENTO, callback: cb });
+    document.head.appendChild(s);
+    const t = setTimeout(() => { if (!done) { clean(); reject(new Error("timeout")); } }, timeoutMs);
+  });
+}
+// Todas las acciones son idempotentes del lado del servidor: reintentar es seguro.
+async function api(params, intentos = 4) {
+  let err;
+  for (let i = 0; i < intentos; i++) {
+    try { return await jsonp(params); } catch (e) { err = e; await sleep(350 * (i + 1)); }
+  }
+  throw err;
+}
+
+// ─── Pantallas y colores ──────────────────────────────────────────────
+const PANTALLAS = ["espera", "registro", "eleccion", "juego", "decision", "fallo", "premio"];
+let timerInactividad = 0, timerAuto = 0;
+function ir(nombre) {
+  PANTALLAS.forEach(p => $(p).hidden = p !== nombre);
+  clearInterval(timerAuto);
+  if (nombre === "espera" || nombre === "registro" || nombre === "eleccion") escena(nombre);
+  if (nombre === "espera") cargarTablero();
+  tocarActividad();
+}
+const ASSETS = "/exacto-assets/";
+const CLARO = { texto: "#21152A", acento: "#4B1F60", panel: "rgba(245,238,224,.86)", boton: "#4B1F60", botonTexto: "#FBF6E9" };
+// Sobre las escenas moradas un botón morado desaparece: ahí va dorado.
+const OSCURO = { texto: "#FBF6E9", acento: "#F4B223", panel: "rgba(40,5,50,.55)", boton: "#F4B223", botonTexto: "#21152A" };
+const ESCENAS = {
+  // Portada limpia (pedido de Daniel): solo el Amazonas fijo, sin decoraciones animadas.
+  // Encuadre 0%: nubes + río en diagonal; con la avioneta a la vista, choca con el título.
+  // Botón dorado: el morado se pierde sobre el río.
+  espera:   { img: "escena-rio.jpg",      pos: "0% center",    fondo: "#F5EEE0", ...CLARO, boton: "#F4B223", botonTexto: "#21152A" },
+  eleccion: { img: "escena-rio.jpg",      pos: "0% center",    fondo: "#F5EEE0", ...CLARO, boton: "#F4B223", botonTexto: "#21152A" },
+  registro: { img: "escena-palmas.jpg",   pos: "center",        fondo: "#F5EEE0", ...CLARO },
+  n1:       { img: "escena-palmas.jpg",   pos: "center",        fondo: "#F5EEE0", ...CLARO },
+  n2:       { img: "escena-edificio.jpg", pos: "80% bottom",    fondo: "#F5EEE0", ...CLARO },
+  n3:       { img: "escena-rio.jpg",      pos: "60% bottom",    fondo: "#F5EEE0", ...CLARO },
+  n4:       { img: "escena-oak.jpg",      pos: "75% center",    fondo: "#501A64", ...OSCURO },
+  n5:       { img: null,                                        fondo: "#280532", ...OSCURO, deco: ["decoSol"] },
+  premio:   { img: null,                                        fondo: "#280532", ...OSCURO, deco: ["decoLoro"] },
+  fallo:    { img: null,                                        fondo: "#280532", ...OSCURO, deco: ["decoPajaros"] },
+};
+// Precarga: un fondo que aparece medio segundo tarde en pleno nivel distrae justo cuando hay que tocar.
+Object.values(ESCENAS).forEach(e => { if (e.img) new Image().src = ASSETS + e.img; });
+function escena(nombre) {
+  const e = ESCENAS[nombre] || ESCENAS.espera;
+  const el = $("escena");
+  el.style.backgroundImage = e.img ? `url(${ASSETS}${e.img})` : "none";
+  el.style.backgroundPosition = e.pos || "center";
+  colores(e.fondo, e.texto);
+  document.body.style.setProperty("--acento", e.acento);
+  document.body.style.setProperty("--panel", e.panel);
+  document.body.style.setProperty("--boton", e.boton);
+  document.body.style.setProperty("--boton-texto", e.botonTexto);
+  ["decoLoro", "decoSol", "decoPajaros"].forEach(id => $(id).classList.toggle("on", (e.deco || []).includes(id)));
+}
+function colores(fondo, texto) {
+  document.body.style.setProperty("--fondo", fondo);
+  document.body.style.setProperty("--texto", texto);
+}
+function cuentaAtras(el, segundos, alTerminar) {
+  clearInterval(timerAuto);
+  const fin = Date.now() + segundos * 1000;
+  const tick = () => {
+    const s = Math.ceil((fin - Date.now()) / 1000);
+    el.textContent = `Sigue solo en ${Math.max(0, s)} s`;
+    if (s <= 0) { clearInterval(timerAuto); alTerminar(); }
+  };
+  tick(); timerAuto = setInterval(tick, 1000);
+}
+function tocarActividad() {
+  clearTimeout(timerInactividad);
+  if (!$("registro").hidden || !$("eleccion").hidden) timerInactividad = setTimeout(() => ir("espera"), 90000);
+}
+document.addEventListener("pointerdown", tocarActividad, { passive: true });
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("gesturestart", e => e.preventDefault());
+function escapar(s) { return String(s || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+function pintarEmbudo(el, niveles, opts = {}) {
+  const total = niveles.length;
+  el.innerHTML = niveles.map((n, i) => {
+    // Al escoger, las letras son más grandes: la punta del embudo no puede ser tan angosta.
+    const ancho = 100 - i * ((opts.elegir ? 36 : 50) / Math.max(1, total - 1));
+    const cls = [n.agotado ? "agotado" : "", opts.elegir && !n.agotado ? "elegible" : ""].join(" ");
+    const rondas = n.agotado ? "agotado" : (n.rondas === 1 ? "1 ronda" : `${n.rondas} rondas`);
+    return `<div class="tramo ${cls}" data-nivel="${n.nivel}" style="width:${ancho}%;background:${n.fondo};color:${n.texto}">
+      <span class="lbl">${escapar(n.label)}</span><span class="rondas">${rondas}</span></div>`;
+  }).join("");
+}
+function pintarProgreso(el, hechas, total) {
+  el.innerHTML = Array.from({ length: total }, (_, i) => `<i class="${i < hechas ? "ok" : ""}"></i>`).join("");
+}
+
+// ─── ESPERA ───────────────────────────────────────────────────────────
+async function cargarTablero() {
+  try {
+    const t = await api({ accion: "exactoTablero" }, 2);
+    if (!t.ok) return;
+    $("badgePrueba").hidden = !t.esPrueba;
+    pintarEmbudo($("embudoEspera"), t.niveles);
+    // Abierto no se muestra nada (cuántos premios quedan no le suma al jugador);
+    // cerrado sí: es lo único que explica por qué el botón no funciona.
+    $("quedan").textContent = t.abierto ? ""
+      : (t.antesDeAbrir ? `El juego abre a las ${t.abreHumano}` : (t.quedanPremios > 0 ? "El juego ya cerró. ¡Gracias por venir!" : "Ya salieron todos los premios. ¡Gracias por jugar!"));
+    $("quedan").hidden = t.abierto;
+    $("btnJugar").disabled = !t.abierto;
+  } catch (e) { $("quedan").textContent = "Conectando…"; $("quedan").hidden = false; }
+}
+setInterval(() => { if (!$("espera").hidden) cargarTablero(); }, 20000);
+
+// Demo de la portada: enseña la mecánica sin explicarla. Muestra un objetivo, el
+// contador corre, "alguien" para justo ahí, se pone verde y arranca otra vez.
+function demoPintar(n) {
+  const d = dos(n);
+  [["demo1", d[0]], ["demo2", d[1]]].forEach(([id, v]) => {
+    const el = $(id);
+    if (el.textContent !== v) { el.textContent = v; el.classList.remove("flip"); void el.offsetWidth; el.classList.add("flip"); }
+  });
+}
+async function demoCiclo() {
+  const objetivo = Math.floor(Math.random() * 100);
+  let n = (objetivo + 100 - 22 - Math.floor(Math.random() * 18)) % 100;
+  $("demoMeta").textContent = `Para en el ${dos(objetivo)}`;
+  $("demoReloj").classList.remove("acierto");
+  demoPintar(n);
+  while (n !== objetivo) {
+    await sleep(120);
+    if ($("espera").hidden) return;
+    n = (n + 1) % 100;
+    demoPintar(n);
+  }
+  $("demoReloj").classList.add("acierto");
+  await sleep(2200);
+}
+(async () => { for (;;) { if ($("espera").hidden) await sleep(500); else await demoCiclo(); } })();
+
+$("btnJugar").addEventListener("click", () => {
+  const el = document.documentElement;
+  if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});
+  limpiarRegistro();
+  ir("registro");
+});
+
+// ─── REGISTRO + TECLADO (igual que Vuelo) ─────────────────────────────
+const REG = { nombre: "", celular: "", tyc: false, campo: "nombre" };
+function limpiarRegistro() { Object.assign(REG, { nombre: "", celular: "", tyc: false, campo: "nombre" }); $("errorReg").textContent = ""; pintarRegistro(); }
+function formatoCel(d) { return d.length <= 3 ? d : d.length <= 6 ? d.slice(0, 3) + "-" + d.slice(3) : d.slice(0, 3) + "-" + d.slice(3, 6) + "-" + d.slice(6); }
+function pintarRegistro() {
+  $("valNombre").textContent = REG.nombre;
+  $("valCel").textContent = formatoCel(REG.celular);
+  $("campoNombre").classList.toggle("activo", REG.campo === "nombre");
+  $("campoCel").classList.toggle("activo", REG.campo === "celular");
+  $("check").classList.toggle("on", REG.tyc);
+  $("check").textContent = REG.tyc ? "✓" : "";
+  const k = $("teclado");
+  let filas;
+  if (REG.campo === "nombre") {
+    k.className = "teclado";
+    filas = [["Q","W","E","R","T","Y","U","I","O","P"], ["A","S","D","F","G","H","J","K","L","Ñ"], ["Z","X","C","V","B","N","M","⌫"], ["ESPACIO", "SIGUIENTE →"]];
+  } else {
+    k.className = "teclado num";
+    filas = [["1","2","3"], ["4","5","6"], ["7","8","9"], ["← NOMBRE","0","⌫"]];
+  }
+  k.innerHTML = filas.map(f => `<div class="fila">${f.map(t => {
+    const cls = t === "ESPACIO" ? "ancha" : (t.length > 1 && t !== "⌫" ? "accion" : "");
+    return `<button class="tecla ${cls}" data-t="${t}">${t}</button>`;
+  }).join("")}</div>`).join("");
+}
+$("teclado").addEventListener("pointerdown", e => {
+  const b = e.target.closest(".tecla"); if (!b) return;
+  e.preventDefault();
+  const t = b.dataset.t;
+  $("errorReg").textContent = "";
+  if (REG.campo === "nombre") {
+    if (t === "⌫") REG.nombre = REG.nombre.slice(0, -1);
+    else if (t === "ESPACIO") { if (REG.nombre && !REG.nombre.endsWith(" ")) REG.nombre += " "; }
+    else if (t === "SIGUIENTE →") REG.campo = "celular";
+    else if (REG.nombre.length < 40) REG.nombre += (REG.nombre.length === 0 || REG.nombre.endsWith(" ")) ? t : t.toLowerCase();
+  } else {
+    if (t === "⌫") REG.celular = REG.celular.slice(0, -1);
+    else if (t === "← NOMBRE") REG.campo = "nombre";
+    else if (REG.celular.length < 10) REG.celular += t;
+  }
+  pintarRegistro();
+});
+$("campoNombre").addEventListener("pointerdown", () => { REG.campo = "nombre"; pintarRegistro(); });
+$("campoCel").addEventListener("pointerdown", () => { REG.campo = "celular"; pintarRegistro(); });
+$("tyc").addEventListener("pointerdown", () => { REG.tyc = !REG.tyc; pintarRegistro(); });
+$("btnCancelar").addEventListener("click", () => ir("espera"));
+
+let P = null;          // estado de la partida (lo que devuelve el servidor)
+let ocupado = false;
+$("btnEmpezar").addEventListener("click", async () => {
+  if (ocupado) return;
+  const nombre = REG.nombre.trim();
+  if (nombre.length < 2) { REG.campo = "nombre"; pintarRegistro(); $("errorReg").textContent = "Escribe tu nombre"; return; }
+  if (REG.celular.length !== 10) { REG.campo = "celular"; pintarRegistro(); $("errorReg").textContent = "Escribe tu celular de 10 dígitos"; return; }
+  if (!REG.tyc) { $("errorReg").textContent = "Acepta las reglas para jugar"; return; }
+  ocupado = true; $("btnEmpezar").disabled = true; $("btnEmpezar").textContent = "Preparando…";
+  const intento = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+  try {
+    const r = await api({ accion: "exactoRegistrar", nombre, celular: REG.celular, tyc: "true", intento });
+    if (!r.ok) { $("errorReg").textContent = r.mensaje || "No se pudo iniciar"; return; }
+    P = r;
+    if (r.premioElegido) await jugarNivel(); else mostrarEleccion(r);
+  } catch (e) {
+    $("errorReg").textContent = "Sin conexión. Intenta de nuevo en un momento.";
+  } finally {
+    ocupado = false; $("btnEmpezar").disabled = false; $("btnEmpezar").textContent = "¡A jugar!";
+  }
+});
+
+// ─── ELECCIÓN DEL PREMIO ──────────────────────────────────────────────
+function mostrarEleccion(r) {
+  pintarEmbudo($("embudoEleccion"), r.niveles, { elegir: true });
+  $("errorEleccion").hidden = true;
+  ir("eleccion");
+}
+$("embudoEleccion").addEventListener("pointerdown", async e => {
+  const t = e.target.closest(".tramo.elegible");
+  if (!t || ocupado) return;
+  ocupado = true;
+  try {
+    const r = await api({ accion: "exactoElegir", partidaId: P.partidaId, token: P.token, nivel: t.dataset.nivel });
+    if (!r.ok) {
+      $("errorEleccion").textContent = r.mensaje || "Ese premio ya no está disponible";
+      $("errorEleccion").hidden = false;
+      if (r.niveles) pintarEmbudo($("embudoEleccion"), r.niveles, { elegir: true });
+      return;
+    }
+    P = r;
+    await jugarNivel();
+  } catch (err) {
+    $("errorEleccion").textContent = "Sin conexión. Toca de nuevo tu premio.";
+    $("errorEleccion").hidden = false;
+  } finally { ocupado = false; }
+});
+
+// ─── JUEGO: una ronda ─────────────────────────────────────────────────
+let N = null, t0 = 0, fase = "", raf = 0, ultimo = -1;
+function numeroEn(ms) { return (N.offset + Math.floor(Math.max(0, ms) / 1000 * N.velocidad)) % 100; }
+function mostrarNumero(n, animar) {
+  const s = dos(n);
+  if ($("c1").textContent !== s[0]) { $("c1").textContent = s[0]; if (animar) { $("c1").classList.remove("flip"); void $("c1").offsetWidth; $("c1").classList.add("flip"); } }
+  if ($("c2").textContent !== s[1]) { $("c2").textContent = s[1]; if (animar) { $("c2").classList.remove("flip"); void $("c2").offsetWidth; $("c2").classList.add("flip"); } }
+}
+
+async function jugarNivel() {
+  const r = await api({ accion: "exactoIniciarRonda", partidaId: P.partidaId, token: P.token });
+  if (!r.ok) {
+    // Ronda vencida (p. ej. se cortó la red a mitad): se cierra como tarde.
+    if (r.vencido) { await parar(10 ** 9); return; }
+    ir("espera"); return;
+  }
+  N = r;
+  t0 = performance.now() - r.msDesdeInicio;
+  escena("n" + r.ronda);
+  $("jNivel").textContent = `Ronda ${r.ronda} de ${r.rondas}`;
+  pintarProgreso($("jProgreso"), r.ronda - 1, r.rondas);
+  $("jObjetivo").textContent = dos(r.objetivo);
+  $("jPremio").textContent = `Vas por: ${r.label}`;
+  $("jToca").textContent = "Prepárate…";
+  $("reloj").className = "reloj";
+  $("c1").textContent = "–"; $("c2").textContent = "–";
+  ultimo = -1; fase = "cuenta";
+  ir("juego");
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(bucle);
+}
+
+function bucle(now) {
+  const ms = now - t0;
+  if (fase === "cuenta") {
+    if (ms < 0) { $("jCuenta").textContent = Math.ceil(-ms / 1000); }
+    else { fase = "corriendo"; $("jCuenta").textContent = ""; $("jToca").textContent = "¡Toca la pantalla!"; }
+  }
+  if (fase === "corriendo") {
+    const n = numeroEn(ms);
+    if (n !== ultimo) { mostrarNumero(n, N.velocidad <= 9); ultimo = n; }
+    // Si no tocó: el servidor lo declara "tarde" con este mismo dato.
+    if (ms > N.limiteMs + 150) { parar(ms); return; }
+  }
+  raf = requestAnimationFrame(bucle);
+}
+
+$("juego").addEventListener("pointerdown", e => {
+  e.preventDefault();
+  if (fase !== "corriendo") return;
+  // timeStamp del evento: el instante del toque, no el de cuando corre el handler.
+  const ms = (e.timeStamp || performance.now()) - t0;
+  parar(ms);
+});
+
+async function parar(ms) {
+  if (fase === "parado") return;
+  fase = "parado";
+  cancelAnimationFrame(raf);
+  if (N) mostrarNumero(numeroEn(Math.min(ms, N.limiteMs)), false);
+  let r = null;
+  try { r = await api({ accion: "exactoParar", partidaId: P.partidaId, token: P.token, ms: ms.toFixed(1) }, 6); } catch (e) {}
+  if (!r || !r.ok) { mostrarFallo({ numero: null, objetivo: N ? N.objetivo : 0, motivo: "red" }, P); return; }
+  P = r;
+  const par = r.parada || {};
+  if (par.numero != null) mostrarNumero(par.numero, false);
+  $("reloj").classList.add(par.acierto ? "acierto" : "fallo");
+  await sleep(900);
+  if (r.estado === "plantado") return mostrarPremio(r);
+  if (par.acierto) return mostrarDecision(r, par);
+  mostrarFallo(par, r);
+}
+
+// ─── RONDA SUPERADA ───────────────────────────────────────────────────
+function mostrarDecision(r, par) {
+  $("dNivel").textContent = `Paraste en el ${dos(par.numero)}`;
+  $("dSub").textContent = `Ronda ${r.rondasSuperadas} de ${r.rondasObjetivo} superada`;
+  pintarProgreso($("dProgreso"), r.rondasSuperadas, r.rondasObjetivo);
+  const faltan = r.rondasObjetivo - r.rondasSuperadas;
+  $("btnSeguir").innerHTML = `Siguiente ronda<small>${faltan === 1 ? "¡la última!" : `faltan ${faltan}`} · vas por ${escapar(r.premioElegido.label)}</small>`;
+  $("dRiesgo").textContent = "Va un poco más rápido. Si fallas, pierdes.";
+  ir("decision");
+  // Si la persona se distrae, la ronda arranca sola: la fila no se detiene.
+  cuentaAtras($("dAuto"), 12, () => seguir());
+}
+async function seguir() {
+  if (ocupado) return; ocupado = true;
+  clearInterval(timerAuto);
+  try { await jugarNivel(); } catch (e) { ir("espera"); } finally { ocupado = false; }
+}
+$("btnSeguir").addEventListener("click", () => seguir());
+
+// ─── FALLO ────────────────────────────────────────────────────────────
+function mostrarFallo(par, r) {
+  escena("fallo");
+  $("fNivel").textContent = par.ronda ? `Ronda ${par.ronda}` : "";
+  const s = par.numero == null ? "––" : dos(par.numero);
+  $("f1").textContent = s[0]; $("f2").textContent = s[1];
+  if (par.motivo === "tarde") {
+    $("fTitulo").textContent = "¡Se te pasó!";
+    $("fSub").textContent = `Había que parar en el ${dos(par.objetivo)}.`;
+  } else if (par.motivo === "red") {
+    $("fTitulo").textContent = "Se cortó la conexión";
+    $("fSub").textContent = "Avísale a alguien del equipo.";
+  } else {
+    $("fTitulo").textContent = `Paraste en el ${s}`;
+    $("fSub").textContent = `Era el ${dos(par.objetivo)}.` + (r && r.premioElegido ? ` Ibas por ${r.premioElegido.label}.` : "") + " ¡Gracias por jugar!";
+  }
+  ir("fallo");
+  cuentaAtras($("fAuto"), 12, () => ir("espera"));
+}
+$("btnFalloSiguiente").addEventListener("click", () => ir("espera"));
+
+// ─── PREMIO ───────────────────────────────────────────────────────────
+async function mostrarPremio(r) {
+  const pr = r.premio;
+  const nivel = r.niveles.find(n => n.nivel === pr.nivel);
+  escena("premio");
+  $("pNombre").textContent = `¡${r.nombre}, te llevas!`;
+  $("pPremio").textContent = pr.label;
+  $("pCodigo").textContent = pr.codigo;
+  $("pVence").textContent = `Un solo uso · válido hasta el ${pr.venceHumano} · en caja`;
+  $("pWaOk").hidden = pr.waEstado !== "enviado";
+  $("qr").innerHTML = "";
+  ir("premio");
+  confeti();
+  cuentaAtras($("pAuto"), 60, () => ir("espera"));
+  try {
+    const g = await api({ accion: "exactoGuardar", partidaId: r.partidaId, token: r.token }, 3);
+    if (g.ok) new QRCode($("qr"), { text: g.linkWA, width: 400, height: 400, colorDark: "#21152A", colorLight: "#FFFFFF", correctLevel: QRCode.CorrectLevel.L });
+  } catch (e) {}
+}
+$("btnPremioSiguiente").addEventListener("click", () => ir("espera"));
+
+function confeti() {
+  const colores_ = ["#4B1F60", "#E3A93B", "#6FB3B0", "#D9604F", "#FBF6E9"];
+  document.body.style.setProperty("--caida", Math.round(document.body.clientHeight * 1.15) + "px");
+  for (let i = 0; i < 90; i++) {
+    const c = document.createElement("div");
+    c.className = "confeti";
+    c.style.left = Math.random() * 100 + "%";
+    c.style.background = colores_[i % colores_.length];
+    c.style.animationDuration = 2.4 + Math.random() * 2.6 + "s";
+    c.style.animationDelay = Math.random() * 0.8 + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 6500);
+  }
+}
+
+escena("espera");
+pintarRegistro();
+cargarTablero();
+</script>
+
+<script>
+// Volver al menú de juegos (/juegos). Va en su propio bloque a propósito: no
+// depende de nada del juego, así que no estorba el resto del archivo.
+// Con una partida en curso pide confirmación: un roce no puede tumbarla.
+(function () {
+  "use strict";
+  const qs = new URLSearchParams(location.search);
+  const volver = (qs.get("volver") || "").toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const destino = "/juegos" + (volver ? "?evento=" + encodeURIComponent(volver) : "");
+  const boton = document.getElementById("btnSalir");
+  const enJuego = function () {
+    const j = document.getElementById("juego");
+    return !!j && !j.hidden;
+  };
+  let pidiendo = 0;
+  boton.addEventListener("click", function () {
+    if (!enJuego() || Date.now() - pidiendo < 4000) { location.href = destino; return; }
+    pidiendo = Date.now();
+    boton.textContent = "¿Salir?";
+    boton.classList.add("confirmar");
+    setTimeout(function () {
+      if (Date.now() - pidiendo >= 3900) { boton.textContent = "Salir"; boton.classList.remove("confirmar"); }
+    }, 4000);
+  });
+})();
+</script>
+</body>
+</html>

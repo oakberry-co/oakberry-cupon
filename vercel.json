@@ -1,48 +1,273 @@
 {
   "version": 2,
   "functions": {
-    "api/mapa.js": { "maxDuration": 30 }
+    "api/mapa.js": {
+      "maxDuration": 30
+    }
   },
+  "redirects": [
+    {
+      "source": "/premios",
+      "destination": "/centrodecontrol#cupones",
+      "permanent": false
+    }
+  ],
   "rewrites": [
-    { "source": "/r/:codigo", "destination": "https://oakberry-reactivacion-api-664413392517.us-central1.run.app/r/:codigo?src=wa" },
-    { "source": "/validar",        "destination": "/validar.html"             },
-    { "source": "/amigos",         "destination": "/amigos.html"              },
-    { "source": "/amigos-config",  "destination": "/amigos_admin.html"        },
-    { "source": "/amigos-panel",   "destination": "/amigos_panel.html"        },
-    { "source": "/amigos/beneficios", "destination": "/mis_beneficios.html"     },
-    { "source": "/influencers",    "destination": "/influencers.html"         },
-    { "source": "/premios",        "destination": "/premios.html"             },
-    { "source": "/mi-cupon",       "destination": "/mi-cupon.html"            },
-    { "source": "/activar-cupon",  "destination": "/activar-cupon.html"       },
-    { "source": "/tyc/amigos",     "destination": "/tyc_amigos.html"          },
-    { "source": "/tyc/influencers", "destination": "/tyc_influencers.html"     },
-    { "source": "/cupon",          "destination": "/cupon.html"               },
-    { "source": "/links",          "destination": "/links.html"               },
-    { "source": "/r",              "destination": "/r.html"                   },
-    { "source": "/tyc",            "destination": "/tyc.html"                 },
-    { "source": "/tyc/reat",       "destination": "/tyc_reactivacion.html"    },
-    { "source": "/portal",         "destination": "/portal.html"              },
-    { "source": "/cursos",         "destination": "/cursos.html"              },
-    { "source": "/reactivar",      "destination": "/reactivar.html"           },
-    { "source": "/tiendas",        "destination": "/tiendas.html"             },
-    { "source": "/mapadecalor",    "destination": "/mapadecalor.html"         },
-    { "source": "/conciliacion",   "destination": "/conciliacion.html"        },
-    { "source": "/dashboard",         "destination": "https://dashboard.oakberry-cupones.com/dashboard/" },
-    { "source": "/dashboard/:path*",  "destination": "https://dashboard.oakberry-cupones.com/dashboard/:path*" },
-    { "source": "/adidas-activar", "destination": "/adidas-activar.html"      },
-    { "source": "/concurso-api",   "destination": "https://us-central1-project-oakberry-colombia-dw.cloudfunctions.net/concurso-api" },
-    { "source": "/concurso",       "destination": "/concurso-v2.html"         },
-    { "source": "/reglamento",     "destination": "/reglamento-concurso.html" },
-    { "source": "/react",          "destination": "/react.html"               },
-    { "source": "/encuesta",       "destination": "/encuesta.html"            },
-    { "source": "/cuentanos",      "destination": "/cuentanos.html"           },
-    { "source": "/uet",            "destination": "/uet.html"                 },
-    { "source": "/ruleta-pantalla", "destination": "/ruleta-pantalla.html"    },
-    { "source": "/ruleta",         "destination": "/ruleta.html"              },
-    { "source": "/sorpresa-config", "destination": "/sorpresa-admin.html"      },
-    { "source": "/sorpresa",       "destination": "/sorpresa.html"            },
-    { "source": "/juego-api/:path*", "destination": "https://oakberry-reactivacion-api-664413392517.us-central1.run.app/:path*" },
-    { "source": "/franquiciados",  "destination": "/franquiciados.html"       },
-    { "source": "/api/(.*)",       "destination": "/api/$1"                   }
+    {
+      "source": "/rd/c/:slug",
+      "destination": "/rd-c.html"
+    },
+    {
+      "source": "/rd/centro",
+      "destination": "/rd-centro.html"
+    },
+    {
+      "source": "/rd/seguimiento",
+      "destination": "/rd-seguimiento.html"
+    },
+    {
+      "source": "/rd/creadores",
+      "destination": "/rd-creadores.html"
+    },
+    {
+      "source": "/centrodecontrol",
+      "destination": "/centrodecontrol.html"
+    },
+    {
+      "source": "/evento/:slug",
+      "destination": "/evento.html"
+    },
+    {
+      "source": "/flyer",
+      "destination": "/flyer.html"
+    },
+    {
+      "source": "/terminos",
+      "destination": "/terminos.html"
+    },
+    {
+      "source": "/consola",
+      "destination": "/consola.html"
+    },
+    {
+      "source": "/sellos",
+      "destination": "/sellos.html"
+    },
+    {
+      "source": "/mensajeria",
+      "destination": "/mensajeria.html"
+    },
+    {
+      "source": "/r/:codigo",
+      "destination": "https://oakberry-reactivacion-api-664413392517.us-central1.run.app/r/:codigo?src=wa"
+    },
+    {
+      "source": "/validar",
+      "destination": "/validar.html"
+    },
+    {
+      "source": "/amigos",
+      "destination": "/amigos.html"
+    },
+    {
+      "source": "/amigos-config",
+      "destination": "/amigos_admin.html"
+    },
+    {
+      "source": "/amigos-panel",
+      "destination": "/amigos_panel.html"
+    },
+    {
+      "source": "/amigos/beneficios",
+      "destination": "/mis_beneficios.html"
+    },
+    {
+      "source": "/influencers",
+      "destination": "/influencers.html"
+    },
+    {
+      "source": "/mi-cupon",
+      "destination": "/mi-cupon.html"
+    },
+    {
+      "source": "/activar-cupon",
+      "destination": "/activar-cupon.html"
+    },
+    {
+      "source": "/tyc/amigos",
+      "destination": "/tyc_amigos.html"
+    },
+    {
+      "source": "/tyc/influencers",
+      "destination": "/tyc_influencers.html"
+    },
+    {
+      "source": "/cupon",
+      "destination": "/cupon.html"
+    },
+    {
+      "source": "/links",
+      "destination": "/links.html"
+    },
+    {
+      "source": "/r",
+      "destination": "/r.html"
+    },
+    {
+      "source": "/tyc",
+      "destination": "/tyc.html"
+    },
+    {
+      "source": "/tyc/reat",
+      "destination": "/tyc_reactivacion.html"
+    },
+    {
+      "source": "/portal",
+      "destination": "/portal.html"
+    },
+    {
+      "source": "/cursos",
+      "destination": "/cursos.html"
+    },
+    {
+      "source": "/reactivar",
+      "destination": "/reactivar.html"
+    },
+    {
+      "source": "/tiendas",
+      "destination": "/tiendas.html"
+    },
+    {
+      "source": "/mapadecalor",
+      "destination": "/mapadecalor.html"
+    },
+    {
+      "source": "/conciliacion",
+      "destination": "/conciliacion.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "https://dashboard.oakberry-cupones.com/dashboard/"
+    },
+    {
+      "source": "/dashboard/:path*",
+      "destination": "https://dashboard.oakberry-cupones.com/dashboard/:path*"
+    },
+    {
+      "source": "/lectura",
+      "destination": "https://oakberry-lectura.vercel.app/"
+    },
+    {
+      "source": "/lectura/:path*",
+      "destination": "https://oakberry-lectura.vercel.app/:path*"
+    },
+    {
+      "source": "/santander",
+      "destination": "https://oakberry-santander.vercel.app/"
+    },
+    {
+      "source": "/santander/:path*",
+      "destination": "https://oakberry-santander.vercel.app/:path*"
+    },
+    {
+      "source": "/adidas-activar",
+      "destination": "/adidas-activar.html"
+    },
+    {
+      "source": "/concurso-api",
+      "destination": "https://us-central1-project-oakberry-colombia-dw.cloudfunctions.net/concurso-api"
+    },
+    {
+      "source": "/concurso",
+      "destination": "/concurso-v2.html"
+    },
+    {
+      "source": "/reglamento",
+      "destination": "/reglamento-concurso.html"
+    },
+    {
+      "source": "/react",
+      "destination": "/react.html"
+    },
+    {
+      "source": "/encuesta",
+      "destination": "/encuesta.html"
+    },
+    {
+      "source": "/cuentanos",
+      "destination": "/cuentanos.html"
+    },
+    {
+      "source": "/uet",
+      "destination": "/uet.html"
+    },
+    {
+      "source": "/vuelo-premio",
+      "destination": "/vuelo-premio.html"
+    },
+    {
+      "source": "/vuelo",
+      "destination": "/vuelo.html"
+    },
+    {
+      "source": "/exacto",
+      "destination": "/exacto.html"
+    },
+    {
+      "source": "/ruleta-pantalla",
+      "destination": "/ruleta-pantalla.html"
+    },
+    {
+      "source": "/ruleta",
+      "destination": "/ruleta.html"
+    },
+    {
+      "source": "/sorpresa-config",
+      "destination": "/sorpresa-admin.html"
+    },
+    {
+      "source": "/sorpresa",
+      "destination": "/sorpresa.html"
+    },
+    {
+      "source": "/juego-api/:path*",
+      "destination": "https://oakberry-reactivacion-api-664413392517.us-central1.run.app/:path*"
+    },
+    {
+      "source": "/franquiciados",
+      "destination": "/franquiciados.html"
+    },
+    {
+      "source": "/reto",
+      "destination": "/reto.html"
+    },
+    {
+      "source": "/maquina",
+      "destination": "/maquina.html"
+    },
+    {
+      "source": "/loro",
+      "destination": "/loro.html"
+    },
+    {
+      "source": "/contador",
+      "destination": "/contador.html"
+    },
+    {
+      "source": "/inicio",
+      "destination": "/inicio.html"
+    },
+    {
+      "source": "/juegos",
+      "destination": "/juegos.html"
+    },
+    {
+      "source": "/centro",
+      "destination": "/centro.html"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
   ]
 }

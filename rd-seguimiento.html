@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F5EEE0">
+<meta name="robots" content="noindex, nofollow">
+<title>Creadores RD · Seguimiento · OAKBERRY</title>
+<link rel="stylesheet" href="/rd-assets/kit.css">
+<style>
+#loginOverlay{position:fixed;inset:0;background:var(--cielo);display:grid;place-items:center;z-index:10;padding:18px}
+#loginOverlay.hidden{display:none}
+.login-err{display:none;color:var(--rojo);font-size:.84rem;font-weight:700;margin-top:10px}.login-err.show{display:block}
+</style>
+</head>
+<body class="panel-ancho">
+<div id="loginOverlay"><div class="tarjeta login-caja">
+  <img src="/rd-assets/wordmark.svg" alt="OAKBERRY" style="width:170px;height:auto;margin:0 auto 14px;display:block">
+  <h2>Seguimiento de creadores <span class="solo-rd">Solo RD</span></h2>
+  <div class="campo" style="text-align:left"><label>Usuario</label><input id="loginUser" type="text" autocomplete="username" placeholder="usuario"></div>
+  <div class="campo" style="text-align:left"><label>Contraseña</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••"></div>
+  <div id="loginErr" class="login-err">Usuario o contraseña incorrectos</div>
+  <button class="pildora" id="loginBtn" style="margin-top:8px">Entrar</button>
+</div></div>
+
+<main>
+  <img class="sol" src="/rd-assets/sol-loro.png" alt="" aria-hidden="true">
+  <img class="loro" src="/rd-assets/loro-vuela.png" alt="" aria-hidden="true" style="right:8%">
+  <div class="cabeza">
+    <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+      <img class="marca" src="/rd-assets/wordmark.svg" alt="OAKBERRY" width="3600" height="472">
+      <div><h1>Creadores · Seguimiento <span class="solo-rd">Solo RD</span></h1><p class="sub" id="sub">Quién se registró, qué cupón tiene y cuántos bowls ha reclamado. Los usos se leen de Foodology cada hora.</p></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center"><button class="pildora chica blanca" id="csv">Descargar CSV</button><button class="pildora chica" id="refrescar">Actualizar</button></div>
+  </div>
+  <section class="tarjeta" style="margin-top:18px"><div class="kpis" id="kpis"></div></section>
+  <section class="tarjeta tabla"><table class="kit"><thead><tr>
+    <th>Creador</th><th>Instagram</th><th>TikTok</th><th>WhatsApp</th><th>Registro</th><th>Cupón del mes</th><th>Usos</th><th>Último uso</th><th>WA</th><th>Historial</th><th></th>
+  </tr></thead><tbody id="filas"></tbody></table></section>
+  <p class="pie">OAKBERRY República Dominicana · programa de creadores</p>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "https://api.oakberry-cupones.com/";
+const SESS_KEY = "oak_rd_seguimiento";
+let DATA = null;
+function jsonp(params){ return new Promise((resolve)=>{
+  const cb = "__cb"+Math.random().toString(36).slice(2);
+  const to = setTimeout(()=>{ cleanup(); resolve({ok:false, mensaje:"timeout"}); }, 20000);
+  function cleanup(){ try{ delete window[cb]; }catch(e){} if(s.parentNode) s.parentNode.removeChild(s); clearTimeout(to); }
+  window[cb] = (r)=>{ cleanup(); resolve(r||{}); }; params.set("callback", cb);
+  const s = document.createElement("script"); s.src = API + "?" + params.toString();
+  s.onerror = ()=>{ cleanup(); resolve({ok:false, mensaje:"network"}); }; document.body.appendChild(s); }); }
+function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2500); }
+function sesion(){ try{ return JSON.parse(sessionStorage.getItem(SESS_KEY)||"null"); }catch(e){ return null; } }
+function cred(){ const s = sesion()||{}; return {usuario:s.usuario||"", pass:s.pass||""}; }
+const f = s => s ? new Date(s).toLocaleString("es-DO",{timeZone:"America/Santo_Domingo",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "—";
+const fd = s => s ? new Date(s+"T12:00:00").toLocaleDateString("es-DO",{day:"2-digit",month:"2-digit"}) : "—";
+function esc(s){ return String(s??"").replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+async function login(){
+  const usuario = document.getElementById("loginUser").value.trim(), pass = document.getElementById("loginPass").value;
+  const r = await jsonp(new URLSearchParams({accion:"login", usuario, pass}));
+  if(!r.ok || r.pais !== "DO"){ document.getElementById("loginErr").classList.add("show"); return; }
+  sessionStorage.setItem(SESS_KEY, JSON.stringify({usuario, pass, nombre:r.nombre}));
+  document.getElementById("loginOverlay").classList.add("hidden"); cargar();
+}
+document.getElementById("loginBtn").addEventListener("click", login);
+document.getElementById("loginPass").addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
+document.getElementById("refrescar").addEventListener("click", cargar);
+document.getElementById("csv").addEventListener("click", csv);
+async function cargar(){
+  const r = await jsonp(new URLSearchParams({accion:"rdInfluencerSeguimiento", ...cred()}));
+  if(!r.ok){ if(r.auth===false){ sessionStorage.removeItem(SESS_KEY); document.getElementById("loginOverlay").classList.remove("hidden"); } return toast(r.mensaje||"Error"); }
+  DATA = r; pintar(r);
+}
+function pintar(r){
+  const k = r.resumen || {};
+  document.getElementById("kpis").innerHTML = [["Creadores activos",k.influencers],["Cupones entregados",k.cupones_entregados],["Bowls reclamados",k.bowls_reclamados],["Cupones con uso",k.cupones_usados],["WA pendientes",k.wa_pendientes]]
+    .map(([t,v])=>`<div class="kpi"><b>${v ?? 0}</b><span>${t}</span></div>`).join("");
+  document.getElementById("sub").textContent = "Usos leídos de Foodology cada hora. Última lectura: " + f(r.ultimoSync) + " (hora RD).";
+  const tb = document.getElementById("filas"); tb.innerHTML = "";
+  (r.filas||[]).forEach(x=>{
+    const usos = x.times_used||0, max = x.max_usos||r.usosPorCupon;
+    const wa = x.wa_estado==="enviado" ? '<span class="pill ok">enviado</span>' : x.wa_estado ? `<span class="pill ${x.wa_estado==="fallido"?"err":"pend"}" title="${esc(x.wa_error||"")}">${x.wa_estado}</span>` : '<span class="pill off">—</span>';
+    const hist = (x.historial||[]).filter(h=>h.codigo!==x.codigo).map(h=>`${h.periodo}: ${h.codigo} ${h.times_used}/${h.max_usos}`).join("<br>") || "—";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><b>${esc(x.nombre)}</b>${x.activo?"":' <span class="pill off">pausado</span>'}</td>
+      <td><a class="link" href="https://instagram.com/${esc(x.instagram)}" target="_blank" rel="noopener">@${esc(x.instagram)}</a></td>
+      <td>${x.tiktok?`<a class="link" href="https://tiktok.com/@${esc(x.tiktok)}" target="_blank" rel="noopener">@${esc(x.tiktok)}</a>`:"—"}</td>
+      <td>+1 ${esc(x.celular)}</td><td>${f(x.registrado_at)}</td>
+      <td>${x.codigo?`<span class="cod">${x.codigo}</span><br><span class="mini">vence ${fd(x.vence)}</span>`:'<span class="pill pend">sin cupón</span>'}</td>
+      <td><span class="barra"><i style="width:${Math.min(100,usos*100/max)}%"></i></span>${usos}/${max}</td>
+      <td>${f(x.ultimo_uso_at)}</td><td>${wa}</td><td class="mini">${hist}</td>
+      <td style="white-space:nowrap">${x.envio_id?`<button class="pildora chica blanca" data-envio="${x.envio_id}">Reenviar WA</button> `:""}<button class="pildora chica blanca" data-id="${x.id}" data-activo="${!x.activo}">${x.activo?"Pausar":"Reactivar"}</button></td>`;
+    tb.appendChild(tr);
+  });
+  if(!(r.filas||[]).length) tb.innerHTML = '<tr><td colspan="11" class="mini">Todavía nadie se ha registrado.</td></tr>';
+  tb.querySelectorAll("button[data-envio]").forEach(b=>b.addEventListener("click", async ()=>{ b.disabled=true; const r=await jsonp(new URLSearchParams({accion:"rdInfluencerReenviar", envioId:b.dataset.envio, ...cred()})); toast(r.ok?"WhatsApp reenviado":"No salió: "+(r.detalle||r.mensaje||"")); cargar(); }));
+  tb.querySelectorAll("button[data-id]").forEach(b=>b.addEventListener("click", async ()=>{ const r=await jsonp(new URLSearchParams({accion:"rdInfluencerActivo", id:b.dataset.id, activo:b.dataset.activo, ...cred()})); toast(r.ok?"Listo":"No se pudo"); cargar(); }));
+}
+function csv(){
+  if(!DATA) return;
+  const cab = ["nombre","instagram","tiktok","celular","registrado_at","activo","codigo","periodo","vence","times_used","max_usos","canjeado_at","ultimo_uso_at","wa_estado","wa_enviado_at"];
+  const rows = [cab.join(",")].concat((DATA.filas||[]).map(x=>cab.map(c=>`"${String(x[c]??"").replace(/"/g,'""')}"`).join(",")));
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿"+rows.join("\n")],{type:"text/csv"})); a.download = "creadores_rd.csv"; a.click();
+}
+if(sesion()){ document.getElementById("loginOverlay").classList.add("hidden"); cargar(); }
+</script>
+</body>
+</html>

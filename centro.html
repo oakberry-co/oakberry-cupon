@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#4B1F60">
+<title>Centro de mando · Juegos OAKBERRY</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-regular.woff2" as="font" type="font/woff2" crossorigin>
+<!--
+  CENTRO DE MANDO de los juegos de evento (/reto, /maquina, /loro).
+
+  Acá el equipo ve cómo va el evento y cambia premios, cupos y dificultad sin
+  tocar BigQuery ni desplegar. Lo que se guarda son las tablas crm.slot_niveles
+  y crm.slot_config, que los tres juegos leen (con 60 s de caché: un cambio se
+  ve en menos de un minuto).
+
+  Esta NO es una pantalla de tótem: es de trabajo, así que va en layout normal
+  y no en 9:16. Se entra con Google, solo cuentas @manelfoods.com (17-oct-2026;
+  antes era un PIN compartido). El servidor da una sesión firmada de 12 h.
+-->
+<style>
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-bold.woff2') format('woff2');font-weight:600 700;font-display:swap}
+@font-face{font-family:'Nexa Slab';src:url('/exacto-assets/fuentes/nexa-slab-black.woff2') format('woff2');font-weight:800 900;font-display:swap}
+:root{
+  --crema:#FBF6E9; --crema-cielo:#F5EEE0; --hueso:#EAE1CC; --tinta:#21152A; --tinta-suave:#5C4A66;
+  --morado:#4B1F60; --morado-hondo:#2C1140; --lila:#B79CC8; --oro:#F4B223; --coral:#E04850;
+  --rojo:#B3261E; --verde:#2F6B3A;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nexa Slab',Rockwell,'Roboto Slab',Georgia,serif;background:var(--crema-cielo);
+  color:var(--tinta);line-height:1.5;-webkit-font-smoothing:antialiased;font-size:15px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 56px}
+button{font-family:inherit;cursor:pointer;border:none}
+input,select{font-family:inherit;font-size:15px;color:var(--tinta);background:#fff;
+  border:2px solid var(--hueso);border-radius:10px;padding:9px 11px;outline:none;width:100%}
+input:focus,select:focus{border-color:var(--morado);box-shadow:0 0 0 3px rgba(75,31,96,.12)}
+[hidden]{display:none!important}
+
+/* Sin sticky: en celular el encabezado quedaba encima de la tabla y tapaba
+   los premios 2 y 3. */
+.barra{background:var(--morado);color:var(--crema);padding:14px 0;z-index:10;
+  box-shadow:0 2px 14px rgba(44,17,64,.3)}
+.barra .wrap{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-bottom:0}
+.marca{font-size:18px;font-weight:900;letter-spacing:2px;text-transform:uppercase}
+.marca span{color:var(--oro)}
+.barra .quien{font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;opacity:.8}
+
+h2{font-size:15px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase;color:var(--morado);
+  margin:30px 0 12px;display:flex;align-items:center;gap:10px}
+h2::after{content:"";flex:1;height:2px;background:var(--hueso)}
+.tarjeta{background:#fff;border:2px solid var(--hueso);border-radius:14px;padding:18px}
+
+/* ── Entrar ─────────────────────────────────────────────────────────── */
+#acceso{max-width:420px;margin:60px auto}
+#acceso .campo{margin-bottom:12px}
+#acceso label{display:block;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:var(--tinta-suave);margin-bottom:5px}
+.btn{background:var(--morado);color:var(--crema);font-weight:800;font-size:14px;letter-spacing:.8px;
+  text-transform:uppercase;padding:12px 18px;border-radius:999px;width:100%}
+.btn:hover{background:var(--morado-hondo)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.oro{background:var(--oro);color:var(--tinta)}
+.btn.chico{width:auto;padding:8px 14px;font-size:12px}
+.error{color:var(--rojo);font-weight:700;font-size:13px;min-height:1.3em;margin-top:8px}
+.ok{color:var(--verde);font-weight:700;font-size:13px}
+.nota-espera{color:var(--morado);font-weight:700;font-size:13px}
+
+/* ── Resumen ────────────────────────────────────────────────────────── */
+.juegos{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.juego{background:#fff;border:2px solid var(--hueso);border-radius:14px;padding:16px}
+.juego h3{font-size:16px;font-weight:900;color:var(--morado);margin-bottom:10px}
+.cifras{display:flex;gap:16px;margin-bottom:12px}
+.cifra b{display:block;font-size:24px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.cifra span{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--tinta-suave)}
+.enlaces{display:flex;gap:8px;flex-wrap:wrap}
+.enlaces a{font-size:12px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--morado);border:2px solid var(--hueso);border-radius:999px;padding:6px 12px;text-decoration:none}
+.enlaces a:hover{border-color:var(--morado)}
+
+/* ── Premios ────────────────────────────────────────────────────────── */
+.tabla-scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--tinta-suave);
+  text-align:left;padding:0 8px 8px;white-space:nowrap}
+th small{display:block;font-weight:600;letter-spacing:0;text-transform:none;opacity:.75}
+td{padding:5px 8px;vertical-align:middle}
+tr.fila td{border-top:2px solid var(--crema-cielo)}
+.nivel{width:34px;height:34px;border-radius:50%;background:var(--morado);color:var(--crema);
+  display:grid;place-items:center;font-weight:900;font-size:14px}
+tr.fila:last-child .nivel{background:var(--oro);color:var(--tinta)}
+td.num input{text-align:center}
+.entregados{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.entregados.lleno{color:var(--rojo)}
+.quitar{background:none;color:var(--tinta-suave);font-size:18px;font-weight:900;padding:4px 8px;border-radius:8px}
+.quitar:hover{background:#f6eded;color:var(--rojo)}
+.pie-tabla{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.nota{font-size:12.5px;color:var(--tinta-suave);margin-top:10px}
+.ajustes{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:16px}
+.ajustes label{display:block;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:var(--tinta-suave);margin-bottom:5px}
+
+/* ── Ganadores ──────────────────────────────────────────────────────── */
+/* Con muchos premios entregados la lista se comía la página. */
+.lista{display:flex;flex-direction:column;max-height:420px;overflow-y:auto}
+.g{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-top:2px solid var(--crema-cielo)}
+.g:first-child{border-top:none}
+.g b{font-weight:800}
+.g small{display:block;font-size:12px;color:var(--tinta-suave)}
+.g .wa{font-size:13px;font-weight:700;color:var(--morado);text-decoration:none;white-space:nowrap}
+/* Solo el corredor y el contador están en la landing: las columnas de los
+   otros dos estorban en el celular. Se ocultan, NO se borran — los inputs
+   siguen en la página, así que guardar conserva sus valores. */
+table:not(.avanzado) .av{display:none}
+.verav{font-size:13px;color:#5C4A66;display:flex;align-items:center;gap:6px;cursor:pointer}
+.verav input{width:auto;flex:0 0 auto;margin:0}
+
+/* En celular la tabla no cabe: cada premio pasa a ser una tarjeta con sus
+   campos rotulados. Es la misma tabla y los mismos inputs — solo cambia
+   cómo se acomodan — así que guardar sigue mandando todo igual. */
+@media (max-width: 760px) {
+  table{min-width:0;display:block}
+  thead{display:none}
+  tbody,tr,td{display:block;width:auto!important}
+  tr.fila{background:#fff;border:1px solid var(--hueso);border-radius:12px;
+    padding:10px 12px 12px;margin-bottom:12px;position:relative}
+  tr.fila td{padding:5px 0}
+  tr.fila td[data-rotulo]::before{content:attr(data-rotulo);display:block;
+    font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+    color:var(--tinta-suave);margin-bottom:3px}
+  tr.fila td.num{text-align:left}
+  tr.fila input{width:100%}
+  /* El número del premio y la X van en la esquina, no como filas sueltas. */
+  tr.fila td:first-child{position:absolute;right:52px;top:10px;padding:0}
+  tr.fila td:last-child{position:absolute;right:12px;top:10px;padding:0}
+}
+</style>
+</head>
+<body>
+
+<div class="barra">
+  <div class="wrap">
+    <div class="marca">OAK<span>BERRY</span> · Centro de mando</div>
+    <div class="quien" id="quien"></div>
+  </div>
+</div>
+
+<!-- ═══ ENTRAR ═══ -->
+<section class="wrap" id="acceso">
+  <div class="tarjeta">
+    <h2 style="margin-top:0">Entrar</h2>
+    <div class="campo">
+      <label for="inEvento">Evento</label>
+      <input id="inEvento" placeholder="rd" autocomplete="off">
+    </div>
+    <p style="font-size:14px;margin:4px 0 12px">Entra con tu correo <b>@manelfoods.com</b>.</p>
+    <div id="gbtn" style="min-height:44px"></div>
+    <p class="error" id="errAcceso"></p>
+  </div>
+</section>
+
+<!-- ═══ TABLERO ═══ -->
+<main class="wrap" id="panel" hidden>
+
+  <h2>Cómo va</h2>
+  <div class="juegos" id="juegos"></div>
+
+  <h2>Premios y dificultad</h2>
+  <div class="tarjeta">
+    <div class="tabla-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Premio</th>
+            <th>Por día<small>tope diario</small></th>
+            <th>Total<small>todo el evento</small></th>
+            <th>Entregados<small>hoy / total</small></th>
+            <th class="av">Tragamonedas<small>% de salir</small></th>
+            <th>Corredor<small>metros</small></th>
+            <th class="av">Trivia<small>aciertos</small></th>
+            <th class="av">Trivia<small>y en menos de (s)</small></th>
+            <th>Contador<small>números por seg</small></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="filas"></tbody>
+      </table>
+    </div>
+    <div class="pie-tabla">
+      <button class="btn chico" id="btnAgregar">+ Agregar premio</button>
+      <label class="verav"><input type="checkbox" id="chkAv"> ver columnas de la trivia y la tragamonedas</label>
+      <span class="nota" style="margin:0">En la tragamonedas cada premio tiene su propio % de salir y entre todos no pueden pasar de 100%: lo que falte es la probabilidad de no ganar nada.</span>
+    </div>
+
+    <div class="ajustes">
+      <div>
+        <label for="inTitulo">Título en pantalla</label>
+        <input id="inTitulo" placeholder="Lanzamiento OAKBERRY RD">
+      </div>
+      <div>
+        <label for="inPiso">Al perder en la tragamonedas</label>
+        <select id="inPiso">
+          <option value="0">Se va sin nada</option>
+          <option value="1">Se queda con el primer premio</option>
+        </select>
+      </div>
+      <div>
+        <label for="inGiros">Tope de giros (0 = sin tope)</label>
+        <input id="inGiros" type="number" min="0" max="50" value="0">
+      </div>
+    </div>
+
+    <div class="pie-tabla">
+      <button class="btn oro" style="width:auto;padding:12px 26px" id="btnGuardar">Guardar cambios</button>
+      <button class="btn chico" id="btnAbrirDia">Dejar disponible hoy el tope diario</button>
+      <span class="error" id="msgGuardar" style="margin:0"></span>
+    </div>
+    <p class="nota">Los tres juegos toman los cambios en menos de un minuto. Los cupos son compartidos: «por día» se reinicia cada día a medianoche (hora de Santo Domingo) y «total» es el tope de todo el evento. Si un premio se agota, deja de salir en los tres.</p>
+  </div>
+
+  <h2>Últimos premios entregados</h2>
+  <div class="tarjeta">
+    <div class="lista" id="ganadores"></div>
+  </div>
+</main>
+
+<script>
+"use strict";
+const API = "/juego-api/juego/admin";
+const $ = id => document.getElementById(id);
+const QS = new URLSearchParams(location.search);
+let EVENTO = "", SES = "", NIVELES = [];
+const CLIENT_ID = "664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleusercontent.com";
+
+function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+// ─── Entrar ───────────────────────────────────────────────────────────
+// El evento y la sesión (12 h) quedan en este navegador para no volver a
+// entrar en cada visita del día; el servidor valida la sesión en cada llamada.
+function sesionGuardada() {
+  try {
+    const d = JSON.parse(localStorage.getItem("centro_sesion") || "null");
+    if (d && Date.now() - d.t < 11.5 * 3600e3) return d;
+  } catch (e) {}
+  return null;
+}
+try { localStorage.removeItem("centro_pin"); } catch (e) {}
+try {
+  $("inEvento").value = QS.get("evento") || localStorage.getItem("centro_evento") || "rd";
+} catch (e) { $("inEvento").value = QS.get("evento") || "rd"; }
+
+function eventoEscrito() {
+  return $("inEvento").value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+}
+
+function pintarBoton() {
+  if (!window.google || !google.accounts) return setTimeout(pintarBoton, 300);
+  google.accounts.id.initialize({ client_id: CLIENT_ID, callback: conGoogle, auto_select: false });
+  google.accounts.id.renderButton($("gbtn"), { theme: "outline", size: "large", shape: "pill", text: "signin_with", locale: "es" });
+}
+
+async function conGoogle(resp) {
+  $("errAcceso").textContent = "Entrando…";
+  let d;
+  try {
+    d = await fetch(`${API}/sesion`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idtoken: resp.credential })
+    }).then(x => x.json());
+  } catch (e) { d = { ok: false, error: "Sin conexión con el servidor. Intenta de nuevo." }; }
+  if (!d.ok) { $("errAcceso").textContent = d.error || "No pudimos entrar."; return; }
+  try { localStorage.setItem("centro_sesion", JSON.stringify({ s: d.sesion, email: d.email, t: Date.now() })); } catch (e) {}
+  entrar(d.sesion, d.email);
+}
+
+async function entrar(ses, email) {
+  const ev = eventoEscrito();
+  if (!ev) { $("errAcceso").textContent = "Escribe el evento."; return; }
+  $("errAcceso").textContent = "";
+  const r = await leer(ev, ses);
+  if (!r.ok) { salir(r.error || "No pudimos entrar."); return; }
+  EVENTO = ev; SES = ses;
+  try { localStorage.setItem("centro_evento", ev); } catch (e) {}
+  $("acceso").hidden = true; $("panel").hidden = false;
+  $("quien").textContent = "Evento: " + ev + " · " + email;
+  pintar(r);
+}
+
+function salir(msg) {
+  try { localStorage.removeItem("centro_sesion"); } catch (e) {}
+  SES = ""; $("panel").hidden = true; $("acceso").hidden = false;
+  $("errAcceso").textContent = msg || "";
+  pintarBoton();
+}
+
+const guardada = sesionGuardada();
+if (guardada) entrar(guardada.s, guardada.email); else pintarBoton();
+
+async function leer(ev, ses) {
+  try {
+    return await fetch(`${API}/estado?evento=${encodeURIComponent(ev)}&s=${encodeURIComponent(ses)}`)
+      .then(x => x.json());
+  } catch (e) { return { ok: false, error: "Sin conexión." }; }
+}
+
+// ─── Pintar ───────────────────────────────────────────────────────────
+const JUEGOS = [
+  { id: "reto", nom: "Reto relámpago", ruta: "/reto" },
+  { id: "slot", nom: "La tragamonedas", ruta: "/maquina" },
+  { id: "loro", nom: "El vuelo del loro", ruta: "/loro" },
+];
+function pintar(r) {
+  const porJuego = Object.fromEntries((r.resumen || []).map(x => [x.juego, x]));
+  $("juegos").innerHTML = JUEGOS.map(j => {
+    const d = porJuego[j.id] || { jugadores: 0, terminaron: 0, premios: 0 };
+    const link = `${j.ruta}?evento=${encodeURIComponent(r.evento)}`;
+    return `<div class="juego">
+      <h3>${j.nom}</h3>
+      <div class="cifras">
+        <div class="cifra"><b>${d.jugadores}</b><span>jugaron</span></div>
+        <div class="cifra"><b>${d.terminaron}</b><span>terminaron</span></div>
+        <div class="cifra"><b>${d.premios}</b><span>premios</span></div>
+      </div>
+      <div class="enlaces">
+        <a href="${link}" target="_blank">Abrir juego</a>
+        <a href="${link}#tablero" target="_blank">Tablero</a>
+      </div>
+    </div>`;
+  }).join("");
+
+  NIVELES = (r.niveles || []).map(n => ({ ...n }));
+  pintarFilas();
+  $("inTitulo").value = (r.ajustes && r.ajustes.titulo) || "";
+  $("inPiso").value = String((r.ajustes && r.ajustes.piso) || 0);
+  $("inGiros").value = String((r.ajustes && r.ajustes.max_giros) || 0);
+
+  $("ganadores").innerHTML = (r.ganadores || []).length
+    ? r.ganadores.map(g => `<div class="g">
+        <div><b>${esc(g.premio)}</b><small>${esc(g.juego)}${g.nombre ? " · " + esc(g.nombre) : ""} · ${esc(g.hora || "")}</small></div>
+        ${g.whatsapp ? `<a class="wa" href="https://wa.me/${esc(g.whatsapp)}" target="_blank">+${esc(g.whatsapp)}</a>`
+                     : `<span class="wa" style="opacity:.55">sin celular</span>`}
+      </div>`).join("")
+    : `<p class="nota" style="margin:0">Todavía no se ha entregado nada.</p>`;
+}
+
+$("chkAv").addEventListener("change", e => {
+  document.querySelector("table").classList.toggle("avanzado", e.target.checked);
+});
+function pintarFilas() {
+  $("filas").innerHTML = NIVELES.map((n, i) => `
+    <tr class="fila">
+      <td><div class="nivel">${i + 1}</div></td>
+      <td data-rotulo="Premio"><input data-i="${i}" data-c="label" value="${esc(n.label)}" maxlength="60"></td>
+      <td class="num" data-rotulo="Por día" style="width:88px"><input data-i="${i}" data-c="cupo" type="number" min="0" value="${n.cupo}"></td>
+      <td class="num" data-rotulo="Total del evento" style="width:88px"><input data-i="${i}" data-c="cupo_total" type="number" min="0" value="${n.cupo_total || 0}"></td>
+      <td data-rotulo="Entregados hoy / total"><span class="entregados ${(n.hoy >= n.cupo) || (n.cupo_total && n.total >= n.cupo_total) ? "lleno" : ""}">${n.hoy || 0} / ${n.total || 0}</span></td>
+      <td class="num av" data-rotulo="Tragamonedas %" style="width:96px"><input data-i="${i}" data-c="prob" type="number" min="0" max="100" value="${Math.round((n.prob || 0) * 100)}"></td>
+      <td class="num" data-rotulo="Corredor: metros" style="width:96px"><input data-i="${i}" data-c="meta_m" type="number" min="0" value="${n.meta_m || 0}"></td>
+      <td class="num av" data-rotulo="Trivia: aciertos" style="width:88px"><input data-i="${i}" data-c="aciertos" type="number" min="0" max="6" value="${n.aciertos || 0}"></td>
+      <td class="num av" data-rotulo="Trivia: segundos" style="width:96px"><input data-i="${i}" data-c="segundos" type="number" min="0" value="${n.segundos || ""}" placeholder="—"></td>
+      <td class="num" data-rotulo="Contador: nº por seg" style="width:104px"><input data-i="${i}" data-c="velocidad" type="number" min="1" max="40" step="0.5" value="${n.velocidad || ""}" placeholder="—"></td>
+      <td>${i === 0 ? "" : `<button class="quitar" data-quitar="${i}" title="Quitar">×</button>`}</td>
+    </tr>`).join("");
+}
+
+$("filas").addEventListener("input", e => {
+  const el = e.target.closest("input"); if (!el) return;
+  const n = NIVELES[+el.dataset.i]; if (!n) return;
+  const c = el.dataset.c;
+  n[c] = c === "label" ? el.value
+       : c === "prob" ? Math.min(100, Math.max(0, +el.value || 0)) / 100
+       : (el.value === "" ? null : +el.value);
+});
+$("filas").addEventListener("click", e => {
+  const b = e.target.closest("[data-quitar]"); if (!b) return;
+  const i = +b.dataset.quitar;
+  const n = NIVELES[i];
+  if (n.entregados > 0 && !confirm(`«${n.label}» ya se entregó ${n.entregados} ${n.entregados === 1 ? "vez" : "veces"}. ¿Quitarlo igual?`)) return;
+  NIVELES.splice(i, 1);
+  pintarFilas();
+});
+$("btnAgregar").addEventListener("click", () => {
+  if (NIVELES.length >= 9) { $("msgGuardar").textContent = "Máximo 9 premios."; return; }
+  const ult = NIVELES[NIVELES.length - 1] || { meta_m: 0, prob: 1, cupo: 10 };
+  NIVELES.push({ label: "", prob: Math.max(0.01, (ult.prob || 0.1) / 2), cupo: 5, cupo_total: 15,
+                 meta_m: (ult.meta_m || 0) + 200, aciertos: 6, segundos: null,
+                 velocidad: Math.min(40, (ult.velocidad || 4) + 1.5), hoy: 0, total: 0 });
+  pintarFilas();
+});
+
+// ─── Guardar ──────────────────────────────────────────────────────────
+// El tope del evento arrastra lo de ayer: un premio con 10 por día podía
+// mostrar "quedan 7" porque ya se habían entregado 3. Esto sube el tope del
+// evento a «lo entregado + el tope diario» para que lo que esté puesto por
+// día sea lo que sale hoy. Hay que volver a oprimirlo cada día.
+$("btnAbrirDia").addEventListener("click", async () => {
+  if (!confirm("Deja disponible HOY el tope diario de cada premio.\n\n" +
+               "Sube el tope del evento a «lo ya entregado + el tope diario», " +
+               "para que lo de ayer no le quite cupo a hoy. ¿Seguimos?")) return;
+  const rot = $("btnAbrirDia").textContent;
+  $("btnAbrirDia").disabled = true; $("btnAbrirDia").textContent = "Abriendo el día…";
+  $("msgGuardar").className = "nota-espera";
+  $("msgGuardar").textContent = "Un momento…";
+  try {
+    const r = await fetch(`${API}/abrir_dia`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ s: SES, evento: EVENTO })
+    }).then(x => x.json());
+    if (!r || !r.ok) { $("msgGuardar").className = "error"; $("msgGuardar").textContent = (r && r.error) || "No se pudo."; return; }
+    $("msgGuardar").className = "ok";
+    $("msgGuardar").textContent = "Listo: hoy sale el tope diario de cada premio.";
+    const est = await leer(EVENTO, SES);
+    if (est && est.ok) pintar(est);
+  } catch (e) {
+    $("msgGuardar").className = "error";
+    $("msgGuardar").textContent = "Sin conexión. Intenta de nuevo.";
+  } finally { $("btnAbrirDia").disabled = false; $("btnAbrirDia").textContent = rot; }
+});
+
+$("btnGuardar").addEventListener("click", async () => {
+  // Guardar son varios cambios en BigQuery y tarda 6-8 s. Sin avisarlo, el
+  // botón parecía muerto y la gente creía que no había servido.
+  const rotulo = $("btnGuardar").textContent;
+  $("btnGuardar").disabled = true; $("btnGuardar").textContent = "Guardando…";
+  $("msgGuardar").className = "nota-espera";
+  $("msgGuardar").textContent = "Guardando… tarda unos segundos, no cierres la página.";
+  let r;
+  try {
+    r = await fetch(`${API}/guardar`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        s: SES, evento: EVENTO,
+        titulo: $("inTitulo").value.trim(),
+        piso_nivel: +$("inPiso").value || 0,
+        max_giros: +$("inGiros").value || 0,
+        niveles: NIVELES.map(n => ({
+          label: n.label, prob: n.prob, cupo: n.cupo, cupo_total: n.cupo_total,
+          meta_m: n.meta_m, aciertos: n.aciertos, segundos: n.segundos, velocidad: n.velocidad,
+        })),
+      }),
+    }).then(x => x.json());
+  } catch (e) { r = { ok: false, error: "Sin conexión." }; }
+  $("btnGuardar").disabled = false; $("btnGuardar").textContent = rotulo;
+  if (!r.ok) { $("msgGuardar").className = "error"; $("msgGuardar").textContent = r.error || "No se pudo guardar."; return; }
+  $("msgGuardar").className = "ok";
+  $("msgGuardar").textContent = `Guardado. Los juegos lo toman en menos de un minuto.`;
+  refrescar();
+});
+
+// ─── Refresco ─────────────────────────────────────────────────────────
+// Solo mientras no se esté editando: recargar debajo de las manos borraría
+// lo que la persona está escribiendo.
+let editando = 0;
+document.addEventListener("input", () => { editando = Date.now(); });
+async function refrescar() {
+  if (!EVENTO || Date.now() - editando < 20000) return;
+  const r = await leer(EVENTO, SES);
+  if (r.ok) pintar(r);
+}
+setInterval(refrescar, 30000);
+</script>
+</body>
+</html>

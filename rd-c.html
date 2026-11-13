@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es-DO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#F5EEE0">
+<meta name="robots" content="noindex, nofollow">
+<title>Tu cupón · OAKBERRY Santo Domingo</title>
+<meta property="og:type" content="website"><meta property="og:locale" content="es_DO">
+<meta property="og:site_name" content="OAKBERRY República Dominicana">
+<meta property="og:title" content="Tu cupón · OAKBERRY Santo Domingo">
+<meta property="og:description" content="Regístrate y recibe tu cupón por WhatsApp. Plaza Andalucía y Agora Mall, Santo Domingo.">
+<meta property="og:image" content="https://www.oakberry-cupones.com/og-rd-cupon.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<link rel="preload" href="/exacto-assets/fuentes/nexa-slab-black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/rd-assets/kit.css">
+<style>
+.premio{text-align:center}.premio .dato{font-size:3.6rem}
+.premio .q{display:block;font-weight:800;font-size:1rem;margin-top:4px;text-transform:uppercase;letter-spacing:.04em}
+.premio p{margin-top:10px}
+#exito,#contenido,#cerrada{display:none}
+</style>
+</head>
+<body>
+<main>
+  <img class="sol" src="/rd-assets/sol-loro.png" alt="" aria-hidden="true">
+  <img class="pajaros" src="/rd-assets/pajaros.png" alt="" aria-hidden="true">
+  <img class="loro" src="/rd-assets/loro-vuela.png" alt="" aria-hidden="true">
+  <img class="marca" src="/rd-assets/wordmark.svg" alt="OAKBERRY" width="3600" height="472">
+  <p class="cejilla" id="cejilla">Santo Domingo</p>
+
+  <section class="tarjeta" id="cargando" style="text-align:center;margin-top:28px"><p class="chico">Cargando tu cupón…</p></section>
+
+  <div id="contenido">
+    <div class="hola"><h1 id="titulo"></h1><p id="lead"></p></div>
+    <section class="tarjeta morada premio"><div class="dato" id="premioN"></div><span class="q" id="premioQ"></span><p class="chico" id="premioFina"></p></section>
+    <p class="grupo">Cómo funciona</p>
+    <section class="tarjeta"><ul class="pasos">
+      <li><b>1</b><span>Regístrate con tu WhatsApp y te llega tu código.</span></li>
+      <li><b>2</b><span>Dicta el código en caja antes de pagar. El cajero lo aplica y listo.</span></li>
+      <li><b>3</b><span id="regla3"></span></li>
+    </ul></section>
+    <p class="grupo" id="grupoForm">Recibe tu cupón</p>
+    <div class="aviso-ok oculto" id="reloj" style="margin-bottom:12px"></div>
+    <section class="tarjeta" id="formCard">
+      <div class="err" id="err" role="alert"></div>
+      <div class="campo"><label for="nombre">Tu nombre</label><input id="nombre" type="text" placeholder="Nombre y apellido" autocomplete="name"></div>
+      <div class="campo"><label for="celular">Tu WhatsApp</label><div class="tel"><span class="ind">+1</span><input id="celular" type="tel" inputmode="numeric" placeholder="809 000 0000" autocomplete="tel-national"></div></div>
+      <label class="tyc" for="tyc"><input type="checkbox" id="tyc"><span>Acepto los <a href="/tyc" target="_blank" rel="noopener">términos</a> y recibir mi cupón por WhatsApp.</span></label>
+      <button class="pildora" id="enviar">Quiero mi cupón</button>
+    </section>
+    <section class="tarjeta" id="exito" aria-live="polite">
+      <h2 id="exitoMsg"></h2><div class="aviso-ok" id="waAviso"></div>
+      <div class="cupon-grande"><div class="etq">Tu cupón</div><div class="cod" id="codigo"></div><div class="chico" id="val"></div></div>
+      <p class="chico" id="nota" style="text-align:center;margin-top:12px"></p>
+      <a id="waLink" class="pildora oro" target="_blank" rel="noopener" style="margin-top:14px">Guardarlo en mi WhatsApp</a>
+    </section>
+  </div>
+  <section class="tarjeta" id="cerrada" style="text-align:center"><p class="chico" id="cerradaMsg"></p></section>
+
+  <p class="grupo">Dónde canjearlo (cualquiera de las dos)</p>
+  <section class="tarjeta" style="text-align:center"><h2>OAKBERRY Plaza Andalucía</h2><p class="chico">Av. Abraham Lincoln 850, primer piso, local 55-A</p><h2 style="margin-top:14px">OAKBERRY Agora Mall</h2><p class="chico">Santo Domingo · 8:00 am – 9:00 pm</p></section>
+  <p class="pie claro">OAKBERRY República Dominicana · <a href="https://www.instagram.com/oakberry_rd/" target="_blank" rel="noopener">@oakberry_rd</a><br><span class="solo-rd">Válido solo en República Dominicana</span></p>
+</main>
+<script>
+const API = "https://api.oakberry-cupones.com/";
+const SLUG = (location.pathname.split("/rd/c/")[1] || new URLSearchParams(location.search).get("c") || "").replace(/[^a-z0-9-]/g,"");
+const $ = id => document.getElementById(id);
+function jsonp(params){ return new Promise((resolve, reject)=>{
+  const cb = "cb_"+Math.random().toString(36).slice(2), s = document.createElement("script"); let listo=false;
+  window[cb]=d=>{listo=true; limpiar(); resolve(d);}; function limpiar(){ delete window[cb]; s.remove(); }
+  s.onerror=()=>{ if(!listo){limpiar(); reject(new Error("red"));} };
+  s.src = API+"?"+new URLSearchParams({...params, callback:cb}).toString(); document.body.appendChild(s);
+  setTimeout(()=>{ if(!listo){limpiar(); reject(new Error("timeout"));} }, 20000); }); }
+async function api(p){ const e=[600,2000,5000]; let u; for(let i=0;i<e.length;i++){ try{ return await jsonp(p);}catch(x){u=x; if(i<e.length-1) await new Promise(r=>setTimeout(r,e[i]));} } throw u; }
+function error(m){ const e=$("err"); e.textContent=m; e.classList.add("show"); e.scrollIntoView({behavior:"smooth",block:"center"}); }
+function fp(){ try{ const c=document.createElement("canvas"),x=c.getContext("2d"); x.fillText("oak-rdc",2,2); const d=c.toDataURL(); let h=0; for(let i=0;i<d.length;i++){h=((h<<5)-h)+d.charCodeAt(i);h|=0;} return "fp"+Math.abs(h).toString(36)+(screen.width||0)+"x"+(screen.height||0);}catch(e){return "fp-none";} }
+const BORR="oak_rdc_"+SLUG;
+(function(){ try{ const d=JSON.parse(localStorage.getItem(BORR)||"null"); if(d) ["nombre","celular"].forEach(k=>{ if(d[k]&&!$(k).value) $(k).value=d[k]; }); }catch(e){} })();
+async function cargar(){
+  if(!SLUG){ $("cargando").querySelector("p").textContent="Este enlace no es válido."; return; }
+  let r; try{ r = await api({accion:"rdcLanding", slug:SLUG}); }catch(e){ $("cargando").querySelector("p").textContent="No pudimos cargar la campaña. Inténtalo de nuevo en un minuto."; return; }
+  if(!r.ok){ $("cargando").querySelector("p").textContent = r.mensaje || "Esta campaña no existe."; return; }
+  const c = r.campana; $("cargando").style.display="none";
+  $("cejilla").textContent = "Santo Domingo · " + c.programa;
+  if(c.descuento_tipo==="PCT"){ $("titulo").textContent = c.descuento_valor+"% en toda tu orden"; $("premioN").textContent = c.descuento_valor+"%"; $("premioQ").textContent="de descuento en toda la orden"; }
+  else { $("titulo").textContent = "Un bowl por nuestra cuenta"; $("premioN").textContent = c.bowl==="9oz" ? "9 oz" : "12 oz"; $("premioQ").textContent = "1 bowl " + (c.bowl==="9oz"?"The One":"Classic") + " por cada uso"; }
+  $("lead").textContent = c.nombre;
+  $("premioFina").textContent = c.beneficio + ". Toppings premium y bebidas se pagan aparte.";
+  $("regla3").textContent = (c.usos===1 ? "Tu cupón es de un solo uso." : "Lo puedes usar hasta "+c.usos+" veces; cada uso es una orden.") + (c.usoHoras ? " Desde que lo recibes tienes " + Math.max(1,Math.round(c.usoHoras/24)) + " día" + (Math.round(c.usoHoras/24)===1?"":"s") + " para usarlo." : " Válido hasta el " + c.venceHumano + ".");
+  if(c.cierraRegistroEl && !c.reclamoVencido){ $("reloj").classList.remove("oculto"); const fin=new Date(c.cierraRegistroEl);
+    const tic=()=>{ const ms=fin-Date.now(); if(ms<=0){ $("reloj").textContent="El tiempo para reclamar este cupón terminó."; $("formCard").style.display="none"; return; }
+      const h=Math.floor(ms/36e5), m=Math.floor(ms%36e5/6e4); $("reloj").textContent = "⏳ Puedes reclamarlo durante " + (h>0 ? h+" h "+m+" min" : m+" min") + " más."; setTimeout(tic, 30000); }; tic(); }
+  $("contenido").style.display="block";
+  if(c.cerrada || c.agotada || c.creando){
+    $("formCard").style.display="none"; $("grupoForm").style.display="none"; $("cerrada").style.display="block";
+    $("cerradaMsg").textContent = c.creando ? "Estamos preparando los cupones. Vuelve en unos minutos." : c.agotada ? "Se acabaron los cupones de esta campaña." : c.reclamoVencido ? "El tiempo para reclamar este cupón terminó." : "Esta campaña ya cerró.";
+  }
+}
+$("celular").addEventListener("input", ()=>{ let v=$("celular").value.replace(/\D/g,""); if(v.startsWith("1")&&v.length===11) v=v.slice(1); v=v.slice(0,10); $("celular").value=v.replace(/(\d{3})(\d{0,3})(\d{0,4})/,(m,a,b,c)=>[a,b,c].filter(Boolean).join(" ")); });
+$("enviar").addEventListener("click", async ()=>{
+  $("err").classList.remove("show");
+  const nombre=$("nombre").value.trim(), instagram="", celular=$("celular").value.replace(/\D/g,"");
+  if(!nombre) return error("Escribe tu nombre.");
+  if(!/^(809|829|849)\d{7}$/.test(celular)) return error("Escribe tu WhatsApp dominicano: 10 dígitos que empiecen por 809, 829 u 849.");
+  if(!$("tyc").checked) return error("Necesitamos que aceptes los términos para enviarte el cupón.");
+  try{ localStorage.setItem(BORR, JSON.stringify({nombre, celular:$("celular").value})); }catch(e){}
+  const btn=$("enviar"), t=btn.textContent; btn.disabled=true; btn.textContent="Un momento…";
+  let r; try{ r = await api({accion:"rdcRegistrar", slug:SLUG, nombre, instagram, celular, tyc:"true", fingerprint:fp()}); }
+  catch(e){ btn.disabled=false; btn.textContent=t; return error("No pudimos completar tu registro ahora mismo. Inténtalo de nuevo en un minuto."); }
+  if(!r.ok){ btn.disabled=false; btn.textContent=t; if(r.agotada||r.cerrada){ btn.disabled=true; btn.textContent = r.agotada?"Cupones agotados":"Campaña cerrada"; } return error(r.mensaje||"No pudimos registrarte."); }
+  try{ localStorage.removeItem(BORR); }catch(e){}
+  $("formCard").style.display="none"; $("grupoForm").style.display="none";
+  $("exitoMsg").textContent = r.repetido ? "Ya tenías tu cupón" : "¡Listo!";
+  $("waAviso").textContent = r.repetido ? "Ya te lo habíamos enviado por WhatsApp al "+r.celularWA+"." : "Te lo estamos enviando por WhatsApp al "+r.celularWA+". Si no te llega en unos minutos, guárdalo con el botón de abajo.";
+  $("codigo").textContent = r.codigo;
+  $("val").textContent = r.beneficio + (r.usos===1 ? " · un solo uso" : " · hasta "+r.usos+" usos" + (r.usados ? " · llevas "+r.usados : ""));
+  $("nota").textContent = "Válido hasta el "+r.venceHumano+". Dilo en caja antes de pagar.";
+  $("reloj").classList.add("oculto");
+  $("waLink").href = r.linkWA; $("exito").style.display="block"; $("exito").scrollIntoView({behavior:"smooth",block:"start"});
+});
+cargar();
+</script>
+</body>
+</html>

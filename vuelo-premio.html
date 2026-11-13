@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FBF6E9">
+<title>Tu premio · Vuelo OAKBERRY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<!--
+  Página que abre el QR de la pantalla del juego (vuelo.html). Pinta el premio
+  como IMAGEN 1080x1350 y la entrega con navigator.share (en iOS un
+  <a download> no hace nada — ver /santodomingo/friends). Si el navegador no
+  comparte archivos, la imagen queda en pantalla para mantenerla presionada.
+  Datos: acción vueloPremio (id + token de la jugada; sin token no hay premio).
+-->
+<style>
+:root{--crema:#FBF6E9;--hueso:#EAE1CC;--tinta:#21152A;--suave:#5C4A66;--morado:#4B1F60}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Azeret Mono',ui-monospace,Menlo,monospace;background:var(--crema);color:var(--tinta);
+  min-height:100svh;display:flex;flex-direction:column;align-items:center;gap:18px;padding:22px 18px 40px;text-align:center}
+[hidden]{display:none!important}
+h1{font-size:1.05rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--morado)}
+#tarjeta{width:100%;max-width:440px;border-radius:14px;box-shadow:0 10px 30px rgba(33,21,42,.18);display:block}
+.btn{background:var(--morado);color:var(--crema);font:800 1rem 'Azeret Mono',monospace;letter-spacing:.08em;
+  text-transform:uppercase;border:none;border-radius:999px;padding:16px 28px;min-height:52px;width:100%;max-width:440px}
+.nota{font-size:.82rem;color:var(--suave);max-width:40ch;line-height:1.5}
+.error{margin-top:30vh;font-size:.95rem;max-width:34ch;line-height:1.6}
+</style>
+</head>
+<body>
+<h1 id="titulo">Tu premio</h1>
+<p class="nota" id="cargando">Cargando tu premio…</p>
+<img id="tarjeta" alt="Tu premio de Vuelo OAKBERRY" hidden>
+<button class="btn" id="btnGuardar" hidden>Guardar imagen</button>
+<p class="nota" id="nota" hidden>Si no se guarda sola, mantén presionada la imagen y elige <b>Guardar</b>.<br>Muéstrala en caja en esta compra.</p>
+<p class="error" id="error" hidden></p>
+
+<script>
+"use strict";
+const API = "https://api.oakberry-cupones.com";
+const QS = new URLSearchParams(location.search);
+const $ = id => document.getElementById(id);
+
+function jsonp(params) {
+  return new Promise((resolve, reject) => {
+    const cb = "cb_" + Math.random().toString(36).slice(2);
+    const s = document.createElement("script");
+    let done = false;
+    const clean = () => { done = true; clearTimeout(t); delete window[cb]; s.remove(); };
+    window[cb] = d => { if (done) return; clean(); resolve(d); };
+    s.onerror = () => { if (done) return; clean(); reject(new Error("red")); };
+    s.src = API + "?" + new URLSearchParams({ ...params, callback: cb });
+    document.body.appendChild(s);
+    const t = setTimeout(() => { if (!done) { clean(); reject(new Error("timeout")); } }, 10000);
+  });
+}
+async function api(p) {
+  for (let i = 0; i < 3; i++) { try { return await jsonp(p); } catch (e) { await new Promise(r => setTimeout(r, 600 * (i + 1))); } }
+  throw new Error("sin conexión");
+}
+function cargarImg(src) {
+  return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+}
+function envolver(ctx, texto, anchoMax) {
+  const palabras = texto.split(" "), lineas = [];
+  let l = "";
+  palabras.forEach(p => {
+    const prueba = l ? l + " " + p : p;
+    if (ctx.measureText(prueba).width > anchoMax && l) { lineas.push(l); l = p; } else l = prueba;
+  });
+  if (l) lineas.push(l);
+  return lineas;
+}
+
+async function pintar(d) {
+  const W = 1080, H = 1350;
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  try { await Promise.all([document.fonts.load("800 90px 'Azeret Mono'"), document.fonts.load("600 40px 'Azeret Mono'"), document.fonts.load("400 34px 'Azeret Mono'")]); } catch (e) {}
+  const [logo, loro] = await Promise.all([cargarImg("/vuelo-lockup-morado.svg"), cargarImg("/vuelo-loro-morado.svg")]);
+
+  x.fillStyle = "#FBF6E9"; x.fillRect(0, 0, W, H);
+  x.strokeStyle = "#21152A"; x.lineWidth = 4; x.strokeRect(40, 40, W - 80, H - 80);
+  x.textAlign = "center"; x.textBaseline = "alphabetic";
+
+  if (logo) { const w = 560, h = w * logo.naturalHeight / logo.naturalWidth; x.drawImage(logo, (W - w) / 2, 110, w, h); }
+
+  x.fillStyle = "#5C4A66"; x.font = "600 34px 'Azeret Mono', monospace";
+  x.fillText("VUELO OAKBERRY · APERTURA", W / 2, 330);
+
+  x.fillStyle = "#21152A"; x.font = "800 64px 'Azeret Mono', monospace";
+  x.fillText(`¡${d.nombre.toUpperCase()}, GANASTE!`.slice(0, 26), W / 2, 450);
+
+  // El premio: el héroe de la tarjeta.
+  x.fillStyle = "#4B1F60"; x.font = "800 104px 'Azeret Mono', monospace";
+  const lineas = envolver(x, d.premio.toUpperCase(), W - 200);
+  const alto = 118;
+  let y = 640 - (lineas.length - 1) * alto / 2;
+  lineas.forEach(l => { x.fillText(l, W / 2, y); y += alto; });
+
+  if (loro) { const w = 200, h = w * loro.naturalHeight / loro.naturalWidth; x.drawImage(loro, (W - w) / 2, 790, w, h); }
+
+  x.fillStyle = "#21152A"; x.font = "600 38px 'Azeret Mono', monospace";
+  x.fillText(`Te retiraste en ${d.retiroX.toFixed(2)}x`, W / 2, 1110);
+  x.fillStyle = "#5C4A66"; x.font = "400 32px 'Azeret Mono', monospace";
+  x.fillText(`${d.tienda} · ${d.ciudad}`, W / 2, 1165);
+  x.fillText(`${d.fecha} · ${d.hora} · Ref ${d.ref}`, W / 2, 1210);
+  x.fillStyle = "#4B1F60"; x.font = "600 32px 'Azeret Mono', monospace";
+  x.fillText("Válido en esta compra · Muéstralo en caja", W / 2, 1262);
+
+  if (d.esPrueba) {
+    x.save(); x.translate(W / 2, H / 2); x.rotate(-0.5);
+    x.fillStyle = "rgba(179,38,30,.35)"; x.font = "800 120px 'Azeret Mono', monospace";
+    x.fillText("PRUEBA", 0, 0); x.restore();
+  }
+  return c;
+}
+
+(async () => {
+  const j = QS.get("j"), t = QS.get("t");
+  let d;
+  try { d = await api({ accion: "vueloPremio", j, t }); } catch (e) { d = null; }
+  $("cargando").hidden = true;
+  if (!d || !d.ok) {
+    $("titulo").hidden = true;
+    $("error").hidden = false;
+    $("error").textContent = d ? "No encontramos este premio. Escanea de nuevo el código de la pantalla." : "Sin conexión. Revisa tu internet y vuelve a abrir el enlace.";
+    return;
+  }
+  const canvas = await pintar(d);
+  let url;
+  try { url = canvas.toDataURL("image/png"); } catch (e) { url = ""; }
+  $("tarjeta").src = url; $("tarjeta").hidden = false; $("nota").hidden = false;
+
+  const blob = await new Promise(r => canvas.toBlob(r, "image/png"));
+  const archivo = blob ? new File([blob], `premio-oakberry-${d.ref}.png`, { type: "image/png" }) : null;
+  if (archivo && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+    $("btnGuardar").hidden = false;
+    $("btnGuardar").addEventListener("click", async () => {
+      try { await navigator.share({ files: [archivo], title: "Mi premio OAKBERRY" }); } catch (e) {}
+    });
+  }
+})();
+</script>
+</body>
+</html>
