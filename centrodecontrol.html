@@ -149,6 +149,11 @@ label.campo{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weigh
 .tope{height:8px;background:var(--crema-cielo);border-radius:9px;overflow:hidden;margin:6px 0 4px}
 .tope i{display:block;height:100%;background:var(--verde)}
 .tope.pasa i{background:var(--coral)}
+/* F1b: lo que lee el cajero en /validar y el sub-formulario del 100 % */
+.cajero{background:var(--blanco);border:1px dashed var(--lila);border-radius:14px;padding:12px 14px;white-space:pre-wrap;font:13.5px/1.5 var(--sans);color:var(--tinta);overflow-wrap:anywhere}
+.cajero b{color:var(--morado)}
+.subben{background:var(--blanco);border:1px solid var(--hueso);border-radius:14px;padding:12px;margin-top:10px}
+.pista{font-size:12.5px;color:var(--tinta-suave);background:var(--oro-suave);border-radius:10px;padding:8px 10px;margin-top:8px}
 .codigos{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px;margin-top:8px}
 .codigos span{font:700 14px/1 ui-monospace,Menlo,monospace;letter-spacing:.5px;background:var(--blanco);border:1px dashed var(--lila);border-radius:8px;padding:8px 4px;text-align:center}
 textarea.lista{font:14px/1.5 ui-monospace,Menlo,monospace}
@@ -426,7 +431,11 @@ const cu = {op:null, lista:[], filtro:'', f:null, t:null, poll:null, det:null};
 function pesos(n){ return n==null ? '—' : '$'+Math.round(Number(n)).toLocaleString('es-CO'); }
 function hoyMas(dias){ return new Date(Date.now()+dias*864e5).toLocaleDateString('en-CA',{timeZone:'America/Bogota'}); }
 function quien(e){ return String(e||'').split('@')[0]; }
-function plantillaDe(f){ return f.beneficio_clave==='pct15' && f.tienda==='todas' ? 'regalo' : 'evento'; }
+// 'regalo' tiene el beneficio fijo («15 % en cualquier tienda»): no sirve para multiuso.
+function plantillaDe(f){ return f.beneficio_clave==='pct15' && f.tienda==='todas' && Number(f.usos||1)===1 ? 'regalo' : 'evento'; }
+const ES_CIEN = k => k==='gratis_producto' || k==='gratis_orden';
+const TOP_TXT = n => n==99 ? 'Todos los que pida' : n==0 ? 'No cubre toppings extra' : n==1 ? 'Sí, 1 topping extra' : `Sí, hasta ${n} toppings extra`;
+function usosTxt(c){ return Number(c.usos_por_codigo||1) > 1 ? `${miles(c.canjes)} de ${miles(c.canjes_max)} usos` : ''; }
 
 document.querySelectorAll('[data-cfiltro]').forEach(b => b.onclick = () => {
   cu.filtro = b.dataset.cfiltro;
@@ -439,11 +448,11 @@ async function cargarCupones(){
   try{ d = await api('ccCupCampanas'); }catch(e){ return; }
   if(!d.ok){ $('tablaCupones').innerHTML = `<tr><td><div class="aviso no">${esc(d.mensaje)}</div></td></tr>`; return; }
   cu.lista = d.campanas;
-  const t = d.campanas.reduce((a,c)=>({e:a.e+c.emitidos, k:a.k+c.canjeados, p:a.p+(c.costo_canjeado||0)}), {e:0,k:0,p:0});
+  const t = d.campanas.reduce((a,c)=>({e:a.e+c.emitidos, k:a.k+(c.canjes||0), p:a.p+(c.costo_canjeado||0)}), {e:0,k:0,p:0});
   $('kpisCupones').innerHTML = `
     <div class="kpi"><div class="n">${d.campanas.length}</div><div class="l">campañas</div></div>
     <div class="kpi"><div class="n">${miles(t.e)}</div><div class="l">cupones entregados</div></div>
-    <div class="kpi verde"><div class="n">${miles(t.k)}</div><div class="l">canjeados en caja</div></div>
+    <div class="kpi verde"><div class="n">${miles(t.k)}</div><div class="l">canjes en caja</div></div>
     <div class="kpi"><div class="n">${pesos(t.p)}</div><div class="l">costo de lo canjeado (estimado)</div></div>`;
   pintarCupones();
 }
@@ -459,7 +468,7 @@ function pintarCupones(){
         <td data-l="Campaña"><div><b>${esc(c.nombre)}</b><br><span class="etq ${m[1]}">${m[0]}</span> <span class="mini" title="${esc(c.motivo_texto||'')}">${esc(c.motivo_nombre||'')}</span>${c.paga==='franquicia' ? ' <span class="etq wait">paga franquicia</span>' : ''}</div></td>
         <td data-l="Beneficio"><div>${esc(c.beneficio||'')}<br><span class="mini">${esc(c.tienda==='todas' ? 'Todas las tiendas' : c.tienda)}</span></div></td>
         <td data-l="Entregados">${miles(c.emitidos)}${c.modo!=='qr' ? ' de '+miles(c.cupo) : ''}</td>
-        <td data-l="Canjeados"><b>${miles(c.canjeados)}</b> <span class="mini">${c.emitidos ? pct+'%' : ''}</span></td>
+        <td data-l="Canjeados"><div><b>${miles(c.canjeados)}</b> <span class="mini">${c.emitidos ? pct+'%' : ''}</span>${usosTxt(c) ? `<br><span class="mini">🔁 ${usosTxt(c)}</span>` : ''}</div></td>
         <td data-l="WhatsApp">${wa}</td>
         <td data-l="Costo"><div>${pesos(c.costo_canjeado)}<br><span class="mini">máx. ${pesos(c.costo_max)}</span></div></td>
         <td data-l="Creada"><div>${fecha(c.created_at)}<br><span class="mini">${esc(quien(c.creado_por))}</span></div></td>
@@ -471,11 +480,12 @@ function pintarCupones(){
 // ── crear ──
 async function nuevoCupon(modo){
   if(!cu.op){
-    let d; try{ d = await api('ccCupOpciones'); }catch(e){ return; }
+    let d; try{ d = await api('ccCupOpciones', {v:2}); }catch(e){ return; }   // v=2: trae los 100 % (F1b)
     if(!d.ok){ alert(d.mensaje); return; }
     cu.op = d;
   }
-  cu.f = {modo:modo||'persona', nombre:'', beneficio_clave:'bowl9', motivo:'cortesia', motivo_texto:'', paga:'marca', tienda:'todas', vence:hoyMas(30), personas:'', cantidad:20, enviar_wa:true, wa_mensaje:SUG_EVENTO.cortesia};
+  cu.f = {modo:modo||'persona', nombre:'', beneficio_clave:'bowl9', motivo:'cortesia', motivo_texto:'', paga:'marca', tienda:'todas', vence:hoyMas(30), personas:'', cantidad:20, enviar_wa:true, wa_mensaje:SUG_EVENTO.cortesia,
+          usos:1, producto_clave:'bowl12', toppings_extra:0, producto_otro:'', producto_precio:''};
   pintarCreadorCupon();
 }
 function pintarCreadorCupon(){
@@ -490,11 +500,15 @@ function pintarCreadorCupon(){
         <button class="chip ${f.modo==='lote'?'on':''}" data-cmodo="lote" type="button">🎟 Lote de códigos</button>
         <button class="chip" data-cmodo="qr" type="button">📱 Evento con QR</button>
       </div>
-      <div class="mini" style="margin-top:6px">${f.modo==='persona' ? 'Cortesías, compensaciones, prensa: escribes nombre y celular y a cada uno le llega su código.' : 'Códigos sin dueño para repartir a mano o imprimir (un aliado, una activación). Cada código sirve una vez.'}</div>
+      <div class="mini" style="margin-top:6px">${f.modo==='persona' ? 'Cortesías, compensaciones, prensa: escribes nombre y celular y a cada uno le llega su código.' : 'Códigos sin dueño para repartir a mano o imprimir (un aliado, una activación). Cada código sirve las veces que digas en el paso 2.'}</div>
       <label class="campo" style="margin-top:10px">Nombre de la campaña (para encontrarla después)<input type="text" id="cu_nombre" maxlength="80" value="${esc(f.nombre)}" placeholder="${f.modo==='persona' ? 'Cortesías prensa noviembre' : 'Activación Bodytech Andino'}"></label>
     </div>
     <div class="card paso"><h3><span class="num">2</span>¿Qué recibe?</h3>
       <div class="plantillas" id="cu_bens" style="margin-top:10px"></div>
+      <div id="cu_sub"></div>
+      <label class="campo" style="margin-top:12px">¿Cuántas veces sirve cada código?
+        <input type="number" id="cu_usos" min="1" max="${op.max_usos||10}" value="${Number(f.usos)||1}" inputmode="numeric"></label>
+      <div class="mini" id="cu_usos_txt"></div>
     </div>
     <div class="card paso"><h3><span class="num">3</span>¿Por qué y quién paga?</h3>
       <div class="grid" style="margin-top:10px">
@@ -537,25 +551,73 @@ function pintarCreadorCupon(){
     leerFormCupon(); cu.f.modo = b.dataset.cmodo; pintarCreadorCupon();
   });
   document.querySelectorAll('[data-cpaga]').forEach(b => b.onclick = () => { cu.f.paga = b.dataset.cpaga; document.querySelectorAll('[data-cpaga]').forEach(x => x.classList.toggle('on', x===b)); previaCupon(); });
-  $('modal').querySelectorAll('input,select,textarea').forEach(el => { el.oninput = el.onchange = () => { leerFormCupon(); previaCupon(); }; });
+  // Los del 100 % (#cu_sub) tienen su propio handler en pintarSubCupon.
+  $('modal').querySelectorAll('input,select,textarea').forEach(el => { if(el.closest('#cu_sub')) return; el.oninput = el.onchange = () => { leerFormCupon(); previaCupon(); }; });
   $('cu_motivo').oninput = null;       // el genérico leería el motivo nuevo antes de este handler
   $('cu_motivo').onchange = () => {
     const viejo = cu.f.motivo; leerFormCupon();
+    if(ES_CIEN(cu.f.beneficio_clave)) pintarBensCupon();   // el 100 % de Toteat sale del motivo
     // Si la frase del WhatsApp era la sugerida del motivo anterior, se cambia por la del nuevo.
     const sug = plantillaDe(cu.f)==='regalo' ? SUG_REGALO : SUG_EVENTO;
     if(!cu.f.wa_mensaje || cu.f.wa_mensaje===SUG_EVENTO[viejo] || cu.f.wa_mensaje===SUG_REGALO[viejo]){ cu.f.wa_mensaje = sug[cu.f.motivo]; if($('cu_wamsj')) $('cu_wamsj').value = cu.f.wa_mensaje; }
     previaCupon();
   };
+  leerFormCupon();
   previaCupon();
 }
 function pintarBensCupon(){
-  $('cu_bens').innerHTML = cu.op.beneficios.map(b => `<button class="pl ${b.clave===cu.f.beneficio_clave?'on':''}" data-cben="${b.clave}" type="button">
-      <div class="tt">${esc(b.titulo)}</div><div class="vv">${pesos(b.valor)} <span class="mini">${b.tipo==='descuento' ? 'por canje, estimado' : 'por canje'}</span></div>
-      <div class="tk">En Toteat: «${esc(b.toteat)}»</div></button>`).join('');
+  const toteat100 = cu.op.toteat_100 || {};
+  $('cu_bens').innerHTML = cu.op.beneficios.map(b => {
+    const cien = ES_CIEN(b.clave);
+    const vv = b.clave==='gratis_producto' ? 'según el producto' : pesos(b.valor) + ` <span class="mini">${b.tipo==='descuento' || b.tipo==='orden' ? 'por canje, estimado' : 'por canje'}</span>`;
+    const tk = cien ? `En Toteat: «${esc(toteat100[cu.f.motivo] || 'un 100 %')}» (sale del motivo)` : `En Toteat: «${esc(b.toteat)}»`;
+    return `<button class="pl ${b.clave===cu.f.beneficio_clave?'on':''}" data-cben="${b.clave}" type="button">
+      <div class="tt">${esc(b.titulo)}</div><div class="vv">${vv}</div><div class="tk">${tk}</div></button>`;
+  }).join('');
   document.querySelectorAll('[data-cben]').forEach(b => b.onclick = () => {
     const antes = plantillaDe(cu.f); cu.f.beneficio_clave = b.dataset.cben; pintarBensCupon();
     if(plantillaDe(cu.f)!==antes) ajustarFraseCupon(); previaCupon();
   });
+  pintarSubCupon();
+}
+// Debajo de las tarjetas: qué producto cubre el 100 % y si cubre toppings extra.
+function pintarSubCupon(){
+  const f = cu.f, op = cu.op, box = $('cu_sub'); if(!box) return;
+  if(f.beneficio_clave==='gratis_orden'){
+    box.innerHTML = `<div class="pista">💜 Cubre <b>todo</b> lo que pida en esa orden (Toteat no le pone tope). El costo se estima con una orden de ${pesos(cu.op.beneficios.find(b=>b.clave==='gratis_orden').valor)}.</div>`;
+    return;
+  }
+  if(f.beneficio_clave!=='gratis_producto'){
+    const b = op.beneficios.find(x => x.clave===f.beneficio_clave) || {};
+    box.innerHTML = b.tipo==='bowl' ? `<div class="pista">Monto fijo: la persona puede pedir más en la misma orden y paga la diferencia. Las adiciones se cobran.</div>` : '';
+    return;
+  }
+  const grupos = {};
+  op.productos.forEach(p => (grupos[p.grupo] = grupos[p.grupo] || []).push(p));
+  const opts = Object.entries(grupos).map(([g, ps]) => `<optgroup label="${esc(g)}">` +
+      ps.map(p => `<option value="${p.clave}" ${p.clave===f.producto_clave?'selected':''}>${esc(p.nombre)} · ${pesos(p.precio)}</option>`).join('') + '</optgroup>').join('') +
+    `<option value="otro" ${f.producto_clave==='otro'?'selected':''}>Otro producto…</option>`;
+  const prod = op.productos.find(p => p.clave===f.producto_clave);
+  const admite = f.producto_clave==='otro' || (prod && prod.toppings);
+  const tops = [0,1,2,3,op.toppings_todos||99].map(n => `<option value="${n}" ${Number(f.toppings_extra)===n?'selected':''}>${TOP_TXT(n)}</option>`).join('');
+  box.innerHTML = `<div class="subben">
+      <label class="campo">¿Qué producto cubre?<select id="cu_prod">${opts}</select></label>
+      ${f.producto_clave==='otro' ? `<div class="grid" style="margin-top:8px">
+        <label class="campo">¿Cuál?<input type="text" id="cu_potro" maxlength="60" value="${esc(f.producto_otro)}" placeholder="Bowl griego 9 oz"></label>
+        <label class="campo">Precio de lista<input type="text" id="cu_pprecio" inputmode="numeric" value="${esc(f.producto_precio)}" placeholder="23.900"></label></div>` : ''}
+      ${admite ? `<label class="campo" style="margin-top:8px">¿Cubre toppings extra (los que se cobran)?<select id="cu_tops">${tops}</select></label>
+        <div class="mini">Cada topping extra se estima en ${pesos(op.topping_valor)}. Los toppings incluidos del bowl siempre van.</div>` : ''}
+      <div class="pista">🧾 En Toteat el 100 % cubre la orden <b>entera</b>. Por eso el cajero abre una orden <b>solo con este producto</b>${admite ? ' (y los toppings extra que cubra)' : ''}; si la persona lleva algo más, va en <b>otra orden</b> y lo paga. Se lo decimos al cajero cuando valida el código.</div>
+    </div>`;
+  ['cu_prod','cu_potro','cu_pprecio','cu_tops'].forEach(id => { const el = $(id); if(el) el.oninput = el.onchange = () => {
+    const antesProd = f.producto_clave; leerFormCupon();
+    if(id==='cu_prod' && f.producto_clave!==antesProd){
+      const p = op.productos.find(x => x.clave===f.producto_clave);
+      if(p && !p.toppings) f.toppings_extra = 0;
+      pintarSubCupon();
+    }
+    previaCupon();
+  }; });
 }
 function ajustarFraseCupon(){
   // Cambió la plantilla (regalo ↔ evento): la frase sugerida de una no sirve en la otra.
@@ -574,6 +636,14 @@ function leerFormCupon(){
   if($('cu_cant')) f.cantidad = Number($('cu_cant').value||0);
   if($('cu_wa')){ f.enviar_wa = $('cu_wa').checked; $('cu_wabox').classList.toggle('oculto', !f.enviar_wa); }
   if($('cu_wamsj')) f.wa_mensaje = $('cu_wamsj').value;
+  if($('cu_usos')) f.usos = Math.max(1, Math.min(cu.op.max_usos||10, Number($('cu_usos').value)||1));
+  if($('cu_prod')) f.producto_clave = $('cu_prod').value;
+  if($('cu_potro')) f.producto_otro = $('cu_potro').value;
+  if($('cu_pprecio')) f.producto_precio = $('cu_pprecio').value;
+  if($('cu_tops')) f.toppings_extra = Number($('cu_tops').value);
+  if($('cu_usos_txt')) $('cu_usos_txt').textContent = f.usos > 1
+    ? `Cada código se puede canjear ${f.usos} veces, y cada vez es una orden distinta en caja (Toteat aplica un descuento por orden). Puede usarlos el mismo día, en órdenes separadas.`
+    : 'Un solo canje por código.';
   if(plantillaDe(f)!==antes) ajustarFraseCupon();
   if($('cu_walabel')) $('cu_walabel').textContent = plantillaDe(f)==='regalo' ? 'El porqué del regalo (una frase; después dice «Por eso queremos consentirte con un regalo…»)' : 'Completa la frase: «Gracias por acompañarnos en …»';
   if($('cu_npers')){ const n = f.personas.split('\n').filter(x=>x.trim()).length; $('cu_npers').textContent = n ? n+(n===1?' persona':' personas')+' (máximo '+cu.op.max_personas+')' : ''; }
@@ -588,12 +658,14 @@ function previaCupon(){
     if(!d.ok){ box.innerHTML = `<div class="aviso info">Falta: ${esc(d.mensaje)}</div>`; $('cu_ok').disabled = true; return; }
     const pct = Math.min(100, Math.round(100*d.costo/d.tope));
     box.innerHTML = `
-      <div class="fila"><div><b style="font-size:18px">${pesos(d.costo)}</b> <span class="mini">es lo máximo que puede costar: ${miles(d.cupo)} × ${pesos(d.valor)}</span></div></div>
+      <div class="fila"><div><b style="font-size:18px">${pesos(d.costo)}</b> <span class="mini">es lo máximo que puede costar: ${miles(d.cupo)} ${d.cupo===1?'código':'códigos'}${d.usos>1 ? ` × ${d.usos} usos` : ''} × ${pesos(d.valor)}</span></div></div>
+      <div class="mini">Un canje = ${esc(d.valor_txt||'')}</div>
       <div class="tope ${d.pasa_tope?'pasa':''}"><i style="width:${pct}%"></i></div>
       <div class="mini">Tope sin aprobación: ${pesos(d.tope)}</div>
       ${d.pasa_tope && !d.puede ? `<div class="aviso no" style="margin-top:8px">Pasa el tope. Bájale cupos o pídele a ${esc(cu.op.aprobadores.join(' o '))} que la cree.</div>` : ''}
       ${d.pasa_tope && d.puede ? `<div class="aviso info" style="margin-top:8px">Pasa el tope; la puedes crear porque apruebas campañas.</div>` : ''}
-      <div class="aviso ok" style="margin-top:10px">🏷️ En caja: el cajero valida el código en /validar y aplica en Toteat <b>«${esc(d.toteat)}»</b>.<br><span class="mini">Recibe: ${esc(d.producto)}</span></div>
+      <div class="mini" style="margin:12px 0 6px">Así lo lee el cajero cuando valida el código en /validar${d.usos>1 ? ' (primer uso)' : ''}:</div>
+      <div class="cajero">${esc(d.texto_caja||'')}</div>
       ${d.texto_wa ? `<div class="mini" style="margin:12px 0 6px">Así le llega por WhatsApp${d.plantilla_aprobada===false ? ' — <b style="color:var(--coral)">plantilla sin aprobar por Meta</b>' : ''}:</div>
         <div class="wa"><div class="burbuja">${esc(d.texto_wa)}<span class="bt">Copiar código</span><span class="bt">Ver tiendas</span></div></div>` : ''}`;
     $('cu_ok').disabled = d.pasa_tope && !d.puede;
@@ -618,7 +690,9 @@ async function detalleCupon(slug, opts){
   if(!d.ok){ abrir(`<div class="aviso no">${esc(d.mensaje)}</div>`); return; }
   cu.det = d;
   const c = d.campana, r = d.registros;
+  const usosMax = Number(c.usos_por_codigo||1), multi = usosMax > 1;
   const canj = r.filter(x => x.estado==='Canjeado').length;
+  const canjes = multi ? r.reduce((a,x) => a + Number(x.usos||0), 0) : canj;   // usos en caja
   const enCola = r.some(x => ['pendiente','enviando'].includes(x.wa_estado));
   const motivoCola = (r.find(x => x.wa_estado==='pendiente' && x.wa_error)||{}).wa_error;
   const fallidos = opts.fallidos && opts.fallidos.length ? `<div class="aviso no">No se pudo entregar a: ${opts.fallidos.map(x => esc(x.nombre)+' ('+esc(x.error)+')').join(', ')}. Vuelve a escribirlos en «Agregar personas».</div>` : '';
@@ -628,11 +702,13 @@ async function detalleCupon(slug, opts){
       <div class="card">
         <div class="kpis">
           <div class="kpi"><div class="n">${miles(r.length)}</div><div class="l">de ${miles(c.cupo)} entregados</div></div>
-          <div class="kpi verde"><div class="n">${miles(canj)}</div><div class="l">canjeados</div></div>
-          <div class="kpi"><div class="n">${pesos(c.valor_cupon==null ? null : c.valor_cupon*canj)}</div><div class="l">costo canjeado · máx. ${pesos(c.costo_max)}</div></div>
+          <div class="kpi verde"><div class="n">${miles(canjes)}</div><div class="l">${multi ? `usos en caja de ${miles(r.length*usosMax)}` : 'canjeados'}</div></div>
+          <div class="kpi"><div class="n">${pesos(c.valor_cupon==null ? null : c.valor_cupon*canjes)}</div><div class="l">costo canjeado · máx. ${pesos(c.costo_max)}</div></div>
         </div>
         <div class="excl" style="margin-top:12px">
           <span>Beneficio</span><span>${esc(c.beneficio)}</span>
+          ${c.producto_nombre ? `<span>Producto</span><span>${esc(c.producto_nombre)}${c.toppings_extra!=null ? ' · '+esc(TOP_TXT(c.toppings_extra).replace(/^Sí, /,'')) : ''}</span>` : ''}
+          <span>Usos por código</span><span>${multi ? usosMax+' (cada uno en una orden aparte)' : '1'}</span>
           <span>En Toteat</span><span>«${esc(c.toteat_descuento)}»</span>
           <span>Dónde</span><span>${esc(c.tienda==='todas' ? 'Todas las tiendas' : c.tienda)}</span>
           <span>Vale hasta</span><span>${fecha(c.vence_el)}</span>
@@ -658,8 +734,9 @@ async function detalleCupon(slug, opts){
           <td data-l="${c.modo==='lote' ? '#' : 'Persona'}">${c.modo==='lote' ? i+1 : `<div>${esc(x.nombre)}<br><span class="mini">${cel(x.celular)}</span></div>`}</td>
           <td data-l="Código"><b>${esc(x.codigo)}</b></td>
           ${c.wa_plantilla ? `<td data-l="WhatsApp">${w ? `<span class="etq ${w[1]}" title="${esc(x.wa_error||'')}">${w[0]}</span>` : '—'}</td>` : ''}
-          <td data-l="Estado"><span class="etq ${x.estado==='Canjeado'?'ok':x.estado==='Vencido'?'no':''}">${esc(x.estado||'—')}</span></td>
-          <td data-l="Canje">${x.estado==='Canjeado' ? `<div>${esc(x.punto_venta||'')}<br><span class="mini">${esc(x.fecha_canje||'')}</span></div>` : '—'}</td></tr>`; }).join('')}
+          <td data-l="Estado"><div><span class="etq ${x.estado==='Canjeado'?'ok':x.estado==='Vencido'?'no':''}">${esc(x.estado||'—')}</span>${multi ? `<br><span class="mini">${miles(x.usos||0)} de ${usosMax} usos</span>` : ''}</div></td>
+          <td data-l="Canje">${multi && x.usos ? `<div>${esc(x.ultima_tienda||'')}<br><span class="mini">último: ${fecha(x.ultimo_canje)}</span></div>`
+            : x.estado==='Canjeado' ? `<div>${esc(x.punto_venta||'')}<br><span class="mini">${esc(x.fecha_canje||'')}</span></div>` : '—'}</td></tr>`; }).join('')}
         </tbody></table></div>
     </div>`);
   // Mientras haya WhatsApp saliendo, se refresca solo (máx. ~1 min).
@@ -684,8 +761,9 @@ async function agregarPersonas(slug){
 function csvCupon(){
   const {campana:c, registros:r} = cu.det;
   const q = s => '"'+String(s==null?'':s).replace(/"/g,'""')+'"';
-  const filas = [['codigo','nombre','celular','whatsapp','estado','tienda_canje','fecha_canje','beneficio','vale_hasta']]
-    .concat(r.map(x => [x.codigo, x.nombre, x.celular, x.wa_estado||'', x.estado||'', x.punto_venta||'', x.fecha_canje||'', c.beneficio, (c.vence_el||'').slice(0,10)]));
+  const filas = [['codigo','nombre','celular','whatsapp','estado','usos','usos_max','tienda_canje','fecha_canje','beneficio','vale_hasta']]
+    .concat(r.map(x => [x.codigo, x.nombre, x.celular, x.wa_estado||'', x.estado||'', x.usos||0, c.usos_por_codigo||1,
+                        x.ultima_tienda || x.punto_venta || '', x.ultimo_canje || x.fecha_canje || '', c.beneficio, (c.vence_el||'').slice(0,10)]));
   const blob = new Blob(['﻿'+filas.map(f => f.map(q).join(',')).join('\n')], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = c.evento+'.csv'; a.click();
 }
@@ -698,7 +776,7 @@ function imprimirCupon(){
     :root{color-scheme:light}body{margin:0;background:#fff;color:#21152A;font:12px/1.35 system-ui,sans-serif}
     .g{display:grid;grid-template-columns:repeat(3,1fr);gap:0}.t{border:1px dashed #B79CC8;padding:14px 12px;text-align:center;break-inside:avoid;height:150px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:4px}
     .m{font-family:Nexa,serif;font-weight:900;color:#4B1F60;font-size:15px;letter-spacing:1px}.b{font-weight:700;font-size:13px}.c{font:900 22px/1 ui-monospace,Menlo,monospace;letter-spacing:2px;color:#4B1F60;margin:4px 0}.p{font-size:10px;color:#5C4A66}
-    @page{margin:10mm}</style></head><body><div class="g">${r.map(x => `<div class="t"><div class="m">OAKBERRY</div><div class="b">${esc(c.beneficio)}</div><div class="c">${esc(x.codigo)}</div><div class="p">${esc(donde)} · vale hasta ${fecha(c.vence_el)}<br>Un solo uso. Muéstralo en caja.</div></div>`).join('')}</div>
+    @page{margin:10mm}</style></head><body><div class="g">${r.map(x => `<div class="t"><div class="m">OAKBERRY</div><div class="b">${esc(c.beneficio)}</div><div class="c">${esc(x.codigo)}</div><div class="p">${esc(donde)} · vale hasta ${fecha(c.vence_el)}<br>${Number(c.usos_por_codigo||1) > 1 ? `Sirve ${Number(c.usos_por_codigo)} veces, cada una en una orden aparte.` : 'Un solo uso.'} Muéstralo en caja.</div></div>`).join('')}</div>
     <script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);
   w.document.close();
 }
