@@ -67,7 +67,7 @@ input:focus{border-color:var(--lila)}
     <h1 id="tituloForm">¡Gracias por venir! 💜</h1>
     <div class="evento" id="nomEvento"></div>
     <div class="aliado oculto" id="aliado"></div>
-    <div class="regalo"><span id="benef">15% de descuento en toda tu orden</span><small id="donde">En cualquier tienda OAKBERRY de Colombia</small></div>
+    <div class="regalo"><span id="benef">15% de descuento en toda tu orden</span><small id="donde">En cualquier tienda OAKBERRY de Colombia</small><small id="vigTxt" class="oculto"></small></div>
     <div class="rifas oculto" id="rifas"></div>
     <form id="f" novalidate>
       <label>Tu nombre<input type="text" id="nombre" autocomplete="name" maxlength="80" required></label>
@@ -115,6 +115,7 @@ const slug = (location.pathname.split('/evento/')[1] || new URLSearchParams(loca
 const $ = id => document.getElementById(id);
 let cfg = null;
 let st_rifas = [];
+let TXT_BTN = 'Quiero mi regalo 🫐';
 const KEY = 'evt_'+slug;
 
 function mostrar(id){ ['cargando','form','listo','cerrado'].forEach(x => $(x).classList.toggle('oculto', x!==id)); window.scrollTo(0,0); }
@@ -153,6 +154,13 @@ async function init(){
   const benef = cfg.beneficio || '15% de descuento en toda tu orden';
   $('benef').textContent = benef; $('benefOk').textContent = benef;
   if(cfg.tienda && !/^(todas|general)$/i.test(cfg.tienda)) $('donde').textContent = 'En OAKBERRY ' + cfg.tienda;
+  // Fecha fija (alianzas): todos vencen el mismo día, así que se dice ANTES de registrarse.
+  if(cfg.venceFijo && cfg.venceEl){ $('vigTxt').textContent = 'Válido hasta el ' + fechaHumana(cfg.venceEl) + ' · un solo uso'; $('vigTxt').classList.remove('oculto'); }
+  // Alianza con una empresa: no hubo evento al que "venir"; se saluda a su equipo.
+  if(cfg.tipoEvento === 'alianza' && cfg.aliado){
+    $('tituloForm').textContent = '¡Hola, equipo ' + cfg.aliado + '! 💜';
+    TXT_BTN = 'Quiero mi descuento 🫐'; $('enviar').textContent = TXT_BTN;
+  }
   if(cfg.aliado){
     $('aliado').innerHTML = '<span>OAKBERRY ×</span>' + (cfg.logoAliado ? '<img alt="">' : '<span></span>');
     if(cfg.logoAliado) $('aliado').querySelector('img').src = cfg.logoAliado; else $('aliado').lastChild.textContent = cfg.aliado;
@@ -181,6 +189,7 @@ async function init(){
   if(cfg.cerrado || cfg.agotado){
     mostrar('cerrado');
     if(cfg.agotado){ $('cerradoTit').textContent='Se acabaron los cupones 😥'; }
+    else if(cfg.tipoEvento === 'alianza'){ $('cerradoTit').textContent='Este beneficio ya cerró'; }
     // Igual dejamos que se registre: el dato vale aunque no haya cupo.
     $('cerradoTxt').innerHTML = 'Déjanos tus datos y te avisamos del próximo plan. <a href="#" id="igual" style="color:var(--morado)">Dejar mis datos</a>';
     $('igual').onclick = ev => { ev.preventDefault(); $('enviar').textContent='Dejar mis datos'; mostrar('form'); };
@@ -212,7 +221,7 @@ $('f').onsubmit = async ev => {
     if(d.guardado){ mostrar('cerrado'); $('cerradoTit').textContent='¡Te anotamos! 💜'; $('cerradoTxt').textContent = d.mensaje; return; }
     $('err').textContent = d.mensaje || 'No pudimos registrarte. Intenta de nuevo.';
   }catch(e){ $('err').textContent = 'Sin conexión. Revisa tu internet e intenta de nuevo.'; }
-  $('enviar').disabled = false; $('enviar').textContent = cfg && cfg.modalidad === 'sorteo' ? 'Quiero participar 🎟️' : 'Quiero mi regalo 🫐';
+  $('enviar').disabled = false; $('enviar').textContent = cfg && cfg.modalidad === 'sorteo' ? 'Quiero participar 🎟️' : TXT_BTN;
 };
 init();
 </script>

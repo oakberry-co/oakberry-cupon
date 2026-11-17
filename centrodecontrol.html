@@ -248,6 +248,7 @@ textarea.lista{font:14px/1.5 ui-monospace,Menlo,monospace}
                 <label class="campo" id="cr_cupo_l">¿Cuántos cupones en total?<input type="number" id="cr_cupo" min="1" max="20000" value="300"></label>
                 <label class="campo">Días para usarlo (desde que se registra)<input type="number" id="cr_vig" min="1" max="90" value="7"></label>
               </div>
+              <label class="campo" id="cr_hasta_l">…o que venza en una FECHA FIJA para todos (opcional; manda sobre los días)<input type="date" id="cr_hasta"></label>
               <div class="grid">
                 <label class="campo">Válido desde (opcional)<input type="date" id="cr_desde"></label>
                 <label class="campo">¿Dónde se canjea?<select id="cr_tienda"><option value="todas">Todas las tiendas de Colombia</option></select></label>
@@ -352,7 +353,7 @@ const CLIENT_ID = '664413392517-cpjl9d2fliqsja9cr5950kel0rf4q46c.apps.googleuser
 const KEY = 'cc_sesion';
 const $ = id => document.getElementById(id);
 const st = { s:null, contactos:[], sel:new Set(), eventos:[], plantillas:[], plantilla:null, fuente:'contactos', preview:null, ids:null };
-const TIPO_EV = {concierto:'Concierto', lanzamiento_marca:'Lanzamiento de marca', apertura_tienda:'Apertura de tienda', bienestar_empresa:'Bienestar / RR. HH. de empresa', otro:'Otro'};
+const TIPO_EV = {concierto:'Concierto', lanzamiento_marca:'Lanzamiento de marca', apertura_tienda:'Apertura de tienda', bienestar_empresa:'Bienestar / RR. HH. de empresa', alianza:'Alianza con empresa (beneficio a su equipo)', otro:'Otro'};
 const LOOPY = {en_evento:['Se inscribió en el evento','ok'], despues:['Se inscribió después','lila'], ya_era:['Ya era Loopy',''], no_loopy:['No es Loopy','no']};
 const META = {APPROVED:['Aprobada','ok'], PENDING:['En revisión de Meta','wait'], REJECTED:['Rechazada por Meta','no'], NO_CREADA:['Aún no creada en Meta','wait'], PAUSED:['Pausada por Meta','no']};
 
@@ -736,7 +737,7 @@ async function cargarEventos(){
       </div>
       <div class="barra-cupo"><i style="width:${pct}%"></i></div>`}
       <div style="margin:6px 0 2px"><b>🎁 ${esc(e.beneficio||'')}</b>${e.aliado_nombre?` · 🤝 ${esc(e.aliado_nombre)}`:''}</div>
-      <div class="mini" style="margin:0 0 10px">Cupón válido ${e.vigencia_dias||'—'} días desde que se registra · ${e.wa_plantilla?`💬 llega por WhatsApp (${miles(e.wa_enviados)} enviados${e.wa_fallidos?`, ${e.wa_fallidos} fallaron`:''})`:'sin WhatsApp'}</div>
+      <div class="mini" style="margin:0 0 10px">${e.vence_el && !e.vigencia_dias ? `Cupón válido hasta el ${fecha(e.vence_el)} (fecha fija)` : `Cupón válido ${e.vigencia_dias||'—'} días desde que se registra`} · ${e.wa_plantilla?`💬 llega por WhatsApp (${miles(e.wa_enviados)} enviados${e.wa_fallidos?`, ${e.wa_fallidos} fallaron`:''})`:'sin WhatsApp'}</div>
       <div class="fila">
         <button class="btn chico" onclick="abrirCreador('${esc(e.evento)}')">Link, QR y flyer</button>
         <button class="btn sec chico" onclick="detalleEvento('${esc(e.evento)}')">Ver asistentes</button>
@@ -796,6 +797,7 @@ function pintarModo(){
   $('cr_rifas_box').classList.toggle('oculto', cr.modo==='sorteo');
   $('cr_wa').closest('label').classList.toggle('oculto', cr.modo==='sorteo');
   $('cr_vig').closest('label').firstChild.textContent = cr.modo==='sorteo' ? 'Días para usar el premio (desde el sorteo)' : 'Días para usarlo (desde que se registra)';
+  $('cr_hasta_l').classList.toggle('oculto', cr.modo==='sorteo'); pintarHasta();
   if(cr.opciones) pintarBeneficios();
 }
 FL.forEach(k => $('fl_'+k).addEventListener('input', () => { cr.flyer[k] = $('fl_'+k).value; previa(); }));
@@ -808,7 +810,10 @@ $('cr_rifa_add').onclick = () => {
 $('fl_reset').onclick = () => { cr.flyer = {}; previa(); };
 ['cr_ganadores','cr_cierre','cr_lugar','cr_ciudad'].forEach(id => $(id).addEventListener('input', () => previa()));
 document.querySelectorAll('[data-fmt]').forEach(b => b.onclick = () => { cr.fmt=b.dataset.fmt; document.querySelectorAll('[data-fmt]').forEach(x=>x.classList.toggle('on',x===b)); previa(); });
-['cr_nombre','cr_fecha','cr_aliado','cr_cupo','cr_vig','cr_tienda','cr_tycx','cr_desde','cr_wa'].forEach(id => $(id).addEventListener('input', () => previa()));
+['cr_nombre','cr_fecha','cr_aliado','cr_cupo','cr_vig','cr_tienda','cr_tycx','cr_desde','cr_wa','cr_hasta'].forEach(id => $(id).addEventListener('input', () => previa()));
+// Fecha fija (alianzas): con «válido hasta» puesto, los días no aplican.
+function pintarHasta(){ $('cr_vig').disabled = cr.modo!=='sorteo' && !!$('cr_hasta').value; }
+$('cr_hasta').addEventListener('input', pintarHasta);
 
 async function nuevoEvento(){ await abrirCreador(null); }
 async function abrirCreador(slug){
@@ -832,6 +837,7 @@ async function abrirCreador(slug){
   $('cr_aliado').value = e ? (e.aliado_nombre||'') : ''; $('cr_logo').value = '';
   $('cr_cupo').value = e ? e.cupo : 300; $('cr_vig').value = e ? (e.vigencia_dias||7) : 7;
   $('cr_desde').value = e && e.abre_el ? new Date(e.abre_el).toLocaleDateString('en-CA',{timeZone:'America/Bogota'}) : '';
+  $('cr_hasta').value = e && e.vence_el && !e.vigencia_dias ? new Date(e.vence_el).toLocaleDateString('en-CA',{timeZone:'America/Bogota'}) : '';
   $('cr_tienda').value = e ? (e.tienda||'todas') : 'todas'; $('cr_tycx').value = e ? (e.tyc_extra||'') : '';
   $('cr_ig').checked = !!(e && e.requiere_instagram); $('cr_wa').checked = !e || !!e.wa_plantilla;
   $('cr_wamsj').value = e ? (e.wa_mensaje||'') : '';
@@ -862,6 +868,7 @@ function datosEvento(){
   return {evento: cr.slug || undefined, nombre:$('cr_nombre').value, tipo_evento:$('cr_tipo').value, fecha_evento:$('cr_fecha').value,
     lugar:$('cr_lugar').value, ciudad:$('cr_ciudad').value, aliado_nombre:$('cr_aliado').value, beneficio_clave:cr.clave,
     cupo:$('cr_cupo').value, vigencia_dias:$('cr_vig').value, valido_desde:$('cr_desde').value || null, tienda:$('cr_tienda').value,
+    valido_hasta: cr.modo!=='sorteo' && $('cr_hasta').value || null,
     tyc_extra:$('cr_tycx').value, requiere_instagram:$('cr_ig').checked, enviar_wa:$('cr_wa').checked, wa_mensaje:$('cr_wamsj').value,
     foto_flyer:cr.foto, activo:$('cr_activo').checked, modalidad:cr.modo, sorteo_ganadores:$('cr_ganadores').value,
     sorteo_cierra:$('cr_cierre').value, flyer: Object.keys(cr.flyer).length ? cr.flyer : null,
@@ -877,10 +884,11 @@ function tycPrevia(d){
     'El premio es personal: no es transferible ni se cambia por dinero.'].concat(d.tyc_extra ? [d.tyc_extra] : []);
   const donde = d.tienda==='todas' ? 'cualquier tienda física OAKBERRY de Colombia' : 'la tienda OAKBERRY ' + d.tienda;
   return [`Beneficio: ${b.titulo.replace(' tu ',' la ')}.`, `Un cupón por persona (por número de celular), sujeto al cupo: ${miles(d.cupo)} cupones en total.`,
-    `Válido ${d.vigencia_dias||7} días desde que te registras${d.valido_desde?', a partir del '+fecha(d.valido_desde):''}; si se vence, no se renueva.`,
+    d.valido_hasta ? `Válido hasta el ${fecha(d.valido_hasta)} a las 11:59 p. m. (hora de Colombia)${d.valido_desde?', a partir del '+fecha(d.valido_desde):''}; se usa una sola vez y, si se vence, no se renueva.`
+      : `Válido ${d.vigencia_dias||7} días desde que te registras${d.valido_desde?', a partir del '+fecha(d.valido_desde):''}; si se vence, no se renueva.`,
     `Se canjea en ${donde}; no aplica en domicilios.`, 'No se acumula con otras promociones ni descuentos (uno por orden).']
     .concat(b.tipo==='bowl' ? ['El bowl incluye su receta estándar; toppings o adiciones extra se cobran.'] : [])
-    .concat(d.aliado_nombre ? [`Actividad realizada en alianza con ${d.aliado_nombre}.`] : [])
+    .concat(d.aliado_nombre ? [d.tipo_evento==='alianza' ? `Beneficio exclusivo para el equipo de ${d.aliado_nombre}, en el marco de su alianza con OAKBERRY.` : `Actividad realizada en alianza con ${d.aliado_nombre}.`] : [])
     .concat(d.tyc_extra ? [d.tyc_extra] : []);
 }
 // Textos automáticos del flyer (estilo Oakers). Lo que el equipo edita en
@@ -901,7 +909,7 @@ function textosAuto(d){
   }
   return {arriba: d.nombre || '', titular: m ? `${m[1]}% OFF en tu orden` : (oz ? `Bowl ${oz[1]} oz gratis` : 'Bowl gratis'), lema:'El açaí #1 en el mundo', sellos:'0',
     qrTexto:'¡Escanéalo y recíbelo!', ubicTitulo: fechaL ? fechaL.charAt(0).toUpperCase()+fechaL.slice(1) : '', ubicTexto: lugar,
-    letra:`Cupo limitado: ${miles(d.cupo)} cupones · 1 por persona · válido ${d.vigencia_dias||7} días desde el registro · TyC en el link`};
+    letra:`Cupo limitado: ${miles(d.cupo)} cupones · 1 por persona · ${d.valido_hasta ? 'válido hasta el ' + fecha(d.valido_hasta) : 'válido ' + (d.vigencia_dias||7) + ' días desde el registro'} · TyC en el link`};
 }
 function datosFlyer(d, overrides, url, logo){
   const auto = textosAuto(d), t = {};
@@ -946,7 +954,8 @@ async function bajarFlyer(slug, fmt){
   const e = st.eventos.find(x=>x.evento===slug) || {};
   await opcionesEvento();
   const d = {nombre:e.nombre, fecha_evento:e.fecha_evento, lugar:e.lugar, ciudad:e.ciudad, aliado_nombre:e.aliado_nombre,
-    beneficio_clave:e.beneficio_clave||'pct15', cupo:e.cupo, vigencia_dias:e.vigencia_dias, modalidad:e.modalidad,
+    beneficio_clave:e.beneficio_clave||'pct15', cupo:e.cupo, vigencia_dias:e.vigencia_dias, modalidad:e.modalidad, tipo_evento:e.tipo_evento,
+    valido_hasta: e.vence_el && !e.vigencia_dias ? new Date(e.vence_el).toLocaleDateString('en-CA',{timeZone:'America/Bogota'}) : null,
     sorteo_ganadores:e.sorteo_ganadores, sorteo_cierra:e.sorteo_cierra_el};
   const c = document.createElement('canvas');
   await OakFlyer.dibujar(c, datosFlyer(d, e.flyer, urlEvento(slug), e.logo_url ? e.logo_url+'?t='+Date.now() : null), fmt);
