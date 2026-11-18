@@ -39,7 +39,7 @@ input:focus{border-color:var(--lila)}
 .btn.wa{background:#1FA855;color:#fff}
 .btn.sec{background:var(--blanco);color:var(--morado);border:1.5px solid var(--lila)}
 .err{color:var(--coral);font-size:14px;min-height:20px;text-align:center}
-.codigo{font-family:Nexa,serif;font-weight:900;font-size:44px;letter-spacing:4px;color:var(--morado);text-align:center;background:var(--blanco);border:2px dashed var(--lila);border-radius:18px;padding:14px;margin:12px 0}
+.codigo{user-select:all;-webkit-user-select:all;font-family:Nexa,serif;font-weight:900;font-size:44px;letter-spacing:4px;color:var(--morado);text-align:center;background:var(--blanco);border:2px dashed var(--lila);border-radius:18px;padding:14px;margin:12px 0}
 .centro{text-align:center}
 .pasos{display:flex;flex-direction:column;gap:10px;margin-top:16px}
 .nota{font-size:13px;color:var(--tinta-suave);text-align:center;margin-top:10px}
@@ -73,8 +73,8 @@ input:focus{border-color:var(--lila)}
       <label>Tu nombre<input type="text" id="nombre" autocomplete="name" maxlength="80" required></label>
       <label>Tu WhatsApp<div class="tel"><span>+57</span><input type="tel" id="celular" inputmode="numeric" autocomplete="tel-national" maxlength="14" placeholder="300 123 4567" required></div></label>
       <label id="lblIg"><span>Tu Instagram <span id="igOpc" style="font-weight:500">(opcional)</span></span><input type="text" id="instagram" autocapitalize="none" autocorrect="off" maxlength="40" placeholder="@usuario"></label>
-      <label><span>Tu correo <span style="font-weight:500">(opcional)</span></span><input type="email" id="email" autocomplete="email" maxlength="80"></label>
-      <label class="check"><input type="checkbox" id="optIn"><span>Quiero que OAKBERRY me escriba por WhatsApp con regalos, invitaciones y planes. Puedo darme de baja cuando quiera.</span></label>
+      <label><span>Tu correo <span id="emailOpc" style="font-weight:500">(opcional)</span></span><input type="email" id="email" autocomplete="email" inputmode="email" autocapitalize="none" maxlength="80"></label>
+      <label class="check"><input type="checkbox" id="optIn"><span id="optInTxt">Quiero que OAKBERRY me escriba por WhatsApp con regalos, invitaciones y planes. Puedo darme de baja cuando quiera.</span></label>
       <label class="check"><input type="checkbox" id="tyc"><span>Acepto los <a href="/tyc" target="_blank">términos</a> y el <a href="/tyc#privacidad" target="_blank">tratamiento de mis datos</a>.</span></label>
       <div class="err" id="err"></div>
       <button class="btn" id="enviar" type="submit">Quiero mi regalo 🫐</button>
@@ -89,6 +89,7 @@ input:focus{border-color:var(--lila)}
     <div class="codigo" id="codigo"></div>
     <p class="centro"><b id="benefOk">15% de descuento en toda tu orden</b><br><span id="vence" style="color:var(--tinta-suave);font-size:14px"></span></p>
     <div class="pasos" id="pasosWA">
+      <button class="btn" id="copiar" type="button">Copiar código</button>
       <a class="btn wa" id="guardarWA" target="_blank" rel="noopener">Guardarlo en mi WhatsApp</a>
     </div>
     <div class="loopy">
@@ -121,6 +122,9 @@ const KEY = 'evt_'+slug;
 function mostrar(id){ ['cargando','form','listo','cerrado'].forEach(x => $(x).classList.toggle('oculto', x!==id)); window.scrollTo(0,0); }
 async function get(params){ const q = new URLSearchParams(params); return (await fetch(API+'?'+q.toString())).json(); }
 function fechaHumana(iso){ return iso ? new Date(iso).toLocaleDateString('es-CO',{timeZone:'America/Bogota',day:'numeric',month:'long'}) : ''; }
+// «Válido del 30 de noviembre al 6 de diciembre» o «Válido hasta el …».
+function rangoVigencia(abre, vence){ return abre && vence ? 'Válido del ' + fechaHumana(abre) + ' al ' + fechaHumana(vence) : (vence ? 'Válido hasta el ' + fechaHumana(vence) : ''); }
+const RE_EMAIL = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
 
 function pintarParticipa(d, nombre){
   $('hola').textContent = (d.repetido ? '¡Ya estabas participando' : '¡Ya estás participando') + (nombre ? ', ' + nombre.split(' ')[0] : '') + '! 🎟️';
@@ -135,7 +139,9 @@ function pintarListo(d, nombre){
   $('hola').textContent = '¡Listo' + (nombre ? ', '+nombre.split(' ')[0] : '') + '! 🎉';
   $('codigo').textContent = d.codigo;
   if(d.beneficio) $('benefOk').textContent = d.beneficio;
-  $('vence').textContent = (d.venceEl ? 'Válido hasta el ' + fechaHumana(d.venceEl) : '') + (d.wa ? ' · También te llega por WhatsApp' : '');
+  $('vence').textContent = rangoVigencia(d.abreEl, d.venceEl) + (d.wa ? ' · También te llega por WhatsApp' : d.correo ? ' · También te lo enviamos a tu correo' : '');
+  // Eventos por correo (masivos): nada de WhatsApp, ni siquiera el de guardárselo uno mismo.
+  $('guardarWA').classList.toggle('oculto', !!d.correo);
   if(st_rifas.length) $('notaCaja').textContent = '🎟️ Ya estás participando en las rifas. Si ganas, te llega por WhatsApp. Muestra el código y tu tarjeta en caja.';
   $('guardarWA').href = d.linkWA || ('https://wa.me/?text=' + encodeURIComponent('Mi cupón OAKBERRY: ' + d.codigo));
   mostrar('listo');
@@ -155,7 +161,11 @@ async function init(){
   $('benef').textContent = benef; $('benefOk').textContent = benef;
   if(cfg.tienda && !/^(todas|general)$/i.test(cfg.tienda)) $('donde').textContent = 'En OAKBERRY ' + cfg.tienda;
   // Fecha fija (alianzas): todos vencen el mismo día, así que se dice ANTES de registrarse.
-  if(cfg.venceFijo && cfg.venceEl){ $('vigTxt').textContent = 'Válido hasta el ' + fechaHumana(cfg.venceEl) + ' · un solo uso'; $('vigTxt').classList.remove('oculto'); }
+  if(cfg.venceFijo && cfg.venceEl){ $('vigTxt').textContent = rangoVigencia(cfg.abreEl, cfg.venceEl) + ' · un solo uso'; $('vigTxt').classList.remove('oculto'); }
+  if(cfg.correo){
+    $('emailOpc').textContent = '(ahí te enviamos tu código)'; $('email').required = true;
+    $('optInTxt').textContent = 'Quiero que OAKBERRY me escriba con regalos, invitaciones y planes. Puedo darme de baja cuando quiera.';
+  }
   // Alianza con una empresa: no hubo evento al que "venir"; se saluda a su equipo.
   if(cfg.tipoEvento === 'alianza' && cfg.aliado){
     $('tituloForm').textContent = '¡Hola, equipo ' + cfg.aliado + '! 💜';
@@ -205,6 +215,7 @@ $('f').onsubmit = async ev => {
   if(!nombre) return $('err').textContent = 'Escribe tu nombre';
   if(cel.length !== 10 || cel[0] !== '3') return $('err').textContent = 'Revisa tu WhatsApp: son 10 dígitos y empieza por 3';
   if(cfg.requiereInstagram && !$('instagram').value.trim()) return $('err').textContent = 'Déjanos tu usuario de Instagram';
+  if(cfg.correo && !RE_EMAIL.test($('email').value.trim())) return $('err').textContent = 'Escribe un correo válido: ahí te enviamos tu código';
   if(!$('tyc').checked) return $('err').textContent = 'Necesitamos que aceptes los términos para darte tu cupón';
   $('enviar').disabled = true; $('enviar').textContent = 'Un momento…';
   try{
@@ -215,13 +226,22 @@ $('f').onsubmit = async ev => {
       return pintarParticipa(d, nombre);
     }
     if(d.ok && d.codigo){
-      try{ localStorage.setItem(KEY, JSON.stringify({codigo:d.codigo, venceEl:d.venceEl, linkWA:d.linkWA, wa:d.wa, beneficio:d.beneficio, nombre})); }catch(e){}
+      try{ localStorage.setItem(KEY, JSON.stringify({codigo:d.codigo, abreEl:d.abreEl, venceEl:d.venceEl, linkWA:d.linkWA, wa:d.wa, correo:d.correo, beneficio:d.beneficio, nombre})); }catch(e){}
       return pintarListo(d, nombre);
     }
     if(d.guardado){ mostrar('cerrado'); $('cerradoTit').textContent='¡Te anotamos! 💜'; $('cerradoTxt').textContent = d.mensaje; return; }
     $('err').textContent = d.mensaje || 'No pudimos registrarte. Intenta de nuevo.';
   }catch(e){ $('err').textContent = 'Sin conexión. Revisa tu internet e intenta de nuevo.'; }
   $('enviar').disabled = false; $('enviar').textContent = cfg && cfg.modalidad === 'sorteo' ? 'Quiero participar 🎟️' : TXT_BTN;
+};
+$('copiar').onclick = async () => {
+  const c = $('codigo').textContent.trim(); let ok = false;
+  try{ await navigator.clipboard.writeText(c); ok = true; }
+  catch(e){ // webviews de IG/FB sin permiso de portapapeles
+    const t = document.createElement('textarea'); t.value = c; t.setAttribute('readonly',''); t.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(t); t.select(); t.setSelectionRange(0, 99); try{ ok = document.execCommand('copy'); }catch(_){} t.remove(); }
+  $('copiar').textContent = ok ? '¡Copiado! ✓' : 'Mantén presionado el código para copiarlo';
+  setTimeout(() => $('copiar').textContent = 'Copiar código', 2500);
 };
 init();
 </script>

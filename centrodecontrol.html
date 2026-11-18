@@ -250,7 +250,7 @@ textarea.lista{font:14px/1.5 ui-monospace,Menlo,monospace}
           <div class="card paso"><h3><span class="num">4</span>Condiciones (TyC)</h3>
             <div class="pasos" style="margin-top:10px">
               <div class="grid">
-                <label class="campo" id="cr_cupo_l">¿Cuántos cupones en total?<input type="number" id="cr_cupo" min="1" max="20000" value="300"></label>
+                <label class="campo" id="cr_cupo_l">¿Cuántos cupones en total?<input type="number" id="cr_cupo" min="1" max="300000" value="300"></label>
                 <label class="campo">Días para usarlo (desde que se registra)<input type="number" id="cr_vig" min="1" max="90" value="7"></label>
               </div>
               <label class="campo" id="cr_hasta_l">…o que venza en una FECHA FIJA para todos (opcional; manda sobre los días)<input type="date" id="cr_hasta"></label>
@@ -265,8 +265,9 @@ textarea.lista{font:14px/1.5 ui-monospace,Menlo,monospace}
           <div class="card paso"><h3><span class="num">5</span>WhatsApp y flyer</h3>
             <div class="pasos" style="margin-top:10px">
               <label class="fila" style="font-size:14px"><input type="checkbox" class="ckbox" id="cr_wa" checked> Mandarle el cupón por WhatsApp al registrarse</label>
+              <label class="fila" style="font-size:14px"><input type="checkbox" class="ckbox" id="cr_correo"> Mandarle el cupón por correo (pide el correo obligatorio; para envíos masivos sale casi gratis)</label>
               <div class="mini" id="cr_wa_estado"></div>
-              <label class="campo">Frase del WhatsApp (solo para 15%)<input type="text" id="cr_wamsj" maxlength="160" placeholder="Gracias por pasar por OAKBERRY en la semana de bienestar."></label>
+              <label class="campo">Frase del mensaje, WhatsApp o correo (solo para 15%)<input type="text" id="cr_wamsj" maxlength="160" placeholder="Gracias por pasar por OAKBERRY en la semana de bienestar."></label>
               <div class="fotos oculto" id="cr_fotos"></div>
               <details id="cr_textos"><summary class="mini" style="font-weight:700">✏️ Textos del flyer (se llenan solos; cámbialos si quieres)</summary>
                 <div class="pasos" style="margin-top:10px">
@@ -815,7 +816,7 @@ async function cargarEventos(){
       </div>
       <div class="barra-cupo"><i style="width:${pct}%"></i></div>`}
       <div style="margin:6px 0 2px"><b>🎁 ${esc(e.beneficio||'')}</b>${e.aliado_nombre?` · 🤝 ${esc(e.aliado_nombre)}`:''}</div>
-      <div class="mini" style="margin:0 0 10px">${e.vence_el && !e.vigencia_dias ? `Cupón válido hasta el ${fecha(e.vence_el)} (fecha fija)` : `Cupón válido ${e.vigencia_dias||'—'} días desde que se registra`} · ${e.wa_plantilla?`💬 llega por WhatsApp (${miles(e.wa_enviados)} enviados${e.wa_fallidos?`, ${e.wa_fallidos} fallaron`:''})`:'sin WhatsApp'}</div>
+      <div class="mini" style="margin:0 0 10px">${e.vence_el && !e.vigencia_dias ? `Cupón válido hasta el ${fecha(e.vence_el)} (fecha fija)` : `Cupón válido ${e.vigencia_dias||'—'} días desde que se registra`} · ${e.wa_plantilla?`💬 llega por WhatsApp (${miles(e.wa_enviados)} enviados${e.wa_fallidos?`, ${e.wa_fallidos} fallaron`:''})`:'sin WhatsApp'}${e.envia_correo?` · ✉️ llega por correo (${miles(e.correos_enviados)} enviados${e.correos_en_cola?`, ${miles(e.correos_en_cola)} en cola`:''}${e.correos_fallidos?`, ${miles(e.correos_fallidos)} fallaron`:''})`:''}</div>
       <div class="fila">
         <button class="btn chico" onclick="abrirCreador('${esc(e.evento)}')">Link, QR y flyer</button>
         <button class="btn sec chico" onclick="detalleEvento('${esc(e.evento)}')">Ver asistentes</button>
@@ -874,6 +875,7 @@ function pintarModo(){
   $('cr_sorteo').classList.toggle('oculto', cr.modo!=='sorteo'); $('cr_cupo_l').classList.toggle('oculto', cr.modo==='sorteo');
   $('cr_rifas_box').classList.toggle('oculto', cr.modo==='sorteo');
   $('cr_wa').closest('label').classList.toggle('oculto', cr.modo==='sorteo');
+  $('cr_correo').closest('label').classList.toggle('oculto', cr.modo==='sorteo');
   $('cr_vig').closest('label').firstChild.textContent = cr.modo==='sorteo' ? 'Días para usar el premio (desde el sorteo)' : 'Días para usarlo (desde que se registra)';
   $('cr_hasta_l').classList.toggle('oculto', cr.modo==='sorteo'); pintarHasta();
   if(cr.opciones) pintarBeneficios();
@@ -919,6 +921,7 @@ async function abrirCreador(slug){
   $('cr_tienda').value = e ? (e.tienda||'todas') : 'todas'; $('cr_tycx').value = e ? (e.tyc_extra||'') : '';
   $('cr_ig').checked = !!(e && e.requiere_instagram); $('cr_wa').checked = !e || !!e.wa_plantilla;
   $('cr_wamsj').value = e ? (e.wa_mensaje||'') : '';
+  $('cr_correo').checked = !!(e && e.envia_correo);
   $('cr_activo_l').classList.toggle('oculto', !e); $('cr_activo').checked = !e || e.activo;
   $('cr_ok').textContent = e ? 'Guardar cambios y regenerar flyer' : 'Crear evento y generar link, QR y flyer';
   $('cr_err').innerHTML = ''; $('cr_resultado').innerHTML = '';
@@ -948,6 +951,7 @@ function datosEvento(){
     cupo:$('cr_cupo').value, vigencia_dias:$('cr_vig').value, valido_desde:$('cr_desde').value || null, tienda:$('cr_tienda').value,
     valido_hasta: cr.modo!=='sorteo' && $('cr_hasta').value || null,
     tyc_extra:$('cr_tycx').value, requiere_instagram:$('cr_ig').checked, enviar_wa:$('cr_wa').checked, wa_mensaje:$('cr_wamsj').value,
+    enviar_correo: cr.modo!=='sorteo' && $('cr_correo').checked,
     foto_flyer:cr.foto, activo:$('cr_activo').checked, modalidad:cr.modo, sorteo_ganadores:$('cr_ganadores').value,
     sorteo_cierra:$('cr_cierre').value, flyer: Object.keys(cr.flyer).length ? cr.flyer : null,
     rifas: cr.rifas.filter(r => r.estado !== 'sorteado').map(r => ({id:r.id, nombre:r.nombre, beneficio_clave:r.beneficio_clave, ganadores:r.ganadores, sortea:r.sortea})),
