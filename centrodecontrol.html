@@ -146,9 +146,6 @@ label.campo{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weigh
 
 /* cupones (pestaña Cupones, centro_cupones.py) */
 .pl .vv{font-family:Nexa,serif;font-weight:900;color:var(--tinta);font-size:15px;margin-top:2px}
-.tope{height:8px;background:var(--crema-cielo);border-radius:9px;overflow:hidden;margin:6px 0 4px}
-.tope i{display:block;height:100%;background:var(--verde)}
-.tope.pasa i{background:var(--coral)}
 /* F1b: lo que lee el cajero en /validar y el sub-formulario del 100 % */
 .cajero{background:var(--blanco);border:1px dashed var(--lila);border-radius:14px;padding:12px 14px;white-space:pre-wrap;font:13.5px/1.5 var(--sans);color:var(--tinta);overflow-wrap:anywhere}
 .cajero b{color:var(--morado)}
@@ -192,6 +189,7 @@ textarea.lista{font:14px/1.5 ui-monospace,Menlo,monospace}
     <section class="vista" id="v-cupones">
       <div class="fila"><div><h2>Cupones</h2><div class="sub">Dale un cupón a alguien o arma un lote de códigos. En caja se valida en /validar y el descuento ya existe en Toteat: nadie lo tiene que pedir de palabra.</div></div><span class="esp"></span><button class="btn" onclick="nuevoCupon()">+ Nuevo cupón</button></div>
       <div class="kpis" id="kpisCupones"></div>
+      <div class="card" id="gastoCupones" style="margin-bottom:14px"></div>
       <div class="fila" id="filtroCupones">
         <button class="chip on" data-cfiltro="">Todos</button>
         <button class="chip" data-cfiltro="persona">👤 Personas</button>
@@ -445,6 +443,7 @@ document.querySelectorAll('[data-cfiltro]').forEach(b => b.onclick = () => {
 });
 
 async function cargarCupones(){
+  cargarGasto();
   let d;
   try{ d = await api('ccCupCampanas'); }catch(e){ return; }
   if(!d.ok){ $('tablaCupones').innerHTML = `<tr><td><div class="aviso no">${esc(d.mensaje)}</div></td></tr>`; return; }
@@ -456,6 +455,37 @@ async function cargarCupones(){
     <div class="kpi verde"><div class="n">${miles(t.k)}</div><div class="l">canjes en caja</div></div>
     <div class="kpi"><div class="n">${pesos(t.p)}</div><div class="l">costo de lo canjeado (estimado)</div></div>`;
   pintarCupones();
+}
+// ── gasto por persona: el control que reemplazó al tope (19-nov-2026) ──
+async function cargarGasto(){
+  let d;
+  try{ d = await api('ccCupGasto'); }catch(e){ return; }
+  if(!d.ok){ $('gastoCupones').innerHTML = `<div class="aviso no">${esc(d.mensaje)}</div>`; return; }
+  cu.gasto = d;
+  if(!cu.gmes) cu.gmes = d.mes_actual;
+  pintarGasto();
+}
+function pintarGasto(){
+  const d = cu.gasto; if(!d) return;
+  const meses = [...new Set([d.mes_actual, ...d.personas.map(a => a.mes)])].sort().reverse();
+  const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const nomMes = m => MES[Number(m.slice(5,7))-1] + ' ' + m.slice(0,4);
+  const filas = d.personas.filter(a => a.mes === cu.gmes);
+  const t = filas.reduce((x,a) => ({c:x.c+a.campanas, k:x.k+a.codigos, e:x.e+a.entregado, j:x.j+a.canjeado}), {c:0,k:0,e:0,j:0});
+  $('gastoCupones').innerHTML = `
+    <div class="fila"><h3>💸 Gasto por persona</h3><span class="esp"></span>
+      ${meses.map(m => `<button class="chip ${m===cu.gmes?'on':''}" type="button" onclick="cu.gmes='${m}';pintarGasto()">${nomMes(m)}</button>`).join('')}</div>
+    <div class="mini" style="margin:4px 0 10px">Sin tope: cada cupón queda a nombre de quien lo creó. <b>Entregado</b> = códigos en la calle × usos × lo que vale un canje. <b>Canjeado</b> = lo que ya se usó en caja (estimado; un % se calcula sobre un ticket promedio).</div>
+    ${filas.length ? `<div class="scroll"><table class="tabla"><thead><tr><th>Persona</th><th>Campañas</th><th>Códigos</th><th>Entregado</th><th>Canjeado</th></tr></thead><tbody>
+      ${filas.map(a => `<tr${a.persona===d.yo ? ' style="font-weight:700"' : ''}>
+        <td data-l="Persona">${esc(quien(a.persona))}${a.persona===d.yo ? ' <span class="mini">(tú)</span>' : ''}</td>
+        <td data-l="Campañas">${miles(a.campanas)}${a.sin_valor ? ` <span class="mini" title="Premios sin valor en pesos (combos)">+${a.sin_valor} sin valor</span>` : ''}</td>
+        <td data-l="Códigos">${miles(a.codigos)}</td>
+        <td data-l="Entregado"><div>${pesos(a.entregado)}${a.paga_franquicia ? `<br><span class="mini">${pesos(a.paga_franquicia)} lo paga la franquicia</span>` : ''}</div></td>
+        <td data-l="Canjeado"><div>${pesos(a.canjeado)}<br><span class="mini">${miles(a.canjes)} ${a.canjes===1?'canje':'canjes'}</span></div></td>
+      </tr>`).join('')}
+      ${filas.length > 1 ? `<tr><td data-l=""><b>Total</b></td><td data-l="Campañas"><b>${miles(t.c)}</b></td><td data-l="Códigos"><b>${miles(t.k)}</b></td><td data-l="Entregado"><b>${pesos(t.e)}</b></td><td data-l="Canjeado"><b>${pesos(t.j)}</b></td></tr>` : ''}
+      </tbody></table></div>` : `<div class="vacio">Nadie ha creado cupones en ${nomMes(cu.gmes)}.</div>`}`;
 }
 function pintarCupones(){
   const filas = cu.lista.filter(c => !cu.filtro || c.modo===cu.filtro);
@@ -657,19 +687,16 @@ function previaCupon(){
     if(cu.f!==f || seq!==cu.seq) return;      // respuesta vieja: ya hay una más nueva en camino
     const box = $('cu_previa'); if(!box) return;
     if(!d.ok){ box.innerHTML = `<div class="aviso info">Falta: ${esc(d.mensaje)}</div>`; $('cu_ok').disabled = true; return; }
-    const pct = Math.min(100, Math.round(100*d.costo/d.tope));
+    const g = d.gasto_mes || {entregado:0, campanas:0};
     box.innerHTML = `
       <div class="fila"><div><b style="font-size:18px">${pesos(d.costo)}</b> <span class="mini">es lo máximo que puede costar: ${miles(d.cupo)} ${d.cupo===1?'código':'códigos'}${d.usos>1 ? ` × ${d.usos} usos` : ''} × ${pesos(d.valor)}</span></div></div>
       <div class="mini">Un canje = ${esc(d.valor_txt||'')}</div>
-      <div class="tope ${d.pasa_tope?'pasa':''}"><i style="width:${pct}%"></i></div>
-      <div class="mini">Tope sin aprobación: ${pesos(d.tope)}</div>
-      ${d.pasa_tope && !d.puede ? `<div class="aviso no" style="margin-top:8px">Pasa el tope. Bájale cupos o pídele a ${esc(cu.op.aprobadores.join(' o '))} que la cree.</div>` : ''}
-      ${d.pasa_tope && d.puede ? `<div class="aviso info" style="margin-top:8px">Pasa el tope; la puedes crear porque apruebas campañas.</div>` : ''}
+      <div class="aviso info" style="margin-top:8px">💸 Queda a tu nombre en el gasto por persona. Este mes llevas <b>${pesos(g.entregado)}</b> en ${miles(g.campanas)} ${g.campanas===1?'campaña':'campañas'}; con esta quedarías en <b>${pesos(g.entregado + d.costo)}</b>.</div>
       <div class="mini" style="margin:12px 0 6px">Así lo lee el cajero cuando valida el código en /validar${d.usos>1 ? ' (primer uso)' : ''}:</div>
       <div class="cajero">${esc(d.texto_caja||'')}</div>
       ${d.texto_wa ? `<div class="mini" style="margin:12px 0 6px">Así le llega por WhatsApp${d.plantilla_aprobada===false ? ' — <b style="color:var(--coral)">plantilla sin aprobar por Meta</b>' : ''}:</div>
         <div class="wa"><div class="burbuja">${esc(d.texto_wa)}<span class="bt">Copiar código</span><span class="bt">Ver tiendas</span></div></div>` : ''}`;
-    $('cu_ok').disabled = d.pasa_tope && !d.puede;
+    $('cu_ok').disabled = false;
   }, 350);
 }
 async function crearCupon(){
